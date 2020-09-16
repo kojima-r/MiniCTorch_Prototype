@@ -1,5 +1,9 @@
 # MiniCTorch_Prototype
 
+## Python Notebook
+
+https://colab.research.google.com/drive/1vDP4v6oUJop1t4ptFU65ylriYZnhzNCx?usp=sharing
+
 ## Dependency
 The following four header only libraries
 ```
