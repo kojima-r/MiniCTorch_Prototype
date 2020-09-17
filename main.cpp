@@ -109,16 +109,19 @@ class AddOp:public MCTNode{
         for(auto& itr:inputs){
             itr->forward();
         }
-        this->output=inputs[0]->output;
-        for(int i=1;i<inputs.size();i++){
-            this->output=this->output+inputs[i]->output;
-        }
+        this->output=inputs[0]->output+inputs[1]->output;
+        //for(int i=1;i<inputs.size();i++){
+        //    this->output=this->output+inputs[i]->output;
+        //}
         return true;
     }
     bool backward(){
+        this->inputs[0]->grad+=this->grad;
+        this->inputs[1]->grad+=this->grad;
+        /*
         for(auto& itr:inputs){
             itr->grad+=this->grad;
-        }
+        }*/
         for(auto& itr:inputs){
             itr->backward();
         }
@@ -133,16 +136,20 @@ class MulOp:public MCTNode{
         for(auto& itr:inputs){
             itr->forward();
         }
-        this->output=inputs[0]->output;
-        for(int i=1;i<inputs.size();i++){
-            this->output=this->output*inputs[i]->output;
-        }
+        this->output=inputs[0]->output*inputs[1]->output;
+        //this->output=inputs[0]->output;
+        //for(int i=1;i<inputs.size();i++){
+        //    this->output=this->output*inputs[i]->output;
+        //}
         return true;
     }
     bool backward(){
+        this->inputs[0]->grad+=this->grad*this->output/this->inputs[0]->output;
+        this->inputs[1]->grad+=this->grad*this->output/this->inputs[1]->output;
+        /*
         for(auto& itr:inputs){
             itr->grad+=this->grad*this->output/itr->output;
-        }
+        }*/
         for(auto& itr:inputs){
             itr->backward();
         }
@@ -345,18 +352,7 @@ void test01(){
     }
 };
 
-int as(){
-    std::ifstream reading("output.json", std::ios::in);
-    json j;
-    reading >> j;
-    for (auto& elem : j) {
-        std::cout << elem << std::endl;
-    }
-    return 1;
-}
-
-int main(){
-    as();
+void test02(){
     Tensor a=
             {{{1, 2, 3,4},
             {4, 5, 6,7},
@@ -386,7 +382,101 @@ int main(){
         cout<<va.grad<<endl;
         cout<<vb.grad<<endl;
     }
+}
 
+json read_computational_graph(const std::string& filename){
+    std::ifstream reading(filename, std::ios::in);
+    json j;
+    reading >> j;
+    for (auto& elem : j) {
+        std::cout << elem << std::endl;
+    }
+    return j;
+}
 
+int main(){
+    cout<<"### reading computational graph..."<<endl;
+    json cg=read_computational_graph("network/example01.json");
+    // input data
+    Tensor x={{1, 2},
+            {3, 4}};
+    VariableTensor var_x(x);
+    cout<<"### computational graph construction..."<<endl;
+    int graph_size=cg.size();
+    vector<MCTNode*> forward_result(graph_size);
+    int output_id=-1;
+    for (int i=0;i<graph_size;i++) {
+        cout<<"=="<<i<<" :"<<endl;
+        if(cg[i]["op"]=="IO Node"){
+            if(cg[i]["name"]=="input/x"){
+                cout<<x<<endl;
+                forward_result[i]=&var_x;
+            }else if(cg[i]["name"]=="output/output.1"){
+                int num_inputs=cg[i]["in"].size();
+                if(num_inputs>0){
+                    output_id=cg[i]["in"][0];
+                }
+                //forward_result[i]=&var_x;
+            }else{
+                cout<<"unknown IO:"<<cg[i]["name"]<<endl;
+            }
+        }else if(cg[i]["op"]=="prim::Constant"){
+            if(cg[i]["shape"].size()==0){ // float
+                Tensor c=(float)cg[i]["constant_value"];
+                forward_result[i]=new VariableTensor(c);
+                cout<<c<<endl;
+            }else{ //tensor
+                Tensor::shape_type shape=cg[i]["shape"];
+                size_t shape_flat=1;
+                for(auto s: shape){
+                    shape_flat*=s;
+                }
+                vector<size_t> ss={shape_flat};
+                Tensor t(ss);
+                for(int j=0;j<shape_flat;j++){
+                    t[j]=(float)cg[i]["constant_value"][j];
+                }
+                t=t.reshape(shape);
+                forward_result[i]=new VariableTensor(t);
+                cout<<t<<endl;
+            }
+        }else if(cg[i]["op"]=="aten::mul"){
+            int num_inputs=cg[i]["in"].size();
+            MulOp* op=new MulOp();
+            cout<<"Mul:";
+            for(int j=0;j<num_inputs;j++){
+                int id=cg[i]["in"][j];
+                cout<<id<<" ";
+                MCTNode* p_in=forward_result[id];
+                op->inputs.push_back(p_in);
+            }
+            cout<<endl;
+            forward_result[i]=op;
+        }else if(cg[i]["op"]=="aten::add"){
+            int num_inputs=cg[i]["in"].size();
+            AddOp* op=new AddOp();
+            cout<<"Add:";
+            for(int j=0;j<num_inputs;j++){
+                int id=cg[i]["in"][j];
+                cout<<id<<" ";
+                MCTNode* p_in=forward_result[id];
+                op->inputs.push_back(p_in);
+            }
+            cout<<endl;
+            forward_result[i]=op;
+        }else{
+            cout<<"unknown op:"<<cg[i]["op"]<<endl;
+        }
+    }
+    
+    cout<<"### forward computation ..."<<endl;
+    forward_result[output_id]->forward();
+    auto o = forward_result[output_id]->output;
+    cout<<o<<endl;
+
+    cout<<"### backward computation ..."<<endl;
+    forward_result[output_id]->grad=xt::ones_like(forward_result[output_id]->grad);
+    forward_result[output_id]->backward();
+    cout<<var_x.grad<<endl;
     return 0;
-};
+}
