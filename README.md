@@ -1,6 +1,7 @@
 # MiniCTorch_Prototype
 
 ## Python Notebook
+Pytorchから計算グラフを抜き出す部分(`network/example01.json`を作成する部分)
 
 https://colab.research.google.com/drive/1vDP4v6oUJop1t4ptFU65ylriYZnhzNCx?usp=sharing
 
