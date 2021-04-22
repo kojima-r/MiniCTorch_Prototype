@@ -70,8 +70,6 @@ def get_tree(t):
             d.append(get_tree(ch))
         return d
 
-    print(t)
-
 
 def parse_attr(LP, s):
     t = LP.parse(s)
@@ -122,10 +120,13 @@ def sort_and_assign_id(graph_data):
     # given graph_data
     for name, node in graph_data.items():
         for key in node["in"]:
-            to_node = graph_data[key]
-            if "out" not in to_node:
-                to_node["out"] = set()
-            to_node["out"].add(name)
+            if key in graph_data:
+                to_node = graph_data[key]
+                if "out" not in to_node:
+                    to_node["out"] = set()
+                to_node["out"].add(name)
+            else:
+                print("skip:",key)
     start_nodes = []
     sorted_graph = []
     for name, node in graph_data.items():
@@ -136,6 +137,8 @@ def sort_and_assign_id(graph_data):
 
     def visit(name):
         nonlocal sorted_graph
+        if name not in graph_data:
+            return
         if "visited" in graph_data[name]:
             return
         else:
@@ -161,7 +164,10 @@ def generate_minictorch_file(model, input_to_model, filename):
         # encoding id
         out_id = [mapping_to_id[el] for el in node["out"]]
         node["out"] = out_id
-        in_id = [mapping_to_id[el] for el in node["in"]]
+        in_id=[]
+        for el in node["in"]:
+            if el in mapping_to_id:
+                in_id.append(mapping_to_id[el])
         node["in"] = in_id
         # delete visited
         del node["visited"]

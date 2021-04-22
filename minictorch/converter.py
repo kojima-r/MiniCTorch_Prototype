@@ -1,4 +1,5 @@
 import json
+import argparse
 
 def makefile_generator(gen_filename):
     make_text="""
@@ -30,7 +31,7 @@ clean:
 	rm -f $(TARGET) $(OBJS) *.gcno *.gcov *~
 	find . -name "*.gcda" | xargs -r rm
 
-"""
+""".format(gen_filename=gen_filename)
     return make_text
 
 def c_code_generator(obj):
@@ -54,79 +55,69 @@ def c_code_generator(obj):
     output_id=None
     for i,el in enumerate(obj):
         print(el)
-        text=""
+        text="""
+        // {el}
+        {{
+        """.format(el=str(el))
+        ### shape
+        if "shape" in el or len(el["shape"])>0:
+            shape=el["shape"]
+            shape_flat=1
+            for s in el["shape"]:
+                shape_flat*=s
+            text+="""
+            Tensor::shape_type shape = {{{shape}}};""".format(i=i,shape=",".join(map(str,shape)) )
+        ### operator
         if el["op"]=="IO Node":
             if el["name"]=="input/x":
-                text="""
-                {{
-                    forward_result[{i}]=&input_var;
-                }}
-                """.format(i=i)
+                text+="""
+            forward_result[{i}]=&input_var;""".format(i=i)
             elif el["name"]=="output/output.1":
                 assert len(el["in"])>0, "output error"
                 output_id=el["in"][0]
             else:
-                assert False, "unknown IO:"+el["name"]
+                #assert False, "unknown IO:"+el["name"]
+                print("unknown IO:"+el["name"])
         elif el["op"]=="prim::Constant":
-            if len(el["shape"])==0:
+            if "constant_value" not in el:
+                text+="""
+            forward_result[{i}]=NULL;""".format(i=i)
+            elif len(el["shape"])==0:
                 val=el["constant_value"]
-                text="""
-                {{
-                    Tensor c=(float){val};
-                    forward_result[{i}]=new VariableTensor(c);
-                }}
-                """.format(i=i,val=str(val))
+                text+="""
+            Tensor c=(float){val};
+            forward_result[{i}]=new VariableTensor(c);""".format(i=i,val=str(val))
             else:
-                values=el["constant_value"]
-                shape=el["shape"]
-                shape_flat=1
-                for s in el["shape"]:
-                    shape_flat*=s
-
-                text="""
-                {{
-                    Tensor::shape_type shape= {{{shape}}};
-                    Tensor t= {{{values}}};
-                    t=t.reshape(shape);
-                    forward_result[{i}]=new VariableTensor(t);
-                }}
-                """.format(i=i,shape=",".join(map(str,shape)), values=",".join(map(str,values)))
+                val=el["constant_value"]
+                text+="""
+            Tensor t= {{{val}}};
+            t=t.reshape(shape);
+            forward_result[{i}]=new VariableTensor(t);""".format(i=i,shape=",".join(map(str,shape)), val=",".join(map(str,val)))
         elif el["op"]=="aten::mul":
-            num_inputs=len(el["in"])
-            text="""
-                {
-                    MulOp* op=new MulOp();
-                    MCTNode* p_in;
-                """
-            for in_id in el["in"]:
-                text+="""
-                    p_in=forward_result[{in_id}];
-                    op->inputs.push_back(p_in);
-                    """.format(in_id=in_id)
-                
             text+="""
-                    forward_result[{i}]=op;
-                }}""".format(i=i)
+            MulOp* op=new MulOp();"""
         elif el["op"]=="aten::add":
+            text+="""
+            AddOp* op=new AddOp();"""
+        else:
+            #assert False, "unknown op:"+el["op"]
+            print("unknown op:"+el["op"])
+        ### setting operator
+        text+="""
+            forward_result[{i}]=op;""".format(i=i)
+        ### inputs
+        if "in" in el and len(el["in"])>0:
             num_inputs=len(el["in"])
-            text="""
-                {
-                    AddOp* op=new AddOp();
-                    MCTNode* p_in;
-                """
+            text+="""
+            MCTNode* p_in;"""
             for in_id in el["in"]:
                 text+="""
-                    p_in=forward_result[{in_id}];
-                    op->inputs.push_back(p_in);
-                    """.format(in_id=in_id)
-                
-            text+="""
-                    forward_result[{i}]=op;
-                }}""".format(i=i)
-        else:
-            assert False, "unknown op:"+el["op"]
+            p_in=forward_result[{in_id}];
+            op->inputs.push_back(p_in);""".format(in_id=in_id)
+        text+="""
+        }
+        """
         all_text+=text
-        #print(text)
 
     all_text+="""
         cout<<"### forward computation ..."<<endl;
@@ -138,7 +129,7 @@ def c_code_generator(obj):
         cout<<"### backward computation ..."<<endl;
         forward_result[{output_id}]->grad=xt::ones_like(forward_result[{output_id}]->grad);
         forward_result[{output_id}]->backward();
-        cout<<input_var_x.grad<<endl;
+        cout<<input_var.grad<<endl;
     """.format(output_id=output_id)
     
     all_text+="""
@@ -147,15 +138,28 @@ def c_code_generator(obj):
     """
     return all_text
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("graph", type=str, help="computational graph json")
+    parser.add_argument(
+        "--output", type=str, default="example.gen.cpp", help="config json file"
+    )
+    parser.add_argument(
+        "--path", type=str, default="src", nargs="?", help="config json file"
+    )
 
-filename = "network/example01.json"
-fp=open(filename)
-obj=json.load(fp)
-code = c_code_generator(obj)
-make_code = makefile_generator("example01.gen.cpp")
+    args = parser.parse_args()
 
-ofp=open("src/example01.gen.cpp","w")
-ofp.write(code)
-makefp=open("src/Makefile","w")
-makefp.write(make_code)
+    filename = args.graph
+    fp=open(filename)
+    obj=json.load(fp)
+    code = c_code_generator(obj)
+    make_code = makefile_generator(args.output)
 
+    ofp=open(args.path+"/"+args.output,"w")
+    ofp.write(code)
+    makefp=open(args.path+"/"+"Makefile","w")
+    makefp.write(make_code)
+
+if __name__ == "__main__":
+    main()
