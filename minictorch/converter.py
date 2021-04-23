@@ -156,6 +156,7 @@ def main():
     code = c_code_generator(obj)
     make_code = makefile_generator(args.output)
 
+    print("[SAVE]",args.path+"/"+args.output)
     ofp=open(args.path+"/"+args.output,"w")
     ofp.write(code)
     makefp=open(args.path+"/"+"Makefile","w")
