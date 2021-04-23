@@ -14,6 +14,19 @@ git clone https://github.com/xtensor-stack/xtl.git
 git clone https://github.com/nlohmann/json.git
 ```
 
+## Installation
+
+```
+pip install .
+```
+## Example
+```
+python example.py
+minictorch_translator sample.json
+```
+
+出力ファイル：`src/example.gen.cpp`
+
 ## Compile
 ```
 g++ -std=c++14 -I./json/include -I./xtensor-blas/include -I./xtensor/include -I./xtl/include  main.cpp -lcblas
