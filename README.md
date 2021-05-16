@@ -25,9 +25,10 @@ python example.py
 minictorch_translator sample.json
 ```
 
-出力ファイル：`src/example.gen.cpp`
+出力ファイル：`src/example.gen.cpp`, `src/Makefile` 
 
 ## Compile
 ```
-g++ -std=c++14 -I./json/include -I./xtensor-blas/include -I./xtensor/include -I./xtl/include  main.cpp -lcblas
+cd src/
+make
 ```
