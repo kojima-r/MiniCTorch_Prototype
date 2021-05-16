@@ -21,7 +21,7 @@ git clone https://github.com/nlohmann/json.git
 ```
 pip install .
 ```
-## Example
+## Example (including unknown operators)
 ```
 python example.py
 minictorch_translator sample.json
@@ -33,4 +33,20 @@ minictorch_translator sample.json
 ```
 cd src/
 make
+```
+
+## Example　(for operation verification)
+インストール後に以下のコマンド入力
+テスト用の計算グラフを変換
+```
+ minictorch_translator network/example01.json
+```
+テスト用の計算グラフ(C++)をコンパイル
+```
+cd src/
+make
+```
+実行
+```
+./mini_c_torch
 ```
