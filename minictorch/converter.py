@@ -59,7 +59,9 @@ def c_code_generator(obj):
         // {el}
         {{
         """.format(el=str(el))
+        ###
         ### shape
+        ###
         if "shape" in el or len(el["shape"])>0:
             shape=el["shape"]
             shape_flat=1
@@ -67,7 +69,9 @@ def c_code_generator(obj):
                 shape_flat*=s
             text+="""
             Tensor::shape_type shape = {{{shape}}};""".format(i=i,shape=",".join(map(str,shape)) )
+        ###
         ### operator
+        ###
         if el["op"]=="IO Node":
             if el["name"]=="input/x":
                 text+="""
@@ -93,25 +97,33 @@ def c_code_generator(obj):
             Tensor t= {{{val}}};
             t=t.reshape(shape);
             forward_result[{i}]=new VariableTensor(t);""".format(i=i,shape=",".join(map(str,shape)), val=",".join(map(str,val)))
-        elif el["op"]=="aten::mul":
-            text+="""
-            MulOp* op=new MulOp();"""
-        elif el["op"]=="aten::add":
-            text+="""
-            AddOp* op=new AddOp();"""
         else:
-            #assert False, "unknown op:"+el["op"]
-            print("unknown op:"+el["op"])
-        ### setting operator
-        text+="""
-            forward_result[{i}]=op;""".format(i=i)
-        ### inputs
-        if "in" in el and len(el["in"])>0:
-            num_inputs=len(el["in"])
-            text+="""
-            MCTNode* p_in;"""
-            for in_id in el["in"]:
+            ###
+            ### standard operators
+            ###
+            if el["op"]=="aten::mul":
                 text+="""
+            MulOp* op=new MulOp();"""
+            elif el["op"]=="aten::add":
+                text+="""
+            AddOp* op=new AddOp();"""
+            else:
+                #assert False, "unknown op:"+el["op"]
+                text+="""
+            AddOp* op=NULL;"""
+                print("unknown op:"+el["op"])
+            ### setting operator
+            text+="""
+            forward_result[{i}]=op;""".format(i=i)
+            ###
+            ### inputs
+            ###
+            if "in" in el and len(el["in"])>0:
+                num_inputs=len(el["in"])
+                text+="""
+            MCTNode* p_in;"""
+                for in_id in el["in"]:
+                    text+="""
             p_in=forward_result[{in_id}];
             op->inputs.push_back(p_in);""".format(in_id=in_id)
         text+="""
