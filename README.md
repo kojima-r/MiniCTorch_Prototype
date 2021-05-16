@@ -8,6 +8,8 @@ https://colab.research.google.com/drive/1vDP4v6oUJop1t4ptFU65ylriYZnhzNCx?usp=sh
 ## Dependency
 The following four header only libraries
 ```
+cd MiniCTorch_Prototype
+
 git clone https://github.com/xtensor-stack/xtensor.git
 git clone https://github.com/xtensor-stack/xtensor-blas.git
 git clone https://github.com/xtensor-stack/xtl.git
