@@ -34,6 +34,120 @@ clean:
 """.format(gen_filename=gen_filename)
     return make_text
 
+
+# 210701 mod mari
+import re
+
+pat = re.compile(r'([^\[\]]*)\[(.*)\]')
+
+def get_attr_from_model( s, model ):
+    
+    arr = s.split("/")
+    if len(arr)>1:
+        class_name = arr[0]
+        xx = arr[1:-1]
+        obj_name_list = []
+        for e in xx:
+            m = pat.match(e)
+            if(m):
+                class_name= m.group(1)
+                obj_name  = m.group(2)
+            else:
+                obj_name = e
+            obj_name_list.append(obj_name)
+        m_model = model
+        for o in obj_name_list:
+            m_model=getattr(m_model,o)
+        return m_model
+    raise Exception("Unknown attribute:"+s)
+    return None
+
+
+# ex. Net/Linear[fc1]/weight/43 -> fc1_weight
+def get_param_name( s1 ):
+    
+    s2 = s1.split('/')
+    s3 = re.findall("(?<=\[).+?(?=\])", s2[1])
+    #print(s2)
+    s4 = s3[0] + '_' + s2[2]
+    return s4
+
+
+def string_tensor( key, out ):
+    
+    tmp = out.to('cpu').detach().numpy().copy()
+    p1 = np.reshape( tmp,(-1,) )
+    n1 = len(p1)
+    s1 = 'Tensor ' + key + ' ={ '
+    
+    num = 8
+    nw1 = n1//num
+    nw2 = n1% num
+    if nw2 == 0:
+        nw1 = nw1 - 1
+        nw2 = num
+            
+    l = 0
+    for k in range(nw1):
+        for i in range(num):
+            s1 = s1 + str(p1[l]) + ','
+            l = l + 1
+        s1 = s1 + '\n' + ' '*24
+    if nw2 > 0:
+        for i in range(nw2):
+            s1 = s1 + str(p1[l])+ ','
+            l = l + 1
+    s1 = s1 + ' }'
+    #print("tensor :",s1)
+    
+    s2 = key + '.reshape({'
+    n2 = len( tmp.shape )
+    for i in range(n2-1):
+       s2 = s2 + str( tmp.shape[i] ) + ','
+    s2 = s2 + str( tmp.shape[n2-1] ) + '})'
+    #print("shape :",s2)
+    
+    return s1, s2
+    
+def c_param_generator( obj, model, input_data ):
+    
+    s1,s2 = string_tensor( "xin", input_data )
+    
+    all_text="""
+        // input data
+        
+        {ivar1};
+        {ivar2};
+        """.format(ivar1=s1,ivar2=s2)
+        
+    #all_text=""
+    
+    for i,el in enumerate(obj):
+        if el["op"]=="prim::GetAttr":
+            print(el)
+            text="""
+        // {el}
+        """.format(el=str(el))
+    
+            name = el["name"]
+            key = get_param_name( name )
+            attr = get_attr_from_model( name, model )
+            s1, s2 = string_tensor( key, attr )
+            if attr.ndim == 1:
+                text+="""
+        {ivar1};
+        """.format(i=i,ivar1=s1)
+            else:
+                text+="""
+        {ivar1};
+        {ivar2};
+        """.format(i=i,ivar1=s1,ivar2=s2)
+        
+            all_text+=text
+    
+    return all_text
+
+
 def c_code_generator(obj):
     all_text="""
     #include<stdio.h>
