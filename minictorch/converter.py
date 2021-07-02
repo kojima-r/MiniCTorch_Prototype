@@ -1,5 +1,6 @@
 import json
 import argparse
+import numpy as np
 
 def makefile_generator(gen_filename):
     make_text="""
@@ -109,7 +110,7 @@ def string_tensor( key, out ):
     
     return s1, s2
     
-def c_param_generator( obj, model, input_data ):
+def c_param_generator( obj, model, input_data, rand_flag=0 ):
     
     s1,s2 = string_tensor( "xin", input_data )
     
@@ -120,6 +121,8 @@ def c_param_generator( obj, model, input_data ):
         {ivar2};
         """.format(ivar1=s1,ivar2=s2)
         
+    if rand_flag > 0:
+        return all_text
     #all_text=""
     
     for i,el in enumerate(obj):
@@ -147,8 +150,9 @@ def c_param_generator( obj, model, input_data ):
     
     return all_text
 
-
-def c_code_generator(obj):
+# 210702 mod mari
+def c_code_generator( obj, model, param_file="", rand_flag=0 ):
+    
     all_text="""
     #include<stdio.h>
     #include<iostream>
@@ -159,13 +163,23 @@ def c_code_generator(obj):
 
     using namespace std;
 
-    int main(){{
+    int main()
+    {"""
+    
+    if len(param_file) > 0:
+        text="""
+        
+    #include "{fn}"
+    """.format(fn=param_file)
+        all_text += text
+    
+    text="""
         // input data
-        Tensor x={{{{1, 2}},
-                {{3, 4}}}};
-        VariableTensor input_var(x);
+        VariableTensor input_var(xin);
         vector<MCTNode*> forward_result({graph_size});
     """.format(graph_size=len(obj))
+    all_text += text
+    
     output_id=None
     for i,el in enumerate(obj):
         print(el)
@@ -176,7 +190,9 @@ def c_code_generator(obj):
         ###
         ### shape
         ###
-        if "shape" in el or len(el["shape"])>0:
+        if el["op"]=="prim::GetAttr":
+            pass
+        elif "shape" in el or len(el["shape"]) > 0:
             shape=el["shape"]
             shape_flat=1
             for s in el["shape"]:
@@ -194,8 +210,16 @@ def c_code_generator(obj):
                 assert len(el["in"])>0, "output error"
                 output_id=el["in"][0]
             else:
-                #assert False, "unknown IO:"+el["name"]
-                print("unknown IO:"+el["name"])
+                if "input" in el["name"]:  # 210702 add mari
+                    text+="""
+            forward_result[{i}] = &input_var;""".format(i=i)
+                elif "output" in el["name"]: 
+                    assert len(el["in"])>0, "output error"
+                    output_id=el["in"][0]
+                else:
+                    #assert False, "unknown IO:"+el["name"]
+                    print("unknown IO:"+el["name"])
+                    
         elif el["op"]=="prim::Constant":
             if "constant_value" not in el:
                 text+="""
@@ -211,6 +235,34 @@ def c_code_generator(obj):
             Tensor t= {{{val}}};
             t=t.reshape(shape);
             forward_result[{i}]=new VariableTensor(t);""".format(i=i,shape=",".join(map(str,shape)), val=",".join(map(str,val)))
+            
+        elif el["op"]=="prim::GetAttr": 
+            name = el["name"]
+            key = get_param_name( name )
+            print(name," -> ",key)
+            attr = get_attr_from_model( name, model )
+            if rand_flag == 0:
+                text+="""
+            forward_result[{i}] = new VariableTensor({k});""".format(i=i,k=key)
+        
+            else:
+                skey = name.split("/")
+                if skey[2] == "weight":
+                    sh1 = attr.shape[0]
+                    sh2 = attr.shape[1]
+                    text+="""
+            Tensor::shape_type shape = {{{sh1},{sh2}}};
+            double y = sqrt(1.0/(double){sh2});
+            Tensor t = xt::random::rand(shape,-y,y);
+            forward_result[{i}] = new VariableTensor(t);""".format(i=i,sh1=sh1,sh2=sh2)
+                elif skey[2] == "bias":
+                    sh1 = attr.shape[0]
+                    text+="""
+            Tensor::shape_type shape = {{{sh1}}};
+            double y = sqrt(1.0/(double){sh1});
+            Tensor t = xt::random::rand(shape,-y,y);
+            forward_result[{i}] = new VariableTensor(t);""".format(i=i,sh1=sh1)
+        
         else:
             ###
             ### standard operators
@@ -221,6 +273,45 @@ def c_code_generator(obj):
             elif el["op"]=="aten::add":
                 text+="""
             AddOp* op=new AddOp();"""
+            elif el["op"]=="aten::sub":     # 210701 add below mari
+                text+="""
+            SubOp* op = new SubOp();"""
+            elif el["op"]=="aten::div":
+                text+="""
+            DivOp* op = new DivOp();"""
+            elif el["op"]=="aten::neg":
+                text+="""
+            NegOp* op = new NegOp();"""
+            elif el["op"]=="aten::matmul":
+                text+="""
+            MatMulOp* op = new MatMulOp();"""
+            elif el["op"]=="aten::addmm":
+                text+="""
+            AddMmOp*  op = new AddMmOp();"""
+            elif el["op"]=="aten::linear":
+                text+="""
+            LinearOp*  op = new LinearOp();"""
+            elif el["op"]=="aten::sum":
+                text+="""
+            SumOp*    op = new SumOp();"""
+            elif el["op"]=="aten::t":
+                text+="""
+            TransposeOp* op = new TransposeOp();"""
+            elif el["op"]=="aten::sigmoid":
+                text+="""
+            SigmoidOp* op = new SigmoidOp();"""
+            elif el["op"]=="aten::relu":
+                text+="""
+            ReluOp* op = new ReluOp();"""
+            elif el["op"]=="aten::softmax":
+                text+="""
+            SoftmaxOp* op = new SoftmaxOp();"""
+            elif el["op"]=="aten::log_softmax":
+                text+="""
+            LogSoftmaxOp* op = new LogSoftmaxOp();"""
+            elif el["op"]=="aten::tanh":
+                text+="""
+            TanhOp* op = new TanhOp();"""
             else:
                 #assert False, "unknown op:"+el["op"]
                 text+="""
@@ -243,7 +334,7 @@ def c_code_generator(obj):
         text+="""
         }
         """
-        all_text+=text
+        all_text += text
 
     all_text+="""
         cout<<"### forward computation ..."<<endl;
@@ -253,7 +344,7 @@ def c_code_generator(obj):
     """.format(output_id=output_id)
     all_text+="""
         cout<<"### backward computation ..."<<endl;
-        forward_result[{output_id}]->grad=xt::ones_like(forward_result[{output_id}]->grad);
+        forward_result[{output_id}]->grad=xt::ones_like(forward_result[{output_id}]->output); // 210702 mod mari
         forward_result[{output_id}]->backward();
         cout<<input_var.grad<<endl;
     """.format(output_id=output_id)
