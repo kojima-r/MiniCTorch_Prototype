@@ -282,6 +282,9 @@ def c_code_generator( obj, model, param_file="", rand_flag=0 ):
             elif el["op"]=="aten::neg":
                 text+="""
             NegOp* op = new NegOp();"""
+            elif el["op"]=="aten::pow":     # 210705 add mari
+                text+="""
+            PowOp* op = new PowOp();"""
             elif el["op"]=="aten::matmul":
                 text+="""
             MatMulOp* op = new MatMulOp();"""

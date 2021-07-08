@@ -149,7 +149,7 @@ class SumOp:public MCTNode{
         for(auto& itr:inputs){
             auto bb=xt::expand_dims(this->grad,this->axis);
             auto g=xt::repeat(bb,this->size,this->axis);
-            itr->grad+=g;
+            if( itr )  itr->grad+=g;  // 210705 mod mari
         }
         _backward_inputs();
         //for(auto& itr:inputs){
@@ -270,6 +270,24 @@ class DivOp:public MCTNode{
     }
 };
 
+class PowOp:public MCTNode{  // 210705 add mari
+    public:
+    PowOp(){}
+    
+    bool forward(){
+        _forward_inputs();
+        output = pow( inputs[0]->output, inputs[1]->output );
+        return true;
+    }
+    bool backward(){
+        auto x = inputs[0]->output;
+        auto c = inputs[1]->output;
+        inputs[0]->grad += this->grad * c * pow( x, c-1.0 );
+        //cout<<"pow"<<inputs[0]->grad<<endl;
+        _backward_inputs();
+        return true;
+    }
+};
 
 class MatMulOp:public MCTNode{
     public:
