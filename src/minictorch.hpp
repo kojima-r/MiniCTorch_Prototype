@@ -31,6 +31,7 @@ class MCTNode{
         return false;
     }
     std::vector<MCTNode*> inputs;
+    std::vector<MCTNode*> unique_inputs;  // 210719 add
     std::string name;
     Tensor output;
     Tensor grad;
@@ -76,7 +77,8 @@ class MCTNode{
     void _backward_inputs()
     {
         //cout<<"backward_inputs"<<endl;
-        for(auto& itr:inputs){
+        //for(auto& itr:inputs){  // 210719 mod mari
+        for(auto& itr:unique_inputs){
             if( itr )  itr->backward();
         }
     }
@@ -107,9 +109,6 @@ class ExpOp:public MCTNode{
     int axis;
     
     bool forward(){
-        //for(auto& itr:inputs){
-        //    itr->forward();
-        //}
         _forward_inputs();
         this->output=xt::exp(inputs[0]->output);
         return true;
@@ -119,9 +118,6 @@ class ExpOp:public MCTNode{
             itr->grad+=this->grad*this->output;
         }
         _backward_inputs();
-        //for(auto& itr:inputs){
-        //    itr->backward();
-        //}
     }
 };
 
@@ -136,9 +132,6 @@ class SumOp:public MCTNode{
     int size;
     
     bool forward(){
-        //for(auto& itr:inputs){
-        //    itr->forward();
-        //}
         _forward_inputs();
         auto s=inputs[0]->output.shape();
         this->size=s[this->axis];
@@ -149,24 +142,18 @@ class SumOp:public MCTNode{
         for(auto& itr:inputs){
             auto bb=xt::expand_dims(this->grad,this->axis);
             auto g=xt::repeat(bb,this->size,this->axis);
-            if( itr )  itr->grad+=g;  // 210705 mod mari
+            if( itr )  itr->grad += g;  // 210705 mod mari
         }
         _backward_inputs();
-        //for(auto& itr:inputs){
-        //    itr->backward();
-        //}
     }
 };
 
 
 class AddOp:public MCTNode{
     public:
-    AddOp(){
-    }
+    AddOp(){}
+    
     bool forward(){
-        //for(auto& itr:inputs){
-        //    itr->forward();
-        //}
         _forward_inputs();
         this->output=inputs[0]->output+inputs[1]->output;
         //for(int i=1;i<inputs.size();i++){
@@ -177,12 +164,8 @@ class AddOp:public MCTNode{
     bool backward(){
         this->inputs[0]->grad+=this->grad;
         this->inputs[1]->grad+=this->grad;
-        /*
-        for(auto& itr:inputs){
-            itr->grad+=this->grad;
-        }*/
         //for(auto& itr:inputs){
-        //    itr->backward();
+        //    itr->grad+=this->grad;
         //}
         _backward_inputs();
     }
@@ -190,12 +173,9 @@ class AddOp:public MCTNode{
 
 class MulOp:public MCTNode{
     public:
-    MulOp(){
-    }
+    MulOp(){}
+    
     bool forward(){
-        //for(auto& itr:inputs){
-        //    itr->forward();
-        //}
         _forward_inputs();
         this->output=inputs[0]->output*inputs[1]->output;
         //this->output=inputs[0]->output;
@@ -207,12 +187,8 @@ class MulOp:public MCTNode{
     bool backward(){
         this->inputs[0]->grad+=this->grad*this->output/this->inputs[0]->output;
         this->inputs[1]->grad+=this->grad*this->output/this->inputs[1]->output;
-        /*
-        for(auto& itr:inputs){
-            itr->grad+=this->grad*this->output/itr->output;
-        }*/
         //for(auto& itr:inputs){
-        //    itr->backward();
+        //    itr->grad+=this->grad*this->output/itr->output;
         //}
         _backward_inputs();
     }
@@ -283,7 +259,6 @@ class PowOp:public MCTNode{  // 210705 add mari
         auto x = inputs[0]->output;
         auto c = inputs[1]->output;
         inputs[0]->grad += this->grad * c * pow( x, c-1.0 );
-        //cout<<"pow"<<inputs[0]->grad<<endl;
         _backward_inputs();
         return true;
     }
@@ -438,7 +413,7 @@ class MatMulOp:public MCTNode{
     }
 };
 
-class LinearOp:public MCTNode{ // 210702 add below mari
+class LinearOp:public MCTNode{ // 210702 add mari
     public:
     LinearOp(){}
     
@@ -897,8 +872,6 @@ class TanhOp:public MCTNode{
     bool backward(){
         //cout<<"tanh(backward)"<<endl;
         inputs[0]->grad += this->grad * ( 1.0 - output * output );
-        //cout<<"output"<<output<<endl;
-        //cout<<"grad"<<grad<<endl;
         _backward_inputs();
         return true;
     }

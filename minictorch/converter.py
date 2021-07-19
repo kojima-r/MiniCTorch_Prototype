@@ -2,7 +2,8 @@ import json
 import argparse
 import numpy as np
 
-def makefile_generator(gen_filename):
+#def makefile_generator(gen_filename):  #210719 mod mari
+def makefile_generator( project ):
     make_text="""
 CXX = g++
 CXXFLAGS = -g -Wall  -std=c++14 -I./ -I../xtensor-blas/include -I../xtensor/include -I../xtl/include
@@ -12,7 +13,7 @@ LDFLAGS = -lcblas
 CPPUTEST_HOME = ./cpputest/workspace/install
 TARGET = mini_c_torch
 # SRCS = main_test.cpp main.cpp
-SRCS = minictorch.cpp {gen_filename}
+SRCS = minictorch.cpp {proj}.cpp {proj}_param.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 
@@ -32,7 +33,8 @@ clean:
 	rm -f $(TARGET) $(OBJS) *.gcno *.gcov *~
 	find . -name "*.gcda" | xargs -r rm
 
-""".format(gen_filename=gen_filename)
+""".format(proj=project)
+#""".format(gen_filename=gen_filename) # 210719 mod mari
     return make_text
 
 
@@ -74,12 +76,19 @@ def get_param_name( s1 ):
     return s4
 
 
-def string_tensor( key, out ):
+def string_tensor( key, out, type=0 ): # 210719 add type mari
     
-    tmp = out.to('cpu').detach().numpy().copy()
+    if type == 0:
+        tmp = out.to('cpu').detach().numpy().copy()
+    else:
+        tmp = out
     p1 = np.reshape( tmp,(-1,) )
     n1 = len(p1)
-    s1 = 'Tensor ' + key + ' ={ '
+    key2 = key  #210719 add mari
+    if len(key) < 12:
+        key2 = key + ' '*(12-len(key))
+    s1 = key2 + ' ={ '
+    #s1 = 'Tensor ' + key + ' ={ ' # 210719 mod
     
     num = 8
     nw1 = n1//num
@@ -110,22 +119,57 @@ def string_tensor( key, out ):
     
     return s1, s2
     
-def c_param_generator( obj, model, input_data, rand_flag=0 ):
+# 210714 mod mari
+def c_param_generator( obj, model, input_data ):
     
+    # type declaration
+    all_text="""
+    #include <xtensor/xarray.hpp>
+    
+    #define fprec float
+    typedef xt::xarray<fprec> Tensor;
+    
+    Tensor  {ivar};""".format(ivar="xin")
+    
+    cno = 0
+    for i,el in enumerate(obj):
+        name = el["name"]
+        if el["op"]=="prim::GetAttr":
+            text=""
+            key = get_param_name( name )
+            text="""
+    Tensor  {ivar1};""".format(ivar1=key)
+            all_text+=text
+            
+        elif el["op"]=="prim::Constant":
+            if len(el["shape"])>0:
+                cno += 1
+                key ="Constant" + str(cno)
+                text="""
+    Tensor  {ivar1};""".format(ivar1=key)
+                all_text+=text
+                #print("constant :",name, key, el["shape"])
+            
+    text="""
+    
+    void LoadParameter()
+    {"""
+    all_text+=text
+    
+    # Data section
     s1,s2 = string_tensor( "xin", input_data )
     
-    all_text="""
+    text="""
         // input data
         
         {ivar1};
         {ivar2};
         """.format(ivar1=s1,ivar2=s2)
-        
-    if rand_flag > 0:
-        return all_text
-    #all_text=""
+    all_text+=text
     
+    cno = 0
     for i,el in enumerate(obj):
+        
         if el["op"]=="prim::GetAttr":
             print(el)
             text="""
@@ -145,33 +189,78 @@ def c_param_generator( obj, model, input_data, rand_flag=0 ):
         {ivar1};
         {ivar2};
         """.format(i=i,ivar1=s1,ivar2=s2)
-        
             all_text+=text
+        
+        elif el["op"]=="prim::Constant":
+            if len(el["shape"])>0:
+                text="""
+        // {el}
+        """.format(el=str(el))
+        
+                cno += 1
+                key ="Constant" + str(cno)
+                shape=el["shape"]
+                val=el["constant_value"]
+                v = np.zeros(len(val))
+                for k in range(len(val)):
+                    v[k] = float(val[k])
+                s1, s2 = string_tensor( key, v, 1 )
+                text+="""
+        {ivar1};
+        {key}.reshape({{{shape}}});
+        """.format(i=i,key=key,shape=",".join(map(str,shape)), ivar1=s1)
+                #print(name, key, shape[0],shape[1],val[0],val[1],len(val))
+                all_text+=text
     
+    text="""
+    }
+    """
+    all_text+=text
+
     return all_text
 
-# 210702 mod mari
-def c_code_generator( obj, model, param_file="", rand_flag=0 ):
+# 210719 mod mari
+def c_code_generator( obj, model, rand_flag=0 ):
     
     all_text="""
-    #include<stdio.h>
-    #include<iostream>
-    #include<fstream>
-    #include<string>
-    #include<vector>
-    #include"minictorch.hpp"
+    #include <stdio.h>
+    #include <iostream>
+    #include <fstream>
+    #include <string>
+    #include <vector>
+    #include "minictorch.hpp"
 
     using namespace std;
+    
+    extern void LoadParameter();
+    
+    extern Tensor  xin;"""  #210719 mod mari
+    
+    cno = 0  # 210719 add mari
+    for i,el in enumerate(obj):
+        if el["op"]=="prim::GetAttr":
+            text=""
+            name = el["name"]
+            key = get_param_name( name )
+            text="""
+    extern Tensor  {key};""".format(key=key)
+            all_text+=text
+        elif el["op"]=="prim::Constant":
+            if len(el["shape"])>0:
+                cno += 1
+                key = "Constant" + str(cno)
+                text="""
+    extern Tensor  {key};""".format(key=key)
+                all_text+=text
+
+    text="""
 
     int main()
-    {"""
-    
-    if len(param_file) > 0:
-        text="""
-        
-    #include "{fn}"
-    """.format(fn=param_file)
-        all_text += text
+    {
+        // load parameters
+        LoadParameter();
+        """
+    all_text += text
     
     text="""
         // input data
@@ -180,6 +269,7 @@ def c_code_generator( obj, model, param_file="", rand_flag=0 ):
     """.format(graph_size=len(obj))
     all_text += text
     
+    cno = 0  # 210719 add mari
     output_id=None
     for i,el in enumerate(obj):
         print(el)
@@ -203,6 +293,7 @@ def c_code_generator( obj, model, param_file="", rand_flag=0 ):
         ### operator
         ###
         if el["op"]=="IO Node":
+            
             if el["name"]=="input/x":
                 text+="""
             forward_result[{i}]=&input_var;""".format(i=i)
@@ -221,6 +312,7 @@ def c_code_generator( obj, model, param_file="", rand_flag=0 ):
                     print("unknown IO:"+el["name"])
                     
         elif el["op"]=="prim::Constant":
+            
             if "constant_value" not in el:
                 text+="""
             forward_result[{i}]=NULL;""".format(i=i)
@@ -230,13 +322,20 @@ def c_code_generator( obj, model, param_file="", rand_flag=0 ):
             Tensor c=(float){val};
             forward_result[{i}]=new VariableTensor(c);""".format(i=i,val=str(val))
             else:
-                val=el["constant_value"]
-                text+="""
+                if len(el["shape"])>0: # 210719 add mari
+                    cno += 1
+                    key = "Constant" + str(cno)
+                    text+="""
+            forward_result[{i}] = new VariableTensor( {key} );""".format(i=i,key=key)
+                else:
+                    val=el["constant_value"]
+                    text+="""
             Tensor t= {{{val}}};
             t=t.reshape(shape);
             forward_result[{i}]=new VariableTensor(t);""".format(i=i,shape=",".join(map(str,shape)), val=",".join(map(str,val)))
             
         elif el["op"]=="prim::GetAttr": 
+            
             name = el["name"]
             key = get_param_name( name )
             print(name," -> ",key)
@@ -332,8 +431,16 @@ def c_code_generator( obj, model, param_file="", rand_flag=0 ):
             MCTNode* p_in;"""
                 for in_id in el["in"]:
                     text+="""
-            p_in=forward_result[{in_id}];
-            op->inputs.push_back(p_in);""".format(in_id=in_id)
+            op->inputs.push_back( forward_result[{in_id}] );""".format(in_id=in_id)
+            #p_in=forward_result[{in_id}];
+            #op->inputs.push_back(p_in);""".format(in_id=in_id)
+            
+                in_set = list( set( el["in"] ) )  # 210719 add mari
+                #print("unique: ", in_set )
+                for k in range(len(in_set)):
+                    text+="""
+            op->unique_inputs.push_back( forward_result[{in_id}] );""".format(in_id=in_set[k])
+            
         text+="""
         }
         """
@@ -345,6 +452,7 @@ def c_code_generator( obj, model, param_file="", rand_flag=0 ):
         auto o = forward_result[{output_id}]->output;
         cout<<o<<endl;
     """.format(output_id=output_id)
+    
     all_text+="""
         cout<<"### backward computation ..."<<endl;
         forward_result[{output_id}]->grad=xt::ones_like(forward_result[{output_id}]->output); // 210702 mod mari
