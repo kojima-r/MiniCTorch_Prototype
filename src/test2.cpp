@@ -1,18 +1,28 @@
 
-    #include<stdio.h>
-    #include<iostream>
-    #include<fstream>
-    #include<string>
-    #include<vector>
-    #include"minictorch.hpp"
+    #include <stdio.h>
+    #include <iostream>
+    #include <fstream>
+    #include <string>
+    #include <vector>
+    #include "minictorch.hpp"
 
     using namespace std;
+    
+    extern void LoadParameter();
+    
+    extern Tensor  xin;
+    extern Tensor  fc1_weight;
+    extern Tensor  fc1_bias;
+    extern Tensor  fc2_weight;
+    extern Tensor  fc2_bias;
+    extern Tensor  fc3_weight;
+    extern Tensor  fc3_bias;
 
     int main()
     {
+        // load parameters
+        LoadParameter();
         
-    #include "test2_param.h"
-    
         // input data
         VariableTensor input_var(xin);
         vector<MCTNode*> forward_result(13);
@@ -43,12 +53,12 @@
             LinearOp*  op = new LinearOp();
             forward_result[3]=op;
             MCTNode* p_in;
-            p_in=forward_result[0];
-            op->inputs.push_back(p_in);
-            p_in=forward_result[1];
-            op->inputs.push_back(p_in);
-            p_in=forward_result[2];
-            op->inputs.push_back(p_in);
+            op->inputs.push_back( forward_result[0] );
+            op->inputs.push_back( forward_result[1] );
+            op->inputs.push_back( forward_result[2] );
+            op->unique_inputs.push_back( forward_result[0] );
+            op->unique_inputs.push_back( forward_result[1] );
+            op->unique_inputs.push_back( forward_result[2] );
         }
         
         // {'name': 'Net/input.3', 'op': 'aten::relu', 'in': [3], 'shape': [1, 32], 'out': [7], 'sorted_id': 4}
@@ -58,8 +68,8 @@
             ReluOp* op = new ReluOp();
             forward_result[4]=op;
             MCTNode* p_in;
-            p_in=forward_result[3];
-            op->inputs.push_back(p_in);
+            op->inputs.push_back( forward_result[3] );
+            op->unique_inputs.push_back( forward_result[3] );
         }
         
         // {'name': 'Net/Linear[fc2]/weight/46', 'op': 'prim::GetAttr', 'in': [], 'shape': [], 'out': [7], 'sorted_id': 5}
@@ -81,12 +91,12 @@
             LinearOp*  op = new LinearOp();
             forward_result[7]=op;
             MCTNode* p_in;
-            p_in=forward_result[4];
-            op->inputs.push_back(p_in);
-            p_in=forward_result[5];
-            op->inputs.push_back(p_in);
-            p_in=forward_result[6];
-            op->inputs.push_back(p_in);
+            op->inputs.push_back( forward_result[4] );
+            op->inputs.push_back( forward_result[5] );
+            op->inputs.push_back( forward_result[6] );
+            op->unique_inputs.push_back( forward_result[4] );
+            op->unique_inputs.push_back( forward_result[5] );
+            op->unique_inputs.push_back( forward_result[6] );
         }
         
         // {'name': 'Net/input', 'op': 'aten::relu', 'in': [7], 'shape': [1, 32], 'out': [11], 'sorted_id': 8}
@@ -96,8 +106,8 @@
             ReluOp* op = new ReluOp();
             forward_result[8]=op;
             MCTNode* p_in;
-            p_in=forward_result[7];
-            op->inputs.push_back(p_in);
+            op->inputs.push_back( forward_result[7] );
+            op->unique_inputs.push_back( forward_result[7] );
         }
         
         // {'name': 'Net/Linear[fc3]/weight/49', 'op': 'prim::GetAttr', 'in': [], 'shape': [], 'out': [11], 'sorted_id': 9}
@@ -119,12 +129,12 @@
             LinearOp*  op = new LinearOp();
             forward_result[11]=op;
             MCTNode* p_in;
-            p_in=forward_result[8];
-            op->inputs.push_back(p_in);
-            p_in=forward_result[9];
-            op->inputs.push_back(p_in);
-            p_in=forward_result[10];
-            op->inputs.push_back(p_in);
+            op->inputs.push_back( forward_result[8] );
+            op->inputs.push_back( forward_result[9] );
+            op->inputs.push_back( forward_result[10] );
+            op->unique_inputs.push_back( forward_result[8] );
+            op->unique_inputs.push_back( forward_result[9] );
+            op->unique_inputs.push_back( forward_result[10] );
         }
         
         // {'name': 'output/output.1', 'op': 'IO Node', 'in': [11], 'shape': [1, 3], 'out': [], 'sorted_id': 12}

@@ -1,18 +1,23 @@
 
-    #include<stdio.h>
-    #include<iostream>
-    #include<fstream>
-    #include<string>
-    #include<vector>
-    #include"minictorch.hpp"
+    #include <stdio.h>
+    #include <iostream>
+    #include <fstream>
+    #include <string>
+    #include <vector>
+    #include "minictorch.hpp"
 
     using namespace std;
+    
+    extern void LoadParameter();
+    
+    extern Tensor  xin;
+    extern Tensor  Constant1;
 
     int main()
     {
+        // load parameters
+        LoadParameter();
         
-    #include "test3_param.h"
-    
         // input data
         VariableTensor input_var(xin);
         vector<MCTNode*> forward_result(6);
@@ -28,9 +33,7 @@
         {
         
             Tensor::shape_type shape = {2,3};
-            Tensor t= {5.0,6.0,7.0,8.0,9.0,10.0};
-            t=t.reshape(shape);
-            forward_result[1]=new VariableTensor(t);
+            forward_result[1] = new VariableTensor( Constant1 );
         }
         
         // {'name': 'Net/tt', 'op': 'aten::t', 'in': [1], 'shape': [3, 2], 'out': [3], 'sorted_id': 2}
@@ -40,8 +43,8 @@
             TransposeOp* op = new TransposeOp();
             forward_result[2]=op;
             MCTNode* p_in;
-            p_in=forward_result[1];
-            op->inputs.push_back(p_in);
+            op->inputs.push_back( forward_result[1] );
+            op->unique_inputs.push_back( forward_result[1] );
         }
         
         // {'name': 'Net/z1', 'op': 'aten::matmul', 'in': [0, 2], 'shape': [1, 2], 'out': [4], 'sorted_id': 3}
@@ -51,10 +54,10 @@
             MatMulOp* op = new MatMulOp();
             forward_result[3]=op;
             MCTNode* p_in;
-            p_in=forward_result[0];
-            op->inputs.push_back(p_in);
-            p_in=forward_result[2];
-            op->inputs.push_back(p_in);
+            op->inputs.push_back( forward_result[0] );
+            op->inputs.push_back( forward_result[2] );
+            op->unique_inputs.push_back( forward_result[0] );
+            op->unique_inputs.push_back( forward_result[2] );
         }
         
         // {'name': 'Net/7', 'op': 'aten::relu', 'in': [3], 'shape': [1, 2], 'out': [5], 'sorted_id': 4}
@@ -64,8 +67,8 @@
             ReluOp* op = new ReluOp();
             forward_result[4]=op;
             MCTNode* p_in;
-            p_in=forward_result[3];
-            op->inputs.push_back(p_in);
+            op->inputs.push_back( forward_result[3] );
+            op->unique_inputs.push_back( forward_result[3] );
         }
         
         // {'name': 'output/output.1', 'op': 'IO Node', 'in': [4], 'shape': [1, 2], 'out': [], 'sorted_id': 5}

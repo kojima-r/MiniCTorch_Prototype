@@ -1,23 +1,28 @@
 
-    #include<stdio.h>
-    #include<iostream>
-    #include<fstream>
-    #include<string>
-    #include<vector>
-    #include"minictorch.hpp"
+    #include <stdio.h>
+    #include <iostream>
+    #include <fstream>
+    #include <string>
+    #include <vector>
+    #include "minictorch.hpp"
 
     using namespace std;
+    
+    extern void LoadParameter();
+    
+    extern Tensor  xin;
+    extern Tensor  Constant1;
 
     int main()
     {
+        // load parameters
+        LoadParameter();
         
-    #include "test1_param.h"
-    
         // input data
         VariableTensor input_var(xin);
         vector<MCTNode*> forward_result(11);
     
-        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'shape': [2, 2], 'out': [3, 2, 7], 'sorted_id': 0}
+        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'shape': [2, 2], 'out': [2, 3, 7], 'sorted_id': 0}
         {
         
             Tensor::shape_type shape = {2,2};
@@ -39,10 +44,10 @@
             MulOp* op=new MulOp();
             forward_result[2]=op;
             MCTNode* p_in;
-            p_in=forward_result[0];
-            op->inputs.push_back(p_in);
-            p_in=forward_result[1];
-            op->inputs.push_back(p_in);
+            op->inputs.push_back( forward_result[0] );
+            op->inputs.push_back( forward_result[1] );
+            op->unique_inputs.push_back( forward_result[0] );
+            op->unique_inputs.push_back( forward_result[1] );
         }
         
         // {'name': 'Net/6', 'op': 'aten::mul', 'in': [2, 0], 'shape': [2, 2], 'out': [5], 'sorted_id': 3}
@@ -52,19 +57,17 @@
             MulOp* op=new MulOp();
             forward_result[3]=op;
             MCTNode* p_in;
-            p_in=forward_result[2];
-            op->inputs.push_back(p_in);
-            p_in=forward_result[0];
-            op->inputs.push_back(p_in);
+            op->inputs.push_back( forward_result[2] );
+            op->inputs.push_back( forward_result[0] );
+            op->unique_inputs.push_back( forward_result[0] );
+            op->unique_inputs.push_back( forward_result[2] );
         }
         
         // {'name': 'Net/7', 'op': 'prim::Constant', 'in': [], 'shape': [2, 2], 'constant_value': [1.0, 2.0, 3.0, 4.0], 'out': [5], 'sorted_id': 4}
         {
         
             Tensor::shape_type shape = {2,2};
-            Tensor t= {1.0,2.0,3.0,4.0};
-            t=t.reshape(shape);
-            forward_result[4]=new VariableTensor(t);
+            forward_result[4] = new VariableTensor( Constant1 );
         }
         
         // {'name': 'Net/f1', 'op': 'aten::mul', 'in': [3, 4], 'shape': [2, 2], 'out': [9], 'sorted_id': 5}
@@ -74,10 +77,10 @@
             MulOp* op=new MulOp();
             forward_result[5]=op;
             MCTNode* p_in;
-            p_in=forward_result[3];
-            op->inputs.push_back(p_in);
-            p_in=forward_result[4];
-            op->inputs.push_back(p_in);
+            op->inputs.push_back( forward_result[3] );
+            op->inputs.push_back( forward_result[4] );
+            op->unique_inputs.push_back( forward_result[3] );
+            op->unique_inputs.push_back( forward_result[4] );
         }
         
         // {'name': 'Net/9', 'op': 'prim::Constant', 'in': [], 'shape': [], 'constant_value': 5.0, 'out': [7], 'sorted_id': 6}
@@ -95,10 +98,10 @@
             MulOp* op=new MulOp();
             forward_result[7]=op;
             MCTNode* p_in;
-            p_in=forward_result[0];
-            op->inputs.push_back(p_in);
-            p_in=forward_result[6];
-            op->inputs.push_back(p_in);
+            op->inputs.push_back( forward_result[0] );
+            op->inputs.push_back( forward_result[6] );
+            op->unique_inputs.push_back( forward_result[0] );
+            op->unique_inputs.push_back( forward_result[6] );
         }
         
         // {'name': 'Net/11', 'op': 'prim::Constant', 'in': [], 'shape': [], 'constant_value': 1.0, 'out': [9], 'sorted_id': 8}
@@ -116,12 +119,12 @@
             AddOp* op=new AddOp();
             forward_result[9]=op;
             MCTNode* p_in;
-            p_in=forward_result[5];
-            op->inputs.push_back(p_in);
-            p_in=forward_result[7];
-            op->inputs.push_back(p_in);
-            p_in=forward_result[8];
-            op->inputs.push_back(p_in);
+            op->inputs.push_back( forward_result[5] );
+            op->inputs.push_back( forward_result[7] );
+            op->inputs.push_back( forward_result[8] );
+            op->unique_inputs.push_back( forward_result[8] );
+            op->unique_inputs.push_back( forward_result[5] );
+            op->unique_inputs.push_back( forward_result[7] );
         }
         
         // {'name': 'output/output.1', 'op': 'IO Node', 'in': [9], 'shape': [2, 2], 'out': [], 'sorted_id': 10}

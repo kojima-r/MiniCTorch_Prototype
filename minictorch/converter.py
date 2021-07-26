@@ -134,6 +134,7 @@ def c_param_generator( obj, model, input_data ):
     cno = 0
     for i,el in enumerate(obj):
         name = el["name"]
+        
         if el["op"]=="prim::GetAttr":
             text=""
             key = get_param_name( name )
@@ -384,6 +385,9 @@ def c_code_generator( obj, model, rand_flag=0 ):
             elif el["op"]=="aten::pow":     # 210705 add mari
                 text+="""
             PowOp* op = new PowOp();"""
+            elif el["op"]=="aten::exp":     # 210721 add mari
+                text+="""
+            ExpOp* op = new ExpOp();"""
             elif el["op"]=="aten::matmul":
                 text+="""
             MatMulOp* op = new MatMulOp();"""
@@ -421,25 +425,30 @@ def c_code_generator( obj, model, rand_flag=0 ):
                 print("unknown op:"+el["op"])
             ### setting operator
             text+="""
-            forward_result[{i}]=op;""".format(i=i)
+            forward_result[{i}]=op;
+            """.format(i=i)
             ###
             ### inputs
             ###
             if "in" in el and len(el["in"])>0:
+                for in_id in el["in"]:
+                    text+="""
+            op->set_inputs( forward_result[{in_id}] );""".format(in_id=in_id)
+            
+            if "in" in el and len(el["in"])<0:  #210723 del mari
                 num_inputs=len(el["in"])
                 text+="""
             MCTNode* p_in;"""
                 for in_id in el["in"]:
                     text+="""
-            op->inputs.push_back( forward_result[{in_id}] );""".format(in_id=in_id)
+            op->set_inputs( forward_result[{in_id}] );""".format(in_id=in_id)
             #p_in=forward_result[{in_id}];
             #op->inputs.push_back(p_in);""".format(in_id=in_id)
-            
-                in_set = list( set( el["in"] ) )  # 210719 add mari
+                in_set = sorted( list(set(el["in"])) )  # 210722 add mari
                 #print("unique: ", in_set )
                 for k in range(len(in_set)):
                     text+="""
-            op->unique_inputs.push_back( forward_result[{in_id}] );""".format(in_id=in_set[k])
+            op->set_unique_inputs( forward_result[{in_id}] );""".format(in_id=in_set[k])
             
         text+="""
         }
