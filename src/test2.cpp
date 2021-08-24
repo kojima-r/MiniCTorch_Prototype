@@ -129,7 +129,12 @@
         cout<<"### forward computation ..."<<endl;
         //forward_result[11]->forward();
         for(int k=0;k<=11;k++) {
-           if( forward_result[k] )  forward_result[k]->forward();
+            if( forward_result[k] )  
+            {
+                //forward_result[k]->set_id( k );
+                forward_result[k]->forward();
+                forward_result[k]->zerograd();
+            }
         }
         auto o = forward_result[11]->output;
         cout<<o<<endl;

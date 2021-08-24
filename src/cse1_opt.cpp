@@ -87,7 +87,7 @@
             op->set_inputs( forward_result[6] );
         }
         
-        // {'name': 'Net/17', 'op': 'prim::Constant', 'in': [], 'shape': [112], 'constant_value': [2.0, 1.0, 1.0, 0.0, 2.0, 0.0, 2.0, 2.0, 0.0, 1.0, 2.0, 1.0, 1.0, 2.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 2.0, 1.0, 0.0, 1.0, 2.0, 0.0, 1.0, 2.0, 1.0, 1.0, 1.0, 0.0, 2.0, 2.0, 0.0, 2.0, 2.0, 0.0, 2.0, 1.0, 0.0, 0.0, 2.0, 0.0, 1.0, 0.0, 2.0, 2.0, 2.0, 0.0, 2.0, 2.0, 0.0, 0.0, 0.0, 1.0, 1.0, 2.0, 2.0, 0.0, 2.0, 1.0, 0.0, 1.0, 1.0, 2.0, 0.0, 2.0, 1.0, 1.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0, 0.0, 2.0, 2.0, 1.0, 0.0, 1.0, 0.0, 2.0, 0.0, 2.0, 2.0, 1.0, 2.0, 2.0, 0.0, 2.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 1.0, 1.0, 0.0, 2.0, 2.0, 0.0, 1.0, 0.0, 2.0], 'out': [12], 'sorted_id': 8}
+        // {'name': 'Net/17', 'op': 'prim::Constant', 'in': [], 'shape': [112], 'constant_value': [2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 2.0, 0.0, 0.0, 1.0, 2.0, 0.0, 1.0, 0.0, 0.0, 2.0, 1.0, 2.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0, 2.0, 0.0, 0.0, 2.0, 0.0, 0.0, 1.0, 0.0, 2.0, 2.0, 2.0, 0.0, 2.0, 1.0, 0.0, 2.0, 1.0, 0.0, 2.0, 0.0, 0.0, 2.0, 0.0, 2.0, 0.0, 2.0, 1.0, 0.0, 2.0, 1.0, 1.0, 0.0, 2.0, 1.0, 0.0, 0.0, 2.0, 2.0, 0.0, 2.0, 0.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 0.0, 2.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 1.0, 0.0, 0.0, 2.0, 1.0, 1.0, 1.0, 1.0, 2.0, 1.0, 2.0, 0.0, 2.0, 0.0, 0.0, 2.0, 1.0, 2.0, 1.0, 0.0], 'out': [12], 'sorted_id': 8}
         {
             Tensor::shape_type shape = {112};
             Constant1.reshape( shape );
@@ -131,27 +131,86 @@
         {
             Tensor::shape_type shape = {};
         }
-        
+    /*
         cout<<"### forward computation ..."<<endl;
         //forward_result[12]->forward();
         for(int k=0;k<=12;k++) {
-            if( forward_result[k] )  
-            {
-                //forward_result[k]->set_id( k );
-                forward_result[k]->forward();
-                forward_result[k]->zerograd();
-            }
+          if( forward_result[k] )  forward_result[k]->forward();
         }
         auto o = forward_result[12]->output;
         cout<<o<<endl;
     
         cout<<"### backward computation ..."<<endl;
-        forward_result[12]->grad = xt::ones_like( forward_result[12]->output );
+        forward_result[12]->grad=xt::ones_like(forward_result[12]->output);
         //forward_result[12]->backward();
         for(int k=12;k>=0;k--) {
-           if( forward_result[k] )  forward_result[k]->backward();
+          if( forward_result[k] )  forward_result[k]->backward();
         }
         cout<<"input_grad"<<input_var.grad<<endl;
+    */
+    
+    // optimization  210819 add
+    auto exec_forward=[]( vector<MCTNode*> &op, int n ) 
+    {
+        cout<<"### forward computation ..."<<endl;
+        //op[n]->forward();
+        for(int k=0;k<=n;k++) {
+          if( op[k] )  op[k]->forward();
+        }
+    };
+    auto exec_backward=[]( vector<MCTNode*> &op, int n ) 
+    {
+        cout<<"### backward computation ..."<<endl;
+        op[n]->grad = xt::ones_like( op[n]->output );
+        //op[n]->backward();
+        for(int k=n;k>=0;k--) {
+          if( op[k] )  op[k]->backward();
+        }
+    };
+    auto exec_zerograd=[]( vector<MCTNode*> &op, int n ) 
+    {
+        for(int k=0;k<=n;k++) {
+          if( op[k] )  op[k]->zerograd();
+        }
+    };
+    auto update_params=[]( vector<MCTNode*> &op, int n, fprec lr=0.01 ) 
+    {
+        for(int k=0;k<=n;k++) {
+          if( op[k] )  op[k]->update( lr );
+        }
+    };
+    
+    auto lbs = forward_result[8]->get_output();
+    auto sh = lbs.shape();
+    //cout<<"sh"<<sh[0]<<endl;
+        
+    ofstream outputfile("cse1.out");
+    for(int epoch=0;epoch<300;epoch++)
+    {
+        fprec lr= 0.01;
+        int   NL = 12;  // loss
+        int   NS =  7;  // result
+        
+        exec_forward( forward_result, NL );
+        
+        CrossEntropyLossOp *op = dynamic_cast<CrossEntropyLossOp*>(forward_result[NL]);
+        
+        auto  lb2 = op->get_classes();
+        auto  eq  = xt::equal( lbs, lb2 );
+        auto  nc2 = xt::sum( eq );
+        fprec acc = fprec(nc2[0]) / fprec(sh[0]);
+        //cout<<"lbs"<<lb2<<endl;
+        //cout<<"nc2"<<nc2<<endl;
+        
+        fprec o = op->get_loss();
+        cout<<"epoch "<<epoch<<" - loss "<<o<<" - accuracy "<<acc<<endl;
+        outputfile<<to_string(o)<<","<<to_string(acc)<<endl;
+        
+        exec_backward( forward_result, NL );
+        update_params( forward_result, NL, lr );
+        exec_zerograd( forward_result, NL );
+    }
+    outputfile.close();
     
         return 0;
     }

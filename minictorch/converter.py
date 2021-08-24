@@ -13,7 +13,7 @@ LDFLAGS = -lcblas
 CPPUTEST_HOME = ./cpputest/workspace/install
 TARGET = mini_c_torch
 # SRCS = main_test.cpp main.cpp
-SRCS = minictorch.cpp {proj}.cpp {proj}_param.cpp
+SRCS = {proj}.cpp {proj}_param.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 
@@ -737,6 +737,9 @@ def c_code_generator( obj, model, rand_flag=0 ):
             elif el["op"]=="aten::sub":     # 210712 add below mari
                 text+="""
             SubOp* op = new SubOp();"""
+            elif el["op"]=="aten::rsub":   # 210824 add below mari
+                text+="""
+            RsubOp* op = new RsubOp();"""
             elif el["op"]=="aten::div":     
                 text+="""
             DivOp* op = new DivOp();"""
@@ -749,6 +752,9 @@ def c_code_generator( obj, model, rand_flag=0 ):
             elif el["op"]=="aten::exp":
                 text+="""
             ExpOp* op = new ExpOp();"""
+            elif el["op"]=="aten::log":     # 210824 add mari
+                text+="""
+            LogOp* op = new LogOp();"""
             elif el["op"]=="aten::matmul":
                 text+="""
             MatMulOp* op = new MatMulOp();"""
@@ -776,7 +782,7 @@ def c_code_generator( obj, model, rand_flag=0 ):
             elif el["op"]=="aten::relu":
                 text+="""
             ReluOp* op = new ReluOp();"""
-            elif el["op"]=="aten::elu": # 210806 add below mari
+            elif el["op"]=="aten::elu":  # 210806 add below mari
                 text+="""
             EluOp* op = new EluOp();"""
             elif el["op"]=="aten::leaky_relu":
@@ -807,6 +813,9 @@ def c_code_generator( obj, model, rand_flag=0 ):
             elif el["op"]=="aten::cross_entropy_loss":
                 text+="""
             CrossEntropyLossOp* op = new CrossEntropyLossOp();"""
+            elif el["op"]=="aten::nll_loss_nd":  #210824 yet
+                text+="""
+            NLLLossOp* op = new NLLLossOp();"""
             elif el["op"]=="aten::size":
                 text+="""
             SizeOp* op = new SizeOp();"""
@@ -878,7 +887,12 @@ def c_code_generator( obj, model, rand_flag=0 ):
         cout<<"### forward computation ..."<<endl;
         //forward_result[{output_id}]->forward();
         for(int k=0;k<={output_id};k++) {{
-           if( forward_result[k] )  forward_result[k]->forward();
+            if( forward_result[k] )  
+            {{
+                //forward_result[k]->set_id( k );
+                forward_result[k]->forward();
+                forward_result[k]->zerograd();
+            }}
         }}
         auto o = forward_result[{output_id}]->output;
         cout<<o<<endl;

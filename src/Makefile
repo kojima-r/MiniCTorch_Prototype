@@ -7,7 +7,7 @@ LDFLAGS = -lcblas
 CPPUTEST_HOME = ./cpputest/workspace/install
 TARGET = mini_c_torch
 # SRCS = main_test.cpp main.cpp
-SRCS = minictorch.cpp test4.cpp test4_param.cpp
+SRCS = cse1.cpp.cpp cse1.cpp_param.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 

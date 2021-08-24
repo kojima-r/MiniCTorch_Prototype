@@ -20,7 +20,7 @@
         xin.reshape( shape );
         VariableTensor input_var(xin);
         
-        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'shape': [2, 2], 'out': [2, 7, 3], 'sorted_id': 0}
+        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'shape': [2, 2], 'out': [7, 3, 2], 'sorted_id': 0}
         {
             Tensor::shape_type shape = {2,2};
             forward_result[0] = &input_var;
@@ -113,7 +113,12 @@
         cout<<"### forward computation ..."<<endl;
         //forward_result[9]->forward();
         for(int k=0;k<=9;k++) {
-           if( forward_result[k] )  forward_result[k]->forward();
+            if( forward_result[k] )  
+            {
+                //forward_result[k]->set_id( k );
+                forward_result[k]->forward();
+                forward_result[k]->zerograd();
+            }
         }
         auto o = forward_result[9]->output;
         cout<<o<<endl;

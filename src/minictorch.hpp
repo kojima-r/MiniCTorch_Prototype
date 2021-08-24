@@ -13,7 +13,7 @@
 #define fprec float   // 210702 add mari
 typedef xt::xarray<fprec> Tensor;
 
-class MCTNode;
+//class MCTNode;
 
 using namespace std;
 
@@ -25,6 +25,7 @@ class MCTNode{
     MCTNode(){
         frontcnt = 0;  // 210806 add
         backcnt  = 0;  // 210722 add
+        id = -1;       // 210821 add for check
     }
     virtual bool forward(){
         cout<<"not implemented: forward"<<endl;
@@ -40,8 +41,10 @@ class MCTNode{
     Tensor grad;
     int    frontcnt;  // 210806 add mari
     int    backcnt;   // 210722 add mari
+    int    id;        // 210821 add for check
     
     // utility function
+    void set_id( int n ) { id = n; };  // 210821 add
     void print_message( const char* msg ) // 210726 add
     {
 #ifdef _DEBUG
@@ -62,6 +65,7 @@ class MCTNode{
         }
         cout<<")"<<endl; // 210702 add mari
     }
+    /* 210824 del
     Tensor _transpose(Tensor a,int ar){ // 210702 move from MatMulOp
         vector<int> perm;
         for(int i=0;i<ar-2;i++){
@@ -83,7 +87,7 @@ class MCTNode{
         new_s[1]=a_shape[ar-2];
         new_s[2]=a_shape[ar-1];
         return new_s;
-    }
+    }*/
     void _forward_inputs()
     {
         //cout<<"forward_inputs"<<endl;
@@ -129,6 +133,32 @@ class MCTNode{
         inputs.push_back( node );
         if( node )  node->backcnt++;
     }
+    
+    Tensor _broadcast( Tensor& b, Tensor::shape_type as  ) {  // 210824 add
+        auto bs = b.shape();
+        int  az = as.size();
+        int  bz = bs.size();
+        if( az == bz )  return b;
+        
+        if( az == 2 && bz == 1 ) {
+            return xt::view( b, xt::all(), xt::newaxis() );
+            // return xt::expand_dims( b, 1 );
+            //b.reshape({-1,1} );
+        }
+        return b; // error
+    }
+    virtual void update( fprec delta ) {};  // 210824 add
+    
+    void zerograd()  // 210824 add
+    {
+        //this->grad = xt::zeros_like( output );
+        this->grad = 0.;
+    }
+    Tensor& get_output() // 210824 add
+    {
+        return output;
+    }
+    bool check_var1( MCTNode *node );  // 210821 add
 };
 
 class VariableTensor:public MCTNode{
@@ -137,10 +167,14 @@ class VariableTensor:public MCTNode{
     
     VariableTensor(Tensor tensor){
         this->output=tensor;
+        
+        this->grad = xt::zeros_like( output );  // 210824 add
     }
     VariableTensor(string name,Tensor tensor){
         this->output=tensor;
         this->name=name;
+        
+        this->grad = xt::zeros_like( output );  // 210824 add
     }
     bool forward(){
         return true;
@@ -149,6 +183,24 @@ class VariableTensor:public MCTNode{
         return true;
     }
 };
+
+bool MCTNode::check_var1( MCTNode *node )  // 210824 add
+{
+    VariableTensor *ptr = dynamic_cast<VariableTensor *>(node);
+    if( ptr )
+    {
+        auto sh = node->output.shape();
+        auto sz = sh.size();
+        if( sz == 0 )  
+        {
+            //cout<<"check scalar size:"<<sz<<",id "<<id<<endl;
+            return false;
+        }
+        //node->print_shape( "check2 shape ", node->output );
+        //cout<<"check2 tensor size:"<<sz<<",id "<<id<<endl;
+    }
+    return true;
+}
 
 class ExpOp:public MCTNode{
     public:
@@ -167,10 +219,29 @@ class ExpOp:public MCTNode{
             itr->grad += this->grad*this->output;
         }
         _backward_inputs();
+        return true;
     }
 };
 
+class LogOp:public MCTNode{  // 210824 add
+    public:
+    LogOp(){}
+    
+    bool forward(){
+        _forward_inputs();
+        print_message( "log(forward)" );
+        this->output = xt::log(inputs[0]->output);
+        return true;
+    }
+    bool backward(){
+        print_message( "log(backward)" );
+        inputs[0]->grad += this->grad / inputs[0]->output;
+        _backward_inputs();
+        return true;
+    }
+};
 
+/* 210824 replace
 class SumOp:public MCTNode{
     public:
     SumOp(int axis=0){
@@ -203,9 +274,67 @@ class SumOp:public MCTNode{
         }
         _backward_inputs();
     }
+};*/
+
+class SumOp:public MCTNode{ // 210824 replace
+    public:
+    SumOp(int ax=0){
+        axis = ax;
+        kind = -1;
+    }
+    int axis;
+    int kind;
+    
+    bool forward(){
+        _forward_inputs();
+        print_message( "sum(forward)" );
+        //cout<<"sum0"<<axis<<endl;
+        if( inputs[1] ) { 
+            axis = (int)inputs[1]->output[0];
+            kind = axis;
+            output = xt::sum( inputs[0]->output, {axis} );
+        } else {
+            if( kind < 0 ) {
+                auto o = xt::sum( inputs[0]->output );
+                output = xt::expand_dims( o, axis );
+            } else {
+                output = xt::sum( inputs[0]->output, {axis} );
+            }
+        }
+        //cout<<"sum0 axis:"<<axis<<endl;
+        //cout<<"sum1 "<<inputs[0]->output<<endl;
+        //cout<<"sum2 "<<output<<endl;
+        return true;
+    }
+    bool backward(){
+        print_message( "sum(backward)" );
+        auto sh = inputs[0]->output.shape();
+        int  sz = sh.size();
+        //cout<<"axis:"<<axis<<" - sz:"<<sz<<endl;
+        //cout<<"sum_grad1"<<grad<<endl;
+        
+        auto e = xt::expand_dims( this->grad, axis );
+        //cout<<"sum_grad21"<<e<<endl;
+        if( kind >=0  ) {
+            auto g = xt::repeat( e, sh[0], axis );
+            inputs[0]->grad = g;
+        } else {
+            auto g1 = xt::repeat( e , sh[0], 0 );
+            //cout<<"sum_grad22"<<g1<<endl;
+            if( sz > 1 && sh[1] > 1 ) {
+                auto g2 = xt::repeat( g1, sh[1], 1 );
+                inputs[0]->grad = g2;
+            } else {
+                inputs[0]->grad = g1;
+            }
+        }
+        //auto &ga = inputs[0]->grad;
+        //cout<<"sum_grad25"<<ga<<endl;
+        _backward_inputs();
+        return true;
+    }
 };
-
-
+    
 class AddOp:public MCTNode{
     public:
     AddOp(){}
@@ -221,6 +350,7 @@ class AddOp:public MCTNode{
         this->inputs[0]->grad += this->grad;
         this->inputs[1]->grad += this->grad;
         _backward_inputs();
+        return true;
     }
 };
 
@@ -236,9 +366,15 @@ class MulOp:public MCTNode{
     }
     bool backward(){
         print_message( "mul(backward)" );
-        this->inputs[0]->grad += this->grad * this->output / inputs[0]->output;
-        this->inputs[1]->grad += this->grad * this->output / inputs[1]->output;
+        // 210824 mod
+        //this->inputs[0]->grad += this->grad * this->output / inputs[0]->output;
+        //this->inputs[1]->grad += this->grad * this->output / inputs[1]->output;
+        if( check_var1( inputs[0] ) )
+            inputs[0]->grad += this->grad * inputs[1]->output;
+        if( check_var1( inputs[1] ) )
+            inputs[1]->grad += this->grad * inputs[0]->output;
         _backward_inputs();
+        return true;
     }
 };
 
@@ -272,8 +408,28 @@ class SubOp:public MCTNode{
     }
     bool backward(){
         print_message( "sub(backward)" );
-        inputs[0]->grad += this->grad;
-        inputs[1]->grad -= this->grad;
+        if( check_var1( inputs[0] ) )  // 210824 mod
+            inputs[0]->grad += this->grad;
+        if( check_var1( inputs[1] ) )
+            inputs[1]->grad -= this->grad;
+        _backward_inputs();
+        return true;
+    }
+};
+
+class RsubOp:public MCTNode{  // 210824 add
+    public:
+    RsubOp(){}
+    
+    bool forward(){
+        _forward_inputs();
+        print_message( "rsub(forward)" );
+        output = inputs[1]->output - inputs[0]->output;
+        return true;
+    }
+    bool backward(){
+        print_message( "rsub(backward)" );
+        inputs[0]->grad -= this->grad;
         _backward_inputs();
         return true;
     }
@@ -293,8 +449,10 @@ class DivOp:public MCTNode{
         print_message( "div(backward)" );
         auto x0 = inputs[0]->output;
         auto x1 = inputs[1]->output;
-        inputs[0]->grad += this->grad / x1;
-        inputs[1]->grad += this->grad * ( -x0 / (x1*x1) );
+        if( check_var1( inputs[0] ) )  // 210824 mod
+            inputs[0]->grad += this->grad / x1;
+        if( check_var1( inputs[1] ) )  // 210824 mod
+            inputs[1]->grad += this->grad * ( -x0 / (x1*x1) );
         _backward_inputs();
         return true;
     }
@@ -320,7 +478,87 @@ class PowOp:public MCTNode{  // 210705 add mari
     }
 };
 
-class MatMulOp:public MCTNode{
+class MatMulBase:public MCTNode{  // 210824 add
+    public:
+    MatMulBase(){}
+    
+    Tensor _batch_transpose( Tensor a ) 
+    {
+        auto as = a.shape();
+        int  ar = as.size();
+        vector<int> perm;
+        for(int i=0;i<ar-2;i++){
+            perm.push_back(i);
+        }
+        perm.push_back(ar-1);
+        perm.push_back(ar-2);
+        return ( xt::transpose(a,perm) );
+    }
+    Tensor::shape_type _batch_shape( Tensor a )
+    {
+        auto as = a.shape();
+        int  ar = as.size();
+        int  b=1;
+        for(int i=0;i<ar-2;i++){
+            b *= as[i];
+        }
+        Tensor::shape_type new_s(3);
+        new_s[0] = b;
+        new_s[1] = as[ar-2];
+        new_s[2] = as[ar-1];
+        return new_s;
+    }
+    Tensor::shape_type _orginal_shape( Tensor::shape_type as, Tensor::shape_type bs ) 
+    {
+        int  ar = as.size();
+        int  br = bs.size();
+        Tensor::shape_type new_s(ar);
+        for(int i=0;i<ar-2;i++){
+            new_s[i] = as[i];
+        }
+        new_s[ar-2] = bs[ar-2];
+        new_s[ar-1] = bs[ar-1];
+        return new_s;
+    }
+    bool forward() { return true; }
+    bool backward(){ return true; }
+    
+    Tensor _batch_grad( Tensor &x, Tensor &y, Tensor::shape_type in_s )
+    {
+        auto x_t  = _batch_transpose( x ); 
+        auto bx_s = _batch_shape( x_t );
+        auto bx   =  x_t.reshape( bx_s );
+        auto by_s = _batch_shape( y );
+        auto by   =  y.reshape( by_s );
+        //
+        print_shape(" x_t  shape ", x_t );
+        print_shape(" y    shape ", y );
+        print_shape("b:x_t shape ", bx );
+        print_shape("b:y   shape ", by );
+        //
+        Tensor::shape_type out_s = { bx_s[0], bx_s[1], by_s[2] };
+        Tensor out(out_s);
+        for(int i=0;i<bx_s[0];i++)
+        {
+            auto v = xt::view( bx, i, xt::all(), xt::all() );
+            auto w = xt::view( by, i, xt::all(), xt::all() );
+            //auto temp=xt::linalg::dot(v,w); //ba.T bb
+            auto temp = DOT(v,w); // ba.T bb
+            print_shape("temp shape ", temp);
+            xt::view( out, i, xt::all(), xt::all() ) = temp;
+        }
+        
+        Tensor::shape_type gb_s = _orginal_shape( in_s, out_s );  // 210822 add
+        //gb += out.reshape( gb_s ); // 210822 mod
+        Tensor gb = out.reshape( gb_s );
+        print_shape("gb shape ", gb);
+        print_tensor( "gb", gb );
+        
+        return gb;
+    }
+};
+
+class MatMulOp:public MatMulBase { // MCTNode  210824 mod
     public:
     MatMulOp(){}
     
@@ -349,9 +587,9 @@ class MatMulOp:public MCTNode{
             //  b.rank: 2 
             this->output = DOT(a,b);
             //this->output =xt::linalg::dot(a,b);
-            print_shape( "a", a );cout<<"x";
-            print_shape( "b", b );cout<<"=>";
-            print_shape( "output", this->output );
+            //print_shape( "a", a );cout<<"x";
+            //print_shape( "b", b );cout<<"=>";
+            //print_shape( "output", this->output );
         }else{
             cout<<"Error:MatMulOp"<<endl;
             cout<<"Error:A:"<<ar<<" B:"<< br<<endl;
@@ -397,10 +635,14 @@ class MatMulOp:public MCTNode{
             //  a.rank: >2
             //  b.rank: 2 
             //ga+=xt::linalg::dot(gc,xt::transpose(b));
-            ga+= DOT(gc,xt::transpose(b));
+            ga+= DOT( gc, xt::transpose(b) );
             print_tensor( "ga", ga );
             print_tensor( "gc", gc );
             cout<<"=="<<endl;
+            
+            gb += _batch_grad( a, gc, as );
+            
+            /* 210824 mod
             auto a_t=this->_transpose(a,ar);
             print_shape( "a_t", a_t );
             auto new_a_shape=_batch_shape(a_t,a_t.shape());
@@ -423,6 +665,7 @@ class MatMulOp:public MCTNode{
                 print_shape( "temp", temp);
                 xt::view( out, i, xt::all(), xt::all() ) = temp;
             }
+            */
             /*
             vector<int> r;
             for(int i=0;i<ar-2;i++){
@@ -441,7 +684,7 @@ class MatMulOp:public MCTNode{
     }
 };
 
-class LinearOp:public MCTNode{ // 210702 add mari
+class LinearOp:public MatMulBase{  // MCTNode // 210824 mod mari
     public:
     LinearOp(){}
     
@@ -481,9 +724,9 @@ class LinearOp:public MCTNode{ // 210702 add mari
             //  b.rank: 2 
             output = DOT( a,xt::transpose(b) ) + d;
             //output =xt::linalg::dot(a,b) + d;
-            print_shape( "a", a );cout<<"x";
-            print_shape( "b", b );cout<<"=>";
-            print_shape( "output", this->output );
+            //print_shape( "a", a );cout<<"x";
+            //print_shape( "b", b );cout<<"=>";
+            //print_shape( "output", this->output );
         }else{
             cout<<"Error:LinearOp"<<endl;
             cout<<"Error:A:"<<ar<<" B:"<< br<<endl;
@@ -532,6 +775,7 @@ class LinearOp:public MCTNode{ // 210702 add mari
             //gb +=xt::linalg::dot(a2,g2);
             gb += DOT( a2, g2 );
             gd += xt::sum( gc,{0} ); // 210721 mod
+            
         } else if( ar > 2 && br==2 ){  // yet gd
             // batched addmm:
             //  a.rank: >2
@@ -543,6 +787,10 @@ class LinearOp:public MCTNode{ // 210702 add mari
             print_tensor( "linear ga", ga );
             print_tensor( "linear gc", gc );
             cout<<"=="<<endl;
+            
+            gb += _batch_grad( gc, a, as );  // 210824 mod
+            
+            /* 210824 mod
             auto a_t=this->_transpose(a,ar);
             print_shape( "a_t", a_t );
             
@@ -567,7 +815,7 @@ class LinearOp:public MCTNode{ // 210702 add mari
                 print_shape( "temp", temp );
                 xt::view(out, i, xt::all(), xt::all() ) = temp;
             }
-            
+            */
             /*
             vector<int> r;
             for(int i=0;i<ar-2;i++){
@@ -584,9 +832,20 @@ class LinearOp:public MCTNode{ // 210702 add mari
         _backward_inputs();
         return true;
     }
+    
+    void update( fprec delta )
+    {
+        auto& b =inputs[1]->output;  // weight
+        auto& d =inputs[2]->output;  // bias
+        auto& gb=inputs[1]->grad;
+        auto& gd=inputs[2]->grad;
+        
+        b = b - delta * gb;
+        d = d - delta * gd;
+    }
 };
 
-class AddMmOp:public MCTNode{ 
+class AddMmOp:public MatMulBase{  // MCTNode 210824 mod
     public:
     AddMmOp(){}
     
@@ -626,10 +885,9 @@ class AddMmOp:public MCTNode{
             //  b.rank: 2 
             output = DOT(a,b) + d;
             //this->output =xt::linalg::dot(a,b + d;
-            /*
-            print_shape( "a", a );cout<<"x";
-            print_shape( "b", b );cout<<"=>";
-            print_shape( "output", this->output );*/
+            //print_shape( "a", a );cout<<"x";
+            //print_shape( "b", b );cout<<"=>";
+            //print_shape( "output", this->output );
         }else{
             cout<<"Error:AddMmOp"<<endl;
             cout<<"Error:A:"<<ar<<" B:"<< br<<endl;
@@ -689,6 +947,10 @@ class AddMmOp:public MCTNode{
             print_tensor( "ga", ga );
             print_tensor( "gc", gc );
             cout<<"=="<<endl;
+            
+            gb += _batch_grad( a, gc, as );
+            
+            /* 210824 mod
             auto a_t=this->_transpose(a,ar);
             print_shape( "a_t", a_t);
             
@@ -713,7 +975,7 @@ class AddMmOp:public MCTNode{
                 print_shape( "temp", temp );
                 xt::view(out, i, xt::all(), xt::all() ) = temp;
             }
-            
+            */
             /*
             vector<int> r;
             for(int i=0;i<ar-2;i++){
@@ -881,7 +1143,67 @@ class LeakyReluOp:public MCTNode{ // 210806 add mari
     }
 };
 
-class SoftmaxOp:public MCTNode{
+class SoftmaxBase:public MCTNode{  // 210824 add
+    public:
+    SoftmaxBase(){}
+    
+    bool forward(){}
+    bool backward(){}
+    
+    virtual Tensor _softmax( Tensor& a, int ax )
+    {
+        //cout<<"softmax"<<endl;
+        auto  as = a.shape();
+        auto  ga = this->grad;
+        //fprec sc = 1.0 / (fprec)as[0];
+        
+        //print_tensor( "ga ", ga );
+        //print_tensor( "a ", a );
+        //print_shape("a shape", a );
+        Tensor sm = xt::amax( a, {ax} );
+        //print_tensor( "sm1", sm );
+        sm = _broadcast( sm, as );  // 210818 mod
+        //print_tensor( "sm2", sm );
+        auto   sa = a - sm;
+        //print_tensor( "sa", sa );
+        auto   se = xt::exp( sa );
+        //print_tensor( "se", se );
+        Tensor sd = xt::sum( se, {ax} );
+        //print_tensor( "sd", sd );
+        //sd.reshape( {-1,1} );
+        sd = _broadcast( sd, as );  // 210818 mod
+        //print_tensor( "sd2", sd2 );
+        Tensor y = se / sd;  // softmax(a)
+        //print_tensor( "y", y );
+        
+        return y;
+    }
+    
+    virtual Tensor _log_softmax( Tensor& a, int ax )
+    {
+        //cout<<"log_softmax"<<endl;
+        auto  as = a.shape();
+        int   ar = as.size();
+        //print_tensor( "a ", a );
+        Tensor sm = xt::amax( a, {ax} );
+        sm = _broadcast( sm, as );
+        //sm = xt::view( sm, xt::all(), xt::newaxis() ); // 210818 add
+        auto sa = a - sm;
+        //print_tensor( "sa", sa );
+        auto se = xt::exp( sa );
+        //print_tensor( "se", se );
+        auto sd = xt::sum( se, {ax} );
+        //print_tensor( "sd", sd );
+        Tensor sl = xt::log( sd );
+        //print_tensor( "sl", sl );
+        sl = _broadcast( sl, as );
+        //sl = xt::view( sl, xt::all(), xt::newaxis() ); // 210818 add
+        //Tensor sz = a - ( sm + sl );
+        return ( a - (sm + sl) );
+    }
+};
+
+class SoftmaxOp:public SoftmaxBase{  // MCTNode 210824 mod
     public:
     SoftmaxOp(int ax=1){
         this->axis = ax;
@@ -892,19 +1214,23 @@ class SoftmaxOp:public MCTNode{
         _forward_inputs();
         print_message( "softmax(forward)" );
         auto  a = inputs[0]->output;
+        
+        output = _softmax( a, axis );  // 210824 mod
+        
+        /*
         auto  as = a.shape();
         int   ar = as.size();
         Tensor sm = xt::amax( a, {axis} );
         Tensor sa = a - sm;
         Tensor se = xt::exp( sa );
         Tensor sd = xt::sum( se, {axis} );
-        /*
-        print_tensor( "a ", a );
-        cout<<"sm"<<sm<<axis<<endl;
-        print_tensor( "sa", sa );
-        print_tensor( "se", se );
-        print_tensor( "sd", sd );*/
+        //print_tensor( "a ", a );
+        //cout<<"sm"<<sm<<axis<<endl;
+        //print_tensor( "sa", sa );
+        //print_tensor( "se", se );
+        //print_tensor( "sd", sd );
         output = se / sd;
+        */
         return true;
     }
     bool backward(){
@@ -924,7 +1250,7 @@ class SoftmaxOp:public MCTNode{
     }
 };
 
-class LogSoftmaxOp:public MCTNode{
+class LogSoftmaxOp:public SoftmaxBase{  // MCTNode  210824 mod
     public:
     LogSoftmaxOp(int ax=1){
         axis=ax;
@@ -935,6 +1261,10 @@ class LogSoftmaxOp:public MCTNode{
         _forward_inputs();
         print_message( "log_softmax(forward)" );
         auto  a = inputs[0]->output;
+        
+        output = _log_softmax( a, axis );
+        
+        /* 210824 mod
         auto  as = a.shape();
         int   ar = as.size();
         Tensor sm = xt::amax( a, {axis} );
@@ -942,14 +1272,15 @@ class LogSoftmaxOp:public MCTNode{
         Tensor se = xt::exp( sa );
         Tensor sd = xt::sum( se, {axis} );
         Tensor sl = xt::log( sd );
-        /*
+        
         print_tensor( "a ", a );
         cout<<"sm"<<sm<<axis<<endl;
         print_tensor( "sa", sa );
         print_tensor( "se", se );
         print_tensor( "sd", sd );
-        print_tensor( "sl", sl );*/
+        print_tensor( "sl", sl );
         output = a - ( sm + sl );
+        */
         return true;
     }
     bool backward(){
@@ -1043,10 +1374,10 @@ class MseLossOp:public MCTNode{
         auto diff = a - b;
         output = xt::sum( xt::pow( diff, 2.0 ) );
         if( type == 1 ) {
-            output = output/(double)a.size();
+            output = output/(fprec)a.size();
         }
-        cout<<"mseloss "<<a.size()<<","<<type<<endl;
-        print_tensor( "mesloss", output );
+        //cout<<"mseloss "<<a.size()<<","<<type<<endl;
+        //print_tensor( "mesloss", output );
         return true;
     }
     bool backward(){
@@ -1060,16 +1391,17 @@ class MseLossOp:public MCTNode{
         auto& gc = this->grad;
         ga = gc * diff * 2.0;
         if( type == 1 ) {
-            ga = ga / (double)a.size();
+            ga = ga / (fprec)a.size();
         }
         gb = -ga;
-        print_tensor( "mseloss_grad", ga );
+        //print_tensor( "mseloss_grad", ga );
         _backward_inputs();
         return true;
     }
+    fprec get_loss() { return output[0]; }  // 210824 add
 };
 
-class CrossEntropyLossOp:public MCTNode{  // #210806 == log_softmax
+class CrossEntropyLossOp:public SoftmaxBase{ //MCTNode 210824 mod == log_softmax
     public:
     CrossEntropyLossOp( int ax=1 ){
         axis = ax;
@@ -1084,6 +1416,10 @@ class CrossEntropyLossOp:public MCTNode{  // #210806 == log_softmax
         auto   as = a.shape();
         //cout<<"a "<<a<<endl;
         cout<<"ashape"<<as[0]<<as[1]<<endl;
+        
+        auto sz = _log_softmax( a, axis );  // 210824 mod
+        
+        /*
         Tensor sm = xt::amax( a, {axis} );
         sm.reshape({-1,1} );
         //print_tensor( "sm", sm );
@@ -1098,6 +1434,7 @@ class CrossEntropyLossOp:public MCTNode{  // #210806 == log_softmax
         //print_tensor( "sd", sd );
         //print_tensor( "sl", sl );
         //print_tensor( "sz", sz );
+        */
         
         fprec  h = (fprec)inputs[4]->output[0];
         //cout<<"h"<<h<<endl;
@@ -1122,6 +1459,9 @@ class CrossEntropyLossOp:public MCTNode{  // #210806 == log_softmax
         auto  ga = this->grad;
         fprec sc = 1.0 / (fprec)as[0];
         
+        auto y = _softmax( a, axis );  // 210824 mod
+        
+        /*
         //cout<<"a "<<a<<endl;
         cout<<"ashape"<<as[0]<<","<<as[1]<<endl;
         Tensor sm = xt::amax( a, {axis} );
@@ -1138,6 +1478,7 @@ class CrossEntropyLossOp:public MCTNode{  // #210806 == log_softmax
         //print_tensor( "sd2", sd2 );
         auto y = se / sd2;
         print_tensor( "y", y );
+        */
         
         Tensor one = xt::zeros<float>( as );
         for(int i=0;i<as[0];i++){
@@ -1153,6 +1494,32 @@ class CrossEntropyLossOp:public MCTNode{  // #210806 == log_softmax
       
         return true;
     }
+    Tensor get_classes()  // 210824 mod
+    {
+        cout<<"get_classes"<<endl;
+        //auto a  = inputs[0]->output;
+        auto sm = _softmax( inputs[0]->output, axis );
+        //cout<<"softmax"<<sm<<endl;
+        
+        auto sh = sm.shape();
+        xt::xarray<fprec>::shape_type shape = {sh[0]};
+        
+        Tensor lbs( shape );
+        for(int i=0;i<sh[0];i++) {
+            fprec smax = sm(i,0);
+            int jl = (int)lbs(i);
+            int jm = 0;
+            for(int j=1;j<sh[1];j++){
+                if( smax< sm(i,j) ) {
+                    smax = sm(i,j);
+                    jm = j;
+                }
+            }
+            lbs[i] = fprec(jm);
+        }
+        return lbs;
+    }
+    fprec get_loss() { return output[0]; }  // 210824 add
 };
 
 class ListConstructOp:public MCTNode{
@@ -1193,7 +1560,7 @@ class ListConstructOp:public MCTNode{
             cout<<"Error:ListConstructOp(mismatch)"<<endl;
             return false;
         }
-        cout<<"list size "<<sz<<endl;
+        //cout<<"list size "<<sz<<endl;
         
         Tensor f0,f1;
         if( sz == 0 ) {
@@ -1201,13 +1568,13 @@ class ListConstructOp:public MCTNode{
             Tensor f1 = {(float)0.0};
             if( inputs[0] ) f0 = {(float)inputs[0]->output[0]};
             if( inputs[1] ) f1 = {(float)inputs[1]->output[0]};
-            cout<<"f0,f1"<<f0<<","<<f1<<endl;
+            //cout<<"f0,f1"<<f0<<","<<f1<<endl;
             output = xt::concatenate(xt::xtuple(f0,f1));
         } else {
             Tensor f0 = inputs[0]->output;
             Tensor f1 = inputs[1]->output;
-            cout<<"f0"<<f0<<endl;
-            cout<<"f1"<<f1<<endl;
+            //cout<<"f0"<<f0<<endl;
+            //cout<<"f1"<<f1<<endl;
             auto f00 = xt::expand_dims( f0, {0} );
             auto f11 = xt::expand_dims( f1, {0} );
             output = xt::concatenate(xt::xtuple(f00,f11));
@@ -1226,7 +1593,7 @@ class ListConstructOp:public MCTNode{
                 output = xt::concatenate(xt::xtuple(output,f22));
             }
         }
-        cout<<"ListConstruct "<<name<<output<<endl;
+        //cout<<"ListConstruct "<<name<<output<<endl;
         return true;
     }
     bool backward(){
@@ -1234,7 +1601,7 @@ class ListConstructOp:public MCTNode{
         auto& gc = this->grad;
         auto gs = gc.shape();
         int  gz = gs.size();
-        cout<<"gz"<<gz<<endl;
+        //print_tensor( "gz", gz );
         if( gz == 0 ) {
             // yet
         } else if( gz < inputs.size() ) {
@@ -1243,7 +1610,7 @@ class ListConstructOp:public MCTNode{
             for(int i=0;i<inputs.size();i++){
                 if( inputs[i] ) {
                     inputs[i]->grad = xt::view( gc, i );
-                    cout<<"ListConstruct "<<name<<","<<i<<" "<<inputs[i]->grad<<endl;
+                    //cout<<"ListConstruct "<<name<<","<<i<<" "<<inputs[i]->grad<<endl;
                 }
             }
         }
@@ -1270,7 +1637,7 @@ class ListUnpackOp:public MCTNode{
         }
         output = xt::view( a, 0 );
         inputs[0]->output = xt::view( a, xt::range(1,_) );
-        cout<<"ListUnpack "<<name<<output<<endl;
+        //cout<<"ListUnpack "<<name<<output<<endl;
         return true;
     }
     bool backward(){
@@ -1279,14 +1646,14 @@ class ListUnpackOp:public MCTNode{
         auto& ga = inputs[0]->grad;
         auto& gc = this->grad;
         int  nga = ga.size();
-        cout<<"ListUnpack size"<<nga<<","<<ga<<endl;
+        //cout<<"ListUnpack size"<<nga<<","<<ga<<endl;
         if( nga == 1 ) {  // yet
             ga = xt::expand_dims( gc, {0} );
         } else {
             auto gb = xt::expand_dims( gc, {0} );
             ga = xt::concatenate( xt::xtuple(gb,ga) );
         }
-        cout<<"ListUnpack "<<name<<ga<<endl;
+        //cout<<"ListUnpack "<<name<<ga<<endl;
         _backward_inputs();
         return true;
     }
@@ -1360,19 +1727,18 @@ class MoveOp:public MCTNode{
         _forward_inputs();
         print_message( "Move(forward)" );
         output = inputs[0]->output;
-        cout<<"MoveOp "<<name<<output<<endl;
+        //cout<<"MoveOp "<<name<<output<<endl;
         return true;
     }
     bool backward(){
         print_message( "Move(backward)" );
         auto& ga = inputs[0]->grad;
         inputs[0]->grad += this->grad;
-        cout<<"MoveOp "<<name<<ga<<endl;
+        //cout<<"MoveOp "<<name<<ga<<endl;
         _backward_inputs();
         return true;
     }
 };
-
 
 class EinsumOp:public MCTNode{
     public:
