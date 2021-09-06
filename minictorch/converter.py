@@ -220,6 +220,29 @@ def c_param_generator_old( obj, model, input_data ):
 
     return all_text
     
+# 210904 add mari
+def c_data_generator( in_data ):
+    
+    # type declaration
+    all_text="""
+    #include <xtensor/xarray.hpp>
+    
+    #define fprec float
+    typedef xt::xarray<fprec> Tensor;
+    """
+    
+    # Data section
+    s1,s2 = string_tensor( "indata", in_data, 1 )
+    text="""
+    // original data
+        
+    {ivar1};
+    
+    """.format(ivar1=s1)
+    all_text += text
+    
+    return all_text
+    
 # 210806 mod mari
 def c_param_generator( obj, model, input_data ):
     
@@ -659,11 +682,11 @@ def c_code_generator( obj, model, rand_flag=0 ):
             if "constant_value" not in el:
                 text+="""
             forward_result[{i}] = NULL;""".format(i=i)
-            elif len(el["shape"])==0:
+            elif len(el["shape"])==0:  # 210904 mod float->fprec, add false
                 val=el["constant_value"]
                 text+="""
-            Tensor c = (float){val};
-            forward_result[{i}] = new VariableTensor( c );""".format(i=i,val=str(val))
+            Tensor c = (fprec){val};
+            forward_result[{i}] = new VariableTensor( c, false );""".format(i=i,val=str(val))
             else:
                 if len(el["shape"])>0: # Constant no.
                     cno += 1
@@ -734,7 +757,7 @@ def c_code_generator( obj, model, rand_flag=0 ):
             elif el["op"]=="aten::add":
                 text+="""
             AddOp* op = new AddOp();"""
-            elif el["op"]=="aten::sub":     # 210712 add below mari
+            elif el["op"]=="aten::sub":    # 210712 add below mari
                 text+="""
             SubOp* op = new SubOp();"""
             elif el["op"]=="aten::rsub":   # 210824 add below mari
@@ -913,6 +936,43 @@ def c_code_generator( obj, model, rand_flag=0 ):
     }
     """
     return all_text
+    
+def convert_json( project, folder, model, input_x, json_path, rand_flag=0 ):
+
+    cpp_fname   = project + ".cpp"
+    param_fname = project + "_param.cpp"
+    cpp_path    = folder + "/" + cpp_fname
+    param_path  = folder + "/" + param_fname
+    make_path   = folder + "/" + "Makefile"
+  
+    # save json file
+    print( "[JSON]", json_path )
+    fp = open( json_path )
+    obj = json.load(fp)
+
+    # save parameter file
+    code1 = c_param_generator( obj, model, input_x )
+    if len(code1) > 0:
+       print( "[PARAM]", param_path )
+       ofparam = open( param_path, "w" )
+       ofparam.write( code1 )
+    else:
+       param_fname=""
+
+    #save cpp file
+    code2 = c_code_generator( obj, model, rand_flag )
+
+    print("[CPP] ", cpp_path )
+    ofp = open( cpp_path, "w" )
+    ofp.write( code2 )
+
+    # save make file
+    make_code = makefile_generator( project )
+
+    print( "[MAKE]", make_path )
+    makefp = open( make_path, "w" )
+    makefp.write( make_code )
+
 
 
 def main():

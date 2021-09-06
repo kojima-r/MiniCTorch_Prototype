@@ -139,7 +139,7 @@
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/40', 'op': 'aten::broadcast_tensors', 'in': [13], 'shape': [], 'out': [15, 16], 'sorted_id': 14}
+        // {'name': 'Net/40', 'op': 'aten::broadcast_tensors', 'in': [13], 'shape': [], 'out': [16, 15], 'sorted_id': 14}
         {
             Tensor::shape_type shape = {};
             MoveOp* op = new MoveOp( "broadcast_tensors" );
@@ -169,8 +169,8 @@
         // {'name': 'Net/43', 'op': 'prim::Constant', 'in': [], 'shape': [], 'constant_value': 1.0, 'out': [18], 'sorted_id': 17}
         {
             Tensor::shape_type shape = {};
-            Tensor c = (float)1.0;
-            forward_result[17] = new VariableTensor( c );
+            Tensor c = (fprec)1.0;
+            forward_result[17] = new VariableTensor( c, false );
         }
         
         // {'name': 'Net/tensor', 'op': 'aten::mse_loss', 'in': [15, 16, 17], 'shape': [], 'out': [19], 'sorted_id': 18}

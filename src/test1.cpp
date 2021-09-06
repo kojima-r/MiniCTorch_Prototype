@@ -29,8 +29,8 @@
         // {'name': 'Net/4', 'op': 'prim::Constant', 'in': [], 'shape': [], 'constant_value': 10.0, 'out': [2], 'sorted_id': 1}
         {
             Tensor::shape_type shape = {};
-            Tensor c = (float)10.0;
-            forward_result[1] = new VariableTensor( c );
+            Tensor c = (fprec)10.0;
+            forward_result[1] = new VariableTensor( c, false );
         }
         
         // {'name': 'Net/5', 'op': 'aten::mul', 'in': [0, 1], 'shape': [2, 2], 'out': [3], 'sorted_id': 2}
@@ -73,8 +73,8 @@
         // {'name': 'Net/9', 'op': 'prim::Constant', 'in': [], 'shape': [], 'constant_value': 5.0, 'out': [7], 'sorted_id': 6}
         {
             Tensor::shape_type shape = {};
-            Tensor c = (float)5.0;
-            forward_result[6] = new VariableTensor( c );
+            Tensor c = (fprec)5.0;
+            forward_result[6] = new VariableTensor( c, false );
         }
         
         // {'name': 'Net/f2', 'op': 'aten::mul', 'in': [0, 6], 'shape': [2, 2], 'out': [9], 'sorted_id': 7}
@@ -90,8 +90,8 @@
         // {'name': 'Net/11', 'op': 'prim::Constant', 'in': [], 'shape': [], 'constant_value': 1.0, 'out': [9], 'sorted_id': 8}
         {
             Tensor::shape_type shape = {};
-            Tensor c = (float)1.0;
-            forward_result[8] = new VariableTensor( c );
+            Tensor c = (fprec)1.0;
+            forward_result[8] = new VariableTensor( c, false );
         }
         
         // {'name': 'Net/12', 'op': 'aten::add', 'in': [5, 7, 8], 'shape': [2, 2], 'out': [10], 'sorted_id': 9}
