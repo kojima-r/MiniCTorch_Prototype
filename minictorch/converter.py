@@ -426,10 +426,10 @@ def c_code_generator_old( obj, model, rand_flag=0 ):
                 text+="""
             forward_result[{i}]=NULL;""".format(i=i)
             elif len(el["shape"])==0:
-                val=el["constant_value"]
+                val = el["constant_value"]
                 text+="""
             Tensor c=(float){val};
-            forward_result[{i}]=new VariableTensor(c);""".format(i=i,val=str(val))
+            forward_result[{i}] = new VariableTensor(c);""".format(i=i,val=str(val))
             else:
                 if len(el["shape"])>0: # 210719 add mari
                     cno += 1
@@ -647,7 +647,7 @@ def c_code_generator( obj, model, rand_flag=0 ):
         ###
         if el["op"]=="prim::GetAttr":
             pass
-        elif "shape" in el or len(el["shape"])>0:
+        elif "shape" in el and len(el["shape"])>0:  # 210920 mod or->and
             shape = el["shape"]
             shape_flat=1
             for s in el["shape"]:
@@ -660,22 +660,32 @@ def c_code_generator( obj, model, rand_flag=0 ):
         ###
         if el["op"]=="IO Node":
             
-            if el["name"]=="input/x":
+            if "input" in el["name"]:  # 210920 mod
                 text+="""
             forward_result[{i}] = &input_var;""".format(i=i)
-            elif el["name"]=="output/output.1":
+            elif "output" in el["name"]: 
                 assert len(el["in"])>0, "output error"
-                output_id=el["in"][0]
+                output_id = el["in"][0]
             else:
-                if "input" in el["name"]:
-                    text+="""
-            forward_result[{i}] = &input_var;""".format(i=i)
-                elif "output" in el["name"]: 
-                    assert len(el["in"])>0, "output error"
-                    output_id = el["in"][0]
-                else:
-                    #assert False, "unknown IO:"+el["name"]
-                    print("unknown IO:"+el["name"])
+                #assert False, "unknown IO:"+el["name"]
+                print("unknown IO:"+el["name"])
+            
+            #if el["name"]=="input/x":
+            #    text+="""
+            #forward_result[{i}] = &input_var;""".format(i=i)
+            #elif el["name"]=="output/output.1":
+            #    assert len(el["in"])>0, "output error"
+            #    output_id=el["in"][0]
+            #else:
+            #    if "input" in el["name"]:
+            #        text+="""
+            #forward_result[{i}] = &input_var;""".format(i=i)
+            #    elif "output" in el["name"]: 
+            #        assert len(el["in"])>0, "output error"
+            #        output_id = el["in"][0]
+            #    else:
+            #        #assert False, "unknown IO:"+el["name"]
+            #        print("unknown IO:"+el["name"])
         
         elif el["op"]=="prim::Constant":
             
@@ -826,22 +836,36 @@ def c_code_generator( obj, model, rand_flag=0 ):
             elif el["op"]=="aten::randn":  #210806 add below mari
                 text+="""
             RandnOp* op = new RandnOp();"""
-            elif el["op"]=="aten::normal":
+            elif el["op"]=="aten::normal":  # 210920 add
                 text+="""
-            NormalOp* op = new NormalOp();
-            op->set_shape( shape );"""
+            NormalOp* op = new NormalOp();"""
             elif el["op"]=="aten::mse_loss":
                 text+="""
             MseLossOp* op = new MseLossOp();"""
             elif el["op"]=="aten::cross_entropy_loss":
                 text+="""
             CrossEntropyLossOp* op = new CrossEntropyLossOp();"""
+            elif el["op"]=="aten::binary_cross_entropy":  # 210920 add
+                text+="""
+            BCELossOp* op = new BCELossOp();"""
             elif el["op"]=="aten::nll_loss_nd":  #210824 yet
                 text+="""
             NLLLossOp* op = new NLLLossOp();"""
             elif el["op"]=="aten::size":
                 text+="""
             SizeOp* op = new SizeOp();"""
+            elif el["op"]=="aten::zeros":  # 210920 add
+                text+="""
+            ZerosOp* op = new ZerosOp();"""
+            elif el["op"]=="aten::zeros_like":  # 210920 add
+                text+="""
+            FullLikeOp* op = new FullLikeOp( 0.0 );"""
+            elif el["op"]=="aten::ones":   # 210920 add
+                text+="""
+            OnesOp* op = new OnesOp();"""
+            elif el["op"]=="aten::ones_like":   # 210920 add
+                text+="""
+            FullLikeOp* op = new FullLikeOp( 1.0 );"""
             elif el["op"]=="aten::expand":
                 text+="""
             ExpandOp* op = new ExpandOp();"""
@@ -851,21 +875,22 @@ def c_code_generator( obj, model, rand_flag=0 ):
             elif el["op"]=="aten::Int":
                 text+="""
             MoveOp* op = new MoveOp( "Int" );"""
-            elif el["op"]=="aten::broadcast_tensors":
+            elif el["op"]=="aten::broadcast_tensors":  # 210920 mod
                 text+="""
-            MoveOp* op = new MoveOp( "broadcast_tensors" );"""
+            BroadcastTensorsOp* op = new BroadcastTensorsOp();"""
             elif el["op"]=="aten::to":
                 text+="""
             ListConstructOp* op = new ListConstructOp( "to" );"""
             elif el["op"]=="aten::detach":
                 text+="""
-            ListUnpackOp* op = new ListUnpackOp( "detach" );"""
+            ListUnpackOp* op = new ListUnpackOp( "detach", {k} );""".format(k=el["output_id"])
             elif el["op"]=="prim::ListConstruct":
                 text+="""
             ListConstructOp* op = new ListConstructOp();"""
             elif el["op"]=="prim::ListUnpack":
+                #print("unpack", el["output_id"])
                 text+="""
-            ListUnpackOp* op = new ListUnpackOp();"""
+            ListUnpackOp* op = new ListUnpackOp( {k} );""".format(k=el["output_id"])
             else:
                 #assert False, "unknown op:"+el["op"]
                 text+="""
@@ -892,13 +917,6 @@ def c_code_generator( obj, model, rand_flag=0 ):
                     text+="""
             p_in = forward_result[{in_id}];
             op->inputs.push_back( p_in );""".format(in_id=in_id)
-            
-                in_set = list( set( el["in"] ) )
-                print("unique: ", in_set)
-                for k in range(len(in_set)):
-                    text+="""
-            p_in = forward_result[{in_id}];
-            op->unique_inputs.push_back( p_in );""".format(in_id=in_set[k])
                 
         text+="""
         }
