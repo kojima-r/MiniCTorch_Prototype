@@ -1,4 +1,6 @@
-from torch.utils.tensorboard._pytorch_graph import graph
+#from torch.utils.tensorboard._pytorch_graph import graph
+from minictorch.torch_graph_util import parse
+
 from lark import Lark
 import json
 import numpy as np
@@ -77,24 +79,25 @@ def parse_attr(LP, s):
     return s
 
 
-def extract_graph(g):
+def extract_graph(list_of_nodes):
     graph_data = {}
     LP = Lark(lark_code, start="dictionary", parser="lalr")
-    for i in range(len(g[0].node)):
+    for i in range(len(list_of_nodes)):
         data = {}
-        name = str(g[0].node[i].name)
+        name = str(list_of_nodes[i]["name"])
         data["name"] = name
-        data["op"] = g[0].node[i].op
-        data["in"] = [str(el) for el in g[0].node[i].input]
+        data["op"]=list_of_nodes[i]["op"]
+        data["in"]=[str(el) for el in list_of_nodes[i]["input"]]
+        data["output_id"]=list_of_nodes[i]["output_id"]
+
         ## decoding shape of the output tensor
-        shape = g[0].node[i].attr["_output_shapes"].list.shape
-        shape_data = []
-        for el in shape:
-            for x in el.dim:
-                shape_data.append(x.size)
-        data["shape"] = shape_data
+        shape=list_of_nodes[i]["outputsize"]
+        if shape is None:
+            data["shape"]=[]
+        else:
+            data["shape"]=shape
         ## Parsing and decoding attributes for constant values
-        attr = str(g[0].node[i].attr["attr"].s.decode())
+        attr=str(list_of_nodes[i]["attributes"])
         attr_data = None
         if attr != "" and attr != "{}":
             attr_data = parse_attr(LP, attr)
@@ -155,8 +158,18 @@ def sort_and_assign_id(graph_data):
 
 
 def generate_minictorch_file(model, input_to_model, filename):
-    g = graph(model, input_to_model)
-    graph_data = extract_graph(g)
+    with torch.onnx.select_model_mode_for_export(model, torch.onnx.TrainingMode.EVAL):  # TODO: move outside of torch.onnx?
+        try:
+            trace = torch.jit.trace(model, input_to_model, strict=True)
+            g=trace.graph
+            torch._C._jit_pass_inline(g)
+        except RuntimeError as e:
+            print(e)
+            print('Error occurs, No graph saved')
+            raise e
+    list_of_nodes=parse(g,trace,input_to_model)
+
+    graph_data = extract_graph(list_of_nodes)
     sorted_graph = sort_and_assign_id(graph_data)
 
     mapping_to_id = {node["name"]: i for i, node in enumerate(sorted_graph)}
