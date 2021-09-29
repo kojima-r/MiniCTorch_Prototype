@@ -28,8 +28,11 @@ function: symbol "(" [arg ("," arg)*] ")"
 
 ?fact: number
      | symbol
-symbol: (WORD+) (LETTER+|DIGIT+|"-"|".")*
+symbol: SYMBOL_NAME
 number: SIGNED_NUMBER
+
+SYMBOL_NAME: ("_"|WORD) ("-"|"."|"_"|LETTER|DIGIT)*
+
 
 %import common.LETTER
 %import common.WORD
