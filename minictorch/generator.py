@@ -1,5 +1,6 @@
 #from torch.utils.tensorboard._pytorch_graph import graph
-from minictorch.torch_graph_util import parse
+#from minictorch.torch_graph_util import parse  # 211004 mod
+from torch_graph_util import parse
 
 from lark import Lark
 import json

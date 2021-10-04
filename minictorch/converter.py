@@ -75,7 +75,7 @@ def get_param_name( s1 ):
     s4 = s3[0] + '_' + s2[2]
     return s4
 
-
+#
 def string_tensor( key, out, type=0 ): # 210719 add type mari
     
     if type == 0:
@@ -84,10 +84,9 @@ def string_tensor( key, out, type=0 ): # 210719 add type mari
         tmp = out
     p1 = np.reshape( tmp,(-1,) )
     n1 = len(p1)
-    key2 = key  #210719 add mari
+    key2 = key  # 210719 add mari
     if len(key) < 12:
         key2 = key + ' '*(12-len(key))
-    #s1 = key2 + ' ={ '  #210728 mod
     s1 = 'Tensor ' + key + ' ={ '
     
     num = 8
@@ -96,13 +95,21 @@ def string_tensor( key, out, type=0 ): # 210719 add type mari
     if nw2 == 0:
         nw1 = nw1 - 1
         nw2 = num
-            
+        
+    #print("nw1,nw2",nw1,nw2)
     l = 0
     for k in range(nw1):
-        for i in range(num):
-            s1 = s1 + str(p1[l]) + ','
-            l = l + 1
-        s1 = s1 + '\n' + ' '*24
+        if ( (nw1>1000) & (k>0) & (k % 5000 == 0)): # 210929 mod
+            print("param:",key," - str loop ",k," / ", nw1)
+        s3 = str(p1[l])  +','+str(p1[l+1])+','+str(p1[l+2])+','+str(p1[l+3])+',' \
+            +str(p1[l+4])+','+str(p1[l+5])+','+str(p1[l+6])+','+str(p1[l+7])+','
+        s1 = s1 + s3 + '\n' + ' '*24
+        l = l+num
+        #for i in range(num):
+        #    #print("for k,i ",k,i)
+        #    s1 = s1 + str(p1[l]) + ','
+        #    l = l + 1
+        #s1 = s1 + '\n' + ' '*24
     if nw2 > 0:
         for i in range(nw2):
             s1 = s1 + str(p1[l])+ ','
@@ -118,107 +125,6 @@ def string_tensor( key, out, type=0 ): # 210719 add type mari
     #print("shape :",s2)
     
     return s1, s2
-    
-# 210714 mod mari
-def c_param_generator_old( obj, model, input_data ):
-    
-    # type declaration
-    all_text="""
-    #include <xtensor/xarray.hpp>
-    
-    #define fprec float
-    typedef xt::xarray<fprec> Tensor;
-    
-    Tensor  {ivar};""".format(ivar="xin")
-    
-    cno = 0
-    for i,el in enumerate(obj):
-        name = el["name"]
-        
-        if el["op"]=="prim::GetAttr":
-            text=""
-            key = get_param_name( name )
-            text="""
-    Tensor  {ivar1};""".format(ivar1=key)
-            all_text+=text
-            
-        elif el["op"]=="prim::Constant":
-            if len(el["shape"])>0:
-                cno += 1
-                key ="Constant" + str(cno)
-                text="""
-    Tensor  {ivar1};""".format(ivar1=key)
-                all_text+=text
-                #print("constant :",name, key, el["shape"])
-            
-    text="""
-    
-    void LoadParameter()
-    {"""
-    all_text+=text
-    
-    # Data section
-    s1,s2 = string_tensor( "xin", input_data )
-    
-    text="""
-        // input data
-        
-        {ivar1};
-        {ivar2};
-        """.format(ivar1=s1,ivar2=s2)
-    all_text+=text
-    
-    cno = 0
-    for i,el in enumerate(obj):
-        
-        if el["op"]=="prim::GetAttr":
-            print(el)
-            text="""
-        // {el}
-        """.format(el=str(el))
-    
-            name = el["name"]
-            key = get_param_name( name )
-            attr = get_attr_from_model( name, model )
-            s1, s2 = string_tensor( key, attr )
-            if attr.ndim == 1:
-                text+="""
-        {ivar1};
-        """.format(i=i,ivar1=s1)
-            else:
-                text+="""
-        {ivar1};
-        {ivar2};
-        """.format(i=i,ivar1=s1,ivar2=s2)
-            all_text+=text
-        
-        elif el["op"]=="prim::Constant":
-            if len(el["shape"])>0:
-                text="""
-        // {el}
-        """.format(el=str(el))
-        
-                cno += 1
-                key ="Constant" + str(cno)
-                shape=el["shape"]
-                val=el["constant_value"]
-                v = np.zeros(len(val))
-                for k in range(len(val)):
-                    v[k] = float(val[k])
-                s1, s2 = string_tensor( key, v, 1 )
-                text+="""
-        {ivar1};
-        {key}.reshape({{{shape}}});
-        """.format(i=i,key=key,shape=",".join(map(str,shape)), ivar1=s1)
-                #print(name, key, shape[0],shape[1],val[0],val[1],len(val))
-                all_text+=text
-    
-    text="""
-    }
-    """
-    all_text+=text
-
-    return all_text
     
 # 210904 add mari
 def c_data_generator( in_data ):
@@ -244,10 +150,15 @@ def c_data_generator( in_data ):
     return all_text
     
 # 210806 mod mari
-def c_param_generator( obj, model, input_data ):
+def c_param_generator( project, obj, model, input_data ):
+    
+    all_text="""
+    //
+    //  {title}_param
+    //""".format(title=project)
     
     # type declaration
-    all_text="""
+    all_text +="""
     #include <xtensor/xarray.hpp>
     
     #define fprec float
@@ -583,9 +494,14 @@ def c_code_generator_old( obj, model, rand_flag=0 ):
     """
     return all_text
     
-def c_code_generator( obj, model, rand_flag=0 ):
+def c_code_generator( project, obj, model, rand_flag=0 ):
     
     all_text="""
+    //
+    //  {title}
+    //""".format(title=project)
+    
+    all_text +="""
     #include<stdio.h>
     #include<iostream>
     #include<fstream>
@@ -711,7 +627,7 @@ def c_code_generator( obj, model, rand_flag=0 ):
             t = t.reshape(shape);
             forward_result[{i}] = new VariableTensor( t );""".format(i=i,shape=",".join(map(str,shape)), val=",".join(map(str,val)))
         
-        elif el["op"]=="prim::GetAttr": # 210629 mod mari
+        elif el["op"]=="prim::GetAttr":
         
             name = el["name"]
             key = get_param_name( name )
@@ -720,57 +636,115 @@ def c_code_generator( obj, model, rand_flag=0 ):
             
             if rand_flag < 0:  # 210728 mod delete
                 text+="""
-            forward_result[{i}] = new VariableTensor({k});""".format(i=i,k=key)
+            forward_result[{i}] = new VariableTensor( {k} );""".format(i=i,k=key)
             
             elif rand_flag == 0:
                 skey = name.split("/")
                 #print("split: ",skey)
                 if skey[2] == "weight":
-                    sh1 = attr.shape[0]
-                    sh2 = attr.shape[1]
-                    text+="""
+                    #print('attr',len(attr.shape))
+                    w_len = len(attr.shape)
+                    #print(attr)
+                    if w_len == 2:  # 210929 add
+                        sh1 = attr.shape[0]
+                        sh2 = attr.shape[1]
+                        text+="""
             Tensor::shape_type shape = {{{sh1},{sh2}}};
             {k}.reshape( shape );
-            forward_result[{i}] = new VariableTensor({k});""".format(i=i,k=key,sh1=sh1,sh2=sh2)
+            forward_result[{i}] = new VariableTensor( {k} );""".format(i=i,k=key,sh1=sh1,sh2=sh2)
+                    elif w_len == 1: # 210929 add
+                        sh1 = attr.shape[0]
+                        text+="""
+            Tensor::shape_type shape = {{{sh1}}};
+            {k}.reshape( shape );
+            forward_result[{i}] = new VariableTensor( {k} );""".format(i=i,k=key,sh1=sh1)
+                    elif w_len == 4: # 210929 mod
+                        sh1 = attr.shape[0]
+                        sh2 = attr.shape[1]
+                        sh3 = attr.shape[2]
+                        sh4 = attr.shape[3]
+                        text+="""
+            Tensor::shape_type shape = {{{sh1},{sh2},{sh3},{sh4}}};
+            {k}.reshape( shape );
+            forward_result[{i}] = new VariableTensor( {k} );""".format(i=i,k=key,sh1=sh1,sh2=sh2,sh3=sh3,sh4=sh4)
                 elif skey[2] == "bias":
                     sh1 = attr.shape[0]
                     text+="""
             Tensor::shape_type shape = {{{sh1}}};
-            forward_result[{i}] = new VariableTensor({k});""".format(i=i,k=key,sh1=sh1)
-                
+            forward_result[{i}] = new VariableTensor( {k} );""".format(i=i,k=key,sh1=sh1)
+                elif skey[2] == "running_mean":  # 210929 add
+                    sh1 = attr.shape[0]
+                    text+="""
+            Tensor::shape_type shape = {{{sh1}}};
+            forward_result[{i}] = new VariableTensor( {k} );""".format(i=i,k=key,sh1=sh1)
+                elif skey[2] == "running_var":  # 210929 add
+                    sh1 = attr.shape[0]
+                    text+="""
+            Tensor::shape_type shape = {{{sh1}}};
+            forward_result[{i}] = new VariableTensor( {k} );""".format(i=i,k=key,sh1=sh1)
             else:
                 skey = name.split("/")
                 #print("split: ",skey)
+                w_len = len( attr.size() )
                 if skey[2] == "weight":
-                    sh1 = attr.shape[0]
-                    sh2 = attr.shape[1]
-                    text+="""
+                    if w_len == 2:  # 210929 add
+                        sh1 = attr.shape[0]
+                        sh2 = attr.shape[1]
+                        text+="""
             Tensor::shape_type shape = {{{sh1},{sh2}}};
-            double y = sqrt(1.0/(double){sh2});
+            fprec y = sqrt(1.0/(fprec){sh2});
             Tensor t = xt::random::rand(shape,-y,y);
-            forward_result[{i}] = new VariableTensor(t);""".format(i=i,sh1=sh1,sh2=sh2)
+            forward_result[{i}] = new VariableTensor( t );""".format(i=i,sh1=sh1,sh2=sh2)
+                    elif w_len == 1: # 210929 add
+                        sh1 = attr.shape[0]
+                        text+="""
+            Tensor::shape_type shape = {{{sh1}}};
+            fprec y = sqrt(1.0/(fprec){sh1});
+            Tensor t = xt::random::rand(shape,-y,y);
+            forward_result[{i}] = new VariableTensor( t );""".format(i=i,sh1=sh1)
+                    elif w_len == 4: # 210929 mod
+                        sh1 = attr.shape[0]
+                        sh2 = attr.shape[1]
+                        sh3 = attr.shape[2]
+                        sh4 = attr.shape[3]
+                        text+="""
+            Tensor::shape_type shape = {{{sh1},{sh2},{sh3},{sh4}}};
+            Tensor t = xt::random::rand(shape,-y,y);
+            forward_result[{i}] = new VariableTensor( t );""".format(i=i,sh1=sh1,sh2=sh2,sh3=sh3,sh4=sh4)
                 elif skey[2] == "bias":
                     sh1 = attr.shape[0]
                     text+="""
             Tensor::shape_type shape = {{{sh1}}};
-            double y = sqrt(1.0/(double){sh1});
+            fprec y = sqrt(1.0/(double){sh1});
             Tensor t = xt::random::rand(shape,-y,y);
-            forward_result[{i}] = new VariableTensor(t);""".format(i=i,sh1=sh1)
+            forward_result[{i}] = new VariableTensor( t );""".format(i=i,sh1=sh1)
+                elif skey[2] == "running_mean":  # 210929 add
+                    sh1 = attr.shape[0]
+                    text+="""
+            Tensor t = xt::zeros<fprec>({sh1});
+            forward_result[{i}] = new VariableTensor( t );""".format(i=i)
+                elif skey[2] == "running_var":  # 210929 add
+                    sh1 = attr.shape[0]
+                    text+="""
+            Tensor t = xt::ones<fprec>({sh1});
+            forward_result[{i}] = new VariableTensor( t );""".format(i=i)
         
         else:
             ###
             ### standard operators
             ###
+            out_id = el["output_id"]  # 2101004 add
+            
             if el["op"]=="aten::mul":
                 text+="""
             MulOp* op = new MulOp();"""
             elif el["op"]=="aten::add":
                 text+="""
             AddOp* op = new AddOp();"""
-            elif el["op"]=="aten::sub":    # 210712 add below mari
+            elif el["op"]=="aten::sub":
                 text+="""
             SubOp* op = new SubOp();"""
-            elif el["op"]=="aten::rsub":   # 210824 add below mari
+            elif el["op"]=="aten::rsub":
                 text+="""
             RsubOp* op = new RsubOp();"""
             elif el["op"]=="aten::div":     
@@ -785,7 +759,7 @@ def c_code_generator( obj, model, rand_flag=0 ):
             elif el["op"]=="aten::exp":
                 text+="""
             ExpOp* op = new ExpOp();"""
-            elif el["op"]=="aten::log":     # 210824 add mari
+            elif el["op"]=="aten::log":
                 text+="""
             LogOp* op = new LogOp();"""
             elif el["op"]=="aten::matmul":
@@ -815,7 +789,7 @@ def c_code_generator( obj, model, rand_flag=0 ):
             elif el["op"]=="aten::relu":
                 text+="""
             ReluOp* op = new ReluOp();"""
-            elif el["op"]=="aten::elu":  # 210806 add below mari
+            elif el["op"]=="aten::elu":
                 text+="""
             EluOp* op = new EluOp();"""
             elif el["op"]=="aten::leaky_relu":
@@ -823,7 +797,10 @@ def c_code_generator( obj, model, rand_flag=0 ):
             LeakyReluOp* op = new LeakyReluOp();"""
             elif el["op"]=="aten::hardtanh":
                 text+="""
-            HardTanhOp* op = new HardTanhOp();"""  
+            HardTanhOp* op = new HardTanhOp();"""
+            elif el["op"]=="aten::softplus":  # 211004 add
+                text+="""
+            SoftplusOp* op = new SoftplusOp();"""
             elif el["op"]=="aten::softmax":
                 text+="""
             SoftmaxOp* op = new SoftmaxOp();"""
@@ -833,19 +810,25 @@ def c_code_generator( obj, model, rand_flag=0 ):
             elif el["op"]=="aten::tanh":
                 text+="""
             TanhOp* op = new TanhOp();"""
-            elif el["op"]=="aten::randn":  #210806 add below mari
+            elif el["op"]=="aten::randn":
                 text+="""
             RandnOp* op = new RandnOp();"""
-            elif el["op"]=="aten::normal":  # 210920 add
+            elif el["op"]=="aten::normal":
                 text+="""
             NormalOp* op = new NormalOp();"""
+            elif el["op"]=="aten::batch_norm":  #211004 add
+                text+="""
+            BatchNormOp* op = new BatchNormOp();"""
+            elif el["op"]=="aten::dropout":  #211004 add
+                text+="""
+            DropoutOp* op = new DropoutOp();"""
             elif el["op"]=="aten::mse_loss":
                 text+="""
             MseLossOp* op = new MseLossOp();"""
             elif el["op"]=="aten::cross_entropy_loss":
                 text+="""
             CrossEntropyLossOp* op = new CrossEntropyLossOp();"""
-            elif el["op"]=="aten::binary_cross_entropy":  # 210920 add
+            elif el["op"]=="aten::binary_cross_entropy":
                 text+="""
             BCELossOp* op = new BCELossOp();"""
             elif el["op"]=="aten::nll_loss_nd":  #210824 yet
@@ -854,16 +837,16 @@ def c_code_generator( obj, model, rand_flag=0 ):
             elif el["op"]=="aten::size":
                 text+="""
             SizeOp* op = new SizeOp();"""
-            elif el["op"]=="aten::zeros":  # 210920 add
+            elif el["op"]=="aten::zeros":
                 text+="""
             ZerosOp* op = new ZerosOp();"""
-            elif el["op"]=="aten::zeros_like":  # 210920 add
+            elif el["op"]=="aten::zeros_like":
                 text+="""
             FullLikeOp* op = new FullLikeOp( 0.0 );"""
-            elif el["op"]=="aten::ones":   # 210920 add
+            elif el["op"]=="aten::ones":
                 text+="""
             OnesOp* op = new OnesOp();"""
-            elif el["op"]=="aten::ones_like":   # 210920 add
+            elif el["op"]=="aten::ones_like":
                 text+="""
             FullLikeOp* op = new FullLikeOp( 1.0 );"""
             elif el["op"]=="aten::expand":
@@ -875,7 +858,10 @@ def c_code_generator( obj, model, rand_flag=0 ):
             elif el["op"]=="aten::Int":
                 text+="""
             MoveOp* op = new MoveOp( "Int" );"""
-            elif el["op"]=="aten::broadcast_tensors":  # 210920 mod
+            elif el["op"]=="aten::view":  # 211004 add
+                text+="""
+            ViewOp* op = new ViewOp();"""
+            elif el["op"]=="aten::broadcast_tensors":
                 text+="""
             BroadcastTensorsOp* op = new BroadcastTensorsOp();"""
             elif el["op"]=="aten::to":
@@ -883,14 +869,14 @@ def c_code_generator( obj, model, rand_flag=0 ):
             ListConstructOp* op = new ListConstructOp( "to" );"""
             elif el["op"]=="aten::detach":
                 text+="""
-            ListUnpackOp* op = new ListUnpackOp( "detach", {k} );""".format(k=el["output_id"])
+            ListUnpackOp* op = new ListUnpackOp( "detach", {k} );""".format(k=out_id)
             elif el["op"]=="prim::ListConstruct":
                 text+="""
             ListConstructOp* op = new ListConstructOp();"""
             elif el["op"]=="prim::ListUnpack":
                 #print("unpack", el["output_id"])
                 text+="""
-            ListUnpackOp* op = new ListUnpackOp( {k} );""".format(k=el["output_id"])
+            ListUnpackOp* op = new ListUnpackOp( {k} );""".format(k=out_id)
             else:
                 #assert False, "unknown op:"+el["op"]
                 text+="""
@@ -955,6 +941,8 @@ def c_code_generator( obj, model, rand_flag=0 ):
     """
     return all_text
     
+    
+# convert json file to parameter, cpp, make file
 def convert_json( project, folder, model, input_x, json_path, rand_flag=0 ):
 
     cpp_fname   = project + ".cpp"
@@ -969,7 +957,7 @@ def convert_json( project, folder, model, input_x, json_path, rand_flag=0 ):
     obj = json.load(fp)
 
     # save parameter file
-    code1 = c_param_generator( obj, model, input_x )
+    code1 = c_param_generator( project, obj, model, input_x )
     if len(code1) > 0:
        print( "[PARAM]", param_path )
        ofparam = open( param_path, "w" )
@@ -978,7 +966,7 @@ def convert_json( project, folder, model, input_x, json_path, rand_flag=0 ):
        param_fname=""
 
     #save cpp file
-    code2 = c_code_generator( obj, model, rand_flag )
+    code2 = c_code_generator( project, obj, model, rand_flag )
 
     print("[CPP] ", cpp_path )
     ofp = open( cpp_path, "w" )

@@ -1,4 +1,7 @@
 
+    //
+    //  mse1
+    //
     #include<stdio.h>
     #include<iostream>
     #include<fstream>
@@ -36,13 +39,13 @@
         {
             Tensor::shape_type shape = {64,2};
             fc1_weight.reshape( shape );
-            forward_result[1] = new VariableTensor(fc1_weight);
+            forward_result[1] = new VariableTensor( fc1_weight );
         }
         
         // {'name': 'Net/Linear[fc1]/bias/63', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [3], 'sorted_id': 2}
         {
             Tensor::shape_type shape = {64};
-            forward_result[2] = new VariableTensor(fc1_bias);
+            forward_result[2] = new VariableTensor( fc1_bias );
         }
         
         // {'name': 'Net/Linear[fc1]/input.1', 'op': 'aten::linear', 'in': [0, 1, 2], 'output_id': 0, 'shape': [100, 64], 'out': [4], 'sorted_id': 3}
@@ -69,13 +72,13 @@
         {
             Tensor::shape_type shape = {32,64};
             fc2_weight.reshape( shape );
-            forward_result[5] = new VariableTensor(fc2_weight);
+            forward_result[5] = new VariableTensor( fc2_weight );
         }
         
         // {'name': 'Net/Linear[fc2]/bias/66', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [7], 'sorted_id': 6}
         {
             Tensor::shape_type shape = {32};
-            forward_result[6] = new VariableTensor(fc2_bias);
+            forward_result[6] = new VariableTensor( fc2_bias );
         }
         
         // {'name': 'Net/Linear[fc2]/input.5', 'op': 'aten::linear', 'in': [4, 5, 6], 'output_id': 0, 'shape': [100, 32], 'out': [8], 'sorted_id': 7}
@@ -102,13 +105,13 @@
         {
             Tensor::shape_type shape = {1,32};
             fc3_weight.reshape( shape );
-            forward_result[9] = new VariableTensor(fc3_weight);
+            forward_result[9] = new VariableTensor( fc3_weight );
         }
         
         // {'name': 'Net/Linear[fc3]/bias/69', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [11], 'sorted_id': 10}
         {
             Tensor::shape_type shape = {1};
-            forward_result[10] = new VariableTensor(fc3_bias);
+            forward_result[10] = new VariableTensor( fc3_bias );
         }
         
         // {'name': 'Net/Linear[fc3]/input.9', 'op': 'aten::linear', 'in': [8, 9, 10], 'output_id': 0, 'shape': [100, 1], 'out': [13], 'sorted_id': 11}

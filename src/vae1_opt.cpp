@@ -780,7 +780,7 @@
             update_params( forward_result, NL, lr );
             exec_zerograd( forward_result, NL );
         }
-        cout<<"total_loss "<<epoch<<" loss-"<<total_loss<<endl;
+        cout<<"total_loss "<<epoch<<" loss - "<<total_loss<<endl;
         
         
         input_var.output = indata;
