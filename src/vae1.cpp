@@ -23,31 +23,27 @@
     extern Tensor  fc4_weight;
     extern Tensor  fc4_bias;
     
-    int main()
-    {
-        vector<MCTNode*> forward_result(75);
+    bool train_mode = true;
     
-        // input data
-        Tensor::shape_type shape = {32,64};
-        xin.reshape( shape );
-        VariableTensor input_var(xin);
-        
-        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [32, 64], 'out': [3, 40, 37], 'sorted_id': 0}
+    void defineOp( vector<MCTNode*>& forward_result, VariableTensor &input_var )
+    {
+        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [32, 64], 'out': [43, 46, 3], 'sorted_id': 0}
         {
             Tensor::shape_type shape = {32,64};
             forward_result[0] = &input_var;
         }
         
-        // {'name': 'Net/Linear[fc1]/weight/146', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [3], 'sorted_id': 1}
+        // {'name': 'Net/Linear[fc1]/weight/141', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [3], 'sorted_id': 1}
         {
             Tensor::shape_type shape = {16,64};
             fc1_weight.reshape( shape );
             forward_result[1] = new VariableTensor( fc1_weight );
         }
         
-        // {'name': 'Net/Linear[fc1]/bias/145', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [3], 'sorted_id': 2}
+        // {'name': 'Net/Linear[fc1]/bias/140', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [3], 'sorted_id': 2}
         {
             Tensor::shape_type shape = {16};
+            fc1_bias.reshape( shape );
             forward_result[2] = new VariableTensor( fc1_bias );
         }
         
@@ -62,7 +58,7 @@
             op->set_inputs( forward_result[2] );
         }
         
-        // {'name': 'Net/input.3', 'op': 'aten::relu', 'in': [3], 'output_id': 0, 'shape': [32, 16], 'out': [18, 7], 'sorted_id': 4}
+        // {'name': 'Net/input.3', 'op': 'aten::relu', 'in': [3], 'output_id': 0, 'shape': [32, 16], 'out': [7, 24], 'sorted_id': 4}
         {
             Tensor::shape_type shape = {32,16};
             ReluOp* op = new ReluOp();
@@ -71,20 +67,21 @@
             op->set_inputs( forward_result[3] );
         }
         
-        // {'name': 'Net/Linear[fc2_mean]/weight/149', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [7], 'sorted_id': 5}
+        // {'name': 'Net/Linear[fc2_mean]/weight/144', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [7], 'sorted_id': 5}
         {
             Tensor::shape_type shape = {2,16};
             fc2_mean_weight.reshape( shape );
             forward_result[5] = new VariableTensor( fc2_mean_weight );
         }
         
-        // {'name': 'Net/Linear[fc2_mean]/bias/148', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [7], 'sorted_id': 6}
+        // {'name': 'Net/Linear[fc2_mean]/bias/143', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [7], 'sorted_id': 6}
         {
             Tensor::shape_type shape = {2};
+            fc2_mean_bias.reshape( shape );
             forward_result[6] = new VariableTensor( fc2_mean_bias );
         }
         
-        // {'name': 'Net/Linear[fc2_mean]/mean', 'op': 'aten::linear', 'in': [4, 5, 6], 'output_id': 0, 'shape': [32, 2], 'out': [24, 59], 'sorted_id': 7}
+        // {'name': 'Net/Linear[fc2_mean]/mean', 'op': 'aten::linear', 'in': [4, 5, 6], 'output_id': 0, 'shape': [32, 2], 'out': [30, 65, 9, 13], 'sorted_id': 7}
         {
             Tensor::shape_type shape = {32,2};
             LinearOp* op = new LinearOp();
@@ -95,537 +92,593 @@
             op->set_inputs( forward_result[6] );
         }
         
-        // {'name': 'Net/44', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 32.0, 'out': [10], 'sorted_id': 8}
+        // {'name': 'Net/33', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [9], 'sorted_id': 8}
         {
-            Tensor c = (fprec)32.0;
+            Tensor c = (fprec)0.0;
             forward_result[8] = new VariableTensor( c, false );
         }
         
-        // {'name': 'Net/45', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 2.0, 'out': [10], 'sorted_id': 9}
+        // {'name': 'Net/34', 'op': 'aten::size', 'in': [7, 8], 'output_id': 0, 'shape': [], 'out': [10], 'sorted_id': 9}
         {
-            Tensor c = (fprec)2.0;
-            forward_result[9] = new VariableTensor( c, false );
+            SizeOp* op = new SizeOp();
+            forward_result[9] = op;
+            
+            op->set_inputs( forward_result[7] );
+            op->set_inputs( forward_result[8] );
         }
         
-        // {'name': 'Net/46', 'op': 'prim::ListConstruct', 'in': [8, 9], 'output_id': 0, 'shape': [], 'out': [15], 'sorted_id': 10}
+        // {'name': 'Net/35', 'op': 'prim::NumToTensor', 'in': [9], 'output_id': 0, 'shape': [], 'out': [11], 'sorted_id': 10}
         {
-            ListConstructOp* op = new ListConstructOp();
+            NumToTensorOp* op = new NumToTensorOp();
             forward_result[10] = op;
             
-            op->set_inputs( forward_result[8] );
             op->set_inputs( forward_result[9] );
         }
         
-        // {'name': 'Net/47', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 6.0, 'out': [15], 'sorted_id': 11}
+        // {'name': 'Net/39', 'op': 'aten::Int', 'in': [10], 'output_id': 0, 'shape': [], 'out': [16], 'sorted_id': 11}
         {
-            Tensor c = (fprec)6.0;
-            forward_result[11] = new VariableTensor( c, false );
-        }
-        
-        // {'name': 'Net/48', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'out': [15], 'sorted_id': 12}
-        {
-            forward_result[12] = NULL;
-        }
-        
-        // {'name': 'Net/49', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'out': [15], 'sorted_id': 13}
-        {
-            forward_result[13] = NULL;
-        }
-        
-        // {'name': 'Net/50', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [15], 'sorted_id': 14}
-        {
-            Tensor c = (fprec)0.0;
-            forward_result[14] = new VariableTensor( c, false );
-        }
-        
-        // {'name': 'Net/eps', 'op': 'aten::randn', 'in': [10, 11, 12, 13, 14], 'output_id': 0, 'shape': [32, 2], 'out': [22], 'sorted_id': 15}
-        {
-            Tensor::shape_type shape = {32,2};
-            RandnOp* op = new RandnOp();
-            forward_result[15] = op;
+            IntOp* op = new IntOp();
+            forward_result[11] = op;
             
             op->set_inputs( forward_result[10] );
-            op->set_inputs( forward_result[11] );
+        }
+        
+        // {'name': 'Net/36', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [13], 'sorted_id': 12}
+        {
+            Tensor c = (fprec)1.0;
+            forward_result[12] = new VariableTensor( c, false );
+        }
+        
+        // {'name': 'Net/37', 'op': 'aten::size', 'in': [7, 12], 'output_id': 0, 'shape': [], 'out': [14], 'sorted_id': 13}
+        {
+            SizeOp* op = new SizeOp();
+            forward_result[13] = op;
+            
+            op->set_inputs( forward_result[7] );
             op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Net/38', 'op': 'prim::NumToTensor', 'in': [13], 'output_id': 0, 'shape': [], 'out': [15], 'sorted_id': 14}
+        {
+            NumToTensorOp* op = new NumToTensorOp();
+            forward_result[14] = op;
+            
             op->set_inputs( forward_result[13] );
+        }
+        
+        // {'name': 'Net/40', 'op': 'aten::Int', 'in': [14], 'output_id': 0, 'shape': [], 'out': [16], 'sorted_id': 15}
+        {
+            IntOp* op = new IntOp();
+            forward_result[15] = op;
+            
             op->set_inputs( forward_result[14] );
         }
         
-        // {'name': 'Net/Linear[fc2_var]/weight/152', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [18], 'sorted_id': 16}
+        // {'name': 'Net/41', 'op': 'prim::ListConstruct', 'in': [11, 15], 'output_id': 0, 'shape': [], 'out': [21], 'sorted_id': 16}
         {
-            Tensor::shape_type shape = {2,16};
-            fc2_var_weight.reshape( shape );
-            forward_result[16] = new VariableTensor( fc2_var_weight );
-        }
-        
-        // {'name': 'Net/Linear[fc2_var]/bias/151', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [18], 'sorted_id': 17}
-        {
-            Tensor::shape_type shape = {2};
-            forward_result[17] = new VariableTensor( fc2_var_bias );
-        }
-        
-        // {'name': 'Net/Linear[fc2_var]/log_var', 'op': 'aten::linear', 'in': [4, 16, 17], 'output_id': 0, 'shape': [32, 2], 'out': [20, 57, 62], 'sorted_id': 18}
-        {
-            Tensor::shape_type shape = {32,2};
-            LinearOp* op = new LinearOp();
-            forward_result[18] = op;
+            ListConstructOp* op = new ListConstructOp();
+            forward_result[16] = op;
             
-            op->set_inputs( forward_result[4] );
-            op->set_inputs( forward_result[16] );
-            op->set_inputs( forward_result[17] );
+            op->set_inputs( forward_result[11] );
+            op->set_inputs( forward_result[15] );
         }
         
-        // {'name': 'Net/52', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.5, 'out': [20], 'sorted_id': 19}
+        // {'name': 'Net/42', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 6.0, 'out': [21], 'sorted_id': 17}
         {
-            Tensor c = (fprec)0.5;
-            forward_result[19] = new VariableTensor( c, false );
+            Tensor c = (fprec)6.0;
+            forward_result[17] = new VariableTensor( c, false );
         }
         
-        // {'name': 'Net/53', 'op': 'aten::mul', 'in': [18, 19], 'output_id': 0, 'shape': [32, 2], 'out': [21], 'sorted_id': 20}
+        // {'name': 'Net/43', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'out': [21], 'sorted_id': 18}
+        {
+            forward_result[18] = NULL;
+        }
+        
+        // {'name': 'Net/44', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'out': [21], 'sorted_id': 19}
+        {
+            forward_result[19] = NULL;
+        }
+        
+        // {'name': 'Net/45', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [21], 'sorted_id': 20}
+        {
+            Tensor c = (fprec)0.0;
+            forward_result[20] = new VariableTensor( c, false );
+        }
+        
+        // {'name': 'Net/eps', 'op': 'aten::randn', 'in': [16, 17, 18, 19, 20], 'output_id': 0, 'shape': [32, 2], 'out': [28], 'sorted_id': 21}
         {
             Tensor::shape_type shape = {32,2};
-            MulOp* op = new MulOp();
-            forward_result[20] = op;
-            
-            op->set_inputs( forward_result[18] );
-            op->set_inputs( forward_result[19] );
-        }
-        
-        // {'name': 'Net/54', 'op': 'aten::exp', 'in': [20], 'output_id': 0, 'shape': [32, 2], 'out': [22], 'sorted_id': 21}
-        {
-            Tensor::shape_type shape = {32,2};
-            ExpOp* op = new ExpOp();
+            RandnOp* op = new RandnOp();
             forward_result[21] = op;
             
+            op->set_inputs( forward_result[16] );
+            op->set_inputs( forward_result[17] );
+            op->set_inputs( forward_result[18] );
+            op->set_inputs( forward_result[19] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/55', 'op': 'aten::mul', 'in': [15, 21], 'output_id': 0, 'shape': [32, 2], 'out': [24], 'sorted_id': 22}
+        // {'name': 'Net/Linear[fc2_var]/weight/147', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [24], 'sorted_id': 22}
         {
-            Tensor::shape_type shape = {32,2};
-            MulOp* op = new MulOp();
-            forward_result[22] = op;
-            
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[21] );
+            Tensor::shape_type shape = {2,16};
+            fc2_var_weight.reshape( shape );
+            forward_result[22] = new VariableTensor( fc2_var_weight );
         }
         
-        // {'name': 'Net/56', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [24], 'sorted_id': 23}
+        // {'name': 'Net/Linear[fc2_var]/bias/146', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [24], 'sorted_id': 23}
         {
-            Tensor c = (fprec)1.0;
-            forward_result[23] = new VariableTensor( c, false );
+            Tensor::shape_type shape = {2};
+            fc2_var_bias.reshape( shape );
+            forward_result[23] = new VariableTensor( fc2_var_bias );
         }
         
-        // {'name': 'Net/input.5', 'op': 'aten::add', 'in': [7, 22, 23], 'output_id': 0, 'shape': [32, 2], 'out': [27], 'sorted_id': 24}
+        // {'name': 'Net/Linear[fc2_var]/log_var', 'op': 'aten::linear', 'in': [4, 22, 23], 'output_id': 0, 'shape': [32, 2], 'out': [26, 63, 68], 'sorted_id': 24}
         {
             Tensor::shape_type shape = {32,2};
-            AddOp* op = new AddOp();
+            LinearOp* op = new LinearOp();
             forward_result[24] = op;
             
-            op->set_inputs( forward_result[7] );
+            op->set_inputs( forward_result[4] );
             op->set_inputs( forward_result[22] );
             op->set_inputs( forward_result[23] );
         }
         
-        // {'name': 'Net/Linear[fc3]/weight/155', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [27], 'sorted_id': 25}
+        // {'name': 'Net/47', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.5, 'out': [26], 'sorted_id': 25}
         {
-            Tensor::shape_type shape = {16,2};
-            fc3_weight.reshape( shape );
-            forward_result[25] = new VariableTensor( fc3_weight );
+            Tensor c = (fprec)0.5;
+            forward_result[25] = new VariableTensor( c, false );
         }
         
-        // {'name': 'Net/Linear[fc3]/bias/154', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [27], 'sorted_id': 26}
+        // {'name': 'Net/48', 'op': 'aten::mul', 'in': [24, 25], 'output_id': 0, 'shape': [32, 2], 'out': [27], 'sorted_id': 26}
         {
-            Tensor::shape_type shape = {16};
-            forward_result[26] = new VariableTensor( fc3_bias );
-        }
-        
-        // {'name': 'Net/Linear[fc3]/input.7', 'op': 'aten::linear', 'in': [24, 25, 26], 'output_id': 0, 'shape': [32, 16], 'out': [28], 'sorted_id': 27}
-        {
-            Tensor::shape_type shape = {32,16};
-            LinearOp* op = new LinearOp();
-            forward_result[27] = op;
+            Tensor::shape_type shape = {32,2};
+            MulOp* op = new MulOp();
+            forward_result[26] = op;
             
             op->set_inputs( forward_result[24] );
             op->set_inputs( forward_result[25] );
+        }
+        
+        // {'name': 'Net/49', 'op': 'aten::exp', 'in': [26], 'output_id': 0, 'shape': [32, 2], 'out': [28], 'sorted_id': 27}
+        {
+            Tensor::shape_type shape = {32,2};
+            ExpOp* op = new ExpOp();
+            forward_result[27] = op;
+            
             op->set_inputs( forward_result[26] );
         }
         
-        // {'name': 'Net/input', 'op': 'aten::relu', 'in': [27], 'output_id': 0, 'shape': [32, 16], 'out': [31], 'sorted_id': 28}
+        // {'name': 'Net/50', 'op': 'aten::mul', 'in': [21, 27], 'output_id': 0, 'shape': [32, 2], 'out': [30], 'sorted_id': 28}
         {
-            Tensor::shape_type shape = {32,16};
-            ReluOp* op = new ReluOp();
+            Tensor::shape_type shape = {32,2};
+            MulOp* op = new MulOp();
             forward_result[28] = op;
             
+            op->set_inputs( forward_result[21] );
             op->set_inputs( forward_result[27] );
         }
         
-        // {'name': 'Net/Linear[fc4]/weight/158', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [31], 'sorted_id': 29}
+        // {'name': 'Net/51', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [30], 'sorted_id': 29}
+        {
+            Tensor c = (fprec)1.0;
+            forward_result[29] = new VariableTensor( c, false );
+        }
+        
+        // {'name': 'Net/input.5', 'op': 'aten::add', 'in': [7, 28, 29], 'output_id': 0, 'shape': [32, 2], 'out': [33], 'sorted_id': 30}
+        {
+            Tensor::shape_type shape = {32,2};
+            AddOp* op = new AddOp();
+            forward_result[30] = op;
+            
+            op->set_inputs( forward_result[7] );
+            op->set_inputs( forward_result[28] );
+            op->set_inputs( forward_result[29] );
+        }
+        
+        // {'name': 'Net/Linear[fc3]/weight/150', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [33], 'sorted_id': 31}
+        {
+            Tensor::shape_type shape = {16,2};
+            fc3_weight.reshape( shape );
+            forward_result[31] = new VariableTensor( fc3_weight );
+        }
+        
+        // {'name': 'Net/Linear[fc3]/bias/149', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [33], 'sorted_id': 32}
+        {
+            Tensor::shape_type shape = {16};
+            fc3_bias.reshape( shape );
+            forward_result[32] = new VariableTensor( fc3_bias );
+        }
+        
+        // {'name': 'Net/Linear[fc3]/input.7', 'op': 'aten::linear', 'in': [30, 31, 32], 'output_id': 0, 'shape': [32, 16], 'out': [34], 'sorted_id': 33}
+        {
+            Tensor::shape_type shape = {32,16};
+            LinearOp* op = new LinearOp();
+            forward_result[33] = op;
+            
+            op->set_inputs( forward_result[30] );
+            op->set_inputs( forward_result[31] );
+            op->set_inputs( forward_result[32] );
+        }
+        
+        // {'name': 'Net/input', 'op': 'aten::relu', 'in': [33], 'output_id': 0, 'shape': [32, 16], 'out': [37], 'sorted_id': 34}
+        {
+            Tensor::shape_type shape = {32,16};
+            ReluOp* op = new ReluOp();
+            forward_result[34] = op;
+            
+            op->set_inputs( forward_result[33] );
+        }
+        
+        // {'name': 'Net/Linear[fc4]/weight/153', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [37], 'sorted_id': 35}
         {
             Tensor::shape_type shape = {64,16};
             fc4_weight.reshape( shape );
-            forward_result[29] = new VariableTensor( fc4_weight );
+            forward_result[35] = new VariableTensor( fc4_weight );
         }
         
-        // {'name': 'Net/Linear[fc4]/bias/157', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [31], 'sorted_id': 30}
+        // {'name': 'Net/Linear[fc4]/bias/152', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [37], 'sorted_id': 36}
         {
             Tensor::shape_type shape = {64};
-            forward_result[30] = new VariableTensor( fc4_bias );
+            fc4_bias.reshape( shape );
+            forward_result[36] = new VariableTensor( fc4_bias );
         }
         
-        // {'name': 'Net/Linear[fc4]/159', 'op': 'aten::linear', 'in': [28, 29, 30], 'output_id': 0, 'shape': [32, 64], 'out': [32], 'sorted_id': 31}
+        // {'name': 'Net/Linear[fc4]/154', 'op': 'aten::linear', 'in': [34, 35, 36], 'output_id': 0, 'shape': [32, 64], 'out': [38], 'sorted_id': 37}
         {
             Tensor::shape_type shape = {32,64};
             LinearOp* op = new LinearOp();
-            forward_result[31] = op;
-            
-            op->set_inputs( forward_result[28] );
-            op->set_inputs( forward_result[29] );
-            op->set_inputs( forward_result[30] );
-        }
-        
-        // {'name': 'Net/y', 'op': 'aten::sigmoid', 'in': [31], 'output_id': 0, 'shape': [32, 64], 'out': [35, 43], 'sorted_id': 32}
-        {
-            Tensor::shape_type shape = {32,64};
-            SigmoidOp* op = new SigmoidOp();
-            forward_result[32] = op;
-            
-            op->set_inputs( forward_result[31] );
-        }
-        
-        // {'name': 'Net/62', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1e-07, 'out': [35], 'sorted_id': 33}
-        {
-            Tensor c = (fprec)1e-07;
-            forward_result[33] = new VariableTensor( c, false );
-        }
-        
-        // {'name': 'Net/63', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [35], 'sorted_id': 34}
-        {
-            Tensor c = (fprec)1.0;
-            forward_result[34] = new VariableTensor( c, false );
-        }
-        
-        // {'name': 'Net/64', 'op': 'aten::add', 'in': [32, 33, 34], 'output_id': 0, 'shape': [32, 64], 'out': [36], 'sorted_id': 35}
-        {
-            Tensor::shape_type shape = {32,64};
-            AddOp* op = new AddOp();
-            forward_result[35] = op;
-            
-            op->set_inputs( forward_result[32] );
-            op->set_inputs( forward_result[33] );
-            op->set_inputs( forward_result[34] );
-        }
-        
-        // {'name': 'Net/65', 'op': 'aten::log', 'in': [35], 'output_id': 0, 'shape': [32, 64], 'out': [37], 'sorted_id': 36}
-        {
-            Tensor::shape_type shape = {32,64};
-            LogOp* op = new LogOp();
-            forward_result[36] = op;
-            
-            op->set_inputs( forward_result[35] );
-        }
-        
-        // {'name': 'Net/66', 'op': 'aten::mul', 'in': [0, 36], 'output_id': 0, 'shape': [32, 64], 'out': [50], 'sorted_id': 37}
-        {
-            Tensor::shape_type shape = {32,64};
-            MulOp* op = new MulOp();
             forward_result[37] = op;
             
-            op->set_inputs( forward_result[0] );
+            op->set_inputs( forward_result[34] );
+            op->set_inputs( forward_result[35] );
             op->set_inputs( forward_result[36] );
         }
         
-        // {'name': 'Net/67', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [40], 'sorted_id': 38}
+        // {'name': 'Net/y', 'op': 'aten::sigmoid', 'in': [37], 'output_id': 0, 'shape': [32, 64], 'out': [41, 49], 'sorted_id': 38}
         {
-            Tensor c = (fprec)1.0;
-            forward_result[38] = new VariableTensor( c, false );
+            Tensor::shape_type shape = {32,64};
+            SigmoidOp* op = new SigmoidOp();
+            forward_result[38] = op;
+            
+            op->set_inputs( forward_result[37] );
         }
         
-        // {'name': 'Net/68', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [40], 'sorted_id': 39}
+        // {'name': 'Net/57', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1e-07, 'out': [41], 'sorted_id': 39}
         {
-            Tensor c = (fprec)1.0;
+            Tensor c = (fprec)1e-07;
             forward_result[39] = new VariableTensor( c, false );
         }
         
-        // {'name': 'Net/69', 'op': 'aten::rsub', 'in': [0, 38, 39], 'output_id': 0, 'shape': [32, 64], 'out': [48], 'sorted_id': 40}
+        // {'name': 'Net/58', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [41], 'sorted_id': 40}
+        {
+            Tensor c = (fprec)1.0;
+            forward_result[40] = new VariableTensor( c, false );
+        }
+        
+        // {'name': 'Net/59', 'op': 'aten::add', 'in': [38, 39, 40], 'output_id': 0, 'shape': [32, 64], 'out': [42], 'sorted_id': 41}
         {
             Tensor::shape_type shape = {32,64};
-            RsubOp* op = new RsubOp();
-            forward_result[40] = op;
+            AddOp* op = new AddOp();
+            forward_result[41] = op;
             
-            op->set_inputs( forward_result[0] );
             op->set_inputs( forward_result[38] );
             op->set_inputs( forward_result[39] );
+            op->set_inputs( forward_result[40] );
         }
         
-        // {'name': 'Net/70', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [43], 'sorted_id': 41}
-        {
-            Tensor c = (fprec)1.0;
-            forward_result[41] = new VariableTensor( c, false );
-        }
-        
-        // {'name': 'Net/71', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [43], 'sorted_id': 42}
-        {
-            Tensor c = (fprec)1.0;
-            forward_result[42] = new VariableTensor( c, false );
-        }
-        
-        // {'name': 'Net/72', 'op': 'aten::rsub', 'in': [32, 41, 42], 'output_id': 0, 'shape': [32, 64], 'out': [46], 'sorted_id': 43}
+        // {'name': 'Net/60', 'op': 'aten::log', 'in': [41], 'output_id': 0, 'shape': [32, 64], 'out': [43], 'sorted_id': 42}
         {
             Tensor::shape_type shape = {32,64};
-            RsubOp* op = new RsubOp();
+            LogOp* op = new LogOp();
+            forward_result[42] = op;
+            
+            op->set_inputs( forward_result[41] );
+        }
+        
+        // {'name': 'Net/61', 'op': 'aten::mul', 'in': [0, 42], 'output_id': 0, 'shape': [32, 64], 'out': [56], 'sorted_id': 43}
+        {
+            Tensor::shape_type shape = {32,64};
+            MulOp* op = new MulOp();
             forward_result[43] = op;
             
-            op->set_inputs( forward_result[32] );
-            op->set_inputs( forward_result[41] );
+            op->set_inputs( forward_result[0] );
             op->set_inputs( forward_result[42] );
         }
         
-        // {'name': 'Net/73', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1e-07, 'out': [46], 'sorted_id': 44}
+        // {'name': 'Net/62', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [46], 'sorted_id': 44}
         {
-            Tensor c = (fprec)1e-07;
+            Tensor c = (fprec)1.0;
             forward_result[44] = new VariableTensor( c, false );
         }
         
-        // {'name': 'Net/74', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [46], 'sorted_id': 45}
+        // {'name': 'Net/63', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [46], 'sorted_id': 45}
         {
             Tensor c = (fprec)1.0;
             forward_result[45] = new VariableTensor( c, false );
         }
         
-        // {'name': 'Net/75', 'op': 'aten::add', 'in': [43, 44, 45], 'output_id': 0, 'shape': [32, 64], 'out': [47], 'sorted_id': 46}
+        // {'name': 'Net/64', 'op': 'aten::rsub', 'in': [0, 44, 45], 'output_id': 0, 'shape': [32, 64], 'out': [54], 'sorted_id': 46}
         {
             Tensor::shape_type shape = {32,64};
-            AddOp* op = new AddOp();
+            RsubOp* op = new RsubOp();
             forward_result[46] = op;
             
-            op->set_inputs( forward_result[43] );
+            op->set_inputs( forward_result[0] );
             op->set_inputs( forward_result[44] );
             op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/76', 'op': 'aten::log', 'in': [46], 'output_id': 0, 'shape': [32, 64], 'out': [48], 'sorted_id': 47}
-        {
-            Tensor::shape_type shape = {32,64};
-            LogOp* op = new LogOp();
-            forward_result[47] = op;
-            
-            op->set_inputs( forward_result[46] );
-        }
-        
-        // {'name': 'Net/77', 'op': 'aten::mul', 'in': [40, 47], 'output_id': 0, 'shape': [32, 64], 'out': [50], 'sorted_id': 48}
-        {
-            Tensor::shape_type shape = {32,64};
-            MulOp* op = new MulOp();
-            forward_result[48] = op;
-            
-            op->set_inputs( forward_result[40] );
-            op->set_inputs( forward_result[47] );
-        }
-        
-        // {'name': 'Net/78', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [50], 'sorted_id': 49}
+        // {'name': 'Net/65', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [49], 'sorted_id': 47}
         {
             Tensor c = (fprec)1.0;
-            forward_result[49] = new VariableTensor( c, false );
+            forward_result[47] = new VariableTensor( c, false );
         }
         
-        // {'name': 'Net/e', 'op': 'aten::add', 'in': [37, 48, 49], 'output_id': 0, 'shape': [32, 64], 'out': [52], 'sorted_id': 50}
+        // {'name': 'Net/66', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [49], 'sorted_id': 48}
+        {
+            Tensor c = (fprec)1.0;
+            forward_result[48] = new VariableTensor( c, false );
+        }
+        
+        // {'name': 'Net/67', 'op': 'aten::rsub', 'in': [38, 47, 48], 'output_id': 0, 'shape': [32, 64], 'out': [52], 'sorted_id': 49}
+        {
+            Tensor::shape_type shape = {32,64};
+            RsubOp* op = new RsubOp();
+            forward_result[49] = op;
+            
+            op->set_inputs( forward_result[38] );
+            op->set_inputs( forward_result[47] );
+            op->set_inputs( forward_result[48] );
+        }
+        
+        // {'name': 'Net/68', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1e-07, 'out': [52], 'sorted_id': 50}
+        {
+            Tensor c = (fprec)1e-07;
+            forward_result[50] = new VariableTensor( c, false );
+        }
+        
+        // {'name': 'Net/69', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [52], 'sorted_id': 51}
+        {
+            Tensor c = (fprec)1.0;
+            forward_result[51] = new VariableTensor( c, false );
+        }
+        
+        // {'name': 'Net/70', 'op': 'aten::add', 'in': [49, 50, 51], 'output_id': 0, 'shape': [32, 64], 'out': [53], 'sorted_id': 52}
         {
             Tensor::shape_type shape = {32,64};
             AddOp* op = new AddOp();
-            forward_result[50] = op;
-            
-            op->set_inputs( forward_result[37] );
-            op->set_inputs( forward_result[48] );
-            op->set_inputs( forward_result[49] );
-        }
-        
-        // {'name': 'Net/80', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'out': [52], 'sorted_id': 51}
-        {
-            forward_result[51] = NULL;
-        }
-        
-        // {'name': 'Net/81', 'op': 'aten::sum', 'in': [50, 51], 'output_id': 0, 'shape': [], 'out': [54], 'sorted_id': 52}
-        {
-            SumOp*    op = new SumOp();
             forward_result[52] = op;
             
+            op->set_inputs( forward_result[49] );
             op->set_inputs( forward_result[50] );
             op->set_inputs( forward_result[51] );
         }
         
-        // {'name': 'Net/88', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 32.0, 'out': [54], 'sorted_id': 53}
+        // {'name': 'Net/71', 'op': 'aten::log', 'in': [52], 'output_id': 0, 'shape': [32, 64], 'out': [54], 'sorted_id': 53}
         {
-            Tensor c = (fprec)32.0;
-            forward_result[53] = new VariableTensor( c, false );
-        }
-        
-        // {'name': 'Net/e1', 'op': 'aten::div', 'in': [52, 53], 'output_id': 0, 'shape': [], 'out': [72], 'sorted_id': 54}
-        {
-            DivOp* op = new DivOp();
-            forward_result[54] = op;
+            Tensor::shape_type shape = {32,64};
+            LogOp* op = new LogOp();
+            forward_result[53] = op;
             
             op->set_inputs( forward_result[52] );
+        }
+        
+        // {'name': 'Net/72', 'op': 'aten::mul', 'in': [46, 53], 'output_id': 0, 'shape': [32, 64], 'out': [56], 'sorted_id': 54}
+        {
+            Tensor::shape_type shape = {32,64};
+            MulOp* op = new MulOp();
+            forward_result[54] = op;
+            
+            op->set_inputs( forward_result[46] );
             op->set_inputs( forward_result[53] );
         }
         
-        // {'name': 'Net/90', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [57], 'sorted_id': 55}
+        // {'name': 'Net/73', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [56], 'sorted_id': 55}
         {
             Tensor c = (fprec)1.0;
             forward_result[55] = new VariableTensor( c, false );
         }
         
-        // {'name': 'Net/91', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [57], 'sorted_id': 56}
+        // {'name': 'Net/e', 'op': 'aten::add', 'in': [43, 54, 55], 'output_id': 0, 'shape': [32, 64], 'out': [58], 'sorted_id': 56}
         {
-            Tensor c = (fprec)1.0;
-            forward_result[56] = new VariableTensor( c, false );
+            Tensor::shape_type shape = {32,64};
+            AddOp* op = new AddOp();
+            forward_result[56] = op;
+            
+            op->set_inputs( forward_result[43] );
+            op->set_inputs( forward_result[54] );
+            op->set_inputs( forward_result[55] );
         }
         
-        // {'name': 'Net/92', 'op': 'aten::add', 'in': [18, 55, 56], 'output_id': 0, 'shape': [32, 2], 'out': [61], 'sorted_id': 57}
+        // {'name': 'Net/75', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'out': [58], 'sorted_id': 57}
+        {
+            forward_result[57] = NULL;
+        }
+        
+        // {'name': 'Net/76', 'op': 'aten::sum', 'in': [56, 57], 'output_id': 0, 'shape': [], 'out': [60], 'sorted_id': 58}
+        {
+            SumOp*    op = new SumOp();
+            forward_result[58] = op;
+            
+            op->set_inputs( forward_result[56] );
+            op->set_inputs( forward_result[57] );
+        }
+        
+        // {'name': 'Net/83', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 32.0, 'out': [60], 'sorted_id': 59}
+        {
+            Tensor c = (fprec)32.0;
+            forward_result[59] = new VariableTensor( c, false );
+        }
+        
+        // {'name': 'Net/e1', 'op': 'aten::div', 'in': [58, 59], 'output_id': 0, 'shape': [], 'out': [78], 'sorted_id': 60}
+        {
+            DivOp* op = new DivOp();
+            forward_result[60] = op;
+            
+            op->set_inputs( forward_result[58] );
+            op->set_inputs( forward_result[59] );
+        }
+        
+        // {'name': 'Net/85', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [63], 'sorted_id': 61}
+        {
+            Tensor c = (fprec)1.0;
+            forward_result[61] = new VariableTensor( c, false );
+        }
+        
+        // {'name': 'Net/86', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [63], 'sorted_id': 62}
+        {
+            Tensor c = (fprec)1.0;
+            forward_result[62] = new VariableTensor( c, false );
+        }
+        
+        // {'name': 'Net/87', 'op': 'aten::add', 'in': [24, 61, 62], 'output_id': 0, 'shape': [32, 2], 'out': [67], 'sorted_id': 63}
         {
             Tensor::shape_type shape = {32,2};
             AddOp* op = new AddOp();
-            forward_result[57] = op;
+            forward_result[63] = op;
             
-            op->set_inputs( forward_result[18] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[56] );
+            op->set_inputs( forward_result[24] );
+            op->set_inputs( forward_result[61] );
+            op->set_inputs( forward_result[62] );
         }
         
-        // {'name': 'Net/93', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 2.0, 'out': [59], 'sorted_id': 58}
+        // {'name': 'Net/88', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 2.0, 'out': [65], 'sorted_id': 64}
         {
             Tensor c = (fprec)2.0;
-            forward_result[58] = new VariableTensor( c, false );
+            forward_result[64] = new VariableTensor( c, false );
         }
         
-        // {'name': 'Net/94', 'op': 'aten::pow', 'in': [7, 58], 'output_id': 0, 'shape': [32, 2], 'out': [61], 'sorted_id': 59}
+        // {'name': 'Net/89', 'op': 'aten::pow', 'in': [7, 64], 'output_id': 0, 'shape': [32, 2], 'out': [67], 'sorted_id': 65}
         {
             Tensor::shape_type shape = {32,2};
             PowOp* op = new PowOp();
-            forward_result[59] = op;
+            forward_result[65] = op;
             
             op->set_inputs( forward_result[7] );
-            op->set_inputs( forward_result[58] );
+            op->set_inputs( forward_result[64] );
         }
         
-        // {'name': 'Net/95', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [61], 'sorted_id': 60}
+        // {'name': 'Net/90', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [67], 'sorted_id': 66}
         {
             Tensor c = (fprec)1.0;
-            forward_result[60] = new VariableTensor( c, false );
+            forward_result[66] = new VariableTensor( c, false );
         }
         
-        // {'name': 'Net/96', 'op': 'aten::sub', 'in': [57, 59, 60], 'output_id': 0, 'shape': [32, 2], 'out': [64], 'sorted_id': 61}
+        // {'name': 'Net/91', 'op': 'aten::sub', 'in': [63, 65, 66], 'output_id': 0, 'shape': [32, 2], 'out': [70], 'sorted_id': 67}
         {
             Tensor::shape_type shape = {32,2};
             SubOp* op = new SubOp();
-            forward_result[61] = op;
+            forward_result[67] = op;
             
-            op->set_inputs( forward_result[57] );
-            op->set_inputs( forward_result[59] );
-            op->set_inputs( forward_result[60] );
+            op->set_inputs( forward_result[63] );
+            op->set_inputs( forward_result[65] );
+            op->set_inputs( forward_result[66] );
         }
         
-        // {'name': 'Net/97', 'op': 'aten::exp', 'in': [18], 'output_id': 0, 'shape': [32, 2], 'out': [64], 'sorted_id': 62}
+        // {'name': 'Net/92', 'op': 'aten::exp', 'in': [24], 'output_id': 0, 'shape': [32, 2], 'out': [70], 'sorted_id': 68}
         {
             Tensor::shape_type shape = {32,2};
             ExpOp* op = new ExpOp();
-            forward_result[62] = op;
-            
-            op->set_inputs( forward_result[18] );
-        }
-        
-        // {'name': 'Net/98', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [64], 'sorted_id': 63}
-        {
-            Tensor c = (fprec)1.0;
-            forward_result[63] = new VariableTensor( c, false );
-        }
-        
-        // {'name': 'Net/g', 'op': 'aten::sub', 'in': [61, 62, 63], 'output_id': 0, 'shape': [32, 2], 'out': [66], 'sorted_id': 64}
-        {
-            Tensor::shape_type shape = {32,2};
-            SubOp* op = new SubOp();
-            forward_result[64] = op;
-            
-            op->set_inputs( forward_result[61] );
-            op->set_inputs( forward_result[62] );
-            op->set_inputs( forward_result[63] );
-        }
-        
-        // {'name': 'Net/100', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'out': [66], 'sorted_id': 65}
-        {
-            forward_result[65] = NULL;
-        }
-        
-        // {'name': 'Net/101', 'op': 'aten::sum', 'in': [64, 65], 'output_id': 0, 'shape': [], 'out': [68], 'sorted_id': 66}
-        {
-            SumOp*    op = new SumOp();
-            forward_result[66] = op;
-            
-            op->set_inputs( forward_result[64] );
-            op->set_inputs( forward_result[65] );
-        }
-        
-        // {'name': 'Net/102', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.5, 'out': [68], 'sorted_id': 67}
-        {
-            Tensor c = (fprec)0.5;
-            forward_result[67] = new VariableTensor( c, false );
-        }
-        
-        // {'name': 'Net/103', 'op': 'aten::mul', 'in': [66, 67], 'output_id': 0, 'shape': [], 'out': [70], 'sorted_id': 68}
-        {
-            MulOp* op = new MulOp();
             forward_result[68] = op;
             
-            op->set_inputs( forward_result[66] );
-            op->set_inputs( forward_result[67] );
+            op->set_inputs( forward_result[24] );
         }
         
-        // {'name': 'Net/110', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 32.0, 'out': [70], 'sorted_id': 69}
+        // {'name': 'Net/93', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [70], 'sorted_id': 69}
         {
-            Tensor c = (fprec)32.0;
+            Tensor c = (fprec)1.0;
             forward_result[69] = new VariableTensor( c, false );
         }
         
-        // {'name': 'Net/e2', 'op': 'aten::div', 'in': [68, 69], 'output_id': 0, 'shape': [], 'out': [72], 'sorted_id': 70}
+        // {'name': 'Net/g', 'op': 'aten::sub', 'in': [67, 68, 69], 'output_id': 0, 'shape': [32, 2], 'out': [72], 'sorted_id': 70}
         {
-            DivOp* op = new DivOp();
+            Tensor::shape_type shape = {32,2};
+            SubOp* op = new SubOp();
             forward_result[70] = op;
             
+            op->set_inputs( forward_result[67] );
             op->set_inputs( forward_result[68] );
             op->set_inputs( forward_result[69] );
         }
         
-        // {'name': 'Net/112', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [72], 'sorted_id': 71}
+        // {'name': 'Net/95', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'out': [72], 'sorted_id': 71}
         {
-            Tensor c = (fprec)1.0;
-            forward_result[71] = new VariableTensor( c, false );
+            forward_result[71] = NULL;
         }
         
-        // {'name': 'Net/113', 'op': 'aten::add', 'in': [54, 70, 71], 'output_id': 0, 'shape': [], 'out': [73], 'sorted_id': 72}
+        // {'name': 'Net/96', 'op': 'aten::sum', 'in': [70, 71], 'output_id': 0, 'shape': [], 'out': [74], 'sorted_id': 72}
         {
-            AddOp* op = new AddOp();
+            SumOp*    op = new SumOp();
             forward_result[72] = op;
             
-            op->set_inputs( forward_result[54] );
             op->set_inputs( forward_result[70] );
             op->set_inputs( forward_result[71] );
         }
         
-        // {'name': 'Net/114', 'op': 'aten::neg', 'in': [72], 'output_id': 0, 'shape': [], 'out': [74], 'sorted_id': 73}
+        // {'name': 'Net/97', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.5, 'out': [74], 'sorted_id': 73}
         {
-            NegOp* op = new NegOp();
-            forward_result[73] = op;
+            Tensor c = (fprec)0.5;
+            forward_result[73] = new VariableTensor( c, false );
+        }
+        
+        // {'name': 'Net/98', 'op': 'aten::mul', 'in': [72, 73], 'output_id': 0, 'shape': [], 'out': [76], 'sorted_id': 74}
+        {
+            MulOp* op = new MulOp();
+            forward_result[74] = op;
             
             op->set_inputs( forward_result[72] );
+            op->set_inputs( forward_result[73] );
         }
         
-        // {'name': 'output/output.1', 'op': 'IO Node', 'in': [73], 'output_id': 0, 'shape': [], 'out': [], 'sorted_id': 74}
+        // {'name': 'Net/105', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 32.0, 'out': [76], 'sorted_id': 75}
+        {
+            Tensor c = (fprec)32.0;
+            forward_result[75] = new VariableTensor( c, false );
+        }
+        
+        // {'name': 'Net/e2', 'op': 'aten::div', 'in': [74, 75], 'output_id': 0, 'shape': [], 'out': [78], 'sorted_id': 76}
+        {
+            DivOp* op = new DivOp();
+            forward_result[76] = op;
+            
+            op->set_inputs( forward_result[74] );
+            op->set_inputs( forward_result[75] );
+        }
+        
+        // {'name': 'Net/107', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [78], 'sorted_id': 77}
+        {
+            Tensor c = (fprec)1.0;
+            forward_result[77] = new VariableTensor( c, false );
+        }
+        
+        // {'name': 'Net/108', 'op': 'aten::add', 'in': [60, 76, 77], 'output_id': 0, 'shape': [], 'out': [79], 'sorted_id': 78}
+        {
+            AddOp* op = new AddOp();
+            forward_result[78] = op;
+            
+            op->set_inputs( forward_result[60] );
+            op->set_inputs( forward_result[76] );
+            op->set_inputs( forward_result[77] );
+        }
+        
+        // {'name': 'Net/109', 'op': 'aten::neg', 'in': [78], 'output_id': 0, 'shape': [], 'out': [80], 'sorted_id': 79}
+        {
+            NegOp* op = new NegOp();
+            forward_result[79] = op;
+            
+            op->set_inputs( forward_result[78] );
+        }
+        
+        // {'name': 'output/output.1', 'op': 'IO Node', 'in': [79], 'output_id': 0, 'shape': [], 'out': [], 'sorted_id': 80}
         {
         }
         
+    }
+    
+    void do_train1( vector<MCTNode*>& forward_result, VariableTensor &input_var, int N )
+    {
         cout<<"### forward computation ..."<<endl;
-        //forward_result[73]->forward();
-        for(int k=0;k<=73;k++) {
+        for(int k=0;k<=N;k++) {
             if( forward_result[k] )  
             {
                 //forward_result[k]->set_id( k );
@@ -633,17 +686,48 @@
                 forward_result[k]->zerograd();
             }
         }
-        auto o = forward_result[73]->output;
+        auto o = forward_result[N]->output;
         cout<<o<<endl;
     
         cout<<"### backward computation ..."<<endl;
-        forward_result[73]->grad = xt::ones_like( forward_result[73]->output );
-        //forward_result[73]->backward();
-        for(int k=73;k>=0;k--) {
+        forward_result[N]->grad = xt::ones_like( forward_result[N]->output );
+        for(int k=N;k>=0;k--) {
            if( forward_result[k] )  forward_result[k]->backward();
         }
         cout<<"input_grad"<<input_var.grad<<endl;
-    
-        return 0;
     }
     
+    /*
+    int main()
+    {
+        vector<MCTNode*> forward_result(81);
+    
+        // input data
+        Tensor::shape_type shape = {32,64};
+        xin.reshape( shape );
+        VariableTensor input_var(xin);
+    
+        defineOp( forward_result, input_var );
+        do_train1( forward_result, input_var, 79 );
+        
+        return 0;
+    }
+    */
+    
+    extern void do_train_loop( vector<MCTNode*> &forward_result, VariableTensor &input_var, int NL, fprec lr );
+    
+    int main()
+    {
+        vector<MCTNode*> forward_result(81);
+    
+        // input data
+        Tensor::shape_type shape = {32,64};
+        xin.reshape( shape );
+        VariableTensor input_var(xin);
+    
+        defineOp( forward_result, input_var );
+        //do_train1( forward_result, input_var, 79 );
+        do_train_loop( forward_result, input_var, 79, 0.01 );
+        
+        return 0;
+    }

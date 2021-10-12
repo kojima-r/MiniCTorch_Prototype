@@ -27,16 +27,11 @@
     extern Tensor  fc4_weight;
     extern Tensor  fc4_bias;
     
-    int main()
-    {
-        vector<MCTNode*> forward_result(111);
+    bool train_mode = true;
     
-        // input data
-        Tensor::shape_type shape = {1000,784};
-        xin.reshape( shape );
-        VariableTensor input_var(xin);
-        
-        // {'name': 'input/x0', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [1000, 784], 'out': [71, 4], 'sorted_id': 0}
+    void defineOp( vector<MCTNode*>& forward_result, VariableTensor &input_var )
+    {
+        // {'name': 'input/x0', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [1000, 784], 'out': [4, 71], 'sorted_id': 0}
         {
             Tensor::shape_type shape = {1000,784};
             forward_result[0] = &input_var;
@@ -83,6 +78,7 @@
         // {'name': 'VAE/Linear[fc1]/bias/210', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [7], 'sorted_id': 6}
         {
             Tensor::shape_type shape = {20};
+            fc1_bias.reshape( shape );
             forward_result[6] = new VariableTensor( fc1_bias );
         }
         
@@ -116,18 +112,21 @@
         // {'name': 'VAE/BatchNorm1d[bn1]/bias/219', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [17], 'sorted_id': 10}
         {
             Tensor::shape_type shape = {20};
+            bn1_bias.reshape( shape );
             forward_result[10] = new VariableTensor( bn1_bias );
         }
         
         // {'name': 'VAE/BatchNorm1d[bn1]/running_mean/218', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [17], 'sorted_id': 11}
         {
             Tensor::shape_type shape = {20};
+            bn1_running_mean.reshape( shape );
             forward_result[11] = new VariableTensor( bn1_running_mean );
         }
         
         // {'name': 'VAE/BatchNorm1d[bn1]/running_var/217', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [17], 'sorted_id': 12}
         {
             Tensor::shape_type shape = {20};
+            bn1_running_var.reshape( shape );
             forward_result[12] = new VariableTensor( bn1_running_var );
         }
         
@@ -155,7 +154,7 @@
             forward_result[16] = new VariableTensor( c, false );
         }
         
-        // {'name': 'VAE/BatchNorm1d[bn1]/input.7', 'op': 'aten::batch_norm', 'in': [8, 9, 10, 11, 12, 13, 14, 15, 16], 'output_id': 0, 'shape': [1000, 20], 'out': [23, 20], 'sorted_id': 17}
+        // {'name': 'VAE/BatchNorm1d[bn1]/input.7', 'op': 'aten::batch_norm', 'in': [8, 9, 10, 11, 12, 13, 14, 15, 16], 'output_id': 0, 'shape': [1000, 20], 'out': [20, 23], 'sorted_id': 17}
         {
             Tensor::shape_type shape = {1000,20};
             BatchNormOp* op = new BatchNormOp();
@@ -182,6 +181,7 @@
         // {'name': 'VAE/Linear[fc2_mean]/bias/222', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [20], 'sorted_id': 19}
         {
             Tensor::shape_type shape = {10};
+            fc2_mean_bias.reshape( shape );
             forward_result[19] = new VariableTensor( fc2_mean_bias );
         }
         
@@ -206,6 +206,7 @@
         // {'name': 'VAE/Linear[fc2_var]/bias/225', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [23], 'sorted_id': 22}
         {
             Tensor::shape_type shape = {10};
+            fc2_var_bias.reshape( shape );
             forward_result[22] = new VariableTensor( fc2_var_bias );
         }
         
@@ -262,7 +263,7 @@
             op->set_inputs( forward_result[27] );
         }
         
-        // {'name': 'VAE/loc.1', 'op': 'prim::ListUnpack', 'in': [28], 'output_id': 0, 'shape': [1000, 10], 'out': [35, 92, 57, 31, 77], 'sorted_id': 29}
+        // {'name': 'VAE/loc.1', 'op': 'prim::ListUnpack', 'in': [28], 'output_id': 0, 'shape': [1000, 10], 'out': [57, 77, 35, 92, 31], 'sorted_id': 29}
         {
             Tensor::shape_type shape = {1000,10};
             ListUnpackOp* op = new ListUnpackOp( 0 );
@@ -286,9 +287,9 @@
             op->set_inputs( forward_result[30] );
         }
         
-        // {'name': 'VAE/65', 'op': 'prim::NumToTensor', 'in': [31], 'output_id': 0, 'shape': [], 'out': [44, 33], 'sorted_id': 32}
+        // {'name': 'VAE/65', 'op': 'prim::NumToTensor', 'in': [31], 'output_id': 0, 'shape': [], 'out': [33, 44], 'sorted_id': 32}
         {
-            MoveOp* op = new MoveOp( "NumToTensor" );
+            NumToTensorOp* op = new NumToTensorOp();
             forward_result[32] = op;
             
             op->set_inputs( forward_result[31] );
@@ -296,7 +297,7 @@
         
         // {'name': 'VAE/74', 'op': 'aten::Int', 'in': [32], 'output_id': 0, 'shape': [], 'out': [38], 'sorted_id': 33}
         {
-            MoveOp* op = new MoveOp( "Int" );
+            IntOp* op = new IntOp();
             forward_result[33] = op;
             
             op->set_inputs( forward_result[32] );
@@ -319,7 +320,7 @@
         
         // {'name': 'VAE/68', 'op': 'prim::NumToTensor', 'in': [35], 'output_id': 0, 'shape': [], 'out': [37, 45], 'sorted_id': 36}
         {
-            MoveOp* op = new MoveOp( "NumToTensor" );
+            NumToTensorOp* op = new NumToTensorOp();
             forward_result[36] = op;
             
             op->set_inputs( forward_result[35] );
@@ -327,7 +328,7 @@
         
         // {'name': 'VAE/75', 'op': 'aten::Int', 'in': [36], 'output_id': 0, 'shape': [], 'out': [38], 'sorted_id': 37}
         {
-            MoveOp* op = new MoveOp( "Int" );
+            IntOp* op = new IntOp();
             forward_result[37] = op;
             
             op->set_inputs( forward_result[36] );
@@ -379,7 +380,7 @@
         
         // {'name': 'VAE/82', 'op': 'aten::Int', 'in': [32], 'output_id': 0, 'shape': [], 'out': [46], 'sorted_id': 44}
         {
-            MoveOp* op = new MoveOp( "Int" );
+            IntOp* op = new IntOp();
             forward_result[44] = op;
             
             op->set_inputs( forward_result[32] );
@@ -387,7 +388,7 @@
         
         // {'name': 'VAE/83', 'op': 'aten::Int', 'in': [36], 'output_id': 0, 'shape': [], 'out': [46], 'sorted_id': 45}
         {
-            MoveOp* op = new MoveOp( "Int" );
+            IntOp* op = new IntOp();
             forward_result[45] = op;
             
             op->set_inputs( forward_result[36] );
@@ -499,6 +500,7 @@
         // {'name': 'VAE/Linear[fc3]/bias/228', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [60], 'sorted_id': 59}
         {
             Tensor::shape_type shape = {20};
+            fc3_bias.reshape( shape );
             forward_result[59] = new VariableTensor( fc3_bias );
         }
         
@@ -555,6 +557,7 @@
         // {'name': 'VAE/Linear[fc4]/bias/234', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [67], 'sorted_id': 66}
         {
             Tensor::shape_type shape = {784};
+            fc4_bias.reshape( shape );
             forward_result[66] = new VariableTensor( fc4_bias );
         }
         
@@ -693,7 +696,7 @@
             op->set_inputs( forward_result[83] );
         }
         
-        // {'name': 'VAE/132', 'op': 'aten::broadcast_tensors', 'in': [84], 'output_id': 0, 'shape': [], 'out': [90, 86], 'sorted_id': 85}
+        // {'name': 'VAE/132', 'op': 'aten::broadcast_tensors', 'in': [84], 'output_id': 0, 'shape': [], 'out': [86, 90], 'sorted_id': 85}
         {
             BroadcastTensorsOp* op = new BroadcastTensorsOp();
             forward_result[85] = op;
@@ -701,7 +704,7 @@
             op->set_inputs( forward_result[84] );
         }
         
-        // {'name': 'VAE/value', 'op': 'prim::ListUnpack', 'in': [85], 'output_id': 1, 'shape': [1000, 10], 'out': [87, 93], 'sorted_id': 86}
+        // {'name': 'VAE/value', 'op': 'prim::ListUnpack', 'in': [85], 'output_id': 1, 'shape': [1000, 10], 'out': [93, 87], 'sorted_id': 86}
         {
             Tensor::shape_type shape = {1000,10};
             ListUnpackOp* op = new ListUnpackOp( 1 );
@@ -726,7 +729,7 @@
             forward_result[88] = new VariableTensor( c, false );
         }
         
-        // {'name': 'VAE/var_ratio', 'op': 'aten::pow', 'in': [87, 88], 'output_id': 0, 'shape': [1000, 10], 'out': [101, 97], 'sorted_id': 89}
+        // {'name': 'VAE/var_ratio', 'op': 'aten::pow', 'in': [87, 88], 'output_id': 0, 'shape': [1000, 10], 'out': [97, 101], 'sorted_id': 89}
         {
             Tensor::shape_type shape = {1000,10};
             PowOp* op = new PowOp();
@@ -904,9 +907,12 @@
         {
         }
         
+    }
+    
+    void do_train1( vector<MCTNode*>& forward_result, VariableTensor &input_var, int N )
+    {
         cout<<"### forward computation ..."<<endl;
-        //forward_result[109]->forward();
-        for(int k=0;k<=109;k++) {
+        for(int k=0;k<=N;k++) {
             if( forward_result[k] )  
             {
                 //forward_result[k]->set_id( k );
@@ -914,17 +920,29 @@
                 forward_result[k]->zerograd();
             }
         }
-        auto o = forward_result[109]->output;
+        auto o = forward_result[N]->output;
         cout<<o<<endl;
     
         cout<<"### backward computation ..."<<endl;
-        forward_result[109]->grad = xt::ones_like( forward_result[109]->output );
-        //forward_result[109]->backward();
-        for(int k=109;k>=0;k--) {
+        forward_result[N]->grad = xt::ones_like( forward_result[N]->output );
+        for(int k=N;k>=0;k--) {
            if( forward_result[k] )  forward_result[k]->backward();
         }
         cout<<"input_grad"<<input_var.grad<<endl;
+    }
     
+    int main()
+    {
+        vector<MCTNode*> forward_result(111);
+    
+        // input data
+        Tensor::shape_type shape = {1000,784};
+        xin.reshape( shape );
+        VariableTensor input_var(xin);
+    
+        defineOp( forward_result, input_var );
+        do_train1( forward_result, input_var, 109 );
+        
         return 0;
     }
     

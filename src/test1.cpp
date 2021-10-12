@@ -14,16 +14,11 @@
     extern Tensor  xin;
     extern Tensor  Constant1;
     
-    int main()
-    {
-        vector<MCTNode*> forward_result(11);
+    bool train_mode = true;
     
-        // input data
-        Tensor::shape_type shape = {2,2};
-        xin.reshape( shape );
-        VariableTensor input_var(xin);
-        
-        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [2, 2], 'out': [3, 7, 2], 'sorted_id': 0}
+    void defineOp( vector<MCTNode*>& forward_result, VariableTensor &input_var )
+    {
+        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [2, 2], 'out': [7, 3, 2], 'sorted_id': 0}
         {
             Tensor::shape_type shape = {2,2};
             forward_result[0] = &input_var;
@@ -110,9 +105,12 @@
             Tensor::shape_type shape = {2,2};
         }
         
+    }
+    
+    void do_train1( vector<MCTNode*>& forward_result, VariableTensor &input_var, int N )
+    {
         cout<<"### forward computation ..."<<endl;
-        //forward_result[9]->forward();
-        for(int k=0;k<=9;k++) {
+        for(int k=0;k<=N;k++) {
             if( forward_result[k] )  
             {
                 //forward_result[k]->set_id( k );
@@ -120,17 +118,29 @@
                 forward_result[k]->zerograd();
             }
         }
-        auto o = forward_result[9]->output;
+        auto o = forward_result[N]->output;
         cout<<o<<endl;
     
         cout<<"### backward computation ..."<<endl;
-        forward_result[9]->grad = xt::ones_like( forward_result[9]->output );
-        //forward_result[9]->backward();
-        for(int k=9;k>=0;k--) {
+        forward_result[N]->grad = xt::ones_like( forward_result[N]->output );
+        for(int k=N;k>=0;k--) {
            if( forward_result[k] )  forward_result[k]->backward();
         }
         cout<<"input_grad"<<input_var.grad<<endl;
+    }
     
+    int main()
+    {
+        vector<MCTNode*> forward_result(11);
+    
+        // input data
+        Tensor::shape_type shape = {2,2};
+        xin.reshape( shape );
+        VariableTensor input_var(xin);
+    
+        defineOp( forward_result, input_var );
+        do_train1( forward_result, input_var, 9 );
+        
         return 0;
     }
     

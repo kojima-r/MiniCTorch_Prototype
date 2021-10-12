@@ -18,15 +18,10 @@
     extern Tensor  fc2_bias;
     extern Tensor  Constant1;
     
-    int main()
-    {
-        vector<MCTNode*> forward_result(14);
+    bool train_mode = true;
     
-        // input data
-        Tensor::shape_type shape = {112,4};
-        xin.reshape( shape );
-        VariableTensor input_var(xin);
-        
+    void defineOp( vector<MCTNode*>& forward_result, VariableTensor &input_var )
+    {
         // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [112, 4], 'out': [3], 'sorted_id': 0}
         {
             Tensor::shape_type shape = {112,4};
@@ -43,6 +38,7 @@
         // {'name': 'Net/Linear[fc1]/bias/34', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [3], 'sorted_id': 2}
         {
             Tensor::shape_type shape = {64};
+            fc1_bias.reshape( shape );
             forward_result[2] = new VariableTensor( fc1_bias );
         }
         
@@ -76,6 +72,7 @@
         // {'name': 'Net/Linear[fc2]/bias/37', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [7], 'sorted_id': 6}
         {
             Tensor::shape_type shape = {3};
+            fc2_bias.reshape( shape );
             forward_result[6] = new VariableTensor( fc2_bias );
         }
         
@@ -90,7 +87,7 @@
             op->set_inputs( forward_result[6] );
         }
         
-        // {'name': 'Net/17', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [112], 'constant_value': [1.0, 2.0, 1.0, 1.0, 0.0, 0.0, 2.0, 2.0, 1.0, 1.0, 0.0, 2.0, 2.0, 1.0, 2.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0, 1.0, 0.0, 2.0, 2.0, 0.0, 1.0, 1.0, 1.0, 2.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 2.0, 0.0, 1.0, 1.0, 0.0, 0.0, 2.0, 0.0, 0.0, 2.0, 1.0, 1.0, 2.0, 1.0, 2.0, 2.0, 0.0, 0.0, 2.0, 2.0, 0.0, 2.0, 0.0, 2.0, 2.0, 1.0, 0.0, 1.0, 2.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 2.0, 1.0, 2.0, 2.0, 2.0, 2.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 2.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 2.0, 2.0, 0.0, 0.0, 0.0, 1.0, 0.0, 2.0], 'out': [12], 'sorted_id': 8}
+        // {'name': 'Net/17', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [112], 'constant_value': [2.0, 0.0, 2.0, 1.0, 2.0, 1.0, 2.0, 2.0, 1.0, 2.0, 0.0, 2.0, 1.0, 2.0, 2.0, 0.0, 1.0, 0.0, 2.0, 2.0, 2.0, 1.0, 1.0, 2.0, 1.0, 1.0, 2.0, 1.0, 2.0, 0.0, 0.0, 2.0, 2.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 2.0, 2.0, 1.0, 1.0, 1.0, 2.0, 2.0, 1.0, 2.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 2.0, 2.0, 0.0, 1.0, 1.0, 2.0, 0.0, 1.0, 2.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0, 2.0, 0.0, 0.0, 2.0, 1.0, 0.0, 2.0, 0.0, 1.0, 2.0, 0.0, 1.0, 0.0, 2.0, 2.0, 1.0, 0.0, 2.0, 1.0, 0.0, 2.0, 2.0, 1.0, 2.0, 0.0, 2.0, 2.0], 'out': [12], 'sorted_id': 8}
         {
             Tensor::shape_type shape = {112};
             Constant1.reshape( shape );
@@ -130,9 +127,12 @@
         {
         }
         
+    }
+    
+    void do_train1( vector<MCTNode*>& forward_result, VariableTensor &input_var, int N )
+    {
         cout<<"### forward computation ..."<<endl;
-        //forward_result[12]->forward();
-        for(int k=0;k<=12;k++) {
+        for(int k=0;k<=N;k++) {
             if( forward_result[k] )  
             {
                 //forward_result[k]->set_id( k );
@@ -140,17 +140,47 @@
                 forward_result[k]->zerograd();
             }
         }
-        auto o = forward_result[12]->output;
+        auto o = forward_result[N]->output;
         cout<<o<<endl;
     
         cout<<"### backward computation ..."<<endl;
-        forward_result[12]->grad = xt::ones_like( forward_result[12]->output );
-        //forward_result[12]->backward();
-        for(int k=12;k>=0;k--) {
+        forward_result[N]->grad = xt::ones_like( forward_result[N]->output );
+        for(int k=N;k>=0;k--) {
            if( forward_result[k] )  forward_result[k]->backward();
         }
         cout<<"input_grad"<<input_var.grad<<endl;
+    }
     
+    int main()
+    {
+        vector<MCTNode*> forward_result(14);
+    
+        // input data
+        Tensor::shape_type shape = {112,4};
+        xin.reshape( shape );
+        VariableTensor input_var(xin);
+    
+        defineOp( forward_result, input_var );
+        do_train1( forward_result, input_var, 12 );
+        
         return 0;
     }
     
+    /*
+    extern void cse_train_loop( vector<MCTNode*>& forward_result, int NL, fprec lr );
+    
+    int main()
+    {
+        vector<MCTNode*> forward_result(14);
+    
+        // input data
+        Tensor::shape_type shape = {112,4};
+        xin.reshape( shape );
+        VariableTensor input_var(xin);
+    
+        defineOp( forward_result, input_var );
+        cse_train_loop( forward_result, 12, 0.01 );
+        //do_train1( forward_result, input_var, 12 );
+        
+        return 0;
+    }*/

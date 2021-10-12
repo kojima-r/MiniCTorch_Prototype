@@ -14,15 +14,10 @@
     extern Tensor  xin;
     extern Tensor  Constant1;
     
-    int main()
-    {
-        vector<MCTNode*> forward_result(6);
+    bool train_mode = true;
     
-        // input data
-        Tensor::shape_type shape = {1,3};
-        xin.reshape( shape );
-        VariableTensor input_var(xin);
-        
+    void defineOp( vector<MCTNode*>& forward_result, VariableTensor &input_var )
+    {
         // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [1, 3], 'out': [3], 'sorted_id': 0}
         {
             Tensor::shape_type shape = {1,3};
@@ -69,9 +64,12 @@
             Tensor::shape_type shape = {1,2};
         }
         
+    }
+    
+    void do_train1( vector<MCTNode*>& forward_result, VariableTensor &input_var, int N )
+    {
         cout<<"### forward computation ..."<<endl;
-        //forward_result[4]->forward();
-        for(int k=0;k<=4;k++) {
+        for(int k=0;k<=N;k++) {
             if( forward_result[k] )  
             {
                 //forward_result[k]->set_id( k );
@@ -79,17 +77,29 @@
                 forward_result[k]->zerograd();
             }
         }
-        auto o = forward_result[4]->output;
+        auto o = forward_result[N]->output;
         cout<<o<<endl;
     
         cout<<"### backward computation ..."<<endl;
-        forward_result[4]->grad = xt::ones_like( forward_result[4]->output );
-        //forward_result[4]->backward();
-        for(int k=4;k>=0;k--) {
+        forward_result[N]->grad = xt::ones_like( forward_result[N]->output );
+        for(int k=N;k>=0;k--) {
            if( forward_result[k] )  forward_result[k]->backward();
         }
         cout<<"input_grad"<<input_var.grad<<endl;
+    }
     
+    int main()
+    {
+        vector<MCTNode*> forward_result(6);
+    
+        // input data
+        Tensor::shape_type shape = {1,3};
+        xin.reshape( shape );
+        VariableTensor input_var(xin);
+    
+        defineOp( forward_result, input_var );
+        do_train1( forward_result, input_var, 4 );
+        
         return 0;
     }
     

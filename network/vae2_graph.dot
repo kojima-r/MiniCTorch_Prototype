@@ -3,7 +3,7 @@ graph[label=vae2, labelloc="t"];
 1 [label="Input (0)", color=orange, style=filled]
 2 [label="fc1_weight (1)", color=orange, style=filled]
 3 [label="fc1_bias (2)", color=orange, style=filled]
-4 [label="Linear[fc1] (3)", color=lightblue, style=filled, shape=box]
+4 [label="linear (3)", color=lightblue, style=filled, shape=box]
 1 -> 4
 2 -> 4
 3 -> 4
@@ -11,13 +11,13 @@ graph[label=vae2, labelloc="t"];
 4 -> 5
 6 [label="fc2_mean_weight (5)", color=orange, style=filled]
 7 [label="fc2_mean_bias (6)", color=orange, style=filled]
-8 [label="Linear[fc2_mean] (7)", color=lightblue, style=filled, shape=box]
+8 [label="linear (7)", color=lightblue, style=filled, shape=box]
 5 -> 8
 6 -> 8
 7 -> 8
 9 [label="fc2_var_weight (8)", color=orange, style=filled]
 10 [label="fc2_var_bias (9)", color=orange, style=filled]
-11 [label="Linear[fc2_var] (10)", color=lightblue, style=filled, shape=box]
+11 [label="linear (10)", color=lightblue, style=filled, shape=box]
 5 -> 11
 9 -> 11
 10 -> 11
@@ -30,7 +30,7 @@ graph[label=vae2, labelloc="t"];
 15 [label="ListConstruct (14)", color=lightblue, style=filled, shape=box]
 8 -> 15
 14 -> 15
-16 [label="Broadcat_Tensors (15)", color=lightblue, style=filled, shape=box]
+16 [label="broadcast_tensors (15)", color=lightblue, style=filled, shape=box]
 15 -> 16
 17 [label="ListUnpack (16)", color=lightblue, style=filled, shape=box]
 16 -> 17
@@ -40,7 +40,7 @@ graph[label=vae2, labelloc="t"];
 18 -> 19
 20 [label="NumToTensor (19)", color=lightblue, style=filled, shape=box]
 19 -> 20
-21 [label="int (20)", color=lightblue, style=filled, shape=box]
+21 [label="Int (20)", color=lightblue, style=filled, shape=box]
 20 -> 21
 22 [label="1.0 (21)", color=orange, style=filled]
 23 [label="size (22)", color=lightblue, style=filled, shape=box]
@@ -48,7 +48,7 @@ graph[label=vae2, labelloc="t"];
 22 -> 23
 24 [label="NumToTensor (23)", color=lightblue, style=filled, shape=box]
 23 -> 24
-25 [label="int (24)", color=lightblue, style=filled, shape=box]
+25 [label="Int (24)", color=lightblue, style=filled, shape=box]
 24 -> 25
 26 [label="ListConstruct (25)", color=lightblue, style=filled, shape=box]
 21 -> 26
@@ -57,15 +57,15 @@ graph[label=vae2, labelloc="t"];
 28 [label="Null (27)", color=orange, style=filled]
 29 [label="Null (28)", color=orange, style=filled]
 30 [label="0.0 (29)", color=orange, style=filled]
-31 [label=" ", color=lightblue, style=filled, shape=box]
+31 [label="zeros (30)", color=lightblue, style=filled, shape=box]
 26 -> 31
 27 -> 31
 28 -> 31
 29 -> 31
 30 -> 31
-32 [label="int (31)", color=lightblue, style=filled, shape=box]
+32 [label="Int (31)", color=lightblue, style=filled, shape=box]
 20 -> 32
-33 [label="int (32)", color=lightblue, style=filled, shape=box]
+33 [label="Int (32)", color=lightblue, style=filled, shape=box]
 24 -> 33
 34 [label="ListConstruct (33)", color=lightblue, style=filled, shape=box]
 32 -> 34
@@ -74,7 +74,7 @@ graph[label=vae2, labelloc="t"];
 36 [label="Null (35)", color=orange, style=filled]
 37 [label="Null (36)", color=orange, style=filled]
 38 [label="0.0 (37)", color=orange, style=filled]
-39 [label=" ", color=lightblue, style=filled, shape=box]
+39 [label="ones (38)", color=lightblue, style=filled, shape=box]
 34 -> 39
 35 -> 39
 36 -> 39
@@ -97,7 +97,7 @@ graph[label=vae2, labelloc="t"];
 44 -> 45
 46 [label="fc3_weight (45)", color=orange, style=filled]
 47 [label="fc3_bias (46)", color=orange, style=filled]
-48 [label="Linear[fc3] (47)", color=lightblue, style=filled, shape=box]
+48 [label="linear (47)", color=lightblue, style=filled, shape=box]
 45 -> 48
 46 -> 48
 47 -> 48
@@ -105,7 +105,7 @@ graph[label=vae2, labelloc="t"];
 48 -> 49
 50 [label="fc4_weight (49)", color=orange, style=filled]
 51 [label="fc4_bias (50)", color=orange, style=filled]
-52 [label="Linear[fc4] (51)", color=lightblue, style=filled, shape=box]
+52 [label="linear (51)", color=lightblue, style=filled, shape=box]
 49 -> 52
 50 -> 52
 51 -> 52
@@ -113,7 +113,7 @@ graph[label=vae2, labelloc="t"];
 52 -> 53
 54 [label="Null (53)", color=orange, style=filled]
 55 [label="1.0 (54)", color=orange, style=filled]
-56 [label=" ", color=lightblue, style=filled, shape=box]
+56 [label="binary_cross_entropy (55)", color=lightblue, style=filled, shape=box]
 53 -> 56
 1 -> 56
 54 -> 56
@@ -123,7 +123,7 @@ graph[label=vae2, labelloc="t"];
 59 [label="Null (58)", color=orange, style=filled]
 60 [label="0.0 (59)", color=orange, style=filled]
 61 [label="Null (60)", color=orange, style=filled]
-62 [label=" ", color=lightblue, style=filled, shape=box]
+62 [label="zeros_like (61)", color=lightblue, style=filled, shape=box]
 17 -> 62
 57 -> 62
 58 -> 62
@@ -135,7 +135,7 @@ graph[label=vae2, labelloc="t"];
 65 [label="Null (64)", color=orange, style=filled]
 66 [label="0.0 (65)", color=orange, style=filled]
 67 [label="Null (66)", color=orange, style=filled]
-68 [label=" ", color=lightblue, style=filled, shape=box]
+68 [label="ones_like (67)", color=lightblue, style=filled, shape=box]
 42 -> 68
 63 -> 68
 64 -> 68
@@ -145,7 +145,7 @@ graph[label=vae2, labelloc="t"];
 69 [label="ListConstruct (68)", color=lightblue, style=filled, shape=box]
 62 -> 69
 68 -> 69
-70 [label="Broadcat_Tensors (69)", color=lightblue, style=filled, shape=box]
+70 [label="broadcast_tensors (69)", color=lightblue, style=filled, shape=box]
 69 -> 70
 71 [label="ListUnpack (70)", color=lightblue, style=filled, shape=box]
 70 -> 71
