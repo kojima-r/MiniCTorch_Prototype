@@ -70,11 +70,8 @@ class MCTNode{
         //this->grad = xt::zeros_like( output );
         this->grad = 0.;
     }
-    Tensor& get_output() // 210824 add
-    {
-        return output;
-    }
-    bool is_grad()       { return grad_calc; };
+    Tensor& get_output()    { return output; }
+    bool is_grad()          { return grad_calc; };
     void set_grad( bool g ) { grad_calc = g; };
     
     // for debug
@@ -127,7 +124,7 @@ class MCTNode{
     void _backward_inputs()
     {
         //cout<<"backward_inputs"<<endl;
-        /*for(auto& itr:inputs){ // 210806 mod mari
+        /*for(auto& itr:inputs){ 
             if( itr )  itr->backward(); 
         }*/
     }
@@ -193,7 +190,7 @@ class ExpOp:public MCTNode{
     {
         print_message( "exp(backward)" );
         for(auto& itr:inputs){
-            itr->grad += this->grad*this->output;
+            itr->grad += this->grad * this->output;
         }
         _backward_inputs();
         return true;
@@ -500,7 +497,7 @@ class MatMulBase:public MCTNode{
         new_s[2] = as[ar-1];
         return new_s;
     }
-    Tensor::shape_type _restore_shape( Tensor::shape_type as, Tensor::shape_type bs ) // 210904 rename
+    Tensor::shape_type _restore_shape( Tensor::shape_type as, Tensor::shape_type bs )
     {
         int  ar = as.size();
         int  br = bs.size();
@@ -534,14 +531,13 @@ class MatMulBase:public MCTNode{
         {
             auto v = xt::view( bx, i, xt::all(), xt::all() );
             auto w = xt::view( by, i, xt::all(), xt::all() );
-            //auto temp=xt::linalg::dot(v,w); //ba.T bb
-            auto temp = DOT(v,w); // ba.T bb
+            //auto temp=xt::linalg::dot(v,w); //ba.T * bb
+            auto temp = DOT(v,w); // ba.T * bb
             print_shape("temp shape ", temp);
             xt::view( out, i, xt::all(), xt::all() ) = temp;
         }
         
         Tensor::shape_type gb_s = _restore_shape( in_s, out_s ); 
-        //gb += out.reshape( gb_s ); // 210822 mod
         Tensor gb = out.reshape( gb_s );
         print_shape("gb shape ", gb);
         print_tensor( "gb", gb );
@@ -573,13 +569,13 @@ class MatMulOp:public MatMulBase{
             //  a.rank: 2
             //  b.rank: 2 
             output = DOT(a,b);
-            //this->output =xt::linalg::dot(a,b);
+            //output =xt::linalg::dot(a,b);
         } else if( ar > 2 && br==2 ) {
             // batched matmul:
             //  a.rank: >2
             //  b.rank: 2 
             output = DOT(a,b);
-            //this->output =xt::linalg::dot(a,b);
+            //output =xt::linalg::dot(a,b);
         } else {
             cout<<"Error:MatMulOp"<<endl;
             cout<<"Error:A:"<<ar<<" B:"<< br<<endl;
@@ -631,7 +627,7 @@ class MatMulOp:public MatMulBase{
             ga += DOT( gc, xt::transpose(b) );
             print_tensor( "ga", ga );
             print_tensor( "gc", gc );
-            cout<<"=="<<endl;
+            //cout<<"=="<<endl;
             
             gb += _batch_grad( a, gc, as );
             
@@ -786,32 +782,6 @@ class LinearOp:public MatMulBase{
             
             gb += _batch_grad( gc, a, as );
             
-            /* 210824 mod
-            auto a_t=this->_transpose(a,ar);
-            print_shape( "a_t", a_t );
-            
-            auto new_a_shape  =_batch_shape(a_t,a_t.shape());
-            auto batch_a_t    = a.reshape(new_a_shape);
-            auto new_gc_shape =_batch_shape(gc,gc.shape());
-            auto batch_gc     = gd.reshape(new_gc_shape);
-            //
-            print_shape( "gc", gc );
-            print_shape( "a_t", a_t );
-            print_shape( "b:gc", batch_gc );
-            print_shape( "b:a_t", batch_a_t );
-            //
-            Tensor::shape_type out_s={new_a_shape[0],new_a_shape[1],new_gc_shape[2]};
-            Tensor out(out_s);
-            for(int i=0;i<new_a_shape[0];i++)  // yet gd
-            {
-                auto v = xt::view(a_t, i, xt::all(), xt::all());
-                auto w = xt::view(gc,  i, xt::all(), xt::all());
-                //auto temp=xt::linalg::dot(v,w);//a.T gc
-                auto temp = DOT(v,w); // a.T gc
-                print_shape( "temp", temp );
-                xt::view(out, i, xt::all(), xt::all() ) = temp;
-            }
-            */
         } else {
             cout<<"Error:LinearOp"<<endl;
             cout<<"Error:A:"<<ar<<" B:"<< br<<endl;
@@ -859,14 +829,12 @@ class AddMmOp:public MatMulBase{
             //  a.rank: 2
             //  b.rank: 2 
             output = DOT(a,b) + d;
-            //this->output =xt::linalg::dot(a,b) + d;
             
         } else if( ar > 2 && br==2 ){
             // batched admm:
             //  a.rank: >2
             //  b.rank: 2 
             output = DOT(a,b) + d;
-            //this->output =xt::linalg::dot(a,b + d;
             
         } else {
             
@@ -895,33 +863,28 @@ class AddMmOp:public MatMulBase{
         int   ar=as.size();
         int   br=bs.size();
        
-        if( ar==2 && br==2 ){
+        if( ar==2 && br==2 ) {
             // addmm:
             //  a.rank: 2
             //  b.rank: 2 
-            //ga+=xt::linalg::dot(gc,xt::transpose(b));
-            //gb+=xt::linalg::dot(xt::transpose(a),gc);
             ga += DOT( gc, xt::transpose(b) );
             gb += DOT( xt::transpose(a), gc );
             gd += xt::sum( gc,{0} );
             
-        } else if( ar==1 && br==2 ){
+        } else if( ar==1 && br==2 ) {
             // addmm:
             //  a.rank: 1
             //  b.rank: 2 
-            //ga+=xt::linalg::dot(gc,xt::transpose(b));
             ga += DOT( gc, xt::transpose(b) );
             Tensor a2 = a.reshape({-1,1});
             Tensor g2 = gc.reshape({1,-1});
-            //gb +=xt::linalg::dot(a2,g2);
             gb += DOT( a2, g2 );
             gd += xt::sum( gc,{0} );
             
-        } else if( ar > 2 && br==2 ){  // yet gd
+        } else if( ar > 2 && br==2 ) {
             // batched addmm:
             //  a.rank: >2
             //  b.rank: 2 
-            //ga+=xt::linalg::dot(gd,xt::transpose(b));
             ga += DOT( gd, xt::transpose(b) );
             gd += xt::sum( gc,{0} );
             gb += _batch_grad( a, gc, as );
@@ -965,7 +928,6 @@ class SigmoidOp:public MCTNode{
         _forward_inputs();
         print_message( "sigmoid(forward)" );
         output = 1.0 / ( 1.0+xt::exp( -inputs[0]->output ) );
-        //print_tensor( "sigmoid", output );
         return true;
     }
     bool backward()
@@ -1028,9 +990,7 @@ class HardTanhOp:public MCTNode{
 
 class EluOp:public MCTNode{
     public:
-    EluOp(fprec a=1.0){
-       alpha = a;
-    }
+    EluOp(fprec a=1.0) { alpha = a; }
     fprec alpha;
     xt::xarray<bool> mask;
     
@@ -1099,7 +1059,7 @@ class SoftplusOp:public MCTNode{
     
     bool forward()
     {
-        fprec beta  = (fprec)inputs[1]->output[0];
+        fprec beta = (fprec)inputs[1]->output[0];
         if( beta == 0.0 ){
             cout<<"Error:Beta is 0.0"<<endl;
             return false;
@@ -1626,16 +1586,16 @@ public:
         fprec ratio = (fprec)inputs[1]->output[0];
         
         if( train_mode ) {
-            fprec scale = 1.0 / (1.0 - ratio);  // inverted dropout 
+            fprec scale = 1.0 / (1.0 - ratio);  // inverted dropout(pytorch)
             Tensor r = xt::random::rand<fprec>( x.shape() );
             dropout = xt::where( r > ratio, 1, 0 );
             //output  = x * dropout;
-            output  = x * dropout * scale; // inverted dropout 
+            output  = x * dropout * scale; // inverted dropout(pytorch)
             print_tensor("drop2",output);
             print_tensor("dropout",dropout);
         } else {
             //output = x * ( 1.0 - ratio );
-            output = x;  // inverted dropout 
+            output = x;  // inverted dropout(pytorch)
         }
         return true;
     }
@@ -1644,7 +1604,7 @@ public:
         if( train_mode ) {
             print_message( "dropout(forward)" );
             fprec ratio = (fprec)inputs[1]->output[0];
-            fprec scale = 1.0 / (1.0 - ratio);  // inverted dropout 
+            fprec scale = 1.0 / (1.0 - ratio);  // inverted dropout(pytorch)
             inputs[0]->grad = this->grad * dropout * scale;
         } else {
             inputs[0]->grad = this->grad;
@@ -1671,10 +1631,6 @@ public:
         {
             output = output/(fprec)a.size();
         }
-        //cout<<"mseloss "<<a.size()<<","<<type<<endl;
-        //print_tensor( "mesloss", output );
-        //cout<<"mseloss a"<<a<<endl;
-        //cout<<"mseloss b"<<b<<endl;
         //cout<<"mseloss"<<output<<endl;
         return true;
     }
@@ -1778,8 +1734,6 @@ public:
     fprec get_loss() { return output[0]; }
 };
 
-//   aten::BCELoss
-//   aten::binary_cross_entropy
 class BCELossOp:public MCTNode {
 public:
     BCELossOp(){};
@@ -2002,7 +1956,6 @@ public:
     }
 };
 
-// broadcast reverve sequential 
 class BroadcastTensorsOp:public MCTNode{
 public:
     BroadcastTensorsOp() 
@@ -2058,7 +2011,6 @@ public:
             if( n_dim < az[i] )  n_dim = az[i];
         }
         if( n_dim < 1 )  return 0; // all numbers
-        if( chk > 0 )  cout<<"broadcast n_dim="<<n_dim<<endl;
         
         int equal = 1;
         int err   = 0;
@@ -2105,8 +2057,6 @@ public:
                 equal++;
             } else if( (ne+n1) == n_dim ) {
                 status = 1;
-            //} else if( ((n1+n2) == n_dim) & (n2==1) ) {
-                //status = 1;
             } else {
                 cout<<"broadcast error. ("<<k<<")"<<endl; 
                 err += 1;
@@ -2126,25 +2076,9 @@ public:
             if( equal == num ) {
                 result = 0;
             } else {
-                /* switch( n_dim ) {  // 211004 mod
-                case 1:
-                    shape = { na[0] };
-                    break;
-                case 2:
-                    shape = { na[0], na[1] };
-                    break;
-                case 3:
-                    shape = { na[0], na[1], na[2] };
-                    break;
-                case 4:
-                    shape = { na[0], na[1], na[2], na[3] };
-                    break;
-                default:
-                    cout<<"tensor dimension is over 4"<<endl;
-                    result = -2;
-                }*/
                 // set shape size by std::vector
-                //   ex. shape = { na[0], na[1], na[2] };
+                //   ex. shape = { na[0], na[1], na[2] } 
+                //   vector<size_t> v= { na[0], na[1], na[2] }
                 std::vector<size_t> v;
                 for(int i=0;i<n_dim;i++)  v.push_back( na[i] );
                 shape = v;
@@ -2169,10 +2103,6 @@ public:
         cout<<"az"<<az<<endl;
         cout<<"oz"<<oz<<endl;
         
-        /*if( az > 4 || oz > 4 ) {  // del
-            cout<<"dimension over 4"<<endl;
-            return -1;
-        }*/
         if( oz == 0 )
         {
             ga = (fprec)ga[0];
@@ -2192,34 +2122,10 @@ public:
         
         int inc = az - oz;
         cout<<"inc"<<inc<<endl;
-        /*if( inc == 1 ) {  // 211004 mod
-            if     ( az == 2 )  ga = xt::view( ga, 0, xt::all() );
-            else if( az == 3 )  ga = xt::view( ga, 0, xt::all(), xt::all() );
-            else if( az == 4 )  ga = xt::view( ga, 0, xt::all(), xt::all(), xt::all() );
-            else  return -2;
-        } else if( inc == 2 ) {
-            if     ( az == 3 )  ga = xt::view( ga, 0, 0, xt::all() );
-            else if( az == 4 )  ga = xt::view( ga, 0, 0, xt::all(), xt::all() );
-            else  return -2;
-        } else if( inc == 3 ) {
-            if( az == 4 )       ga = xt::view( ga, 0, 0, 0, xt::all() );
-            else  return -2;
-        } else if(inc < 0 ) {
-            return -2;
-        }
-        
-        if( oz == 1 ) {
-            ga = xt::view(ga, xt::range(0,os[0]) );
-        } else if( oz == 2 ) {
-            ga = xt::view(ga, xt::range(0,os[0]), xt::range(0,os[1]) );
-        } else if( oz == 3 ) {
-            ga = xt::view(ga, xt::range(0,os[0]), xt::range(0,os[1]), xt::range(0,os[2]) );
-        } else if( oz == 4 ) {
-            ga = xt::view(ga, xt::range(0,os[0]), xt::range(0,os[1]), xt::range(0,os[2]), xt::range(0,os[3]) );
-        }*/
-        
-        // return tensor row size 
-        //  ex. ga = xt::view( ga, 0, xt::all(), xt::all() );
+        // return original tensor row size 
+        //  ex. delete first row
+        //      ga = xt::view( ga, 0, xt::ellipsis() );
+        //  cf. numpy : ga = ga[ 0, ... ]
         if( inc > 0 ) {
             xt::xstrided_slice_vector sv1;
             for(int i=0;i<inc;i++)  sv1.push_back( 0 );  // 0 == decrease tensor row
@@ -2228,8 +2134,10 @@ public:
         } else if( inc < 0 ) {
             return -2;
         }
-        // return tensor column size
-        //  ex. ga = xt::view(ga, xt::range(0,os[0]), xt::range(0,os[1]) );
+        // return original tensor column size
+        //  ex. original tensor is sencond tensor. os is original column size array.
+        //      ga = xt::view(ga, xt::range(0,os[0]), xt::range(0,os[1]) );
+        //  cf. numpy : ga = ga[ 0:os[0], 0:os[1] ]
         if( oz > 0 )
         {
             xt::xstrided_slice_vector sv2;
@@ -2251,7 +2159,7 @@ public:
             {
                 result = check( *tlist1, tlist1->size(), broadcast_shape, 0 );
                 if( result != 0 )  cout<<"broadcast check="<<result<<endl;
-                if( result < 0 )  return false;
+                if( result < 0 )   return false;
                 
                 tlist.clear();
                 glist.clear();
@@ -2414,8 +2322,6 @@ public:
             } else {
                 glist1->at(out_id)= this->grad;
             }
-            //glist1->insert( glist1->begin(), this->grad );
-            //glist1->push_back( this->grad );
         }
         _backward_inputs();
         return true;
