@@ -61,17 +61,20 @@ def get_attr_from_model( s, model ):
         return m_model
     raise Exception("Unknown attribute:"+s)
     return None
-
+    
 
 # ex. Net/Linear[fc1]/weight/43 -> fc1_weight
+#     VAE/Net[net]/Linear[fc1]/weight/158 -> fc1_weight
 def get_param_name( s1 ):
-    
     s2 = s1.split('/')
-    s3 = re.findall("(?<=\[).+?(?=\])", s2[1])
-    #print(s2)
-    s4 = s3[0] + '_' + s2[2]
+    n = 1
+    for i in range(len(s2)):
+      k = s2[i].find("[")
+      if( k >= 0 ):  n = i
+    s3 = re.findall("(?<=\[).+?(?=\])", s2[n])
+    s4 = s3[0] + '_' + s2[n+1]
     return s4
-
+    
 #
 def string_tensor( key, out, type=0 ):
     
@@ -231,8 +234,12 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
     #include<fstream>
     #include<string>
     #include<vector>
-    #include"minictorch.hpp"
-
+    #ifdef _NOTEBOOK
+    #include "../../src/minictorch.hpp"
+    #else
+    #include "minictorch.hpp"
+    #endif
+    
     using namespace std;
     
     extern Tensor  xin;"""
@@ -243,7 +250,6 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
             text=""
             name = el["name"]
             key = get_param_name( name )
-            #print(key)
             text="""
     extern Tensor  {key};""".format(key=key)
             all_text+=text
@@ -351,11 +357,9 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
             
             if rand_flag == 0:
                 skey = name.split("/")
-                #print("split: ",skey)
                 w_len = len(attr.shape) 
                 if w_len > 0:
                     shape = ",".join(map(str,attr.shape))
-                    #print("---",skey[2],w_len,shape)
                     text+="""
             Tensor::shape_type shape = {{{shape}}};
             {key}.reshape( shape );
@@ -363,11 +367,9 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
             
             else:
                 skey = name.split("/")
-                #print("split: ",skey)
                 w_len = len(attr.shape) 
                 if w_len > 0:
                     shape = ",".join(map(str,attr.shape))
-                    #print("---",skey[2],w_len,shape)
                     shy = attr.shape[w_len-1]
                     text+="""
             Tensor::shape_type shape = {{{shape}}};
@@ -423,12 +425,6 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
             elif el["op"]=="aten::t":
                 text+="""
             TransposeOp* op = new TransposeOp();"""
-            elif el["op"]=="aten::max":  # 210729 add yet
-                text+="""
-            MaxOp* op = new MaxOp();"""
-            elif el["op"]=="aten::min":  # 210729 add yet
-                text+="""
-            MinOp* op = new MinOp();""" 
             elif el["op"]=="aten::sigmoid":
                 text+="""
             SigmoidOp* op = new SigmoidOp();"""
@@ -477,7 +473,7 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
             elif el["op"]=="aten::binary_cross_entropy":
                 text+="""
             BCELossOp* op = new BCELossOp();"""
-            elif el["op"]=="aten::nll_loss_nd":  #210824 yet
+            elif el["op"]=="aten::nll_loss_nd":  # yet check
                 text+="""
             NLLLossOp* op = new NLLLossOp();"""
             elif el["op"]=="aten::size":
@@ -522,6 +518,12 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
             elif el["op"]=="prim::ListUnpack":
                 text+="""
             ListUnpackOp* op = new ListUnpackOp( {k} );""".format(k=out_id)
+            elif el["op"]=="prim::TupleConstruct":
+                text+="""
+            TupleConstructOp* op = new TupleConstructOp();"""
+            elif el["op"]=="prim::TupleUnpack":
+                text+="""
+            TupleUnpackOp* op = new TupleUnpackOp( {k} );""".format(k=out_id)
             else:
                 #assert False, "unknown op:"+el["op"]
                 text+="""
@@ -572,6 +574,8 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
         }
         cout<<"input_grad"<<input_var.grad<<endl;
     }
+    
+    //extern void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var, int N );
     """
     
     # main program
@@ -596,6 +600,7 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
     all_text +="""
         defineOp( forward_result, input_var );
         do_train1( forward_result, input_var, {output_id} );
+        //do_train_loop( forward_result, input_var, {output_id} );
         
         return 0;
     }}
@@ -604,7 +609,7 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
     return all_text
     
     
-# convert json file to parameter, cpp, make file
+# convert json file to parameter, cpp, and make file
 def convert_json( project, folder, model, input_x, json_path, rand_flag=0 ):
 
     cpp_fname   = project + ".cpp"
