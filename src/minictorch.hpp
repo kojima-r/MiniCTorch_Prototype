@@ -60,9 +60,9 @@ class MCTNode{
     virtual void update( fprec delta ) {};
     virtual void set_output1( fprec o1 ) {};
     
-    virtual vector<Tensor>* get_tlist() { return NULL; };
-    virtual vector<Tensor>* get_glist() { return NULL; };
-    virtual vector<MCTNode*>* get_ndlist(){ return NULL; }; // 211025 add
+    virtual vector<Tensor>*   get_tlist() { return NULL; };
+    virtual vector<Tensor>*   get_glist() { return NULL; };
+    virtual vector<MCTNode*>* get_ndlist(){ return NULL; };
     
     // utility function
     void set_id( int n ) { id = n; };
@@ -217,41 +217,6 @@ class LogOp:public MCTNode{
         return true;
     }
 };
-
-/* 210824 replace
-class SumOp:public MCTNode{
-    public:
-    SumOp(int axis=0){
-        this->axis=axis;
-        this->size=1;
-    }
-    int axis;
-    int size;
-    
-    bool forward(){
-        _forward_inputs();
-        print_message( "sum(forward)" );
-        if( inputs[1] ) {  // 210724 add
-            auto ax = (int)inputs[1]->output[0];
-            if( ax == 1 )  this->axis = ax;
-        }
-        auto s = inputs[0]->output.shape();
-        this->size   = s[this->axis];
-        this->output = xt::sum(inputs[0]->output,{this->axis});
-        return true;
-    }
-    bool backward(){
-        print_message( "sum(backward)" );
-        for(auto& itr:inputs){
-            if( itr ) {
-                auto bb = xt::expand_dims( this->grad,this->axis );
-                auto g  = xt::repeat( bb,this->size,this->axis );
-                itr->grad += g;  // 210723 mod mari
-            }
-        }
-        _backward_inputs();
-    }
-};*/
 
 class SumOp:public MCTNode{
     public:
@@ -520,7 +485,6 @@ class MatMulBase:public MCTNode{
         {
             auto v = xt::view( bx, i, xt::all(), xt::all() );
             auto w = xt::view( by, i, xt::all(), xt::all() );
-            //auto temp=xt::linalg::dot(v,w); //ba.T * bb
             auto temp = DOT(v,w); // ba.T * bb
             print_shape("temp shape ", temp);
             xt::view( out, i, xt::all(), xt::all() ) = temp;
@@ -594,25 +558,20 @@ class MatMulOp:public MatMulBase{
             //  b.rank: 2 
             ga += DOT( gc, xt::transpose(b) );
             gb += DOT( xt::transpose(a), gc );
-            //ga+=xt::linalg::dot(gc,xt::transpose(b));
-            //gb+=xt::linalg::dot(xt::transpose(a),gc);
             
         } else if( ar==1 && br==2 ){
             // matmul:
             //  a.rank: 1
             //  b.rank: 2 
-            //ga+=xt::linalg::dot(gc,xt::transpose(b));
             ga += DOT( gc, xt::transpose(b) );
             Tensor a2 = a.reshape({-1,1});
             Tensor g2 = gc.reshape({1,-1});
             gb += DOT( a2, g2 );
-            //gb+=xt::linalg::dot(a2,g2);
             
         } else if( ar > 2 && br==2 ){
             // batched matmul:
             //  a.rank: >2
             //  b.rank: 2 
-            //ga+=xt::linalg::dot(gc,xt::transpose(b));
             ga += DOT( gc, xt::transpose(b) );
             print_tensor( "ga", ga );
             print_tensor( "gc", gc );
@@ -697,14 +656,12 @@ class LinearOp:public MatMulBase{
             //  a.rank: 2
             //  b.rank: 2 
             output = DOT(a, xt::transpose(b) ) + d;
-            //output =xt::linalg::dot(a,b) + d;
             
         } else if( ar > 2 && br==2 ){  // yet 
             // batched admm:
             //  a.rank: >2
             //  b.rank: 2 
             output = DOT( a,xt::transpose(b) ) + d;
-            //output =xt::linalg::dot(a,b) + d;
             
         } else {
             cout<<"Error:LinearOp"<<endl;
@@ -736,8 +693,6 @@ class LinearOp:public MatMulBase{
             // addmm:
             //  a.rank: 2
             //  b.rank: 2 
-            //ga+=xt::linalg::dot(gc,xt::transpose(b));
-            //gb+=xt::linalg::dot(xt::transpose(a),gc);
             ga += DOT( gc, b );
             gb += DOT( xt::transpose(gc), a );
             gd += xt::sum( gc,{0} );
@@ -745,12 +700,10 @@ class LinearOp:public MatMulBase{
         } else if( ar==1 && br==2 ){ // yet
             // addmm:
             //  a.rank: 1
-            //  b.rank: 2 
-            //ga+=xt::linalg::dot(gc,xt::transpose(b));
+            //  b.rank: 2
             ga += DOT( gc, xt::transpose(b) );
             Tensor a2 = a.reshape({-1,1});
             Tensor g2 = gc.reshape({1,-1});
-            //gb +=xt::linalg::dot(a2,g2);
             gb += DOT( a2, g2 );
             gd += xt::sum( gc,{0} );
             
@@ -758,7 +711,6 @@ class LinearOp:public MatMulBase{
             // batched addmm:
             //  a.rank: >2
             //  b.rank: 2 
-            //ga+=xt::linalg::dot(gd,xt::transpose(b));
             ga += DOT( gd, xt::transpose(b) );
             gd += xt::sum( gc,{0} );
             
@@ -1154,7 +1106,7 @@ class SoftmaxOp:public SoftmaxBase{
 
 class LogSoftmaxOp:public SoftmaxBase{
     public:
-    LogSoftmaxOp(int ax=1) { axis=ax; }
+    LogSoftmaxOp( int ax=1 ) { axis=ax; }
     int axis;
     
     bool forward()
@@ -1405,7 +1357,6 @@ public:
         Tensor   x  = inputs[0]->output;
         auto     xs = x.shape();
         int   n_dim = xs.size();
-        //cout<<"ndim="<<n_dim<<endl;
         if( n_dim != 2 && n_dim != 4 )
         {
             cout<<"Error:BatchNormOp input dimension(not 2 or 4)"<<endl;
@@ -1555,7 +1506,7 @@ public:
                 output  = x * dropout * scale;
             } else {
                 dropout = xt::where( r > ratio, 1, 0 );
-                output  = x * dropout *
+                output  = x * dropout;
             }
             print_tensor("drop2",output);
             print_tensor("dropout",dropout);
