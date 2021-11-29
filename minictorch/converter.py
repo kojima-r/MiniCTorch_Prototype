@@ -148,8 +148,9 @@ def c_data_generator_old( in_data ):  # 211113 mod
     all_text += text
     
     return all_text
-    
-def c_data_generator( **datas ):  # 211113 add
+
+
+def c_data_generator( **datas ):
     
     # type declaration
     all_text="""
@@ -177,6 +178,7 @@ def c_data_generator( **datas ):  # 211113 add
     
     return all_text
     
+
 def c_param_generator( project, obj, model, input_data ):
     
     all_text="""
@@ -641,36 +643,55 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
     
     return all_text
     
+
+def unpack_origin_no( obj, no1 ):
+    no  = no1
+    el1 = obj[no]
+    no2 = el1["in"][0]
+    out_id = el1['output_id']
+    el2 = obj[no2]
+    #print( "unpack",el2["op"], out_id)
+    if el2["op"] == 'prim::ListConstruct':
+        no = el2['in'][out_id]
+    elif el2["op"] == 'prim::TupleConstruct':
+        no = el2['in'][out_id]
+    elif el2["op"] == 'aten::broadcast_tensors':
+        el3 = obj[el2['in'][0]]
+        if el3["op"] == 'prim::ListConstruct':
+            no = el3['in'][out_id]
+    #print("unpack original no: ",no,no1)
+    return no
     
 def get_unpack_origin( obj, no1 ):
     no = no1
-    el1 = obj[no1]
-    print( "unpack0", el1["op"])
-    if el1["op"]=='prim::ListUnpack' or el1["op"] == 'prim::TupleUnpack':
-        no2 = el1["in"][0]
-        out_id = el1['output_id']
-        el2 = obj[no2]
-        print( "unpack1",el2["op"], out_id)
-        if el2["op"] == 'prim::ListConstruct':
-            no = el2['in'][out_id]
-        elif el2["op"] == 'prim::TupleConstruct':
-            no = el2['in'][out_id]
-        elif el2["op"] == 'aten::broadcast_tensors':
-            el3 = obj[el2['in'][0]]
-            print( "unpack2",el3["op"], out_id)
-            if el3["op"] == 'prim::ListConstruct':
-                no = el3['in'][out_id]
-    print("unpack original no: ",no,no1)
+    while True:
+        el = obj[no]
+        if el["op"] == 'prim::ListUnpack' or el["op"] == 'prim::TupleUnpack':
+            no = unpack_origin_no( obj, no )
+        else:
+            break
     return no
 
+def get_tensor_shape( x ):
+    num = len( x.shape )
+    text = ""
+    if num > 1:
+        text = "{"
+        for i in range(num-1):
+            text += str(x.shape[i])
+            text += ','
+        text += str(x.shape[num-1]) + "}"
+        return 1,text
+    elif num == 1:
+        text = "{" + str(x.shape[0]) + "}"
+        return 1,text
+    return 0,text
+    
 def c_train_code_generator( project, folder, obj, **kwargs ):
     
-    # option check
+    # arguments
     nwargs = len(kwargs)
     if nwargs < 1: return ""
-    
-    if 'sol' not in kwargs:  return ""
-    sol_type = kwargs['sol']
     
     epochs = 200
     if 'epochs' in kwargs:
@@ -687,70 +708,220 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         lr = kwargs['lr']
     print("lr : ", lr )
         
-    imgs = 10;
-    if 'imgs' in kwargs:
-        imgs = kwargs['imgs']
+    net_key = "Net"
+    if 'net_key' in kwargs:
+        net_key = kwargs['net_key']
+        print("net_key :", net_key )
+    
+    loss_key = "Loss"
+    if 'loss_key' in kwargs:
+        loss_key = kwargs['loss_key']
+        print("loss_key :", loss_key )
         
-    pred_opt = 0
-    pred_s = ""
-    if 'pred_shape' in kwargs:
-        pred_s = kwargs['pred_shape']
-        pred_opt = 2
-        print("pred_shape : ",pred_s)
+    pred_key = ""
+    if 'pred_key' in kwargs:
+        pred_key = kwargs['pred_key']
+        print("pred_key :", pred_key )
         
-    if 'pred_data' in kwargs:
-        pred_data = kwargs[ 'pred_data']
-        #print( "shape : ", pred_data.shape )
-        num = len(pred_data.shape)
-        if num > 1:
-            pred_s = "{"
-            for i in range(num-1):
-                pred_s += str(pred_data.shape[i])
-                pred_s += ','
-            pred_s += str(pred_data.shape[num-1]) + "}"
-            pred_opt = 1
+    pred_specify_no = -1
+    if 'pred_no' in kwargs:
+        pred_specify_no = kwargs['pred_no']
+        print("pred_no :", pred_specify_no )
         
     inp_opt = 0;
     inp_s = ""
     if 'inp_data' in kwargs:
         inp_data = kwargs[ 'inp_data']
-        num = len(inp_data.shape)
-        print( "inp shape", inp_data.shape,num )
-        if num > 0:
-            inp_s = "{"
-            for i in range(num-1):
-                inp_s += str(inp_data.shape[i])
-                inp_s += ','
-            inp_s += str(inp_data.shape[num-1]) + "}"
-            inp_opt = 1
-         
+        inp_opt, inp_s = get_tensor_shape( inp_data )
+        
     target_opt = 0
     target_s = ""
     if 'target_data' in kwargs:
         target_data = kwargs[ 'target_data']
-        #print( "shape : ", target_data.shape )
-        num = len(target_data.shape)
-        if num > 0:
-            target_s = "{"
-            for i in range(num-1):
-                target_s += str(target_data.shape[i])
-                target_s += ','
-            target_s += str(target_data.shape[num-1]) + "}"
-            target_opt = 1
+        target_opt, target_s = get_tensor_shape( target_data )
         
-    print("inp  shape : ",inp_opt ,inp_s)
-    print("pred shape : ",pred_opt,pred_s)
-    print("target shape : ", target_opt,target_s)
+    print("inp  shape : ", inp_opt, inp_s)
+    print("target shape : ", target_opt, target_s)
+    
+    pred_num = 0;
+    if inp_opt > 0:
+        pred_num = inp_data.shape[0]
+        
+    if 'pred_num' in kwargs:  # need to rename
+        pred_num = kwargs['pred_num']
+    print("pred_num : ", pred_num)
     
     div_flag = False;
     if 'div' in kwargs:
         div_flag = kwargs['div']
     print("div : ", div_flag)
         
+    # ---------- 
+    
+    # output id
+    output_id = -1
+    for i,el in enumerate(obj):
+        if "output" in el['name']:
+            assert len(el["in"])>0, "output error"
+            output_id = el["in"][0]
+            
+    nadd1 = 0;
+    nadd2 = 0;
+    if output_id >=0:
+        el = obj[output_id];
+        if el["op"] == "aten::add":  # for vae
+            nadd1 = el['in'][0]
+            nadd2 = el['in'][1]
+            print("nadd : ", nadd1,nadd2)
+    
+    # division number (X)           
+    ndiv = []
+    if div_flag:
+        k = 0
+        for i,el in enumerate(obj):
+            if el["op"]=="aten::div":
+                el2 = obj[ el['in'][1] ]
+                if el2["op"] == "prim::Constant":
+                    div = el2["constant_value"]
+                    print("div value:",div)
+                    if abs(div-batchs) < 0.01:
+                        ndiv.append( el['in'][1] )
+                        print("div_el",el2)
+                        k = k+1
+        if len(nd) != 2:  div_flag = False
+        print("div no :",ndiv)
+    
+    # evaluated no
+    pred_no   = -1
+    target_no = -1
+    pred_pos  = -1
+    class_no  =  0
+    
+    pos1 = 0
+    pos2 = 0
+    for i,el in enumerate(obj):
+        if net_key in el["name"]:
+            pos1 = i+1
+        if loss_key in el["name"]:
+            pos2 = i
+            break
+    if pos1 > output_id:  pos1 = 0
+    if ( pos1 > 0 ) and ( pos1 < pos2 ):
+        pred_pos = pos1
+    elif pos2 > 0:
+        pred_pos = pos2
+    print("pred_pos : ",pred_pos,pos1,pos2)
+    
+    # inout option ( 0:input only, 1:input and output both )
+    inout = np.zeros( output_id+1, dtype=np.int )
+    inout[0] = 1
+    for i in range(1,output_id+1):
+        el = obj[i]
+        if   el['op'] == "prim::Constant":  pass
+        elif el['op'] == "aten::GetAttr":   pass
+        elif el['op'] == "prim::ListConstruct": pass
+        elif el['op'] == "prim::ListUnpack":    pass
+        elif el['op'] == "aten::broadcast_tensors":  pass
+        elif el['op'] == "prim::TupleConstruct":  pass
+        elif el['op'] == "prim::TupleUnpack":  pass
+        else:
+            nin = 0;
+            for j in range(len(el['in'])):
+                k = get_unpack_origin( obj, el['in'][j] )
+                if inout[k] == 1: nin=nin+1
+            if nin > 0: inout[i] = 1
+            
+    #set_no = set()
+    last = -1
+    pred_max = -1
+    pred_id  = -1
+    for i in range(output_id+1):
+        el = obj[i]
+        #print("el ",i,inout[i], " : ", el['name'],el['op'],el['in'],el['output_id'])
+        if inout[i] > 0:
+            print("el ",i,inout[i], " : ", el['name'],el['op'],el['in'],el['output_id'],pred_no)
+            if last < i: last = i
+            if pred_pos < 0:  
+                pass
+                #for j in range(len(el['in'])):
+                #    k = get_unpack_origin( obj, el['in'][j])
+                #    if inout[k] > 0:
+                #        print(" --- pred el (",j,") :",el['in'][j]," -> ",k)
+                #        set_no.add( k )
+            elif i >= pred_pos:
+                for j in range(len(el['in'])):
+                    k = get_unpack_origin( obj, el['in'][j])
+                    if ( k < pred_pos ) and ( inout[k] > 0 ):
+                        print(" --- pred el (",j,") :",el['in'][j]," -> ",k)
+                        #set_no.add( k )
+                        if pred_max < k: 
+                            pred_max = k
+                            pred_id  = i
+    
+    if pred_id > 0:
+        el = obj[pred_id]
+        type = 0
+        if   el['op'] == 'aten::mse_loss':  type = 1
+        elif el['op'] == 'aten::cross_entropy_loss':    type = 2
+        elif el['op'] == 'aten::binary_cross_entropy':  type = 2
+        else:  type = 3
+        print("loss pred_id : ",pred_id,pred_max)
+        if type > 0:
+            pred_no = get_unpack_origin( obj, el['in'][0] )
+            if len(el['in']) > 1: 
+                no2 = get_unpack_origin( obj, el['in'][1] )
+                if target_opt > 0: target_no = no2
+                if type == 2:      class_no  = no2
+        if pred_no > 0:  
+            print("eval no :",i," (type=",type,") : ", pred_no,target_no)
+            
+    if pred_pos < 0:
+        if len(pred_key) > 0:
+            for i,el in enumerate(obj):
+                if pred_key in el['op']:
+                    if i > pred_no:  pred_no = i
+        else:
+            type = 0
+            for i,el in enumerate(obj):
+                if   el['op'] == 'aten::mse_loss':  type = 1
+                elif el['op'] == 'aten::cross_entropy_loss':    type = 2
+                elif el['op'] == 'aten::binary_cross_entropy':  type = 2
+                if type > 0:
+                    pred_no = get_unpack_origin( obj, el['in'][0] )
+                    if len(el['in']) > 1:
+                        no2 = get_unpack_origin( obj, el['in'][1] )
+                        if target_opt > 0: target_no = no2
+                        if type == 2:      class_no  = no2
+                if pred_no > 0:  
+                    print("eval no :",i,"-> type=",type," : ",pred_no,target_no)
+                    break
+            
+        
+    print("last cmd:", last)
+    #if len(set_no) > 0:
+    #    print("set_no :", sorted(set_no,reverse=True))
+    print("------")
+        
+    ###
+    sol_kind = "";
+    if "sol" in kwargs:
+        sol_kind = kwargs["sol"]
+    print("solution :", sol_kind)
+    if not "clas" in sol_kind:  class_no = 0
+    
+    if ( pred_specify_no >= 0 ) and ( pred_specify_no < output_id ):
+        if inout[pred_specify_no] > 0: 
+            pred_no = pred_specify_no
+   
+    print("pred_no   :", pred_no)
+    print("target_no :", target_no)
+    print("class_no  :", class_no)
+    
+    
     # header section
     all_text="""
     //
-    //  {title}_train
+    //  {proj}_train
     //
     #ifdef _NOTEBOOK
     #include "../../src/minictorch.hpp"
@@ -759,36 +930,20 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     #endif
     
     extern bool train_mode;
-    """.format(title=project)
+    """.format(proj=project)
     
-    text=""
-    if sol_type == "mse":
-        text="""
-    extern Tensor inp_data;
-    extern Tensor target_data;
-    
-    """
-    elif sol_type == "mse1":
-        text="""
-    extern Tensor inp_data;
-    extern Tensor pred_data;
-    
-    """
-    elif sol_type == "cse":
-        text="""
-    extern Tensor inp_data;
-    extern Tensor labels;
-    """
-
-    elif sol_type == "vae":
-        text="""
-    extern Tensor inp_data;
-    """
-    else:
-        pass
+    text = ""
+    if inp_opt > 0:
+        text +="""
+    extern Tensor inp_data;"""
+    if target_opt > 0:
+        text +="""
+    extern Tensor target_data;"""
     all_text += text
     
+    # train loop program
     all_text +="""
+    
     void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var, int NL )
     {
         auto do_forward=[]( vector<MCTNode*> &op, int n ) 
@@ -827,104 +982,63 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         cout<<"epoch_num : "<<epoch_num<<endl;
     """.format(ne=epochs,lr=lr)
     
-    # output id
-    output_id = -1
-    for i,el in enumerate(obj):
-        if "output" in el['name']:
-            assert len(el["in"])>0, "output error"
-            output_id = el["in"][0]
-    """
-    # taget_no ( plane to delete )
-    target_no = -1
-    if 'target' in kwargs:
-        keyw = kwargs["target"]
-        for i,el in enumerate(obj):
-            if el["op"]=="aten::linear" or el["op"]=="aten::sigmoid" or el["op"]=="aten::relu":
-                if keyw in el["name"]:
-                    target_no = i
-                    print("target_no : ",i," keyw:",keyw)
-    """
-    # evaluated no
-    nb = 0
-    nk = 0
-    if sol_type == "mse" or sol_type == "mse1":
-        for i,el in enumerate(obj):
-            if el["op"] == "aten::mse_loss": 
-                no1 = el['in'][0]
-                no2 = el['in'][1]
-                nb = get_unpack_origin( obj, no1 );
-                nk = get_unpack_origin( obj, no2 );
-                print("mse_no : ",nb,nk)
-                
-    elif sol_type == "cse" or sol_type == "cse1":
-        for i,el in enumerate(obj):
-            if el["op"] == "aten::cross_entropy_loss": 
-                nb = el['in'][0]
-                nk = el['in'][1]
-                print("cse_no : ",nb,nk)
-                
-    elif sol_type == "vae":
-        el = obj[output_id];
-        if el["op"] == "aten::add":  # for vae
-            nb = el['in'][0]
-            nk = el['in'][1]
-            print("nb,nk : ", nb,nk)
-            all_text +="""
-            
-      //int NL = {nl};  // loss value
-        int NB = {nb};  // binary_cross_entropy
-        int NK = {nk};  // KL divergence
-            """.format(nl=output_id,nb=nb,nk=nk)
-    
-    print("batch_size:",batchs)
-    print("inp_shape:" ,inp_s)
-    
-    if sol_type != "mse1" and sol_type != "cse1":
-        all_text +="""
+    text = ""
+    if batchs > 0:
+        
+        if inp_opt > 0:
+            text +="""
         inp_data.reshape( {shape} );
         auto inp_shape = inp_data.shape();
     
         int batch_size = {bz};
         int n_batch = (int)inp_shape[0] / batch_size;
-        cout<<"indata shape   : "<<inp_shape[0]<<","<<inp_shape[1]<<endl;
         cout<<"batch  number  : "<<n_batch<<","<<batch_size<<endl;
         cout<<"learning ratio : "<<lr<<endl;
     
         """.format(shape=inp_s,bz=batchs)
+        #cout<<"indata shape   : "<<inp_shape[0]<<inp_shape[1]<<endl;
         
-    if sol_type == "mse":
-        all_text +="""
+    else:
+        
+        batchs = 0
+        if inp_opt > 0:
+            text +="""
+        inp_data.reshape( {shape} );
+        auto inp_shape = inp_data.shape();
+        input_var.output = inp_data;
+        
+        """.format(shape=inp_s)
+        
+    all_text += text
+    
+    text = ""
+    if batchs > 0:
+        if inp_opt > 0:
+            text +="""
+        Tensor x_tmp = xt::zeros<fprec>( { batch_size, (int)inp_shape[1] } );"""
+        if target_opt > 0:
+            if class_no > 0:
+                text +="""
+        Tensor y_tmp = xt::zeros<fprec>( { batch_size } );"""
+            else:
+                text +="""
         target_data.reshape( {shape} );
-        Tensor x_t = xt::zeros<fprec>( {{ batch_size, (int)inp_shape[1] }} );
-        Tensor y_t = xt::zeros<fprec>( {{ batch_size, (int)inp_shape[1] }} );
-        """.format(shape=target_s)
-    
-    elif sol_type == "mse1":
-        pass
-    
-    elif sol_type == "cse":
-        all_text +="""
-        Tensor x_pred   = xt::zeros<fprec>( { batch_size, (int)inp_shape[1] } );
-        Tensor x_labels = xt::zeros<fprec>( { batch_size } );
-        """
-    
-    elif sol_type == "cse1":
-        if nk >= 0:
-            all_text +="""
-            
-        auto labels = forward_result[{nk}]->output;
-        auto lb_shape = labels.shape(); 
-        """.format(nk=nk)
+        Tensor y_tmp = xt::zeros<fprec>( {{ batch_size, (int)inp_shape[1] }} );""".format(shape=target_s)
     
     else:
-        all_text +="""
-        Tensor x_pred = xt::zeros<fprec>( { batch_size, (int)inp_shape[1] } );
-        """
+        if class_no > 0:
+            text +="""
+        auto labels = forward_result[{nt}]->output;
+        auto labels_shape = labels.shape();""".format(nt=class_no)
+    
+    all_text += text
+    
         
     # learning section
     fpath = folder + '/' + project + ".out"
         
-    all_text +="""
+    all_text += """
+    
         ofstream outputfile("{fn}");
         
         do_zerograd( forward_result, NL );
@@ -933,79 +1047,98 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             train_mode = true;""".format(fn=fpath)
             
     text = ""
-    if sol_type == "mse" or sol_type == "cse" or sol_type == "vae":
+    if batchs > 0:
         text += """
             
             xt::xarray<int> index = xt::arange( (int)inp_shape[0] );
-            xt::random::shuffle( index );
-        """
+            xt::random::shuffle( index );"""
             
-
-    if sol_type == "mse1":
-        text="""
+    if batchs < 1:  # batchsize == 0
+        
+        if class_no > 0:  # classification only
+        
+            text +="""
+            do_forward( forward_result, NL );
+            
+            fprec o = forward_result[NL]->output[0];
+            auto  y = forward_result[{ns}]->output;
+            auto  lbs  = xt::argmax( y, 1 );
+            auto  eq   = xt::equal( labels, lbs );
+            auto  eq_t = xt::sum( eq );     
+            fprec acc = (fprec)eq_t[0] / (fprec)labels_shape[0];
+            cout<<"epoch "<<epoch<<" - loss "<<o<<" - accuracy "<<acc<<endl;
+            outputfile<<to_string(o)<<","<<to_string(acc)<<endl;
+        """.format(ns=pred_no)
+        
+        else:  # others
+            
+            text +="""
             do_forward( forward_result, NL );
             
             auto o = forward_result[NL]->output;
             cout<<"epoch "<<epoch<<" - loss "<<o[0]<<endl;
             outputfile<<to_string(o[0])<<endl;
-            
+        """
+        
+        text += """
             do_backward( forward_result, NL );
             update_params( forward_result, NL, lr );
-            do_zerograd( forward_result, NL );"""
-            
-    elif sol_type == "mse":
-         text+="""
-           
-            fprec total_loss = 0.0;
-            for(int j=0;j<n_batch;j++)
-            {{
-                int jb = j * batch_size;
-                for(int k=0;k<batch_size;k++)
-                {{
-                    xt::row( x_t, k ) = xt::flatten( xt::row( inp_data, index(jb+k) ) );
-                    xt::row( y_t, k ) = xt::flatten( xt::row( target_data, index(jb+k) ) );
-                }}
-                
-                input_var.output = x_t;
-                forward_result[{nd1}]->output = y_t;  
-                do_forward( forward_result, NL );
-                
-                auto o = forward_result[NL]->output;
-                total_loss += o[0];
-            
-                do_backward( forward_result, NL );
-                update_params( forward_result, NL, lr );
-                do_zerograd( forward_result, NL );
-            }}
-            cout<<"total_loss : epoch "<<epoch<<" : loss "<<total_loss<<endl;
-            outputfile<<to_string(total_loss)<<endl;
-            """.format(nd1=nk)
+            do_zerograd( forward_result, NL );
+        """
         
-    elif sol_type == "cse":
-        text+="""
-           
+    else:  # minibatch ( batchsize > 0 )
+            
+        if div_flag:
+            for i in range(len(nd)):
+                text +="""
+            forward_result[{nd1}]->set_output1( (fprec)batch_size );  // div size""".format(nd1=nd[i])
+            
+        if class_no > 0:  # classification only
+            text +="""
+            
             fprec total_loss = 0.0;
-            int   total_corrects = 0;
+            int   total_corrects = 0;"""
+        else:
+            text +="""
+            
+            fprec total_loss = 0.0;"""
+        text +="""
             for(int j=0;j<n_batch;j++)
-            {{
+            {
                 int jb = j * batch_size;
                 for(int k=0;k<batch_size;k++)
-                {{
-                    xt::row( x_pred, k ) = xt::flatten( xt::row( inp_data, index(jb+k) ) );
-                    x_labels( k ) = labels( index(jb+k) );
-                }}
+                {"""
+            
+        if inp_opt > 0:
+            text +="""
+                    xt::row( x_tmp, k ) = xt::row( inp_data, index(jb+k) );"""
+        if target_opt > 0:
+            if class_no > 0:
+                text +="""
+                    y_tmp( k ) = target_data( index(jb+k) );"""
+            else:
+                text +="""
+                    xt::row( y_tmp, k ) = xt::row( target_data, index(jb+k) );"""
+                    
+        text +="""
+                }
                 
-                input_var.output = x_pred;
-                forward_result[{nd1}]->output = x_labels;  
+                input_var.output = x_tmp;"""
+        if target_no > 0:
+            text +="""
+                forward_result[{nt}]->output = y_tmp;""".format(nt=target_no)
+        
+        if class_no > 0:  # classification only
+            text +="""
                 do_forward( forward_result, NL );
                 
                 auto o = forward_result[NL]->output;
                 total_loss += o[0];
                 
-                auto y = forward_result[{nd2}]->output;
-                auto preds = xt::argmax( y, 1 );
-                auto eq    = xt::equal( x_labels, preds );
-                auto eq_t  = xt::sum( eq );     
+                auto y    = forward_result[{ns}]->output;
+                auto lbs  = xt::argmax( y, 1 );
+                auto eq   = xt::equal( y_tmp, lbs );
+                auto eq_t = xt::sum( eq );     
                 total_corrects += (int)eq_t[0];
             
                 do_backward( forward_result, NL );
@@ -1014,62 +1147,11 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             }}
             fprec total_acc = (fprec)total_corrects / (fprec)inp_shape[0];
             cout<<"total_loss : epoch "<<epoch<<" : loss "<<total_loss<<" : Acc "<<total_acc<<" "<<total_corrects<<endl;
-            outputfile<<to_string(total_loss)<<","<<to_string(total_acc)<<endl;
-            """.format(nd1=nk,nd2=nb)
-            
-    elif sol_type == "cse1":
-        text +="""
-            do_forward( forward_result, NL );
-            
-            fprec o = forward_result[NL]->output[0];
-          
-            auto y = forward_result[{nb}]->output;
-            auto preds = xt::argmax( y, 1 );
-            auto eq    = xt::equal( labels, preds );
-            auto eq_t  = xt::sum( eq );     
-            fprec acc = (fprec)eq_t[0] / (fprec)lb_shape[0];
-            
-            cout<<"epoch "<<epoch<<" - loss "<<o<<" - accuracy "<<acc<<endl;
-            outputfile<<to_string(o)<<","<<to_string(acc)<<endl;
-            
-            do_backward( forward_result, NL );
-            update_params( forward_result, NL, lr );
-            do_zerograd( forward_result, NL );""".format(nb=nb)
-            
-    elif sol_type == "vae":
-        nd = []
-        if div_flag:
-            k = 0
-            for i,el in enumerate(obj):
-                if el["op"]=="aten::div":
-                    el2 = obj[ el['in'][1] ]
-                    if el2["op"] == "prim::Constant":
-                        div = el2["constant_value"]
-                        print("div value:",div)
-                        if abs(div-batchs) < 0.01:
-                            nd.append( el['in'][1] )
-                            print("div_el",el2)
-                            k = k+1
-            if len(nd) != 2:  div_flag = False
-            print("div no:",nd)
-            
-        if div_flag:
-            for i in range(len(nd)):
-                text +="""
-            forward_result[{nd1}]->set_output1( (fprec)batch_size );  // div size""".format(nd1=nd[i])
-            
-        text +="""
+            """.format(ns=pred_no)
         
-            fprec total_loss = 0.0;
-            for(int j=0;j<n_batch;j++)
-            {
-                int jb = j * batch_size;
-                for(int k=0;k<batch_size;k++)
-                {
-                    xt::row( x_pred, k ) = xt::flatten( xt::row( inp_data, index(jb+k) ) );
-                }
-                
-                input_var.output = x_pred;
+        else: # others
+        
+            text +="""
                 do_forward( forward_result, NL );
                 
                 auto o = forward_result[NL]->output;
@@ -1080,10 +1162,17 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
                 do_zerograd( forward_result, NL );
             }
             cout<<"total_loss : epoch "<<epoch<<" - loss "<<total_loss<<endl;
-            
-            train_mode = false;
-            input_var.output = inp_data;
             """
+            
+        # print loss value per epoch
+        text +="""
+            train_mode = false;
+            
+            input_var.output = inp_data;"""
+            
+        if target_no > 0:
+            text +="""
+            forward_result[{nt}]->output = target_data;""".format(nt=target_no)
             
         if div_flag:
             for i in range(len(nd)):
@@ -1091,18 +1180,35 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             forward_result[{nd1}]->set_output1( (fprec)inp_shape[0] );  // div size""".format(nd1=nd[i])
             text +="""
             """
-        if( nb > 0 and nk > 0 ):
+            
+        if( nadd1 > 0 and nadd2 > 0 ):
             text +="""
             do_forward( forward_result, NL );
+            
             auto o  = forward_result[NL]->output;
-            auto o1 = forward_result[NB]->output;
-            auto o2 = forward_result[NK]->output; 
+            auto o1 = forward_result[{na1}]->output;
+            auto o2 = forward_result[{na2}]->output; 
             cout<<"epoch "<<epoch<<" - loss "<<o[0]<<" ( "<<o1[0]<<" , "<<o2[0]<<" ) "<<endl;
             outputfile<<to_string(o[0])<<endl;
-            """
+            """.format(na1=nadd1,na2=nadd2)
         else:
-            text+="""
+            if class_no > 0:  # classification only
+                text +="""
             do_forward( forward_result, NL );
+            
+            auto  o = forward_result[NL]->output;
+            auto  y = forward_result[{ns}]->output;
+            auto  lbs  = xt::argmax( y, 1 );
+            auto  eq   = xt::equal( target_data, lbs );
+            auto  eq_t = xt::sum( eq );     
+            fprec acc = (fprec)eq_t[0] / (fprec)inp_shape[0];
+            cout<<"total_loss : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<eq_t[0]<<endl;
+            outputfile<<to_string(o[0])<<","<<to_string(acc)<<endl;""".format(ns=pred_no)
+            
+            else: # others
+                text+="""
+            do_forward( forward_result, NL );
+            
             auto o  = forward_result[NL]->output;
             cout<<"epoch "<<epoch<<" - loss "<<o[0]<<endl;
             outputfile<<to_string(o[0])<<endl;
@@ -1114,129 +1220,133 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         }
         outputfile.close();
         
-        train_mode = false;
-    """
+        train_mode = false;"""
     
     # prediction section
     path = folder + '/' + project + ".pred"
     
     text=""
-    if sol_type=="mse":
-        if nb >= 0:
-            if pred_opt > 0:
-                text ="""
-        pred_data.reshape( {shape} );""".format(shape=pred_s)
+    if pred_no > 0:
+        print("pred_no : ",pred_no)
+        if batchs < 1:  # batchsize == 0
         
-            text +="""
+            if inp_opt > 0:
+                
+                el = obj[pred_no]
+                text +="""
+        inp_data.reshape( {shape} );
         {{
+            // {ns} : {el1}
             input_var.output = inp_data;
-            do_forward( forward_result, {nb} );
-            auto y_pred = forward_result[{nb}]->output;
+            auto inp_shape = inp_data.shape();
+            int  nx = inp_shape[0];
+            """.format(shape=inp_s,ns=pred_no,el1=el['op'])
             
-            int nx = inp_data.size();
-           
-            ofstream outputfile("{fn}");
-            for(int i=0;i<nx;i++)
-            {{
-                outputfile<<to_string(inp_data(i,0))<<","<<to_string(y_pred(i,0))<<endl;
-            }}
-            outputfile.close();
-        }}
-        """.format(fn=path,nb=nb)
-        
-    elif sol_type=="mse1":
-        fname=""
-        if inp_opt > 0:
-            fname="inp_data"
-        else:
-            fname="pred_data"
-        print("file",inp_opt,fname)
-            
-        #if target_no >= 0:
-        if nb >= 0:
-            if pred_opt > 0:
-                text ="""
-        pred_data.reshape( {shape} );""".format(shape=pred_s)
-        
-            text +="""
-        {{
-            input_var.output = pred_data;
+                text += """
             do_forward( forward_result, {ns} );
             auto y_pred = forward_result[{ns}]->get_output();
             
-            int nx = inp_data.size();
-           
-            ofstream outputfile("{fn}");
+            ofstream outputfile( "{fn}" );
+            outputfile<<to_string(nx)<<",1"<<endl;
             for(int i=0;i<nx;i++)
             {{
-                outputfile<<to_string({xx}[i])<<","<<to_string(y_pred(i,0))<<endl;
+                outputfile<<to_string(y_pred(i,0))<<endl;
             }}
             outputfile.close();
-        }}
-        """.format(fn=path,ns=nb,xx=fname)
+        }}""".format(fn=path,ns=pred_no)
+            
+        else:  # minibatch ( batchsize > 0)
         
-    elif sol_type == "cse":
-        label_no = -1
-        for i,el in enumerate(obj):
-            if el["op"] == "aten::cross_entropy_loss":  # cse
-                no1 = el['in'][0]
-                print("cse_no : ",i)
-                label_no = get_unpack_origin( obj, no1 );
-        if label_no >= 0:
-            pass
-        
-    elif sol_type == "vae":
-        
-        # prediction
-        #path = folder + '/' + project + ".pred"
-    
-        label_no = -1
-        for i,el in enumerate(obj):
-            if el["op"] == "aten::binary_cross_entropy": 
-                no1 = el['in'][0]
-                print("bce_no : ",i)
-                label_no = get_unpack_origin( obj, no1 );
-        if label_no < 0:
-            for i,el in enumerate(obj):
-                if el["op"] == "aten::sigmoid":
-                    label_no = i
-                    print("sigmoid : ",i)
-        if label_no >= 0:
-            text +="""
+            if class_no < 1: # not classification only
+                el = obj[pred_no]
+            
+                pred_type = 1  ###
+                if inp_opt > 0:
+                    pred_type = len(inp_data.shape)
+                print("pred_type : ",pred_type)
+                
+                if pred_type == 1: ###
+                    text +="""
         {{
-            // {ns} : sigmid outpout
-            int n_img = {nm};
+            // {ns} : {el1}""".format(ns=pred_no,el1=el['op'])
             
-            auto y_pred = forward_result[ {ns} ]->get_output();
-           
+                    if inp_opt > 0:
+                        text +="""
+            input_var.output = inp_data;"""
+                 
+                    text +="""
+            do_forward( forward_result, {ns} );
+            auto y_pred = forward_result[{ns}]->output;
+            
             ofstream outputfile( "{fn}" );
-            outputfile<<to_string(n_img)<<","<<to_string(inp_shape[1])<<endl;
+            outputfile<<to_string(inp_shape[0])<<",1"<<endl;
             
-            for(int k=0;k<n_img;k++)
+            for(int i=0;i<inp_shape[0];i++)
             {{
-                for(int i=0;i<inp_shape[1]-1;i++)
-                {{
-                    outputfile<<to_string(y_pred(k,i))<<",";
-                }}
-                outputfile<<to_string(y_pred(k,inp_shape[1]-1))<<endl;
+                outputfile<<to_string(y_pred(i,0))<<endl;
             }}
             outputfile.close();
-        }}
-        """.format(fn=path,nm=imgs,ns=label_no)
+        }}""".format(fn=path,ns=pred_no)
+            
+                elif pred_type > 1:
+                    el = obj[pred_no]
+                    text +="""
+            
+        {{
+            // {ns} : {el1}""".format(ns=pred_no,el1=el['op'])
+            
+                    if inp_opt > 0:
+                        text +="""
+            input_var.output = inp_data;"""
+                
+                    text +="""
+            do_forward( forward_result, {ns} );
+            auto y_pred = forward_result[{ns}]->output;
+            """.format(ns=pred_no)
+            
+                    nx_set = 0;
+                    if inp_opt > 0:
+                        if pred_num == inp_data.shape[0]:
+                            nx_set = 1
+                            text +="""
+            auto inp_shape = inp_data.shape();
+            int nx = inp_shape[0];
+            """
+                    if nx_set == 0:
+                        text +="""
+            int nx = {nx};
+            """.format(nx=pred_num)
+            
+                    text +="""
+            ofstream outputfile( "{fn}" );
+            outputfile<<to_string(nx)<<","<<to_string(inp_shape[1])<<endl;
+            
+            for(int i=0;i<nx;i++)
+            {{
+                for(int j=0;j<inp_shape[1]-1;j++)
+                {{
+                    outputfile<<to_string(y_pred(i,j))<<",";
+                }}
+                outputfile<<to_string(y_pred(i,inp_shape[1]-1))<<endl;
+            }}
+            outputfile.close();
+        }}""".format(fn=path,nx=pred_num)
         
-        # latent variable
-        pathz = folder + '/' + project + ".z"
     
-        label_no  = -1
-        if "z" in kwargs:   
-            keyw = kwargs["z"]
-            for i,el in enumerate(obj):
-                if el["op"] == "aten::linear":
-                    if keyw in el['name']:
-                        label_no = el['in'][0]
-                        print("vae z: ",label_no," keyw:",keyw)
-        if label_no >= 0:
-            text +="""
+    # latent variable
+    z_no  = -1
+    if "z" in kwargs:   
+        keyw = kwargs["z"]
+        for i,el in enumerate(obj):
+            if el["op"] == "aten::linear":
+                if keyw in el['name']:
+                    z_no = el['in'][0]
+                    print("vae z: ", z_no," keyw :", keyw )
+                    
+    if z_no >= 0:
+        pathz = folder + '/' + project + ".z"
+            
+        text +="""
         {{
             // {nz} : z output
             auto z_pred = forward_result[{nz}]->get_output();
@@ -1250,11 +1360,11 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             }}
             outputfile.close();
         }}
-            """.format(fn=pathz,nz=label_no)
+        """.format(fn=pathz,nz=z_no)
     
     all_text += text
-    
     all_text +="""
+    
     }
     """
     return all_text

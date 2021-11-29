@@ -22,7 +22,7 @@
     
     void defineOp( vector<MCTNode*>& forward_result, VariableTensor &input_var )
     {
-        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [2, 2], 'out': [2, 3, 7], 'sorted_id': 0}
+        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [2, 2], 'out': [3, 7, 2], 'sorted_id': 0}
         {
             Tensor::shape_type shape = {2,2};
             forward_result[0] = &input_var;

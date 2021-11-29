@@ -44,7 +44,7 @@
             op->set_inputs( forward_result[1] );
         }
         
-        // {'name': 'Net/tensor', 'op': 'aten::matmul', 'in': [0, 2], 'output_id': 0, 'shape': [1, 2], 'out': [4], 'sorted_id': 3}
+        // {'name': 'Net/z1', 'op': 'aten::matmul', 'in': [0, 2], 'output_id': 0, 'shape': [1, 2], 'out': [4], 'sorted_id': 3}
         {
             Tensor::shape_type shape = {1,2};
             MatMulOp* op = new MatMulOp();
@@ -54,7 +54,7 @@
             op->set_inputs( forward_result[2] );
         }
         
-        // {'name': 'Net/58', 'op': 'aten::relu', 'in': [3], 'output_id': 0, 'shape': [1, 2], 'out': [5], 'sorted_id': 4}
+        // {'name': 'Net/7', 'op': 'aten::relu', 'in': [3], 'output_id': 0, 'shape': [1, 2], 'out': [5], 'sorted_id': 4}
         {
             Tensor::shape_type shape = {1,2};
             ReluOp* op = new ReluOp();

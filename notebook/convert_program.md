@@ -21,9 +21,8 @@ convert_data_file( project, folder, **kwargs )
  folder  : 生成するデータファイルを保存するフォルダ (notebookからの相対アドレス)
  kwargs  : 辞書による可変長引数
 
-  inp_data    : 入力変数
-  pred_data   : 入力変数2　(複数特徴量の入力変数に相当する。"mse1"を参照)
-　target_data : 教師データの変数　(回帰での参照データ、分類での正解データ)
+  inp_data    : 入力データ配列　
+　target_data : 教師データ配列　(回帰での参照データ、分類での正解データに相当する)
 
 
 ## 学習ループのC++コードの生成プログラム
@@ -35,15 +34,24 @@ convert_train_code( project, folder, **kwargs )
  folder  : 生成するデータファイルを保存するフォルダ (notebookからの相対アドレス)
  kwargs  : 辞書による可変長引数
 
-　 sol       : 解析タイプ ( "mse"(回帰), "cse"(分類), "vae"(変分オートエンコーダ) )
-   epoch     : 学習の反復回数　(デフォルト200)
-   lr        : 学習率          (デフォルト0.01)
-   batch     : ミニバッチ数
-　 inp_data  : 入力変数    (convert_data_fileと同じ)
-   pred_data : 入力変数２　(convert_data_fileと同じ)
+　 sol         : 解析タイプ (文字："regr"(回帰), "clas"(分類), "vae"(変分オートエンコーダ))
+   epoch       : 学習の反復回数　(正整数：デフォルト200)
+   lr          : 学習率          (正実数：デフォルト0.01)
+   batch       : ミニバッチ数　 （正整数：デフォルト32)
+　 inp_data    : 入力データ配列　(convert_data_fileと同じ)
+   target_data : 参照データ配列　(convert_data_fileと同じ)
+   net_key     : Netクラスのクラス名　　(文字：pythonコードのNetクラスに相当する)
+   loss_key    : Lossクラスのクラス名 　(文字：pythonコードのLossクラスに相当する)
+   pred_key    : 予測変数を求める計算グラフのキーワード(文字)
+   pred_no     : 予測変数を求める計算グラフ番号（正整数)
+   pred_num    : 予測変数の後処理する数 (正整数)
+   
+   (sample)
+     inp_data=d1,net_key="Net",loss_key="loss",pred_key="sigmoid",pre_no=38,pred_num=10
+   
 
 　"vae"専用
-　z   : 潜在変数を探すキーワード　(潜在変数を入力とする全結合層の名前）
+   z   : 潜在変数を探すキーワード　(潜在変数を入力とする全結合層の名前）
 
 　　(sample)  
 　　　vae2のnotebookではself.zが潜在変数にあたりますが、
@@ -57,35 +65,51 @@ convert_train_code( project, folder, **kwargs )
       y = F.relu( self.fc3( self.z ) )
         :
 
+
 # notebook一覧
 
-  mse1 :   複数特徴量による回帰問題の例  [sol="mse1"]
-   　参考：  https://axa.biopapyrus.jp/deep-learning/object-classification/regression-multiple-features.html
-
-  mse2 :   sinxを近似する回帰問題（ミニバッチによる学習も含む）  [sol="mse"]
-     参考：  https://watlab-blog.com/2021/06/14/pytorch-nonlinear-regression/
-
-  cse1 :   skleranのirisモデルの分類問題 (１バッチサイズの分類モデル） [sol="cse1"]
-
-　cse2 :   sklearnのirisモデルの分類モデル (ミニバッチによる全モデルの分類) [sol="cse"]
-
-  vae1 :   変分オートエンコーダ [sol="vae"]
-　　 KLdivergenceの評価を直接記述したもの（ミニバッチによる学習も含む）
-　　 参考：我妻　「はじめてのディープラーニング２」
-
-　vae2 :   変分オートエンコーダ [sol="vae"]
-　　 KLdivergenceの評価をpytorchの評価関数を用いたもの（ミニバッチによる学習も含む）
-　　 参考：我妻　「はじめてのディープラーニング２」
-
-  test1 :  四則演算のテストプログラム
+  regression :  sinxを近似する回帰問題のコード（ミニバッチによる学習も含む）  [sol="regr"]
   
-  test2 :  全結合層のテストプログラム
+     損失関数として、torch.nn.MSELoss を採用している。
+     
+     　　　MSELoss( y, t )   y:評価値、　t:参照値(教師データ)
+     
+　classification :  sklearnのirisモデルの分類問題のコード　(ミニバッチによる全モデルの分類) [sol="clas"]
+　
+　　　損失関数として、torch.nn.CrossEntropyLoss を採用している。
+　　　
+　　　　　 CrossEntropyLoss( y, t )  y:評価値　t:参照値(教師データ)
+
+　vae　      :   変分オートエンコーダ [sol="vae"]
+　　 （注）Cross_Entropy,KLdivergenceをpytorchの評価関数で記述したコード（ミニバッチによる学習も含む）
+　　 損失関数は交差エントロピー(e1)とKLダイバージェンス(e2)の和で評価している。
+　　 
+　　 　 e1  = F.binary_cross_entropy( y , t, reduction="sum" )
+        p_z = td.normal.Normal( torch.zeros_like(q_z.loc), torch.ones_like(q_z.scale) )
+        e2  = td.kl_divergence( q_z, p_z ).sum()
+        loss = e1+e2
+        
+        但し、y:評価値  t: 参照値　 q_z:計算されて平均、標準偏差による正規分布
+        
+　以下のコードは開発に使用したサンプルコードです。
+　
+　test1      :  四則演算のコード
   
-  test3 :  各種活性化関数のテストプログラム
+  test2      :  全結合層のコード
   
-  test_batch :  バッチタイプの行列演算のテストプログラム
+  test3      :  各種活性化関数のコード
   
-  broadcast_check :　ブロードキャストのテストプログラム
+  test_regr1 :   複数特徴量による回帰問題のコード  [sol="regr"]
+   　
+  test_clas1 :   skleranのirisモデルに対する分類問題のコード  (１バッチサイズの分類モデル） [sol="clas"]
   
-  network_dot :  JSONファイルの計算グラフのgraphic_vizによる描画プログラム
+  test_vae1  :   変分オートエンコーダ [sol="vae"]
+　　（注）交差エントロピー,KLダイバージェンスを自作関数で記述したコード（ミニバッチによる学習も含む）
+　　 
+  test_batch :  バッチタイプの行列演算のコード
+  
+  broadcast_check :　ブロードキャストのコード
+  
+  network_dot :  JSONファイルの計算グラフのgraphic_vizによる描画コード
+  
   
