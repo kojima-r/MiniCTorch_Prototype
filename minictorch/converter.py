@@ -15,7 +15,7 @@ OBJS    = $(SRCS:.cpp=.o)
 
 TRAIN_SRCS    = {proj}.cpp {proj}_param.cpp {proj}_train.cpp {proj}_data.cpp
 TRAIN_TARGET  = {proj}_train
-TRAIN_OBJS    = $(TRAIN_SRCS:.cpp=.o)
+TRAIN_OBJS    = $(TRAIN_SRCS:.cpp=.train.o)
 
 all: $(TARGET) $(TRAIN_TARGET)
 
@@ -25,8 +25,8 @@ $(TRAIN_TARGET): $(TRAIN_OBJS)
 $(TARGET): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
-$(OBJS): $(SRCS)
-	$(CXX) -c $(CXXFLAGS) $^
+%.train.o: %.cpp
+	$(CXX) -c -D_TRAIN $(CXXFLAGS) $< -o $@
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $<
