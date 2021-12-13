@@ -27,7 +27,9 @@ def main():
     with torch.no_grad():
         filename="sample.json"
         print("[SAVE]",filename)
-        minictorch.generator.generate_minictorch_file(model, input_to_model, filename)
+        minictorch.trace(model, input_to_model, filename)
+    #convert_all( project, folder, json_path, input_dict, data_dict={}, **kwargs):
+    minictorch.convert_all("example", "output", model, filename,input_to_model, {"inp_data":input_to_model})
 
 
 if __name__ == "__main__":

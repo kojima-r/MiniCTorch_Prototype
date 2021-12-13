@@ -191,6 +191,9 @@ def generate_minictorch_file(model, input_to_model, filename):
     with open(filename, "w") as fp:
         json.dump(sorted_graph, fp)
 
+def trace(model, input_to_model, filename):
+    generate_minictorch_file(model, input_to_model, filename)
+
 
 def main():
     class Sampler(nn.Module):

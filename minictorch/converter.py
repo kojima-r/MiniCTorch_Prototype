@@ -1,22 +1,26 @@
 import json
 import argparse
 import numpy as np
+import os
+import torch
 
-def makefile_generator( project ):
+def makefile_generator( project, xtensor_include_base="../", minictorch_include="../src"):
     make_text="""
 CXX = g++
-CXXFLAGS = -g -Wall  -std=c++14 -I./ -I../xtensor-blas/include -I../xtensor/include -I../xtl/include
-#CXXFLAGS = -g -Wall  -fprofile-arcs -ftest-coverage -std=c++14 -I./json/include -I./xtensor-blas/include -I./xtensor/include -I./xtl/include
-#LDFLAGS = -L./ -L$(CPPUTEST_HOME)/lib -lCppUTest -lCppUTestExt  -lcblas
+CXXFLAGS += -g -Wall  -std=c++14 -I./ -I{minictorch_inc} -I{xtensor_base}xtensor-blas/include -I{xtensor_base}xtensor/include -I{xtensor_base}xtl/include -I{xtensor_base}json/include
 LDFLAGS = -lcblas
-CPPUTEST_HOME = ./cpputest/workspace/install
-TARGET = mini_c_torch
-# SRCS = main_test.cpp main.cpp
-SRCS = {proj}.cpp {proj}_param.cpp
-OBJS = $(SRCS:.cpp=.o)
+TARGET  = {proj}
+SRCS    = {proj}.cpp {proj}_param.cpp
+OBJS    = $(SRCS:.cpp=.o)
 
+TRAIN_SRCS    = {proj}.cpp {proj}_param.cpp {proj}_train.cpp {proj}_data.cpp
+TRAIN_TARGET  = {proj}_train
+TRAIN_OBJS    = $(TRAIN_SRCS:.cpp=.o)
 
-all: $(TARGET)
+all: $(TARGET) $(TRAIN_TARGET)
+
+$(TRAIN_TARGET): $(TRAIN_OBJS)
+	$(CXX) -o $@ $^ -D_TRAIN $(CXXFLAGS) $(LDFLAGS)
 
 $(TARGET): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
@@ -32,7 +36,7 @@ clean:
 	rm -f $(TARGET) $(OBJS) *.gcno *.gcov *~
 	find . -name "*.gcda" | xargs -r rm
 
-""".format(proj=project)
+""".format(proj=project,xtensor_base=xtensor_include_base,minictorch_inc=minictorch_include)
     return make_text
 
 
@@ -76,9 +80,9 @@ def get_param_name( s1 ):
     return s4
     
 #
-def string_tensor( key, out, type=0 ):
+def string_tensor( key, out):
     
-    if type == 0:
+    if torch.is_tensor(out):
         tmp = out.to('cpu').detach().numpy().copy()
     else:
         tmp = out
@@ -167,7 +171,7 @@ def c_data_generator( **datas ):
     j=0
     for i in range(len(key_list)):
         print("datafile key : ", key_list[i])
-        s1,s2 = string_tensor( key_list[i], val_list[i], 1 )
+        s1,s2 = string_tensor( key_list[i], val_list[i])
         text="""
         // data
         
@@ -241,7 +245,7 @@ def c_param_generator( project, obj, model, input_data ):
                 v = np.zeros(len(val))
                 for k in range(len(val)):
                     v[k] = float(val[k])
-                s1, s2 = string_tensor( key, v, 1 )
+                s1, s2 = string_tensor( key, v)
                 text+="""
     {ivar1};
     """.format(i=i,key=key,shape=",".join(map(str,shape)), ivar1=s1)
@@ -1436,22 +1440,36 @@ def convert_train_code( project, folder, json_path, **kwargs ):
     ofp_train.write( train_code )
 
 
+def convert_all( project, folder, model, json_path, input_x, data_dict={}, **kwargs):
+    os.makedirs(folder,exist_ok=True)
+    rand_flag=0
+    if "rand_flag" in kwargs:
+        rand_flag=kwargs["rand_flag"]
+    convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=rand_flag)
+    convert_data_file( project, folder, **data_dict )
+    convert_train_code( project, folder, json_path, **kwargs )
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("graph", type=str, help="computational graph json")
     parser.add_argument(
-        "--output", type=str, default="example.gen.cpp", help="config json file"
+        "--project","-p", type=str, default="example", help="project name [example]"
     )
     parser.add_argument(
-        "--path", type=str, default="src", nargs="?", help="config json file"
+        "--output_path","-o", type=str, default="output", nargs="?", help="output path [output]"
+    )
+    parser.add_argument(
+        "--model","-m", type=str, default="Net", nargs="?", help="model name [Net]"
     )
 
     args = parser.parse_args()
 
     filename = args.graph
-    fp=open(filename)
-    obj=json.load(fp)
+    #fp=open(filename)
+    #obj=json.load(fp)
     code = c_code_generator(obj)
+    convert_cpp_code( args.project, args.output_path, args.model, input_x, json_path, rand_flag=0)
+
     make_code = makefile_generator(args.output)
 
     print("[SAVE]",args.path+"/"+args.output)
