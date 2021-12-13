@@ -263,11 +263,7 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
     #include<fstream>
     #include<string>
     #include<vector>
-    #ifdef _NOTEBOOK
-    #include "../../src/minictorch.hpp"
-    #else
     #include "minictorch.hpp"
-    #endif
     
     using namespace std;
     
