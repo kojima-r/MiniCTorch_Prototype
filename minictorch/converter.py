@@ -1211,7 +1211,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             
             auto o  = forward_result[NL]->output;
             cout<<"epoch "<<epoch<<" - loss "<<o[0]<<endl;
-            outputfile<<to_string(o[0])<<endl;
+            outputfile<<to_string(o[0])<<","<< total_loss <<endl;
             """
             
     all_text += text
