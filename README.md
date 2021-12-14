@@ -9,7 +9,6 @@ cd MiniCTorch_Prototype
 git clone https://github.com/xtensor-stack/xtensor.git
 git clone https://github.com/xtensor-stack/xtensor-blas.git
 git clone https://github.com/xtensor-stack/xtl.git
-git clone https://github.com/nlohmann/json.git
 ```
 
 ## Installation
@@ -29,6 +28,9 @@ python example.py
 - `output/example_data.cpp`:学習データ
 - `output/example_train.cpp`:学習プログラム
 - `output/Makefile`
+
+## 実装済み演算
+https://docs.google.com/spreadsheets/d/1xPFaXAceqH8FPTJTFEfQup7KIxAGWHLt/edit?usp=sharing&ouid=108859876331580908917&rtpof=true&sd=true
 
 ## Compile
 ```
