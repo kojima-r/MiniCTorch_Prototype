@@ -7,7 +7,7 @@ import torch
 def makefile_generator( project, xtensor_include_base="../", minictorch_include="../src"):
     make_text="""
 CXX = g++
-CXXFLAGS += -g -Wall  -std=c++14 -I./ -I{minictorch_inc} -I{xtensor_base}xtensor-blas/include -I{xtensor_base}xtensor/include -I{xtensor_base}xtl/include -I{xtensor_base}json/include
+CXXFLAGS += -g -Wall  -std=c++14 -I./ -I{minictorch_inc} -I{xtensor_base}xtensor-blas/include -I{xtensor_base}xtensor/include -I{xtensor_base}xtl/include
 LDFLAGS = -lcblas
 TARGET  = {proj}
 SRCS    = {proj}.cpp {proj}_param.cpp
@@ -1203,7 +1203,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             auto  eq_t = xt::sum( eq );     
             fprec acc = (fprec)eq_t[0] / (fprec)inp_shape[0];
             cout<<"total_loss : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<eq_t[0]<<endl;
-            outputfile<<to_string(o[0])<<","<<to_string(acc)<<endl;""".format(ns=pred_no)
+            outputfile<<to_string(o[0])<<","<<to_string(acc)<<","<<total_loss<<endl;""".format(ns=pred_no)
             
             else: # others
                 text+="""
