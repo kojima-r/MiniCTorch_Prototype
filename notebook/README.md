@@ -1,5 +1,9 @@
 # C++コードへの変換プログラム
 
+> convert_all( project, folder, model, json_path, input_x, data_dict={}, **kwargs)
+
+ - 以下の関数をすべてまとめて実行
+ 
 ## JSONファイルからC++コードへの変換
 
 > convert_cpp_code( project, folder, model, input, json_path )
@@ -19,7 +23,7 @@
 [引数]
  - project : プロジェクト名 (ファイルのヘッダーに相当) 
  - folder  : 生成するデータファイルを保存するフォルダ (notebookからの相対アドレス)
- - kwargs  : 辞書による可変長引数
+ - kwargs  : 辞書による可変長引数（data_dict）
    - inp_data    : 入力データ配列
    - target_data : 教師データ配列　(回帰での参照データ、分類での正解データに相当する)
 
