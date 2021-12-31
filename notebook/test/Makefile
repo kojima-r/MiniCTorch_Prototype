@@ -1,14 +1,10 @@
 
 CXX = g++
-CXXFLAGS = -g -Wall  -std=c++14 -I./ -I../xtensor-blas/include -I../xtensor/include -I../xtl/include
-#CXXFLAGS = -g -Wall  -fprofile-arcs -ftest-coverage -std=c++14 -I./json/include -I./xtensor-blas/include -I./xtensor/include -I./xtl/include
-#LDFLAGS = -L./ -L$(CPPUTEST_HOME)/lib -lCppUTest -lCppUTestExt  -lcblas
+CXXFLAGS += -g -Wall  -std=c++14 -I./ -I../src -I../xtensor-blas/include -I../xtensor/include -I../xtl/include
 LDFLAGS = -lcblas
-CPPUTEST_HOME = ./cpputest/workspace/install
-TARGET = mini_c_torch
-# SRCS = main_test.cpp main.cpp
-SRCS = vae1.cpp vae1_param.cpp
-OBJS = $(SRCS:.cpp=.o)
+TARGET  = test03
+SRCS    = test03.cpp test03_param.cpp
+OBJS    = $(SRCS:.cpp=.o)
 
 
 all: $(TARGET)
@@ -16,8 +12,8 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
-$(OBJS): $(SRCS)
-	$(CXX) -c $(CXXFLAGS) $^
+%.train.o: %.cpp
+	$(CXX) -c -D_TRAIN $(CXXFLAGS) $< -o $@
 
 %.o: %.cpp
 	$(CXX) -c $(CXXFLAGS) $<

@@ -10,7 +10,7 @@
     
     extern bool train_mode;
     
-    extern Tensor inp_data;
+    extern Tensor input_data;
     
     void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var, int NL )
     {
@@ -46,17 +46,16 @@
         int epoch_num = 200;
         cout<<"epoch_num : "<<epoch_num<<endl;
     
-        inp_data.reshape( {1797,64} );
-        auto inp_shape = inp_data.shape();
+        input_data.reshape( {1797,64} );
+        auto input_shape = input_data.shape();
     
         int batch_size = 32;
-        int n_batch = (int)inp_shape[0] / batch_size;
-        cout<<"indata shape   : "<<inp_shape[0]<<inp_shape[1]<<endl;
+        int n_batch = (int)input_shape[0] / batch_size;
         cout<<"batch  number  : "<<n_batch<<","<<batch_size<<endl;
         cout<<"learning ratio : "<<lr<<endl;
     
         
-        Tensor x_tmp = xt::zeros<fprec>( { batch_size, (int)inp_shape[1] } );
+        Tensor x_tmp = xt::zeros<fprec>( { batch_size, (int)input_shape[1] } );
     
         ofstream outputfile("./test/vae1.out");
         
@@ -65,7 +64,7 @@
         {
             train_mode = true;
             
-            xt::xarray<int> index = xt::arange( (int)inp_shape[0] );
+            xt::xarray<int> index = xt::arange( (int)input_shape[0] );
             xt::random::shuffle( index );
             
             fprec total_loss = 0.0;
@@ -74,7 +73,7 @@
                 int jb = j * batch_size;
                 for(int k=0;k<batch_size;k++)
                 {
-                    xt::row( x_tmp, k ) = xt::row( inp_data, index(jb+k) );
+                    xt::row( x_tmp, k ) = xt::row( input_data, index(jb+k) );
                 }
                 
                 input_var.output = x_tmp;
@@ -91,7 +90,7 @@
             
             train_mode = false;
             
-            input_var.output = inp_data;
+            input_var.output = input_data;
             do_forward( forward_result, NL );
             
             auto o  = forward_result[NL]->output;
@@ -107,22 +106,22 @@
             
         {
             // 38 : aten::sigmoid
-            input_var.output = inp_data;
+            input_var.output = input_data;
             do_forward( forward_result, 38 );
             auto y_pred = forward_result[38]->output;
             
             int nx = 10;
             
             ofstream outputfile( "./test/vae1.pred" );
-            outputfile<<to_string(nx)<<","<<to_string(inp_shape[1])<<endl;
+            outputfile<<to_string(nx)<<","<<to_string(input_shape[1])<<endl;
             
             for(int i=0;i<nx;i++)
             {
-                for(int j=0;j<inp_shape[1]-1;j++)
+                for(int j=0;j<input_shape[1]-1;j++)
                 {
                     outputfile<<to_string(y_pred(i,j))<<",";
                 }
-                outputfile<<to_string(y_pred(i,inp_shape[1]-1))<<endl;
+                outputfile<<to_string(y_pred(i,input_shape[1]-1))<<endl;
             }
             outputfile.close();
         }
@@ -131,9 +130,9 @@
             auto z_pred = forward_result[30]->get_output();
         
             ofstream outputfile( "./test/vae1.z" );
-            outputfile<<to_string(inp_shape[0])<<","<<to_string(2)<<endl;
+            outputfile<<to_string(input_shape[0])<<","<<to_string(2)<<endl;
         
-            for(int k=0;k<inp_shape[0];k++)
+            for(int k=0;k<input_shape[0];k++)
             {
                 outputfile<<to_string(z_pred(k,0))<<","<<to_string(z_pred(k,1))<<endl;
             }

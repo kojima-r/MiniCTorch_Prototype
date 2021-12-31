@@ -4,7 +4,7 @@ import numpy as np
 import os
 import torch
 
-def makefile_generator( project, xtensor_include_base="../", minictorch_include="../src"):
+def makefile_generator( project, code="all", xtensor_include_base="../", minictorch_include="../src" ):
     make_text="""
 CXX = g++
 CXXFLAGS += -g -Wall  -std=c++14 -I./ -I{minictorch_inc} -I{xtensor_base}xtensor-blas/include -I{xtensor_base}xtensor/include -I{xtensor_base}xtl/include
@@ -13,6 +13,10 @@ TARGET  = {proj}
 SRCS    = {proj}.cpp {proj}_param.cpp
 OBJS    = $(SRCS:.cpp=.o)
 
+""".format(proj=project,xtensor_base=xtensor_include_base,minictorch_inc=minictorch_include)
+
+    if code == "all":
+        make_text+="""
 TRAIN_SRCS    = {proj}.cpp {proj}_param.cpp {proj}_train.cpp {proj}_data.cpp
 TRAIN_TARGET  = {proj}_train
 TRAIN_OBJS    = $(TRAIN_SRCS:.cpp=.train.o)
@@ -21,7 +25,13 @@ all: $(TARGET) $(TRAIN_TARGET)
 
 $(TRAIN_TARGET): $(TRAIN_OBJS)
 	$(CXX) -o $@ $^ -D_TRAIN $(CXXFLAGS) $(LDFLAGS)
+""".format(proj=project)
+    else:
+        make_text+="""
+all: $(TARGET)
+"""
 
+    make_text+="""
 $(TARGET): $(OBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
 
@@ -36,7 +46,7 @@ clean:
 	rm -f $(TARGET) $(OBJS) *.gcno *.gcov *~
 	find . -name "*.gcda" | xargs -r rm
 
-""".format(proj=project,xtensor_base=xtensor_include_base,minictorch_inc=minictorch_include)
+"""  #.format(proj=project,xtensor_base=xtensor_include_base,minictorch_inc=minictorch_include)
     return make_text
 
 
@@ -131,29 +141,6 @@ def string_tensor( key, out):
     
 
 # export all input data
-def c_data_generator_old( in_data ):  # 211113 mod
-    
-    # type declaration
-    all_text="""
-    #include <xtensor/xarray.hpp>
-    
-    #define fprec float
-    typedef xt::xarray<fprec> Tensor;
-    """
-    
-    # Data section
-    s1,s2 = string_tensor( "indata", in_data, 1 )
-    text="""
-    // original data
-        
-    {ivar1};
-    
-    """.format(ivar1=s1)
-    all_text += text
-    
-    return all_text
-
-
 def c_data_generator( **datas ):
     
     # type declaration
@@ -168,7 +155,7 @@ def c_data_generator( **datas ):
     key_list = list( datas.keys() )
     val_list = list( datas.values() )
     #print("dict len ",len(key_list))
-    j=0
+    
     for i in range(len(key_list)):
         print("datafile key : ", key_list[i])
         s1,s2 = string_tensor( key_list[i], val_list[i])
@@ -454,6 +441,12 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
             elif el["op"]=="aten::t":
                 text+="""
             TransposeOp* op = new TransposeOp();"""
+            elif el["op"]=="aten::max":
+                text+="""
+            MaxOp* op = new MaxOp();"""
+            elif el["op"]=="aten::min":
+                text+="""
+            MinOp* op = new MinOp();""" 
             elif el["op"]=="aten::sigmoid":
                 text+="""
             SigmoidOp* op = new SigmoidOp();"""
@@ -643,7 +636,6 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
     
     return all_text
     
-
 def unpack_origin_no( obj, no1 ):
     no  = no1
     el1 = obj[no]
@@ -723,16 +715,16 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         pred_key = kwargs['pred_key']
         print("pred_key :", pred_key )
         
-    pred_specify_no = -1
-    if 'pred_no' in kwargs:
-        pred_specify_no = kwargs['pred_no']
-        print("pred_no :", pred_specify_no )
+    pred_index = -1
+    if 'pred_index' in kwargs:
+        pred_index_no = kwargs['pred_index']
+        print("pred_index :", pred_index )
         
-    inp_opt = 0;
-    inp_s = ""
-    if 'inp_data' in kwargs:
-        inp_data = kwargs[ 'inp_data']
-        inp_opt, inp_s = get_tensor_shape( inp_data )
+    input_opt = 0;
+    input_s = ""
+    if 'input_data' in kwargs:
+        input_data = kwargs[ 'input_data']
+        input_opt, input_s = get_tensor_shape( input_data )
         
     target_opt = 0
     target_s = ""
@@ -740,16 +732,16 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         target_data = kwargs[ 'target_data']
         target_opt, target_s = get_tensor_shape( target_data )
         
-    print("inp  shape : ", inp_opt, inp_s)
+    print("input  shape : ", input_opt, input_s)
     print("target shape : ", target_opt, target_s)
     
-    pred_num = 0;
-    if inp_opt > 0:
-        pred_num = inp_data.shape[0]
+    pred_output = 0;
+    if input_opt > 0:
+        pred_output = input_data.shape[0]
         
-    if 'pred_num' in kwargs:  # need to rename
-        pred_num = kwargs['pred_num']
-    print("pred_num : ", pred_num)
+    if 'pred_output' in kwargs:  # need to rename
+        pred_output = kwargs['pred_output']
+    print("pred_output : ", pred_output)
     
     div_flag = False;
     if 'div' in kwargs:
@@ -909,9 +901,8 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     print("solution :", sol_kind)
     if not "clas" in sol_kind:  class_no = 0
     
-    if ( pred_specify_no >= 0 ) and ( pred_specify_no < output_id ):
-        if inout[pred_specify_no] > 0: 
-            pred_no = pred_specify_no
+    if ( pred_index >= 0 ) and ( pred_index < output_id ):
+        if inout[pred_index] > 0:  pred_no = pred_index
    
     print("pred_no   :", pred_no)
     print("target_no :", target_no)
@@ -933,9 +924,9 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     """.format(proj=project)
     
     text = ""
-    if inp_opt > 0:
+    if input_opt > 0:
         text +="""
-    extern Tensor inp_data;"""
+    extern Tensor input_data;"""
     if target_opt > 0:
         text +="""
     extern Tensor target_data;"""
@@ -985,27 +976,27 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     text = ""
     if batchs > 0:
         
-        if inp_opt > 0:
+        if input_opt > 0:
             text +="""
-        inp_data.reshape( {shape} );
-        auto inp_shape = inp_data.shape();
+        input_data.reshape( {shape} );
+        auto input_shape = input_data.shape();
     
         int batch_size = {bz};
-        int n_batch = (int)inp_shape[0] / batch_size;
+        int n_batch = (int)input_shape[0] / batch_size;
         cout<<"batch  number  : "<<n_batch<<","<<batch_size<<endl;
         cout<<"learning ratio : "<<lr<<endl;
     
-        """.format(shape=inp_s,bz=batchs)
-        #cout<<"indata shape   : "<<inp_shape[0]<<inp_shape[1]<<endl;
+        """.format(shape=input_s,bz=batchs)
+        #cout<<"indata shape   : "<<input_shape[0]<<input_shape[1]<<endl;
         
     else:
         
         batchs = 0
         if inp_opt > 0:
             text +="""
-        inp_data.reshape( {shape} );
-        auto inp_shape = inp_data.shape();
-        input_var.output = inp_data;
+        input_data.reshape( {shape} );
+        auto input_shape = input_data.shape();
+        input_var.output = input_data;
         
         """.format(shape=inp_s)
         
@@ -1013,9 +1004,9 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     
     text = ""
     if batchs > 0:
-        if inp_opt > 0:
+        if input_opt > 0:
             text +="""
-        Tensor x_tmp = xt::zeros<fprec>( { batch_size, (int)inp_shape[1] } );"""
+        Tensor x_tmp = xt::zeros<fprec>( { batch_size, (int)input_shape[1] } );"""
         if target_opt > 0:
             if class_no > 0:
                 text +="""
@@ -1023,7 +1014,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             else:
                 text +="""
         target_data.reshape( {shape} );
-        Tensor y_tmp = xt::zeros<fprec>( {{ batch_size, (int)inp_shape[1] }} );""".format(shape=target_s)
+        Tensor y_tmp = xt::zeros<fprec>( {{ batch_size, (int)input_shape[1] }} );""".format(shape=target_s)
     
     else:
         if class_no > 0:
@@ -1050,7 +1041,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     if batchs > 0:
         text += """
             
-            xt::xarray<int> index = xt::arange( (int)inp_shape[0] );
+            xt::xarray<int> index = xt::arange( (int)input_shape[0] );
             xt::random::shuffle( index );"""
             
     if batchs < 1:  # batchsize == 0
@@ -1109,9 +1100,9 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
                 for(int k=0;k<batch_size;k++)
                 {"""
             
-        if inp_opt > 0:
+        if input_opt > 0:
             text +="""
-                    xt::row( x_tmp, k ) = xt::row( inp_data, index(jb+k) );"""
+                    xt::row( x_tmp, k ) = xt::row( input_data, index(jb+k) );"""
         if target_opt > 0:
             if class_no > 0:
                 text +="""
@@ -1145,7 +1136,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
                 update_params( forward_result, NL, lr );
                 do_zerograd( forward_result, NL );
             }}
-            fprec total_acc = (fprec)total_corrects / (fprec)inp_shape[0];
+            fprec total_acc = (fprec)total_corrects / (fprec)input_shape[0];
             cout<<"total_loss : epoch "<<epoch<<" : loss "<<total_loss<<" : Acc "<<total_acc<<" "<<total_corrects<<endl;
             """.format(ns=pred_no)
         
@@ -1168,7 +1159,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         text +="""
             train_mode = false;
             
-            input_var.output = inp_data;"""
+            input_var.output = input_data;"""
             
         if target_no > 0:
             text +="""
@@ -1177,7 +1168,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         if div_flag:
             for i in range(len(nd)):
                 text +="""
-            forward_result[{nd1}]->set_output1( (fprec)inp_shape[0] );  // div size""".format(nd1=nd[i])
+            forward_result[{nd1}]->set_output1( (fprec)input_shape[0] );  // div size""".format(nd1=nd[i])
             text +="""
             """
             
@@ -1201,7 +1192,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             auto  lbs  = xt::argmax( y, 1 );
             auto  eq   = xt::equal( target_data, lbs );
             auto  eq_t = xt::sum( eq );     
-            fprec acc = (fprec)eq_t[0] / (fprec)inp_shape[0];
+            fprec acc = (fprec)eq_t[0] / (fprec)input_shape[0];
             cout<<"total_loss : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<eq_t[0]<<endl;
             outputfile<<to_string(o[0])<<","<<to_string(acc)<<","<<total_loss<<endl;""".format(ns=pred_no)
             
@@ -1211,7 +1202,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             
             auto o  = forward_result[NL]->output;
             cout<<"epoch "<<epoch<<" - loss "<<o[0]<<endl;
-            outputfile<<to_string(o[0])<<","<< total_loss <<endl;
+            outputfile<<to_string(o[0])<<endl;
             """
             
     all_text += text
@@ -1230,15 +1221,15 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         print("pred_no : ",pred_no)
         if batchs < 1:  # batchsize == 0
         
-            if inp_opt > 0:
+            if input_opt > 0:
                 
                 el = obj[pred_no]
                 text +="""
-        inp_data.reshape( {shape} );
+        input_data.reshape( {shape} );
         {{
             // {ns} : {el1}
-            input_var.output = inp_data;
-            auto inp_shape = inp_data.shape();
+            input_var.output = input_data;
+            auto inp_shape = input_data.shape();
             int  nx = inp_shape[0];
             """.format(shape=inp_s,ns=pred_no,el1=el['op'])
             
@@ -1261,8 +1252,8 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
                 el = obj[pred_no]
             
                 pred_type = 1  ###
-                if inp_opt > 0:
-                    pred_type = len(inp_data.shape)
+                if input_opt > 0:
+                    pred_type = len(input_data.shape)
                 print("pred_type : ",pred_type)
                 
                 if pred_type == 1: ###
@@ -1270,18 +1261,18 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         {{
             // {ns} : {el1}""".format(ns=pred_no,el1=el['op'])
             
-                    if inp_opt > 0:
+                    if input_opt > 0:
                         text +="""
-            input_var.output = inp_data;"""
+            input_var.output = input_data;"""
                  
                     text +="""
             do_forward( forward_result, {ns} );
             auto y_pred = forward_result[{ns}]->output;
             
             ofstream outputfile( "{fn}" );
-            outputfile<<to_string(inp_shape[0])<<",1"<<endl;
+            outputfile<<to_string(input_shape[0])<<",1"<<endl;
             
-            for(int i=0;i<inp_shape[0];i++)
+            for(int i=0;i<input_shape[0];i++)
             {{
                 outputfile<<to_string(y_pred(i,0))<<endl;
             }}
@@ -1295,9 +1286,9 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         {{
             // {ns} : {el1}""".format(ns=pred_no,el1=el['op'])
             
-                    if inp_opt > 0:
+                    if input_opt > 0:
                         text +="""
-            input_var.output = inp_data;"""
+            input_var.output = input_data;"""
                 
                     text +="""
             do_forward( forward_result, {ns} );
@@ -1305,32 +1296,31 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             """.format(ns=pred_no)
             
                     nx_set = 0;
-                    if inp_opt > 0:
-                        if pred_num == inp_data.shape[0]:
+                    if input_opt > 0:
+                        if pred_output == input_data.shape[0]:
                             nx_set = 1
                             text +="""
-            auto inp_shape = inp_data.shape();
-            int nx = inp_shape[0];
+            int nx = input_shape[0];
             """
                     if nx_set == 0:
                         text +="""
             int nx = {nx};
-            """.format(nx=pred_num)
+            """.format(nx=pred_output)
             
                     text +="""
             ofstream outputfile( "{fn}" );
-            outputfile<<to_string(nx)<<","<<to_string(inp_shape[1])<<endl;
+            outputfile<<to_string(nx)<<","<<to_string(input_shape[1])<<endl;
             
             for(int i=0;i<nx;i++)
             {{
-                for(int j=0;j<inp_shape[1]-1;j++)
+                for(int j=0;j<input_shape[1]-1;j++)
                 {{
                     outputfile<<to_string(y_pred(i,j))<<",";
                 }}
-                outputfile<<to_string(y_pred(i,inp_shape[1]-1))<<endl;
+                outputfile<<to_string(y_pred(i,input_shape[1]-1))<<endl;
             }}
             outputfile.close();
-        }}""".format(fn=path,nx=pred_num)
+        }}""".format(fn=path,nx=pred_output)
         
     
     # latent variable
@@ -1352,9 +1342,9 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             auto z_pred = forward_result[{nz}]->get_output();
         
             ofstream outputfile( "{fn}" );
-            outputfile<<to_string(inp_shape[0])<<","<<to_string(2)<<endl;
+            outputfile<<to_string(input_shape[0])<<","<<to_string(2)<<endl;
         
-            for(int k=0;k<inp_shape[0];k++)
+            for(int k=0;k<input_shape[0];k++)
             {{
                 outputfile<<to_string(z_pred(k,0))<<","<<to_string(z_pred(k,1))<<endl;
             }}
@@ -1371,7 +1361,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
 
 
 # convert json file to parameter, cpp, and make file
-def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0 ):
+def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, code="all" ):
 
     cpp_fname   = project + ".cpp"
     param_fname = project + "_param.cpp"
@@ -1401,7 +1391,7 @@ def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0 ):
     ofp.write( code2 )
 
     # save make file
-    code3 = makefile_generator( project )
+    code3 = makefile_generator( project, code )
 
     print( "[MAKE]", make_path )
     ofpmake = open( make_path, "w" )
@@ -1440,14 +1430,23 @@ def convert_train_code( project, folder, json_path, **kwargs ):
     ofp_train.write( train_code )
 
 
-def convert_all( project, folder, model, json_path, input_x, data_dict={}, **kwargs):
+def convert_all( project, folder, model, json_path, input_x, data_dict={}, **kwargs ):
+    
     os.makedirs(folder,exist_ok=True)
     rand_flag=0
     if "rand_flag" in kwargs:
         rand_flag=kwargs["rand_flag"]
-    convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=rand_flag)
-    convert_data_file( project, folder, **data_dict )
-    convert_train_code( project, folder, json_path, **kwargs )
+    code="all"
+    if "code" in kwargs:
+        code=kwargs["code"]
+        
+    kwargs2 = kwargs.copy()
+    kwargs2.update( data_dict )
+        
+    convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=rand_flag, code=code )
+    if code == "all":
+        convert_data_file( project, folder, **data_dict )
+        convert_train_code( project, folder, json_path, **kwargs2 )
 
 def main():
     parser = argparse.ArgumentParser()

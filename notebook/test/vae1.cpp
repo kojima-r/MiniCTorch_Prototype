@@ -7,11 +7,7 @@
     #include<fstream>
     #include<string>
     #include<vector>
-    #ifdef _NOTEBOOK
-    #include "../../src/minictorch.hpp"
-    #else
     #include "minictorch.hpp"
-    #endif
     
     using namespace std;
     
@@ -31,7 +27,7 @@
     
     void defineOp( vector<MCTNode*>& forward_result, VariableTensor &input_var )
     {
-        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [32, 64], 'out': [43, 3, 46], 'sorted_id': 0}
+        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [32, 64], 'out': [3, 43, 46], 'sorted_id': 0}
         {
             Tensor::shape_type shape = {32,64};
             forward_result[0] = &input_var;
@@ -85,7 +81,7 @@
             forward_result[6] = new VariableTensor( fc2_mean_bias );
         }
         
-        // {'name': 'Net/Linear[fc2_mean]/130', 'op': 'aten::linear', 'in': [4, 5, 6], 'output_id': 0, 'shape': [32, 2], 'out': [30, 64, 9, 13], 'sorted_id': 7}
+        // {'name': 'Net/Linear[fc2_mean]/130', 'op': 'aten::linear', 'in': [4, 5, 6], 'output_id': 0, 'shape': [32, 2], 'out': [64, 30, 9, 13], 'sorted_id': 7}
         {
             Tensor::shape_type shape = {32,2};
             LinearOp* op = new LinearOp();
@@ -216,7 +212,7 @@
             forward_result[23] = new VariableTensor( fc2_var_bias );
         }
         
-        // {'name': 'Net/Linear[fc2_var]/log_var', 'op': 'aten::linear', 'in': [4, 22, 23], 'output_id': 0, 'shape': [32, 2], 'out': [62, 26, 67], 'sorted_id': 24}
+        // {'name': 'Net/Linear[fc2_var]/log_var', 'op': 'aten::linear', 'in': [4, 22, 23], 'output_id': 0, 'shape': [32, 2], 'out': [67, 62, 26], 'sorted_id': 24}
         {
             Tensor::shape_type shape = {32,2};
             LinearOp* op = new LinearOp();
@@ -338,7 +334,7 @@
             op->set_inputs( forward_result[36] );
         }
         
-        // {'name': 'Net/y.1', 'op': 'aten::sigmoid', 'in': [37], 'output_id': 0, 'shape': [32, 64], 'out': [41, 49], 'sorted_id': 38}
+        // {'name': 'Net/y.1', 'op': 'aten::sigmoid', 'in': [37], 'output_id': 0, 'shape': [32, 64], 'out': [49, 41], 'sorted_id': 38}
         {
             Tensor::shape_type shape = {32,64};
             SigmoidOp* op = new SigmoidOp();
