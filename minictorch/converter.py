@@ -90,7 +90,7 @@ def get_param_name( s1 ):
     return s4
     
 #
-def string_tensor( key, out):
+def string_tensor( key, out ):
     
     if torch.is_tensor(out):
         tmp = out.to('cpu').detach().numpy().copy()
@@ -130,11 +130,15 @@ def string_tensor( key, out):
     s1 = s1 + ' }'
     #print("tensor :",s1)
     
-    s2 = key + '.reshape({'
-    n2 = len( tmp.shape )
-    for i in range(n2-1):
-       s2 = s2 + str( tmp.shape[i] ) + ','
-    s2 = s2 + str( tmp.shape[n2-1] ) + '})'
+    n2 = len( tmp.shape )  # 220104 mod
+    #print("n2",n2)
+    if n2 == 0:
+        s2 = ""
+    else:
+        s2 = key + '.reshape({'
+        for i in range(n2-1):
+            s2 = s2 + str( tmp.shape[i] ) + ','
+        s2 = s2 + str( tmp.shape[n2-1] ) + '})'
     #print("shape :",s2)
     
     return s1, s2
@@ -229,10 +233,14 @@ def c_param_generator( project, obj, model, input_data ):
                 key ="Constant" + str(cno)
                 shape=el["shape"]
                 val=el["constant_value"]
-                v = np.zeros(len(val))
-                for k in range(len(val)):
-                    v[k] = float(val[k])
-                s1, s2 = string_tensor( key, v)
+                #print("val",val)
+                #print("val type",type(val))
+                print(el)
+                #v = np.zeros(len(val))
+                #for k in range(len(val)):
+                #    v[k] = float(val[k])
+                v = np.array( val )  # 220104 mod
+                s1, s2 = string_tensor( key, v )
                 text+="""
     {ivar1};
     """.format(i=i,key=key,shape=",".join(map(str,shape)), ivar1=s1)
@@ -426,6 +434,9 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
             elif el["op"]=="aten::log":
                 text+="""
             LogOp* op = new LogOp();"""
+            elif el["op"]=="aten::log1p":
+                text+="""
+            Log1pOp* op = new Log1pOp();"""
             elif el["op"]=="aten::matmul":
                 text+="""
             MatMulOp* op = new MatMulOp();"""
@@ -437,7 +448,16 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
             LinearOp* op = new LinearOp();"""
             elif el["op"]=="aten::sum":
                 text+="""
-            SumOp*    op = new SumOp();"""
+            SumOp* op = new SumOp();"""
+            elif el["op"]=="aten::mean":  # 220105 add
+                text+="""
+            MeanOp* op = new MeanOp();"""  
+            elif el["op"]=="aten::select":
+                text+="""
+            SelectOp* op = new SelectOp();"""
+            elif el["op"]=="aten::copy_":
+                text+="""
+            Copy_Op* op = new Copy_Op();"""
             elif el["op"]=="aten::t":
                 text+="""
             TransposeOp* op = new TransposeOp();"""
@@ -530,7 +550,7 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
             BroadcastTensorsOp* op = new BroadcastTensorsOp();"""
             elif el["op"]=="aten::to":
                 text+="""
-            ToOp* op = new To( "to" );"""
+            ToOp* op = new ToOp();"""
             elif el["op"]=="aten::detach":
                 text+="""
             DetachOp* op = new DetachOp( {k} );""".format(k=out_id)

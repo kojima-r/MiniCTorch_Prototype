@@ -1,146 +1,96 @@
 
-#include "minictorch.hpp"
-
-using namespace std;
-
-void print_shape(Tensor x, string ss )
-{
-    auto s=x.shape();
-    cout<<ss<<" shape (";
-    for(int i=0;i<s.size();i++){
-        cout<<s[i]<<",";
-    }
-    cout<<")"<<endl;
-}
-
-void test01()
-{
-    Tensor a=
-            {{{1, 2, 3},
-            {4, 5, 6},
-            {7, 8, 9}},
-            {{1, 2, 3},
-            {4, 5, 6},
-            {7, 8, 9}}};
-    Tensor b=
-            {{{1, 2, 3},
-            {4, 5, 6},
-            {7, 8, 9}},
-            {{1, 2, 3},
-            {4, 5, 6},
-            {7, 8, 9}}};
-    Tensor c({2,3,3});
+    //
+    //  test05
+    //
+    #include<stdio.h>
+    #include<iostream>
+    #include<fstream>
+    #include<string>
+    #include<vector>
+    #include "minictorch.hpp"
     
-    for (int i = 0; i < 2; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            for (int k = 0; k < 3; ++k) {
-                a[i, j,k] = 1;
-                b[i, j,k] = 1;
+    using namespace std;
+    
+    extern Tensor  xin;
+    extern Tensor  Constant1;
+    
+    bool train_mode = true;
+    
+    void defineOp( vector<MCTNode*>& forward_result, VariableTensor &input_var )
+    {
+        // {'name': 'Net/4', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [2, 3, 4], 'constant_value': [1.0, 2.0, 3.0, 4.0, 4.0, 5.0, 6.0, 7.0, 7.0, 8.0, 9.0, 10.0, 1.0, 2.0, 3.0, 4.0, 4.0, 5.0, 6.0, 7.0, 7.0, 8.0, 9.0, 9.0], 'out': [2], 'sorted_id': 0}
+        {
+            Tensor::shape_type shape = {2,3,4};
+            Constant1.reshape( shape );
+            forward_result[0] = new VariableTensor( Constant1 );
+        }
+        
+        // {'name': 'input/y', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [4, 3], 'out': [2], 'sorted_id': 1}
+        {
+            Tensor::shape_type shape = {4,3};
+            forward_result[1] = &input_var;
+        }
+        
+        // {'name': 'Net/5', 'op': 'aten::matmul', 'in': [0, 1], 'output_id': 0, 'shape': [2, 3, 3], 'out': [3], 'sorted_id': 2}
+        {
+            Tensor::shape_type shape = {2,3,3};
+            MatMulOp* op = new MatMulOp();
+            forward_result[2] = op;
+            
+            op->set_inputs( forward_result[0] );
+            op->set_inputs( forward_result[1] );
+        }
+        
+        // {'name': 'output/output.1', 'op': 'IO Node', 'in': [2], 'output_id': 0, 'shape': [2, 3, 3], 'out': [], 'sorted_id': 3}
+        {
+            Tensor::shape_type shape = {2,3,3};
+        }
+        
+    }
+    
+    void do_train1( vector<MCTNode*>& forward_result, VariableTensor &input_var, int N )
+    {
+        cout<<"### forward computation ..."<<endl;
+        for(int k=0;k<=N;k++) {
+            if( forward_result[k] )  
+            {
+                //forward_result[k]->set_id( k );
+                forward_result[k]->forward();
+                forward_result[k]->zerograd();
             }
         }
-    }
-    c=a+b;
-    cout<<"a"<<a<<endl;
-    cout<<"b"<<b<<endl;
-    cout<<"c"<<c<<endl;
-    const auto& d = c.shape();
-    cout << "Dim size: " << d.size() <<endl;
-    //for(int i=0;i<d.size();i++){
-    //    cout << ">>" << d[i] <<endl;
-    //}
-    print_shape( c, "c" );
+        auto o = forward_result[N]->output;
+        cout<<o<<endl;
     
-    /////////////
+        cout<<"### backward computation ..."<<endl;
+        forward_result[N]->grad = xt::ones_like( forward_result[N]->output );
+        for(int k=N;k>=0;k--) {
+           if( forward_result[k] )  forward_result[k]->backward();
+        }
+        cout<<"input_grad"<<input_var.grad<<endl;
+    }
+    
+    
+    #ifdef _TRAIN
+    extern void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var, int N );
+    #endif
+    
+    int main()
     {
-        cout<<"=="<<endl;
-        VariableTensor va(a);
-        VariableTensor vb(b);
-        AddOp op_a_b;
-        op_a_b.inputs.push_back(&va);
-        op_a_b.inputs.push_back(&vb);
-        op_a_b.forward();
-        cout<<op_a_b.output<<endl;
-        cout<<"=="<<endl;
-        op_a_b.grad = xt::ones_like( op_a_b.output );
-        op_a_b.backward();
-        cout<<op_a_b.grad<<endl;
-        cout<<va.grad<<endl;
-        cout<<vb.grad<<endl;
+        vector<MCTNode*> forward_result(4);
+    
+        // input data
+        Tensor::shape_type shape = {4,3};
+        xin.reshape( shape );
+        VariableTensor input_var(xin);
+    
+        defineOp( forward_result, input_var );
+    #ifdef _TRAIN
+        do_train_loop( forward_result, input_var, 2 );
+    #else
+        do_train1( forward_result, input_var, 2 );
+    #endif
+        
+        return 0;
     }
-};
-
-void test02()
-{
-    Tensor a=
-            {{{1, 2, 3, 4},
-            {4, 5, 6, 7},
-            {7, 8, 9,10}},
-            {{1, 2, 3, 4},
-            {4, 5, 6,7},
-            {7, 8, 9,9}}};
-    Tensor b={{1, 2, 3},
-            {4, 5, 6},
-            {4, 5, 6},
-            {7, 8, 9}};
-    auto bb=xt::expand_dims(b,1);
-    auto z=xt::repeat(bb,2,1);
-    cout<<z<<endl;
-    {
-        cout<<"=="<<endl;
-        VariableTensor va(a);
-        VariableTensor vb(b);
-        MatMulOp op_a_b;
-        op_a_b.inputs.push_back(&va);
-        op_a_b.inputs.push_back(&vb);
-        op_a_b.forward();
-        cout<<"a"<<a<<endl;
-        cout<<"b"<<b<<endl;
-        cout<<"c"<<op_a_b.output<<endl;
-        cout<<"=="<<endl;
-        //op_a_b.grad=op_a_b.output;
-        op_a_b.grad = xt::ones_like( op_a_b.output );
-        op_a_b.backward();
-        cout<<"va_grad"<<va.grad<<endl;
-        cout<<"vb_grad"<<vb.grad<<endl;
-    }
-}
-
-void test03()
-{
-    Tensor a1=
-            {{{1, 2, 3, 4},
-              {4, 5, 6, 7},
-              {7, 8, 9,10}},
-             {{1, 2, 3, 4},
-              {4, 5, 6, 7},
-              {7, 8, 9, 9}}};
-            
-    auto a2 = xt::amax( a1, {0} );
-    auto a3 = xt::amax( a1, {1} );
-    auto a4 = xt::amax( a1, {2} );
-    auto a5 = xt::amax( a1 );
     
-    cout<<"a1"<<a1<<endl;
-    cout<<"a2"<<a2<<endl;
-    cout<<"a3"<<a3<<endl;
-    cout<<"a4"<<a4<<endl;
-    cout<<"a5"<<a5<<endl;
-    
-    Tensor b1={{1, 2, 3, 4},
-               {4, 5, 6, 7},
-               {7, 8, 9,10}};
-    auto b2 = xt::amax( b1, {0} );
-    auto b3 = xt::amax( b1, {1} );
-    auto b4 = xt::amax( b1 );
-    cout<<"b1"<<b1<<endl;
-    cout<<"b2"<<b2<<endl;
-    cout<<"b3"<<b3<<endl;
-    cout<<"b4"<<b4<<endl;
-}
-
-int main( int argc, char *argv[] )
-{
-    test02();
-    
-    return 0;
-}
