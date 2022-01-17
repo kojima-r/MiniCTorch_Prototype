@@ -363,13 +363,13 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
                     key = "Constant" + str(cno)
                     text+="""
             {key}.reshape( shape );
-            forward_result[{i}] = new VariableTensor( {key} );""".format(i=i,key=key)
+            forward_result[{i}] = new VariableTensor( {key}, false );""".format(i=i,key=key)
                 else:
                     val=el["constant_value"]
                     text+="""
             Tensor t= {{{val}}};
             t = t.reshape(shape);
-            forward_result[{i}] = new VariableTensor( t );""".format(i=i,shape=",".join(map(str,shape)), val=",".join(map(str,val)))
+            forward_result[{i}] = new VariableTensor( t, false );""".format(i=i,shape=",".join(map(str,shape)), val=",".join(map(str,val)))
         
         elif el["op"]=="prim::GetAttr":
         
@@ -452,6 +452,15 @@ def c_code_generator( project, obj, model, rand_flag=0 ):
             elif el["op"]=="aten::mean":  # 220105 add
                 text+="""
             MeanOp* op = new MeanOp();"""  
+            elif el["op"]=="aten::stack":  # 220105 add
+                text+="""
+            StackOp* op = new StackOp();"""  
+            elif el["op"]=="aten::resolve_conj":  # 220105 add
+                text+="""
+            ResolveConjOp* op = new ResolveConjOp();"""  
+            elif el["op"]=="aten::resolve_neg":  # 220105 add
+                text+="""
+            ResolveNegOp*  op = new ResolveNegOp();"""  
             elif el["op"]=="aten::select":
                 text+="""
             SelectOp* op = new SelectOp();"""

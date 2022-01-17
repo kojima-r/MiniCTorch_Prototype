@@ -27,7 +27,7 @@
     
     void defineOp( vector<MCTNode*>& forward_result, VariableTensor &input_var )
     {
-        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [32, 64], 'out': [3, 43, 46], 'sorted_id': 0}
+        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [32, 64], 'out': [43, 3, 46], 'sorted_id': 0}
         {
             Tensor::shape_type shape = {32,64};
             forward_result[0] = &input_var;
@@ -81,7 +81,7 @@
             forward_result[6] = new VariableTensor( fc2_mean_bias );
         }
         
-        // {'name': 'Net/Linear[fc2_mean]/130', 'op': 'aten::linear', 'in': [4, 5, 6], 'output_id': 0, 'shape': [32, 2], 'out': [64, 30, 9, 13], 'sorted_id': 7}
+        // {'name': 'Net/Linear[fc2_mean]/130', 'op': 'aten::linear', 'in': [4, 5, 6], 'output_id': 0, 'shape': [32, 2], 'out': [13, 9, 64, 30], 'sorted_id': 7}
         {
             Tensor::shape_type shape = {32,2};
             LinearOp* op = new LinearOp();
@@ -497,7 +497,7 @@
         
         // {'name': 'Net/z', 'op': 'aten::sum', 'in': [56, 57], 'output_id': 0, 'shape': [], 'out': [59], 'sorted_id': 58}
         {
-            SumOp*    op = new SumOp();
+            SumOp* op = new SumOp();
             forward_result[58] = op;
             
             op->set_inputs( forward_result[56] );
@@ -601,7 +601,7 @@
         
         // {'name': 'Net/89', 'op': 'aten::sum', 'in': [69, 70], 'output_id': 0, 'shape': [], 'out': [73], 'sorted_id': 71}
         {
-            SumOp*    op = new SumOp();
+            SumOp* op = new SumOp();
             forward_result[71] = op;
             
             op->set_inputs( forward_result[69] );
