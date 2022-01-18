@@ -29,7 +29,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 project(example-test)
 
 add_executable(example-test
-    sum_test.cpp)
+    sum_test.cpp test_activation.cpp)
 
 target_link_libraries(example-test
     PRIVATE
