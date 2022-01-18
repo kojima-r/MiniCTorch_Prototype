@@ -8,6 +8,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Clone another repository
+      run: |
+        git clone git clone https://github.com/xtensor-stack/xtensor.git
+        git clone https://github.com/xtensor-stack/xtensor-blas.git
+        git clone https://github.com/xtensor-stack/xtl.git
     - name: create build directory
       run: |
         cd ./test/
@@ -17,10 +22,5 @@ jobs:
         cd ./test/build
         cmake ..
         cmake --build .
-    - name: Clone another repository
-      run: |
-        git clone git clone https://github.com/xtensor-stack/xtensor.git
-        git clone https://github.com/xtensor-stack/xtensor-blas.git
-        git clone https://github.com/xtensor-stack/xtl.git
     - name: run test
       run: ./test/build/example-test
