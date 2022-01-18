@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.10)
 
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
@@ -37,5 +37,9 @@ target_link_libraries(example-test
 
 target_include_directories(example-test
     PRIVATE
-    ../)
+    ../
+    ../xtensor/include/
+    ../xtensor-blas/include/
+    ../xtl/include/
+    ../src)
     
