@@ -18,7 +18,7 @@
     
     void defineOp( vector<MCTNode*>& forward_result, VariableTensor &input_var )
     {
-        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [2, 2], 'out': [7, 3, 2], 'sorted_id': 0}
+        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [2, 2], 'out': [3, 7, 2], 'sorted_id': 0}
         {
             Tensor::shape_type shape = {2,2};
             forward_result[0] = &input_var;
@@ -27,7 +27,7 @@
         // {'name': 'Net/4', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 10.0, 'out': [2], 'sorted_id': 1}
         {
             Tensor c = (fprec)10.0;
-            forward_result[1] = new VariableTensor( c, false );
+            forward_result[1] = new VariableTensor( c, 1 );
         }
         
         // {'name': 'Net/5', 'op': 'aten::mul', 'in': [0, 1], 'output_id': 0, 'shape': [2, 2], 'out': [3], 'sorted_id': 2}
@@ -54,7 +54,7 @@
         {
             Tensor::shape_type shape = {2,2};
             Constant1.reshape( shape );
-            forward_result[4] = new VariableTensor( Constant1 );
+            forward_result[4] = new VariableTensor( Constant1, 1 );
         }
         
         // {'name': 'Net/f1', 'op': 'aten::mul', 'in': [3, 4], 'output_id': 0, 'shape': [2, 2], 'out': [9], 'sorted_id': 5}
@@ -70,7 +70,7 @@
         // {'name': 'Net/9', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 5.0, 'out': [7], 'sorted_id': 6}
         {
             Tensor c = (fprec)5.0;
-            forward_result[6] = new VariableTensor( c, false );
+            forward_result[6] = new VariableTensor( c, 1 );
         }
         
         // {'name': 'Net/f2', 'op': 'aten::mul', 'in': [0, 6], 'output_id': 0, 'shape': [2, 2], 'out': [9], 'sorted_id': 7}
@@ -86,7 +86,7 @@
         // {'name': 'Net/11', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [9], 'sorted_id': 8}
         {
             Tensor c = (fprec)1.0;
-            forward_result[8] = new VariableTensor( c, false );
+            forward_result[8] = new VariableTensor( c, 1 );
         }
         
         // {'name': 'Net/12', 'op': 'aten::add', 'in': [5, 7, 8], 'output_id': 0, 'shape': [2, 2], 'out': [10], 'sorted_id': 9}
@@ -141,7 +141,7 @@
         // input data
         Tensor::shape_type shape = {2,2};
         xin.reshape( shape );
-        VariableTensor input_var(xin);
+        VariableTensor input_var( xin, 3 );
     
         defineOp( forward_result, input_var );
     #ifdef _TRAIN

@@ -28,7 +28,7 @@
         {
             Tensor::shape_type shape = {2,3};
             Constant1.reshape( shape );
-            forward_result[1] = new VariableTensor( Constant1 );
+            forward_result[1] = new VariableTensor( Constant1, 1 );
         }
         
         // {'name': 'Net/tt', 'op': 'aten::t', 'in': [1], 'output_id': 0, 'shape': [3, 2], 'out': [3], 'sorted_id': 2}
@@ -100,7 +100,7 @@
         // input data
         Tensor::shape_type shape = {1,3};
         xin.reshape( shape );
-        VariableTensor input_var(xin);
+        VariableTensor input_var( xin, 3 );
     
         defineOp( forward_result, input_var );
     #ifdef _TRAIN

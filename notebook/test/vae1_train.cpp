@@ -40,7 +40,7 @@
             }
         };
     
-        xt::random::seed(1);
+        //xt::random::seed(1);  
         
         fprec lr = 0.001;
         int epoch_num = 200;
@@ -48,14 +48,14 @@
     
         input_data.reshape( {1797,64} );
         auto input_shape = input_data.shape();
-    
+        
         int batch_size = 32;
         int n_batch = (int)input_shape[0] / batch_size;
         cout<<"batch  number  : "<<n_batch<<","<<batch_size<<endl;
         cout<<"learning ratio : "<<lr<<endl;
     
         
-        Tensor x_tmp = xt::zeros<fprec>( { batch_size, (int)input_shape[1] } );
+        Tensor x_tmp = xt::zeros<fprec>( { batch_size, 64 } );
     
         ofstream outputfile("./test/vae1.out");
         
@@ -73,7 +73,8 @@
                 int jb = j * batch_size;
                 for(int k=0;k<batch_size;k++)
                 {
-                    xt::row( x_tmp, k ) = xt::row( input_data, index(jb+k) );
+                    auto xw = xt::view( input_data, index(jb+k) );
+                    xt::view( x_tmp, k ) = xw;
                 }
                 
                 input_var.output = x_tmp;

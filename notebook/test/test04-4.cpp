@@ -22,7 +22,7 @@
         {
             Tensor::shape_type shape = {3,3};
             Constant1.reshape( shape );
-            forward_result[0] = new VariableTensor( Constant1 );
+            forward_result[0] = new VariableTensor( Constant1, 1 );
         }
         
         // {'name': 'input/y', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [1], 'out': [3], 'sorted_id': 1}
@@ -34,7 +34,7 @@
         // {'name': 'Net/5', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [3], 'sorted_id': 2}
         {
             Tensor c = (fprec)1.0;
-            forward_result[2] = new VariableTensor( c, false );
+            forward_result[2] = new VariableTensor( c, 1 );
         }
         
         // {'name': 'Net/6', 'op': 'aten::add', 'in': [0, 1, 2], 'output_id': 0, 'shape': [3, 3], 'out': [4], 'sorted_id': 3}
@@ -89,7 +89,7 @@
         // input data
         Tensor::shape_type shape = {1};
         xin.reshape( shape );
-        VariableTensor input_var(xin);
+        VariableTensor input_var( xin, 3 );
     
         defineOp( forward_result, input_var );
     #ifdef _TRAIN

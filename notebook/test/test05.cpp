@@ -22,7 +22,7 @@
         {
             Tensor::shape_type shape = {2,3,4};
             Constant1.reshape( shape );
-            forward_result[0] = new VariableTensor( Constant1 );
+            forward_result[0] = new VariableTensor( Constant1, 1 );
         }
         
         // {'name': 'input/y', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [4, 3], 'out': [2], 'sorted_id': 1}
@@ -82,7 +82,7 @@
         // input data
         Tensor::shape_type shape = {4,3};
         xin.reshape( shape );
-        VariableTensor input_var(xin);
+        VariableTensor input_var( xin, 3 );
     
         defineOp( forward_result, input_var );
     #ifdef _TRAIN

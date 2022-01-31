@@ -34,14 +34,14 @@
         {
             Tensor::shape_type shape = {32,1};
             fc1_weight.reshape( shape );
-            forward_result[1] = new VariableTensor( fc1_weight );
+            forward_result[1] = new VariableTensor( fc1_weight, 2 );
         }
         
         // {'name': 'MSE/Net[net]/Linear[fc1]/bias/bias.7', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [3], 'sorted_id': 2}
         {
             Tensor::shape_type shape = {32};
             fc1_bias.reshape( shape );
-            forward_result[2] = new VariableTensor( fc1_bias );
+            forward_result[2] = new VariableTensor( fc1_bias, 2 );
         }
         
         // {'name': 'MSE/Net[net]/Linear[fc1]/input.1', 'op': 'aten::linear', 'in': [0, 1, 2], 'output_id': 0, 'shape': [63, 32], 'out': [4], 'sorted_id': 3}
@@ -68,14 +68,14 @@
         {
             Tensor::shape_type shape = {16,32};
             fc2_weight.reshape( shape );
-            forward_result[5] = new VariableTensor( fc2_weight );
+            forward_result[5] = new VariableTensor( fc2_weight, 2 );
         }
         
         // {'name': 'MSE/Net[net]/Linear[fc2]/bias/bias.9', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [7], 'sorted_id': 6}
         {
             Tensor::shape_type shape = {16};
             fc2_bias.reshape( shape );
-            forward_result[6] = new VariableTensor( fc2_bias );
+            forward_result[6] = new VariableTensor( fc2_bias, 2 );
         }
         
         // {'name': 'MSE/Net[net]/Linear[fc2]/input.5', 'op': 'aten::linear', 'in': [4, 5, 6], 'output_id': 0, 'shape': [63, 16], 'out': [8], 'sorted_id': 7}
@@ -102,14 +102,14 @@
         {
             Tensor::shape_type shape = {1,16};
             fc3_weight.reshape( shape );
-            forward_result[9] = new VariableTensor( fc3_weight );
+            forward_result[9] = new VariableTensor( fc3_weight, 2 );
         }
         
         // {'name': 'MSE/Net[net]/Linear[fc3]/bias/bias', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [11], 'sorted_id': 10}
         {
             Tensor::shape_type shape = {1};
             fc3_bias.reshape( shape );
-            forward_result[10] = new VariableTensor( fc3_bias );
+            forward_result[10] = new VariableTensor( fc3_bias, 2 );
         }
         
         // {'name': 'MSE/Net[net]/Linear[fc3]/input.9', 'op': 'aten::linear', 'in': [8, 9, 10], 'output_id': 0, 'shape': [63, 1], 'out': [13], 'sorted_id': 11}
@@ -127,7 +127,7 @@
         {
             Tensor::shape_type shape = {63,1};
             Constant1.reshape( shape );
-            forward_result[12] = new VariableTensor( Constant1 );
+            forward_result[12] = new VariableTensor( Constant1, 1 );
         }
         
         // {'name': 'MSE/Loss[loss]/90', 'op': 'prim::ListConstruct', 'in': [11, 12], 'output_id': 0, 'shape': [], 'out': [14], 'sorted_id': 13}
@@ -139,7 +139,7 @@
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'MSE/Loss[loss]/91', 'op': 'aten::broadcast_tensors', 'in': [13], 'output_id': 0, 'shape': [], 'out': [16, 15], 'sorted_id': 14}
+        // {'name': 'MSE/Loss[loss]/91', 'op': 'aten::broadcast_tensors', 'in': [13], 'output_id': 0, 'shape': [], 'out': [15, 16], 'sorted_id': 14}
         {
             BroadcastTensorsOp* op = new BroadcastTensorsOp();
             forward_result[14] = op;
@@ -168,7 +168,7 @@
         // {'name': 'MSE/Loss[loss]/88', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [18], 'sorted_id': 17}
         {
             Tensor c = (fprec)1.0;
-            forward_result[17] = new VariableTensor( c, false );
+            forward_result[17] = new VariableTensor( c, 1 );
         }
         
         // {'name': 'MSE/Loss[loss]/94', 'op': 'aten::mse_loss', 'in': [15, 16, 17], 'output_id': 0, 'shape': [], 'out': [19], 'sorted_id': 18}
@@ -221,7 +221,7 @@
         // input data
         Tensor::shape_type shape = {63,1};
         xin.reshape( shape );
-        VariableTensor input_var(xin);
+        VariableTensor input_var( xin, 3 );
     
         defineOp( forward_result, input_var );
     #ifdef _TRAIN

@@ -40,8 +40,15 @@
               if( op[k] )  op[k]->update( lr );
             }
         };
+        auto eval_labels=[]( Tensor& y, Tensor &t )
+        {
+            auto lb = xt::argmax( y, 1 );
+            auto eq = xt::equal( t, lb );
+            auto sm = xt::sum( eq );
+            return (int)sm[0];
+        };
     
-        xt::random::seed(1);
+        //xt::random::seed(1);  
         
         fprec lr = 0.01;
         int epoch_num = 200;
@@ -49,14 +56,17 @@
     
         input_data.reshape( {112,4} );
         auto input_shape = input_data.shape();
-    
+        
+        target_data.reshape( {112} );
+        auto target_shape = target_data.shape();
+        
         int batch_size = 16;
         int n_batch = (int)input_shape[0] / batch_size;
         cout<<"batch  number  : "<<n_batch<<","<<batch_size<<endl;
         cout<<"learning ratio : "<<lr<<endl;
     
         
-        Tensor x_tmp = xt::zeros<fprec>( { batch_size, (int)input_shape[1] } );
+        Tensor x_tmp = xt::zeros<fprec>( { batch_size, 4 } );
         Tensor y_tmp = xt::zeros<fprec>( { batch_size } );
     
         ofstream outputfile("./classification/clas.out");
@@ -76,7 +86,8 @@
                 int jb = j * batch_size;
                 for(int k=0;k<batch_size;k++)
                 {
-                    xt::row( x_tmp, k ) = xt::row( input_data, index(jb+k) );
+                    auto xw = xt::view( input_data, index(jb+k) );
+                    xt::view( x_tmp, k ) = xw;
                     y_tmp( k ) = target_data( index(jb+k) );
                 }
                 
@@ -87,11 +98,8 @@
                 auto o = forward_result[NL]->output;
                 total_loss += o[0];
                 
-                auto y    = forward_result[7]->output;
-                auto lbs  = xt::argmax( y, 1 );
-                auto eq   = xt::equal( y_tmp, lbs );
-                auto eq_t = xt::sum( eq );     
-                total_corrects += (int)eq_t[0];
+                int corrects = eval_labels( forward_result[7]->output, y_tmp );
+                total_corrects += corrects;
             
                 do_backward( forward_result, NL );
                 update_params( forward_result, NL, lr );
@@ -106,13 +114,10 @@
             forward_result[8]->output = target_data;
             do_forward( forward_result, NL );
             
-            auto  o = forward_result[NL]->output;
-            auto  y = forward_result[7]->output;
-            auto  lbs  = xt::argmax( y, 1 );
-            auto  eq   = xt::equal( target_data, lbs );
-            auto  eq_t = xt::sum( eq );     
-            fprec acc = (fprec)eq_t[0] / (fprec)input_shape[0];
-            cout<<"total_loss : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<eq_t[0]<<endl;
+            auto o = forward_result[NL]->output;
+            int corrects = eval_labels( forward_result[7]->output, target_data );
+            fprec acc = (fprec)corrects / (fprec)input_shape[0];
+            cout<<"total_loss : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<corrects<<endl;
             outputfile<<to_string(o[0])<<","<<to_string(acc)<<","<<total_loss<<endl;
         }
         outputfile.close();

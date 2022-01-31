@@ -43,17 +43,18 @@
    - epoch       : 学習の反復回数　(正整数：デフォルト200)
    - lr          : 学習率          (正実数：デフォルト0.01)
    - batch       : ミニバッチ数　 （正整数：デフォルト32)
-　 - input_data  : 入力データ配列　(convert_data_fileと同じ)
-   - target_data : 参照データ配列　(convert_data_fileと同じ)
+　 - seed        : 乱数発生の初期指定番号
    - net_key     : Netクラスのクラス名　　(文字：pythonコードのNetクラスに相当する)
    - loss_key    : Lossクラスのクラス名 　(文字：pythonコードのLossクラスに相当する)
    - pred_key    : 予測変数を求める計算グラフのキーワード(文字)
    - pred_index  : 予測変数を求める計算グラフ番号（正整数)
    - pred_output : 予測変数の後処理する数 (正整数、最初からの個数に相当する)
    
+　　尚、convert_data_fileに指定されているファイル名は自動的に付加される。
+   
 #### Example
  ```
-     input_data=d1,net_key="Net",loss_key="loss",pred_key="sigmoid",pred_index=38,pred_output=10
+     net_key="Net",loss_key="loss",pred_key="sigmoid",pred_index=38,pred_output=10,seed=1
  ```
 
 　"vae"専用

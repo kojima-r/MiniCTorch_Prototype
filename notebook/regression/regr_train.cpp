@@ -41,7 +41,7 @@
             }
         };
     
-        xt::random::seed(1);
+        //xt::random::seed(1);  
         
         fprec lr = 0.01;
         int epoch_num = 2000;
@@ -49,16 +49,19 @@
     
         input_data.reshape( {63,1} );
         auto input_shape = input_data.shape();
-    
+        
+        target_data.reshape( {63,1} );
+        auto target_shape = target_data.shape();
+        
         int batch_size = 9;
         int n_batch = (int)input_shape[0] / batch_size;
         cout<<"batch  number  : "<<n_batch<<","<<batch_size<<endl;
         cout<<"learning ratio : "<<lr<<endl;
     
         
-        Tensor x_tmp = xt::zeros<fprec>( { batch_size, (int)input_shape[1] } );
+        Tensor x_tmp = xt::zeros<fprec>( { batch_size, 1 } );
         target_data.reshape( {63,1} );
-        Tensor y_tmp = xt::zeros<fprec>( { batch_size, (int)input_shape[1] } );
+        Tensor y_tmp = xt::zeros<fprec>( { batch_size, 1 } );
     
         ofstream outputfile("./regression/regr.out");
         
@@ -76,8 +79,10 @@
                 int jb = j * batch_size;
                 for(int k=0;k<batch_size;k++)
                 {
-                    xt::row( x_tmp, k ) = xt::row( input_data, index(jb+k) );
-                    xt::row( y_tmp, k ) = xt::row( target_data, index(jb+k) );
+                    auto xw = xt::view( input_data, index(jb+k) );
+                    xt::view( x_tmp, k ) = xw;
+                    auto yw = xt::view( target_data, index(jb+k) );
+                    xt::view( y_tmp, k ) = yw;
                 }
                 
                 input_var.output = x_tmp;

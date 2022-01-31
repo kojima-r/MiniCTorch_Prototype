@@ -2,13 +2,13 @@
 CXX = g++
 CXXFLAGS += -g -Wall  -std=c++14 -I./ -I../src -I../xtensor-blas/include -I../xtensor/include -I../xtl/include
 LDFLAGS = -lcblas
-TARGET  = bbb
-SRCS    = bbb.cpp bbb_param.cpp
+TARGET  = bbb3
+SRCS    = bbb3.cpp bbb3_param.cpp
 OBJS    = $(SRCS:.cpp=.o)
 
 
-TRAIN_SRCS    = bbb.cpp bbb_param.cpp bbb_train.cpp bbb_data.cpp
-TRAIN_TARGET  = bbb_train
+TRAIN_SRCS    = bbb3.cpp bbb3_param.cpp bbb3_train.cpp bbb3_data.cpp
+TRAIN_TARGET  = bbb3_train
 TRAIN_OBJS    = $(TRAIN_SRCS:.cpp=.train.o)
 
 all: $(TARGET) $(TRAIN_TARGET)
