@@ -81,7 +81,7 @@
             forward_result[6] = new VariableTensor( fc2_mean_bias, 2 );
         }
         
-        // {'name': 'Net/Linear[fc2_mean]/130', 'op': 'aten::linear', 'in': [4, 5, 6], 'output_id': 0, 'shape': [32, 2], 'out': [64, 13, 30, 9], 'sorted_id': 7}
+        // {'name': 'Net/Linear[fc2_mean]/130', 'op': 'aten::linear', 'in': [4, 5, 6], 'output_id': 0, 'shape': [32, 2], 'out': [30, 13, 9, 64], 'sorted_id': 7}
         {
             Tensor::shape_type shape = {32,2};
             LinearOp* op = new LinearOp();
@@ -212,7 +212,7 @@
             forward_result[23] = new VariableTensor( fc2_var_bias, 2 );
         }
         
-        // {'name': 'Net/Linear[fc2_var]/log_var', 'op': 'aten::linear', 'in': [4, 22, 23], 'output_id': 0, 'shape': [32, 2], 'out': [67, 62, 26], 'sorted_id': 24}
+        // {'name': 'Net/Linear[fc2_var]/log_var', 'op': 'aten::linear', 'in': [4, 22, 23], 'output_id': 0, 'shape': [32, 2], 'out': [62, 67, 26], 'sorted_id': 24}
         {
             Tensor::shape_type shape = {32,2};
             LinearOp* op = new LinearOp();
@@ -670,7 +670,7 @@
         cout<<"### backward computation ..."<<endl;
         forward_result[N]->grad = xt::ones_like( forward_result[N]->output );
         for(int k=N;k>=0;k--) {
-           if( forward_result[k] )  forward_result[k]->backward();
+            if( forward_result[k] )  forward_result[k]->backward();
         }
         cout<<"input_grad"<<input_var.grad<<endl;
     }

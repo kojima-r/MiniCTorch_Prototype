@@ -127,6 +127,7 @@ def string_tensor( key, out ):
         for i in range(nw2):
             s1 = s1 + str(p1[l])+ ','
             l = l + 1
+        print("param:",key," - str loop ",nw1," / ", nw1)  # 220203 add
     s1 = s1 + ' }'
     #print("tensor :",s1)
     
@@ -630,8 +631,18 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
     
         cout<<"### backward computation ..."<<endl;
         forward_result[N]->grad = xt::ones_like( forward_result[N]->output );
-        for(int k=N;k>=0;k--) {
-           if( forward_result[k] )  forward_result[k]->backward();
+        for(int k=N;k>=0;k--) {"""
+    if chk_shape > 0:
+        text +="""
+            if( forward_result[k] )  
+            {
+               forward_result[k]->backward();
+               forward_result[k]->check_grad_shape();
+            }"""
+    else:
+        text +="""
+            if( forward_result[k] )  forward_result[k]->backward();"""
+    text +="""
         }
         cout<<"input_grad"<<input_var.grad<<endl;
     }
@@ -700,12 +711,18 @@ def unpack_origin_no( obj, no1 ):
     #print("unpack original no: ",no,no1)
     return no
     
-def get_unpack_origin( obj, no1 ):
+def get_unpack_origin( obj, no1, inout ):
     no = no1
     while True:
         el = obj[no]
         if el["op"] == 'prim::ListUnpack' or el["op"] == 'prim::TupleUnpack':
             no = unpack_origin_no( obj, no )
+        elif el["op"] == 'prim::ListConstruct':  # 220203 add
+            #no = unpack_origin_no( obj, no )
+            for j in range(len(el['in'])):
+                k = get_unpack_origin( obj, el['in'][j], inout )
+                if inout[k] == 1: return k
+            return no1
         else:
             break
     return no
@@ -854,7 +871,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     elif pos2 > 0:
         pred_pos = pos2
     if pos1 > pos2:  pred_pos = -1  # 220127 add
-    print("pred_pos : ",pred_pos,pos1,pos2)
+    print("pred_pos : ",pred_pos,pos1,pos2,output_id)
     
     # inout option ( 0:input only, 1:input and output both )
     inout = np.zeros( output_id+1, dtype=np.int )
@@ -871,7 +888,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         else:
             nin = 0;
             for j in range(len(el['in'])):
-                k = get_unpack_origin( obj, el['in'][j] )
+                k = get_unpack_origin( obj, el['in'][j], inout ) # 220203 inout add
                 if inout[k] == 1: nin=nin+1
             if nin > 0: inout[i] = 1
             
@@ -888,13 +905,13 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             if pred_pos < 0:  
                 pass
                 #for j in range(len(el['in'])):
-                #    k = get_unpack_origin( obj, el['in'][j])
+                #    k = get_unpack_origin( obj, el['in'][j], inout )
                 #    if inout[k] > 0:
                 #        print(" --- pred el (",j,") :",el['in'][j]," -> ",k)
                 #        set_no.add( k )
             elif i >= pred_pos:
                 for j in range(len(el['in'])):
-                    k = get_unpack_origin( obj, el['in'][j])
+                    k = get_unpack_origin( obj, el['in'][j], inout )
                     if ( k < pred_pos ) and ( inout[k] > 0 ):
                         print(" --- pred el (",j,") :",el['in'][j]," -> ",k)
                         #set_no.add( k )
@@ -909,14 +926,16 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         if   el['op'] == 'aten::mse_loss':  type = 1
         elif el['op'] == 'aten::cross_entropy_loss':    type = 2
         elif el['op'] == 'aten::binary_cross_entropy':  type = 2
+        elif el['op'] == 'aten::nll_loss_nd':  type = 3  # 220203 add
         else:  type = 4
         print("loss pred_id : ",pred_id,pred_max)
         if type > 0:
-            pred_no = get_unpack_origin( obj, el['in'][0] )
+            pred_no = get_unpack_origin( obj, el['in'][0], inout )
             if len(el['in']) > 1: 
-                no2 = get_unpack_origin( obj, el['in'][1] )
+                no2 = get_unpack_origin( obj, el['in'][1], inout )
                 if target_opt > 0: target_no = no2
                 if type == 2:      class_no  = no2
+                if type == 3:      class_no  = no2  # 220203 add
         if pred_no > 0:  
             print("eval1 no :",i," (type=",type,") : ", pred_no,target_no)
             
@@ -933,11 +952,12 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
                 elif el['op'] == 'aten::binary_cross_entropy':  type = 2
                 elif el['op'] == 'aten::nll_loss_nd':  type = 3
                 if type > 0:
-                    pred_no = get_unpack_origin( obj, el['in'][0] )
+                    pred_no = get_unpack_origin( obj, el['in'][0], inout )
                     if len(el['in']) > 1:
-                        no2 = get_unpack_origin( obj, el['in'][1] )
+                        no2 = get_unpack_origin( obj, el['in'][1], inout )
                         if target_opt > 0: target_no = no2
                         if type == 2:      class_no  = no2
+                        if type == 3:      class_no  = no2
                 if pred_no > 0:  
                     if type == 3: pred_no = -1  #220127 add
                     print("eval2 no :",i,"-> type=",type," : ",pred_no,target_no)
@@ -1252,7 +1272,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
                 do_zerograd( forward_result, NL );
             }}
             fprec total_acc = (fprec)total_corrects / (fprec)input_shape[0];
-            cout<<"total_loss : epoch "<<epoch<<" : loss "<<total_loss<<" : Acc "<<total_acc<<" "<<total_corrects<<endl;
+            cout<<"total_loss (batch): epoch "<<epoch<<" : loss "<<total_loss<<" : Acc "<<total_acc<<" "<<total_corrects<<endl;
             """.format(ns=pred_no)
         
         else: # others
@@ -1287,7 +1307,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             text +="""
             """
             
-        if( nadd1 > 0 and nadd2 > 0 ):
+        if( nadd1 > 0 and nadd2 > 0 and class_no < 1 ):  # 220203 mod
             text +="""
             do_forward( forward_result, NL );
             
@@ -1305,7 +1325,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             auto o = forward_result[NL]->output;
             int corrects = eval_labels( forward_result[{ns}]->output, target_data );
             fprec acc = (fprec)corrects / (fprec)input_shape[0];
-            cout<<"total_loss : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<corrects<<endl;
+            cout<<"total_loss (all)  : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<corrects<<endl;
             outputfile<<to_string(o[0])<<","<<to_string(acc)<<","<<total_loss<<endl;""".format(ns=pred_no)
             
             else: # others

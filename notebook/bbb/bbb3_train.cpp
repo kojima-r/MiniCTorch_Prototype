@@ -40,6 +40,13 @@
               if( op[k] )  op[k]->update( lr );
             }
         };
+        auto eval_labels=[]( Tensor& y, Tensor &t )
+        {
+            auto lb = xt::argmax( y, 1 );
+            auto eq = xt::equal( t, lb );
+            auto sm = xt::sum( eq );
+            return (int)sm[0];
+        };
     
         //xt::random::seed(1);  
         
@@ -70,6 +77,7 @@
             train_mode = true;
             
             fprec total_loss = 0.0;
+            int   total_corrects = 0;
             for(int j=0;j<n_batch;j++)
             {
                 int jb = j * batch_size;
@@ -81,30 +89,33 @@
                 }
                 
                 input_var.output = x_tmp;
-                forward_result[1158]->output = y_tmp;
+                forward_result[1109]->output = y_tmp;
                 do_forward( forward_result, NL );
                 
                 auto o = forward_result[NL]->output;
                 total_loss += o[0];
                 
+                int corrects = eval_labels( forward_result[1064]->output, y_tmp );
+                total_corrects += corrects;
+            
                 do_backward( forward_result, NL );
                 update_params( forward_result, NL, lr );
                 do_zerograd( forward_result, NL );
             }
-            cout<<"total_loss : epoch "<<epoch<<" - loss "<<total_loss<<endl;
+            fprec total_acc = (fprec)total_corrects / (fprec)input_shape[0];
+            cout<<"total_loss (batch): epoch "<<epoch<<" : loss "<<total_loss<<" : Acc "<<total_acc<<" "<<total_corrects<<endl;
             
             train_mode = false;
             
             input_var.output = input_data;
-            forward_result[1158]->output = target_data;
+            forward_result[1109]->output = target_data;
             do_forward( forward_result, NL );
             
-            auto o  = forward_result[NL]->output;
-            auto o1 = forward_result[1150]->output;
-            auto o2 = forward_result[1160]->output; 
-            cout<<"epoch "<<epoch<<" - loss "<<o[0]<<" ( "<<o1[0]<<" , "<<o2[0]<<" ) "<<endl;
-            outputfile<<to_string(o[0])<<endl;
-            
+            auto o = forward_result[NL]->output;
+            int corrects = eval_labels( forward_result[1064]->output, target_data );
+            fprec acc = (fprec)corrects / (fprec)input_shape[0];
+            cout<<"total_loss (all)  : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<corrects<<endl;
+            outputfile<<to_string(o[0])<<","<<to_string(acc)<<","<<total_loss<<endl;
         }
         outputfile.close();
         

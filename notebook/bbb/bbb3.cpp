@@ -48,25 +48,25 @@
     
     void defineOp( vector<MCTNode*>& forward_result, VariableTensor &input_var )
     {
-        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [4, 1, 28, 28], 'out': [416, 787, 4], 'sorted_id': 0}
+        // {'name': 'input/x', 'op': 'IO Node', 'in': [], 'output_id': 0, 'shape': [4, 1, 28, 28], 'out': [374, 733, 4], 'sorted_id': 0}
         {
             Tensor::shape_type shape = {4,1,28,28};
             forward_result[0] = &input_var;
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/2787', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': -1.0, 'out': [786, 3, 415], 'sorted_id': 1}
+        // {'name': 'Model/Net[net]/2693', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': -1.0, 'out': [3, 732, 373], 'sorted_id': 1}
         {
             Tensor c = (fprec)-1.0;
             forward_result[1] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/2788', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 784.0, 'out': [786, 3, 415], 'sorted_id': 2}
+        // {'name': 'Model/Net[net]/2692', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 784.0, 'out': [3, 732, 373], 'sorted_id': 2}
         {
             Tensor c = (fprec)784.0;
             forward_result[2] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/2808', 'op': 'prim::ListConstruct', 'in': [1, 2], 'output_id': 0, 'shape': [], 'out': [4], 'sorted_id': 3}
+        // {'name': 'Model/Net[net]/2697', 'op': 'prim::ListConstruct', 'in': [1, 2], 'output_id': 0, 'shape': [], 'out': [4], 'sorted_id': 3}
         {
             ListConstructOp* op = new ListConstructOp();
             forward_result[3] = op;
@@ -75,7 +75,7 @@
             op->set_inputs( forward_result[2] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/input.1', 'op': 'aten::view', 'in': [0, 3], 'output_id': 0, 'shape': [4, 784], 'out': [42], 'sorted_id': 4}
+        // {'name': 'Model/Net[net]/input.1', 'op': 'aten::view', 'in': [0, 3], 'output_id': 0, 'shape': [4, 784], 'out': [42], 'sorted_id': 4}
         {
             Tensor::shape_type shape = {4,784};
             ViewOp* op = new ViewOp();
@@ -83,56 +83,53 @@
             
             op->set_inputs( forward_result[0] );
             op->set_inputs( forward_result[3] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l1]/weight_mu/weight_mu.1', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [26, 109], 'sorted_id': 5}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/weight_mu/weight_mu.1', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [26, 109], 'sorted_id': 5}
         {
             Tensor::shape_type shape = {400,784};
             l1_weight_mu.reshape( shape );
             forward_result[5] = new VariableTensor( l1_weight_mu, 2 );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l1]/weight_rho/weight_rho.1', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [111, 104, 7, 11, 13], 'sorted_id': 6}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/weight_rho/weight_rho.1', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [104, 111, 13, 7, 11], 'sorted_id': 6}
         {
             Tensor::shape_type shape = {400,784};
             l1_weight_rho.reshape( shape );
             forward_result[6] = new VariableTensor( l1_weight_rho, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2822', 'op': 'aten::exp', 'in': [6], 'output_id': 0, 'shape': [400, 784], 'out': [8], 'sorted_id': 7}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2711', 'op': 'aten::exp', 'in': [6], 'output_id': 0, 'shape': [400, 784], 'out': [8], 'sorted_id': 7}
         {
             Tensor::shape_type shape = {400,784};
             ExpOp* op = new ExpOp();
             forward_result[7] = op;
             
             op->set_inputs( forward_result[6] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2823', 'op': 'aten::log1p', 'in': [7], 'output_id': 0, 'shape': [400, 784], 'out': [25], 'sorted_id': 8}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2712', 'op': 'aten::log1p', 'in': [7], 'output_id': 0, 'shape': [400, 784], 'out': [25], 'sorted_id': 8}
         {
             Tensor::shape_type shape = {400,784};
             Log1pOp* op = new Log1pOp();
             forward_result[8] = op;
             
             op->set_inputs( forward_result[7] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2802', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [16, 132], 'sorted_id': 9}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2678', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [16, 132], 'sorted_id': 9}
         {
             Tensor c = (fprec)0.0;
             forward_result[9] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2804', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [909, 1026, 157, 445, 39, 922, 269, 261, 565, 11, 141, 670, 1155, 277, 792, 916, 1012, 685, 678, 1146, 430, 164, 799, 1032, 550, 806, 662, 1128, 438, 542, 558, 1156, 24, 812, 422, 32, 149, 284, 1019, 902], 'sorted_id': 10}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2676', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [24, 1081, 1063, 156, 267, 641, 259, 163, 847, 275, 380, 388, 148, 11, 403, 867, 499, 618, 626, 861, 522, 396, 634, 745, 976, 738, 956, 752, 507, 140, 32, 854, 1099, 282, 970, 39, 515, 963, 1062, 758], 'sorted_id': 10}
         {
             Tensor c = (fprec)0.0;
             forward_result[10] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2814', 'op': 'aten::size', 'in': [6, 10], 'output_id': 0, 'shape': [], 'out': [18, 14], 'sorted_id': 11}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2703', 'op': 'aten::size', 'in': [6, 10], 'output_id': 0, 'shape': [], 'out': [18, 14], 'sorted_id': 11}
         {
             SizeOp* op = new SizeOp();
             forward_result[11] = op;
@@ -141,13 +138,13 @@
             op->set_inputs( forward_result[10] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2803', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [891, 698, 108, 993, 177, 314, 182, 41, 1058, 827, 289, 1126, 727, 750, 944, 423, 523, 731, 838, 338, 1103, 348, 1132, 1091, 814, 310, 251, 711, 1124, 1113, 1120, 1021, 770, 499, 994, 570, 1072, 522, 1013, 129, 122, 611, 1047, 699, 241, 823, 487, 712, 532, 228, 1086, 13, 362, 190, 637, 969, 344, 224, 866, 552, 903, 475, 131, 663, 69, 690, 951, 801, 687, 824, 926, 44, 739, 262, 337, 1137, 205, 151, 1069, 85, 884, 271, 302, 642, 326, 703, 206, 100, 870, 625, 793, 643, 414, 937, 61, 976, 286, 567, 583, 54, 762, 599, 816, 841, 958, 719, 330, 249, 26, 459, 70, 169, 1104, 1139, 73, 56, 450, 479, 84, 311, 959, 715, 738, 361, 757, 1142, 1068, 672, 221, 1061, 1090, 371, 962, 341, 579, 652, 1083, 530, 412, 432, 471, 591, 408, 218, 509, 517, 142, 924, 77, 109, 606, 458, 849, 510, 297, 980, 860, 97, 229, 618, 772, 349, 848, 871, 96, 1003, 1054, 1001, 948, 883, 650, 198, 236, 578, 217, 178, 595, 630, 1036, 1055, 749, 592, 629, 970, 742, 210, 491, 835, 863, 878, 945, 1079, 783, 103, 369, 447, 745, 988, 779, 318, 191, 934, 933, 472, 763, 1044, 1034, 1111, 325, 498, 981, 973, 607, 726, 852, 1144, 1161, 543, 166, 859, 1148, 893, 463, 911, 1080, 194, 486, 121, 298, 619, 834, 89, 1134, 356, 116, 1098, 505, 622, 785, 502, 1043, 242], 'sorted_id': 12}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2677', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [77, 926, 324, 682, 830, 1013, 1035, 235, 770, 978, 579, 879, 1060, 1055, 109, 205, 536, 300, 655, 805, 576, 360, 594, 460, 837, 209, 1074, 701, 216, 190, 706, 586, 429, 430, 671, 719, 769, 787, 829, 248, 893, 524, 646, 675, 335, 914, 1069, 1042, 475, 991, 848, 824, 987, 381, 359, 713, 488, 1030, 957, 108, 798, 856, 240, 780, 1087, 628, 918, 1012, 556, 433, 643, 687, 731, 609, 1027, 509, 871, 998, 347, 339, 408, 1072, 599, 241, 882, 654, 938, 1016, 773, 457, 189, 390, 587, 999, 61, 527, 667, 907, 1077, 1090, 116, 269, 121, 417, 668, 939, 122, 296, 342, 223, 915, 13, 747, 193, 946, 903, 659, 220, 480, 70, 563, 728, 463, 890, 1057, 96, 600, 948, 1097, 1092, 100, 481, 346, 85, 141, 988, 1023, 1085, 150, 812, 217, 312, 421, 878, 227, 287, 284, 762, 56, 369, 328, 449, 309, 839, 795, 619, 1002, 549, 467, 695, 683, 1079, 367, 705, 228, 535, 204, 739, 698, 129, 564, 726, 784, 181, 809, 176, 372, 250, 323, 165, 500, 980, 168, 131, 44, 1005, 1024, 405, 490, 794, 582, 354, 41, 416, 437, 694, 965, 806, 568, 444, 904, 260, 781, 295, 89, 69, 540, 548, 97, 73, 607, 1048, 1067, 1047, 308, 103, 84, 456, 575, 54, 336, 1095, 552, 889, 197, 26, 177, 468, 445, 1034, 316, 896, 817, 760, 933, 718, 869, 816, 925, 921], 'sorted_id': 12}
         {
             Tensor c = (fprec)1.0;
             forward_result[12] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2815', 'op': 'aten::size', 'in': [6, 12], 'output_id': 0, 'shape': [], 'out': [18, 14], 'sorted_id': 13}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2704', 'op': 'aten::size', 'in': [6, 12], 'output_id': 0, 'shape': [], 'out': [18, 14], 'sorted_id': 13}
         {
             SizeOp* op = new SizeOp();
             forward_result[13] = op;
@@ -156,7 +153,7 @@
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2816', 'op': 'prim::ListConstruct', 'in': [11, 13], 'output_id': 0, 'shape': [], 'out': [16], 'sorted_id': 14}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2705', 'op': 'prim::ListConstruct', 'in': [11, 13], 'output_id': 0, 'shape': [], 'out': [16], 'sorted_id': 14}
         {
             ListConstructOp* op = new ListConstructOp();
             forward_result[14] = op;
@@ -165,13 +162,13 @@
             op->set_inputs( forward_result[13] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2801', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [909, 907, 445, 665, 159, 39, 425, 19, 269, 563, 922, 440, 545, 565, 147, 918, 680, 279, 267, 162, 670, 797, 668, 920, 685, 905, 795, 16, 144, 560, 430, 164, 443, 799, 548, 1032, 1157, 810, 550, 264, 1015, 1030, 1028, 282, 37, 1017, 24, 812, 683, 284, 34, 149, 808, 1019, 428], 'sorted_id': 15}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2679', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [24, 16, 961, 267, 641, 624, 163, 852, 143, 401, 865, 520, 388, 148, 161, 403, 867, 158, 626, 37, 754, 522, 636, 756, 959, 262, 972, 398, 741, 745, 976, 383, 505, 280, 517, 1064, 386, 974, 507, 854, 850, 863, 743, 146, 282, 621, 265, 639, 277, 19, 39, 34, 963, 502, 758], 'sorted_id': 15}
         {
             Tensor c = (fprec)0.0;
             forward_result[15] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2817', 'op': 'aten::expand', 'in': [9, 14, 15], 'output_id': 0, 'shape': [400, 784], 'out': [21], 'sorted_id': 16}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2706', 'op': 'aten::expand', 'in': [9, 14, 15], 'output_id': 0, 'shape': [400, 784], 'out': [21], 'sorted_id': 16}
         {
             Tensor::shape_type shape = {400,784};
             ExpandOp* op = new ExpandOp();
@@ -180,16 +177,15 @@
             op->set_inputs( forward_result[9] );
             op->set_inputs( forward_result[14] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2800', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [132, 19], 'sorted_id': 17}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2680', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [19, 132], 'sorted_id': 17}
         {
             Tensor c = (fprec)1.0;
             forward_result[17] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2818', 'op': 'prim::ListConstruct', 'in': [11, 13], 'output_id': 0, 'shape': [], 'out': [19], 'sorted_id': 18}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2707', 'op': 'prim::ListConstruct', 'in': [11, 13], 'output_id': 0, 'shape': [], 'out': [19], 'sorted_id': 18}
         {
             ListConstructOp* op = new ListConstructOp();
             forward_result[18] = op;
@@ -198,7 +194,7 @@
             op->set_inputs( forward_result[13] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2819', 'op': 'aten::expand', 'in': [17, 18, 15], 'output_id': 0, 'shape': [400, 784], 'out': [21], 'sorted_id': 19}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2708', 'op': 'aten::expand', 'in': [17, 18, 15], 'output_id': 0, 'shape': [400, 784], 'out': [21], 'sorted_id': 19}
         {
             Tensor::shape_type shape = {400,784};
             ExpandOp* op = new ExpandOp();
@@ -207,15 +203,14 @@
             op->set_inputs( forward_result[17] );
             op->set_inputs( forward_result[18] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2799', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'out': [909, 269, 1002, 1147, 429, 283, 430, 164, 1032, 1157, 892, 1120, 550, 38, 921, 268, 444, 1112, 24, 518, 531, 39, 684, 1160, 811, 565, 865, 196, 879, 758, 798, 237, 1060, 149, 370, 117, 1099, 922, 102, 316, 1031, 670, 549, 343, 685, 250, 564, 651, 408, 744, 597, 75, 148, 624, 357, 812, 1019, 223, 130, 989, 445, 669, 975, 504, 771, 779, 908, 1129, 1085, 799, 950, 21, 1018, 717, 163, 638, 477, 840, 284], 'sorted_id': 20}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2681', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'out': [267, 163, 700, 1060, 388, 403, 195, 920, 522, 1029, 1064, 368, 39, 1004, 758, 786, 731, 1056, 148, 402, 811, 162, 757, 745, 314, 476, 744, 117, 727, 435, 38, 24, 641, 1100, 75, 1043, 867, 521, 236, 976, 506, 895, 222, 825, 282, 934, 608, 975, 595, 372, 147, 581, 266, 387, 866, 130, 962, 626, 838, 21, 554, 853, 489, 1082, 102, 507, 854, 355, 673, 341, 281, 625, 714, 249, 947, 462, 963, 640], 'sorted_id': 20}
         {
             forward_result[20] = NULL;
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2820', 'op': 'aten::normal', 'in': [16, 19, 20], 'output_id': 0, 'shape': [400, 784], 'out': [24], 'sorted_id': 21}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2709', 'op': 'aten::normal', 'in': [16, 19, 20], 'output_id': 0, 'shape': [400, 784], 'out': [24], 'sorted_id': 21}
         {
             Tensor::shape_type shape = {400,784};
             NormalOp* op = new NormalOp();
@@ -224,21 +219,20 @@
             op->set_inputs( forward_result[16] );
             op->set_inputs( forward_result[19] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2798', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 6.0, 'out': [909, 445, 24, 812, 39, 550, 685, 799, 269, 922, 284, 149, 565, 430, 1019, 164, 670, 1032], 'sorted_id': 22}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2682', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 6.0, 'out': [745, 24, 282, 403, 867, 976, 267, 641, 626, 963, 163, 39, 522, 507, 854, 388, 148, 758], 'sorted_id': 22}
         {
             Tensor c = (fprec)6.0;
             forward_result[22] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2797', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'out': [909, 445, 24, 812, 39, 550, 685, 799, 269, 922, 284, 149, 565, 430, 1019, 164, 670, 1032], 'sorted_id': 23}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2683', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'out': [745, 24, 282, 403, 867, 976, 267, 641, 626, 963, 163, 39, 522, 507, 854, 388, 148, 758], 'sorted_id': 23}
         {
             forward_result[23] = NULL;
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/epsilon.1', 'op': 'aten::to', 'in': [21, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400, 784], 'out': [25], 'sorted_id': 24}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/epsilon.1', 'op': 'aten::to', 'in': [21, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400, 784], 'out': [25], 'sorted_id': 24}
         {
             Tensor::shape_type shape = {400,784};
             ToOp* op = new ToOp();
@@ -252,10 +246,9 @@
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2824', 'op': 'aten::mul', 'in': [8, 24], 'output_id': 0, 'shape': [400, 784], 'out': [26], 'sorted_id': 25}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2713', 'op': 'aten::mul', 'in': [8, 24], 'output_id': 0, 'shape': [400, 784], 'out': [26], 'sorted_id': 25}
         {
             Tensor::shape_type shape = {400,784};
             MulOp* op = new MulOp();
@@ -263,10 +256,9 @@
             
             op->set_inputs( forward_result[8] );
             op->set_inputs( forward_result[24] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/value.1', 'op': 'aten::add', 'in': [5, 25, 12], 'output_id': 0, 'shape': [400, 784], 'out': [109, 61, 44, 42], 'sorted_id': 26}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/value.1', 'op': 'aten::add', 'in': [5, 25, 12], 'output_id': 0, 'shape': [400, 784], 'out': [42, 44, 109, 61], 'sorted_id': 26}
         {
             Tensor::shape_type shape = {400,784};
             AddOp* op = new AddOp();
@@ -275,50 +267,47 @@
             op->set_inputs( forward_result[5] );
             op->set_inputs( forward_result[25] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l1]/bias_mu/bias_mu.1', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [122, 41], 'sorted_id': 27}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/bias_mu/bias_mu.1', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [122, 41], 'sorted_id': 27}
         {
             Tensor::shape_type shape = {400};
             l1_bias_mu.reshape( shape );
             forward_result[27] = new VariableTensor( l1_bias_mu, 2 );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l1]/bias_rho/bias_rho.1', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [32, 29, 118, 124], 'sorted_id': 28}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/bias_rho/bias_rho.1', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [32, 124, 29, 118], 'sorted_id': 28}
         {
             Tensor::shape_type shape = {400};
             l1_bias_rho.reshape( shape );
             forward_result[28] = new VariableTensor( l1_bias_rho, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2835', 'op': 'aten::exp', 'in': [28], 'output_id': 0, 'shape': [400], 'out': [30], 'sorted_id': 29}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2724', 'op': 'aten::exp', 'in': [28], 'output_id': 0, 'shape': [400], 'out': [30], 'sorted_id': 29}
         {
             Tensor::shape_type shape = {400};
             ExpOp* op = new ExpOp();
             forward_result[29] = op;
             
             op->set_inputs( forward_result[28] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2836', 'op': 'aten::log1p', 'in': [29], 'output_id': 0, 'shape': [400], 'out': [40], 'sorted_id': 30}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2725', 'op': 'aten::log1p', 'in': [29], 'output_id': 0, 'shape': [400], 'out': [40], 'sorted_id': 30}
         {
             Tensor::shape_type shape = {400};
             Log1pOp* op = new Log1pOp();
             forward_result[30] = op;
             
             op->set_inputs( forward_result[29] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2827', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [132, 34], 'sorted_id': 31}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2716', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [34, 132], 'sorted_id': 31}
         {
             Tensor c = (fprec)0.0;
             forward_result[31] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2826', 'op': 'aten::size', 'in': [28, 10], 'output_id': 0, 'shape': [], 'out': [33, 36], 'sorted_id': 32}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2715', 'op': 'aten::size', 'in': [28, 10], 'output_id': 0, 'shape': [], 'out': [33, 36], 'sorted_id': 32}
         {
             SizeOp* op = new SizeOp();
             forward_result[32] = op;
@@ -327,7 +316,7 @@
             op->set_inputs( forward_result[10] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2828', 'op': 'prim::ListConstruct', 'in': [32], 'output_id': 0, 'shape': [], 'out': [34], 'sorted_id': 33}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2717', 'op': 'prim::ListConstruct', 'in': [32], 'output_id': 0, 'shape': [], 'out': [34], 'sorted_id': 33}
         {
             ListConstructOp* op = new ListConstructOp();
             forward_result[33] = op;
@@ -335,7 +324,7 @@
             op->set_inputs( forward_result[32] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2829', 'op': 'aten::expand', 'in': [31, 33, 15], 'output_id': 0, 'shape': [400], 'out': [38], 'sorted_id': 34}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2718', 'op': 'aten::expand', 'in': [31, 33, 15], 'output_id': 0, 'shape': [400], 'out': [38], 'sorted_id': 34}
         {
             Tensor::shape_type shape = {400};
             ExpandOp* op = new ExpandOp();
@@ -344,16 +333,15 @@
             op->set_inputs( forward_result[31] );
             op->set_inputs( forward_result[33] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2830', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [132, 37], 'sorted_id': 35}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2719', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [37, 132], 'sorted_id': 35}
         {
             Tensor c = (fprec)1.0;
             forward_result[35] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2831', 'op': 'prim::ListConstruct', 'in': [32], 'output_id': 0, 'shape': [], 'out': [37], 'sorted_id': 36}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2720', 'op': 'prim::ListConstruct', 'in': [32], 'output_id': 0, 'shape': [], 'out': [37], 'sorted_id': 36}
         {
             ListConstructOp* op = new ListConstructOp();
             forward_result[36] = op;
@@ -361,7 +349,7 @@
             op->set_inputs( forward_result[32] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2832', 'op': 'aten::expand', 'in': [35, 36, 15], 'output_id': 0, 'shape': [400], 'out': [38], 'sorted_id': 37}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2721', 'op': 'aten::expand', 'in': [35, 36, 15], 'output_id': 0, 'shape': [400], 'out': [38], 'sorted_id': 37}
         {
             Tensor::shape_type shape = {400};
             ExpandOp* op = new ExpandOp();
@@ -370,10 +358,9 @@
             op->set_inputs( forward_result[35] );
             op->set_inputs( forward_result[36] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2833', 'op': 'aten::normal', 'in': [34, 37, 20], 'output_id': 0, 'shape': [400], 'out': [39], 'sorted_id': 38}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2722', 'op': 'aten::normal', 'in': [34, 37, 20], 'output_id': 0, 'shape': [400], 'out': [39], 'sorted_id': 38}
         {
             Tensor::shape_type shape = {400};
             NormalOp* op = new NormalOp();
@@ -382,10 +369,9 @@
             op->set_inputs( forward_result[34] );
             op->set_inputs( forward_result[37] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/epsilon.3', 'op': 'aten::to', 'in': [38, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400], 'out': [40], 'sorted_id': 39}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/epsilon.3', 'op': 'aten::to', 'in': [38, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400], 'out': [40], 'sorted_id': 39}
         {
             Tensor::shape_type shape = {400};
             ToOp* op = new ToOp();
@@ -399,10 +385,9 @@
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2837', 'op': 'aten::mul', 'in': [30, 39], 'output_id': 0, 'shape': [400], 'out': [41], 'sorted_id': 40}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2726', 'op': 'aten::mul', 'in': [30, 39], 'output_id': 0, 'shape': [400], 'out': [41], 'sorted_id': 40}
         {
             Tensor::shape_type shape = {400};
             MulOp* op = new MulOp();
@@ -410,10 +395,9 @@
             
             op->set_inputs( forward_result[30] );
             op->set_inputs( forward_result[39] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/value.3', 'op': 'aten::add', 'in': [27, 40, 12], 'output_id': 0, 'shape': [400], 'out': [89, 77, 122, 42], 'sorted_id': 41}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/value.3', 'op': 'aten::add', 'in': [27, 40, 12], 'output_id': 0, 'shape': [400], 'out': [77, 89, 42, 122], 'sorted_id': 41}
         {
             Tensor::shape_type shape = {400};
             AddOp* op = new AddOp();
@@ -422,10 +406,9 @@
             op->set_inputs( forward_result[27] );
             op->set_inputs( forward_result[40] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/input.3', 'op': 'aten::linear', 'in': [4, 26, 41], 'output_id': 0, 'shape': [4, 400], 'out': [132], 'sorted_id': 42}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/input.3', 'op': 'aten::linear', 'in': [4, 26, 41], 'output_id': 0, 'shape': [4, 400], 'out': [132], 'sorted_id': 42}
         {
             Tensor::shape_type shape = {4,400};
             LinearOp* op = new LinearOp();
@@ -434,17 +417,16 @@
             op->set_inputs( forward_result[4] );
             op->set_inputs( forward_result[26] );
             op->set_inputs( forward_result[41] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2794', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [132, 44], 'sorted_id': 43}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2686', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [44, 132], 'sorted_id': 43}
         {
             Tensor::shape_type shape = {1};
             Constant1.reshape( shape );
             forward_result[43] = new VariableTensor( Constant1, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2841', 'op': 'aten::sub', 'in': [26, 43, 12], 'output_id': 0, 'shape': [400, 784], 'out': [46], 'sorted_id': 44}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2730', 'op': 'aten::sub', 'in': [26, 43, 12], 'output_id': 0, 'shape': [400, 784], 'out': [46], 'sorted_id': 44}
         {
             Tensor::shape_type shape = {400,784};
             SubOp* op = new SubOp();
@@ -453,16 +435,15 @@
             op->set_inputs( forward_result[26] );
             op->set_inputs( forward_result[43] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2795', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 2.0, 'out': [1062, 92, 1039, 647, 888, 828, 602, 875, 78, 587, 751, 49, 985, 644, 872, 366, 492, 1105, 80, 1073, 929, 995, 754, 243, 201, 62, 965, 333, 764, 722, 612, 574, 524, 1160, 830, 853, 938, 1108, 1037, 199, 170, 65, 303, 885, 842, 952, 720, 90, 1048, 363, 631, 1092, 691, 1064, 113, 331, 186, 819, 855, 126, 998, 454, 173, 350, 634, 213, 290, 451, 940, 293, 511, 982, 600, 480, 464, 467, 123, 514, 1095, 844, 46, 927, 211, 1075, 321, 767, 494, 306, 732, 707, 110, 614, 571, 183, 230, 584, 1050, 954, 704, 353, 246, 319, 734, 817, 963, 694, 527, 233, 482], 'sorted_id': 45}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2685', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 2.0, 'out': [604, 482, 46, 788, 198, 200, 872, 329, 818, 110, 927, 994, 422, 317, 245, 331, 49, 92, 885, 591, 1039, 776, 899, 440, 229, 1019, 663, 569, 472, 660, 943, 883, 304, 450, 232, 940, 288, 1017, 544, 80, 801, 821, 983, 763, 834, 361, 1049, 242, 676, 528, 723, 469, 210, 62, 1052, 123, 291, 425, 720, 412, 707, 588, 438, 601, 78, 1006, 690, 678, 541, 185, 409, 930, 790, 212, 647, 799, 874, 90, 1036, 897, 910, 364, 65, 348, 908, 319, 1008, 182, 831, 172, 169, 126, 992, 452, 485, 571, 301, 765, 981, 710, 531, 688, 113, 559, 351, 650, 774, 557], 'sorted_id': 45}
         {
             Tensor c = (fprec)2.0;
             forward_result[45] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2842', 'op': 'aten::pow', 'in': [44, 45], 'output_id': 0, 'shape': [400, 784], 'out': [47], 'sorted_id': 46}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2731', 'op': 'aten::pow', 'in': [44, 45], 'output_id': 0, 'shape': [400, 784], 'out': [47], 'sorted_id': 46}
         {
             Tensor::shape_type shape = {400,784};
             PowOp* op = new PowOp();
@@ -470,27 +451,25 @@
             
             op->set_inputs( forward_result[44] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2843', 'op': 'aten::neg', 'in': [46], 'output_id': 0, 'shape': [400, 784], 'out': [52], 'sorted_id': 47}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2732', 'op': 'aten::neg', 'in': [46], 'output_id': 0, 'shape': [400, 784], 'out': [52], 'sorted_id': 47}
         {
             Tensor::shape_type shape = {400,784};
             NegOp* op = new NegOp();
             forward_result[47] = op;
             
             op->set_inputs( forward_result[46] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2796', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 1.0, 'out': [83, 53, 49, 132, 80], 'sorted_id': 48}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2684', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 1.0, 'out': [53, 83, 80, 49, 132], 'sorted_id': 48}
         {
             Tensor::shape_type shape = {1};
             Constant2.reshape( shape );
             forward_result[48] = new VariableTensor( Constant2, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/var.1', 'op': 'aten::pow', 'in': [48, 45], 'output_id': 0, 'shape': [1], 'out': [51], 'sorted_id': 49}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/var.1', 'op': 'aten::pow', 'in': [48, 45], 'output_id': 0, 'shape': [1], 'out': [51], 'sorted_id': 49}
         {
             Tensor::shape_type shape = {1};
             PowOp* op = new PowOp();
@@ -498,16 +477,15 @@
             
             op->set_inputs( forward_result[48] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2793', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 2.0, 'out': [695, 999, 635, 735, 114, 322, 723, 966, 468, 174, 1040, 603, 334, 955, 1109, 515, 831, 127, 93, 648, 856, 81, 876, 367, 845, 202, 528, 483, 1065, 930, 51, 615, 1096, 294, 214, 495, 755, 889, 986, 820, 575, 768, 588, 66, 307, 1051, 455, 1076, 941, 247, 187, 354, 234, 708], 'sorted_id': 50}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2687', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 2.0, 'out': [66, 691, 995, 572, 213, 984, 664, 51, 233, 545, 93, 365, 724, 711, 605, 791, 875, 835, 486, 944, 1053, 802, 473, 532, 332, 246, 453, 886, 320, 292, 114, 822, 931, 1040, 305, 900, 127, 352, 651, 186, 173, 592, 560, 766, 201, 441, 1009, 679, 1020, 911, 426, 413, 81, 777], 'sorted_id': 50}
         {
             Tensor c = (fprec)2.0;
             forward_result[50] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2844', 'op': 'aten::mul', 'in': [49, 50], 'output_id': 0, 'shape': [1], 'out': [52], 'sorted_id': 51}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2733', 'op': 'aten::mul', 'in': [49, 50], 'output_id': 0, 'shape': [1], 'out': [52], 'sorted_id': 51}
         {
             Tensor::shape_type shape = {1};
             MulOp* op = new MulOp();
@@ -515,10 +493,9 @@
             
             op->set_inputs( forward_result[49] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2845', 'op': 'aten::div', 'in': [47, 51], 'output_id': 0, 'shape': [400, 784], 'out': [54], 'sorted_id': 52}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2734', 'op': 'aten::div', 'in': [47, 51], 'output_id': 0, 'shape': [400, 784], 'out': [54], 'sorted_id': 52}
         {
             Tensor::shape_type shape = {400,784};
             DivOp* op = new DivOp();
@@ -526,20 +503,18 @@
             
             op->set_inputs( forward_result[47] );
             op->set_inputs( forward_result[51] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/log_scale.1', 'op': 'aten::log', 'in': [48], 'output_id': 0, 'shape': [1], 'out': [54], 'sorted_id': 53}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/log_scale.1', 'op': 'aten::log', 'in': [48], 'output_id': 0, 'shape': [1], 'out': [54], 'sorted_id': 53}
         {
             Tensor::shape_type shape = {1};
             LogOp* op = new LogOp();
             forward_result[53] = op;
             
             op->set_inputs( forward_result[48] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2846', 'op': 'aten::sub', 'in': [52, 53, 12], 'output_id': 0, 'shape': [400, 784], 'out': [56], 'sorted_id': 54}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2735', 'op': 'aten::sub', 'in': [52, 53, 12], 'output_id': 0, 'shape': [400, 784], 'out': [56], 'sorted_id': 54}
         {
             Tensor::shape_type shape = {400,784};
             SubOp* op = new SubOp();
@@ -548,16 +523,15 @@
             op->set_inputs( forward_result[52] );
             op->set_inputs( forward_result[53] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2792', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.9189, 'out': [459, 970, 70, 835, 945, 56, 311, 959, 191, 727, 934, 824, 472, 1044, 739, 338, 607, 1069, 85, 1080, 218, 326, 499, 849, 206, 860, 97, 298, 619, 699, 487, 178, 712, 1055, 579, 592], 'sorted_id': 55}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2688', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.9189, 'out': [324, 890, 70, 1013, 1024, 770, 879, 85, 806, 988, 904, 205, 536, 217, 781, 655, 576, 97, 457, 56, 999, 190, 309, 336, 795, 430, 549, 695, 683, 417, 668, 177, 445, 296, 564, 915], 'sorted_id': 55}
         {
             Tensor c = (fprec)0.9189;
             forward_result[55] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2847', 'op': 'aten::sub', 'in': [54, 55, 12], 'output_id': 0, 'shape': [400, 784], 'out': [57], 'sorted_id': 56}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2736', 'op': 'aten::sub', 'in': [54, 55, 12], 'output_id': 0, 'shape': [400, 784], 'out': [57], 'sorted_id': 56}
         {
             Tensor::shape_type shape = {400,784};
             SubOp* op = new SubOp();
@@ -566,26 +540,24 @@
             op->set_inputs( forward_result[54] );
             op->set_inputs( forward_result[55] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/prob1.1', 'op': 'aten::exp', 'in': [56], 'output_id': 0, 'shape': [400, 784], 'out': [59], 'sorted_id': 57}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/prob1.1', 'op': 'aten::exp', 'in': [56], 'output_id': 0, 'shape': [400, 784], 'out': [59], 'sorted_id': 57}
         {
             Tensor::shape_type shape = {400,784};
             ExpOp* op = new ExpOp();
             forward_result[57] = op;
             
             op->set_inputs( forward_result[56] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2790', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.5, 'out': [1071, 72, 461, 59, 501, 936, 947, 474, 851, 328, 621, 220, 87, 594, 729, 180, 313, 609, 581, 1082, 340, 741, 193, 1046, 837, 300, 208, 972, 701, 1057, 862, 99, 961, 826, 714, 489], 'sorted_id': 58}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2690', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.5, 'out': [881, 87, 311, 459, 578, 783, 432, 657, 906, 338, 99, 670, 326, 990, 685, 797, 551, 219, 419, 538, 192, 207, 179, 566, 72, 697, 892, 59, 1026, 1015, 1001, 298, 772, 808, 447, 917], 'sorted_id': 58}
         {
             Tensor c = (fprec)0.5;
             forward_result[58] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2860', 'op': 'aten::mul', 'in': [57, 58], 'output_id': 0, 'shape': [400, 784], 'out': [73], 'sorted_id': 59}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2749', 'op': 'aten::mul', 'in': [57, 58], 'output_id': 0, 'shape': [400, 784], 'out': [73], 'sorted_id': 59}
         {
             Tensor::shape_type shape = {400,784};
             MulOp* op = new MulOp();
@@ -593,17 +565,16 @@
             
             op->set_inputs( forward_result[57] );
             op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2851', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [132, 61], 'sorted_id': 60}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2740', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [132, 61], 'sorted_id': 60}
         {
             Tensor::shape_type shape = {1};
             Constant3.reshape( shape );
             forward_result[60] = new VariableTensor( Constant3, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2852', 'op': 'aten::sub', 'in': [26, 60, 12], 'output_id': 0, 'shape': [400, 784], 'out': [62], 'sorted_id': 61}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2741', 'op': 'aten::sub', 'in': [26, 60, 12], 'output_id': 0, 'shape': [400, 784], 'out': [62], 'sorted_id': 61}
         {
             Tensor::shape_type shape = {400,784};
             SubOp* op = new SubOp();
@@ -612,10 +583,9 @@
             op->set_inputs( forward_result[26] );
             op->set_inputs( forward_result[60] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2853', 'op': 'aten::pow', 'in': [61, 45], 'output_id': 0, 'shape': [400, 784], 'out': [63], 'sorted_id': 62}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2742', 'op': 'aten::pow', 'in': [61, 45], 'output_id': 0, 'shape': [400, 784], 'out': [63], 'sorted_id': 62}
         {
             Tensor::shape_type shape = {400,784};
             PowOp* op = new PowOp();
@@ -623,27 +593,25 @@
             
             op->set_inputs( forward_result[61] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2854', 'op': 'aten::neg', 'in': [62], 'output_id': 0, 'shape': [400, 784], 'out': [67], 'sorted_id': 63}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2743', 'op': 'aten::neg', 'in': [62], 'output_id': 0, 'shape': [400, 784], 'out': [67], 'sorted_id': 63}
         {
             Tensor::shape_type shape = {400,784};
             NegOp* op = new NegOp();
             forward_result[63] = op;
             
             op->set_inputs( forward_result[62] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2791', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0025, 'out': [68, 92, 65, 95, 132], 'sorted_id': 64}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2689', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0025, 'out': [68, 65, 92, 95, 132], 'sorted_id': 64}
         {
             Tensor::shape_type shape = {1};
             Constant4.reshape( shape );
             forward_result[64] = new VariableTensor( Constant4, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/var.3', 'op': 'aten::pow', 'in': [64, 45], 'output_id': 0, 'shape': [1], 'out': [66], 'sorted_id': 65}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/var.3', 'op': 'aten::pow', 'in': [64, 45], 'output_id': 0, 'shape': [1], 'out': [66], 'sorted_id': 65}
         {
             Tensor::shape_type shape = {1};
             PowOp* op = new PowOp();
@@ -651,10 +619,9 @@
             
             op->set_inputs( forward_result[64] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2855', 'op': 'aten::mul', 'in': [65, 50], 'output_id': 0, 'shape': [1], 'out': [67], 'sorted_id': 66}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2744', 'op': 'aten::mul', 'in': [65, 50], 'output_id': 0, 'shape': [1], 'out': [67], 'sorted_id': 66}
         {
             Tensor::shape_type shape = {1};
             MulOp* op = new MulOp();
@@ -662,10 +629,9 @@
             
             op->set_inputs( forward_result[65] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2856', 'op': 'aten::div', 'in': [63, 66], 'output_id': 0, 'shape': [400, 784], 'out': [69], 'sorted_id': 67}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2745', 'op': 'aten::div', 'in': [63, 66], 'output_id': 0, 'shape': [400, 784], 'out': [69], 'sorted_id': 67}
         {
             Tensor::shape_type shape = {400,784};
             DivOp* op = new DivOp();
@@ -673,20 +639,18 @@
             
             op->set_inputs( forward_result[63] );
             op->set_inputs( forward_result[66] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/log_scale.3', 'op': 'aten::log', 'in': [64], 'output_id': 0, 'shape': [1], 'out': [69], 'sorted_id': 68}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/log_scale.3', 'op': 'aten::log', 'in': [64], 'output_id': 0, 'shape': [1], 'out': [69], 'sorted_id': 68}
         {
             Tensor::shape_type shape = {1};
             LogOp* op = new LogOp();
             forward_result[68] = op;
             
             op->set_inputs( forward_result[64] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2857', 'op': 'aten::sub', 'in': [67, 68, 12], 'output_id': 0, 'shape': [400, 784], 'out': [70], 'sorted_id': 69}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2746', 'op': 'aten::sub', 'in': [67, 68, 12], 'output_id': 0, 'shape': [400, 784], 'out': [70], 'sorted_id': 69}
         {
             Tensor::shape_type shape = {400,784};
             SubOp* op = new SubOp();
@@ -695,10 +659,9 @@
             op->set_inputs( forward_result[67] );
             op->set_inputs( forward_result[68] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2858', 'op': 'aten::sub', 'in': [69, 55, 12], 'output_id': 0, 'shape': [400, 784], 'out': [71], 'sorted_id': 70}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2747', 'op': 'aten::sub', 'in': [69, 55, 12], 'output_id': 0, 'shape': [400, 784], 'out': [71], 'sorted_id': 70}
         {
             Tensor::shape_type shape = {400,784};
             SubOp* op = new SubOp();
@@ -707,20 +670,18 @@
             op->set_inputs( forward_result[69] );
             op->set_inputs( forward_result[55] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/prob2.1', 'op': 'aten::exp', 'in': [70], 'output_id': 0, 'shape': [400, 784], 'out': [72], 'sorted_id': 71}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/prob2.1', 'op': 'aten::exp', 'in': [70], 'output_id': 0, 'shape': [400, 784], 'out': [72], 'sorted_id': 71}
         {
             Tensor::shape_type shape = {400,784};
             ExpOp* op = new ExpOp();
             forward_result[71] = op;
             
             op->set_inputs( forward_result[70] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2861', 'op': 'aten::mul', 'in': [71, 58], 'output_id': 0, 'shape': [400, 784], 'out': [73], 'sorted_id': 72}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2750', 'op': 'aten::mul', 'in': [71, 58], 'output_id': 0, 'shape': [400, 784], 'out': [73], 'sorted_id': 72}
         {
             Tensor::shape_type shape = {400,784};
             MulOp* op = new MulOp();
@@ -728,10 +689,9 @@
             
             op->set_inputs( forward_result[71] );
             op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2862', 'op': 'aten::add', 'in': [59, 72, 12], 'output_id': 0, 'shape': [400, 784], 'out': [74], 'sorted_id': 73}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2751', 'op': 'aten::add', 'in': [59, 72, 12], 'output_id': 0, 'shape': [400, 784], 'out': [74], 'sorted_id': 73}
         {
             Tensor::shape_type shape = {400,784};
             AddOp* op = new AddOp();
@@ -740,20 +700,18 @@
             op->set_inputs( forward_result[59] );
             op->set_inputs( forward_result[72] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2863', 'op': 'aten::log', 'in': [73], 'output_id': 0, 'shape': [400, 784], 'out': [75], 'sorted_id': 74}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2752', 'op': 'aten::log', 'in': [73], 'output_id': 0, 'shape': [400, 784], 'out': [75], 'sorted_id': 74}
         {
             Tensor::shape_type shape = {400,784};
             LogOp* op = new LogOp();
             forward_result[74] = op;
             
             op->set_inputs( forward_result[73] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2864', 'op': 'aten::sum', 'in': [74, 20], 'output_id': 0, 'shape': [], 'out': [103], 'sorted_id': 75}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2753', 'op': 'aten::sum', 'in': [74, 20], 'output_id': 0, 'shape': [], 'out': [103], 'sorted_id': 75}
         {
             SumOp* op = new SumOp();
             forward_result[75] = op;
@@ -762,14 +720,14 @@
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2867', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [132, 77], 'sorted_id': 76}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2756', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [77, 132], 'sorted_id': 76}
         {
             Tensor::shape_type shape = {1};
             Constant5.reshape( shape );
             forward_result[76] = new VariableTensor( Constant5, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2868', 'op': 'aten::sub', 'in': [41, 76, 12], 'output_id': 0, 'shape': [400], 'out': [78], 'sorted_id': 77}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2757', 'op': 'aten::sub', 'in': [41, 76, 12], 'output_id': 0, 'shape': [400], 'out': [78], 'sorted_id': 77}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
@@ -778,10 +736,9 @@
             op->set_inputs( forward_result[41] );
             op->set_inputs( forward_result[76] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2869', 'op': 'aten::pow', 'in': [77, 45], 'output_id': 0, 'shape': [400], 'out': [79], 'sorted_id': 78}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2758', 'op': 'aten::pow', 'in': [77, 45], 'output_id': 0, 'shape': [400], 'out': [79], 'sorted_id': 78}
         {
             Tensor::shape_type shape = {400};
             PowOp* op = new PowOp();
@@ -789,20 +746,18 @@
             
             op->set_inputs( forward_result[77] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2870', 'op': 'aten::neg', 'in': [78], 'output_id': 0, 'shape': [400], 'out': [82], 'sorted_id': 79}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2759', 'op': 'aten::neg', 'in': [78], 'output_id': 0, 'shape': [400], 'out': [82], 'sorted_id': 79}
         {
             Tensor::shape_type shape = {400};
             NegOp* op = new NegOp();
             forward_result[79] = op;
             
             op->set_inputs( forward_result[78] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/var.5', 'op': 'aten::pow', 'in': [48, 45], 'output_id': 0, 'shape': [1], 'out': [81], 'sorted_id': 80}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/var.5', 'op': 'aten::pow', 'in': [48, 45], 'output_id': 0, 'shape': [1], 'out': [81], 'sorted_id': 80}
         {
             Tensor::shape_type shape = {1};
             PowOp* op = new PowOp();
@@ -810,10 +765,9 @@
             
             op->set_inputs( forward_result[48] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2871', 'op': 'aten::mul', 'in': [80, 50], 'output_id': 0, 'shape': [1], 'out': [82], 'sorted_id': 81}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2760', 'op': 'aten::mul', 'in': [80, 50], 'output_id': 0, 'shape': [1], 'out': [82], 'sorted_id': 81}
         {
             Tensor::shape_type shape = {1};
             MulOp* op = new MulOp();
@@ -821,10 +775,9 @@
             
             op->set_inputs( forward_result[80] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2872', 'op': 'aten::div', 'in': [79, 81], 'output_id': 0, 'shape': [400], 'out': [84], 'sorted_id': 82}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2761', 'op': 'aten::div', 'in': [79, 81], 'output_id': 0, 'shape': [400], 'out': [84], 'sorted_id': 82}
         {
             Tensor::shape_type shape = {400};
             DivOp* op = new DivOp();
@@ -832,20 +785,18 @@
             
             op->set_inputs( forward_result[79] );
             op->set_inputs( forward_result[81] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/log_scale.5', 'op': 'aten::log', 'in': [48], 'output_id': 0, 'shape': [1], 'out': [84], 'sorted_id': 83}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/log_scale.5', 'op': 'aten::log', 'in': [48], 'output_id': 0, 'shape': [1], 'out': [84], 'sorted_id': 83}
         {
             Tensor::shape_type shape = {1};
             LogOp* op = new LogOp();
             forward_result[83] = op;
             
             op->set_inputs( forward_result[48] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2873', 'op': 'aten::sub', 'in': [82, 83, 12], 'output_id': 0, 'shape': [400], 'out': [85], 'sorted_id': 84}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2762', 'op': 'aten::sub', 'in': [82, 83, 12], 'output_id': 0, 'shape': [400], 'out': [85], 'sorted_id': 84}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
@@ -854,10 +805,9 @@
             op->set_inputs( forward_result[82] );
             op->set_inputs( forward_result[83] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2874', 'op': 'aten::sub', 'in': [84, 55, 12], 'output_id': 0, 'shape': [400], 'out': [86], 'sorted_id': 85}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2763', 'op': 'aten::sub', 'in': [84, 55, 12], 'output_id': 0, 'shape': [400], 'out': [86], 'sorted_id': 85}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
@@ -866,20 +816,18 @@
             op->set_inputs( forward_result[84] );
             op->set_inputs( forward_result[55] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/prob1.3', 'op': 'aten::exp', 'in': [85], 'output_id': 0, 'shape': [400], 'out': [87], 'sorted_id': 86}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/prob1.3', 'op': 'aten::exp', 'in': [85], 'output_id': 0, 'shape': [400], 'out': [87], 'sorted_id': 86}
         {
             Tensor::shape_type shape = {400};
             ExpOp* op = new ExpOp();
             forward_result[86] = op;
             
             op->set_inputs( forward_result[85] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2887', 'op': 'aten::mul', 'in': [86, 58], 'output_id': 0, 'shape': [400], 'out': [100], 'sorted_id': 87}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2776', 'op': 'aten::mul', 'in': [86, 58], 'output_id': 0, 'shape': [400], 'out': [100], 'sorted_id': 87}
         {
             Tensor::shape_type shape = {400};
             MulOp* op = new MulOp();
@@ -887,17 +835,16 @@
             
             op->set_inputs( forward_result[86] );
             op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2878', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [89, 132], 'sorted_id': 88}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2767', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [89, 132], 'sorted_id': 88}
         {
             Tensor::shape_type shape = {1};
             Constant6.reshape( shape );
             forward_result[88] = new VariableTensor( Constant6, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2879', 'op': 'aten::sub', 'in': [41, 88, 12], 'output_id': 0, 'shape': [400], 'out': [90], 'sorted_id': 89}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2768', 'op': 'aten::sub', 'in': [41, 88, 12], 'output_id': 0, 'shape': [400], 'out': [90], 'sorted_id': 89}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
@@ -906,10 +853,9 @@
             op->set_inputs( forward_result[41] );
             op->set_inputs( forward_result[88] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2880', 'op': 'aten::pow', 'in': [89, 45], 'output_id': 0, 'shape': [400], 'out': [91], 'sorted_id': 90}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2769', 'op': 'aten::pow', 'in': [89, 45], 'output_id': 0, 'shape': [400], 'out': [91], 'sorted_id': 90}
         {
             Tensor::shape_type shape = {400};
             PowOp* op = new PowOp();
@@ -917,20 +863,18 @@
             
             op->set_inputs( forward_result[89] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2881', 'op': 'aten::neg', 'in': [90], 'output_id': 0, 'shape': [400], 'out': [94], 'sorted_id': 91}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2770', 'op': 'aten::neg', 'in': [90], 'output_id': 0, 'shape': [400], 'out': [94], 'sorted_id': 91}
         {
             Tensor::shape_type shape = {400};
             NegOp* op = new NegOp();
             forward_result[91] = op;
             
             op->set_inputs( forward_result[90] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/var.7', 'op': 'aten::pow', 'in': [64, 45], 'output_id': 0, 'shape': [1], 'out': [93], 'sorted_id': 92}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/var.7', 'op': 'aten::pow', 'in': [64, 45], 'output_id': 0, 'shape': [1], 'out': [93], 'sorted_id': 92}
         {
             Tensor::shape_type shape = {1};
             PowOp* op = new PowOp();
@@ -938,10 +882,9 @@
             
             op->set_inputs( forward_result[64] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2882', 'op': 'aten::mul', 'in': [92, 50], 'output_id': 0, 'shape': [1], 'out': [94], 'sorted_id': 93}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2771', 'op': 'aten::mul', 'in': [92, 50], 'output_id': 0, 'shape': [1], 'out': [94], 'sorted_id': 93}
         {
             Tensor::shape_type shape = {1};
             MulOp* op = new MulOp();
@@ -949,10 +892,9 @@
             
             op->set_inputs( forward_result[92] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2883', 'op': 'aten::div', 'in': [91, 93], 'output_id': 0, 'shape': [400], 'out': [96], 'sorted_id': 94}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2772', 'op': 'aten::div', 'in': [91, 93], 'output_id': 0, 'shape': [400], 'out': [96], 'sorted_id': 94}
         {
             Tensor::shape_type shape = {400};
             DivOp* op = new DivOp();
@@ -960,20 +902,18 @@
             
             op->set_inputs( forward_result[91] );
             op->set_inputs( forward_result[93] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/log_scale.7', 'op': 'aten::log', 'in': [64], 'output_id': 0, 'shape': [1], 'out': [96], 'sorted_id': 95}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/log_scale.7', 'op': 'aten::log', 'in': [64], 'output_id': 0, 'shape': [1], 'out': [96], 'sorted_id': 95}
         {
             Tensor::shape_type shape = {1};
             LogOp* op = new LogOp();
             forward_result[95] = op;
             
             op->set_inputs( forward_result[64] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2884', 'op': 'aten::sub', 'in': [94, 95, 12], 'output_id': 0, 'shape': [400], 'out': [97], 'sorted_id': 96}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2773', 'op': 'aten::sub', 'in': [94, 95, 12], 'output_id': 0, 'shape': [400], 'out': [97], 'sorted_id': 96}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
@@ -982,10 +922,9 @@
             op->set_inputs( forward_result[94] );
             op->set_inputs( forward_result[95] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2885', 'op': 'aten::sub', 'in': [96, 55, 12], 'output_id': 0, 'shape': [400], 'out': [98], 'sorted_id': 97}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2774', 'op': 'aten::sub', 'in': [96, 55, 12], 'output_id': 0, 'shape': [400], 'out': [98], 'sorted_id': 97}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
@@ -994,20 +933,18 @@
             op->set_inputs( forward_result[96] );
             op->set_inputs( forward_result[55] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/prob2.3', 'op': 'aten::exp', 'in': [97], 'output_id': 0, 'shape': [400], 'out': [99], 'sorted_id': 98}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/prob2.3', 'op': 'aten::exp', 'in': [97], 'output_id': 0, 'shape': [400], 'out': [99], 'sorted_id': 98}
         {
             Tensor::shape_type shape = {400};
             ExpOp* op = new ExpOp();
             forward_result[98] = op;
             
             op->set_inputs( forward_result[97] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2888', 'op': 'aten::mul', 'in': [98, 58], 'output_id': 0, 'shape': [400], 'out': [100], 'sorted_id': 99}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2777', 'op': 'aten::mul', 'in': [98, 58], 'output_id': 0, 'shape': [400], 'out': [100], 'sorted_id': 99}
         {
             Tensor::shape_type shape = {400};
             MulOp* op = new MulOp();
@@ -1015,10 +952,9 @@
             
             op->set_inputs( forward_result[98] );
             op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2889', 'op': 'aten::add', 'in': [87, 99, 12], 'output_id': 0, 'shape': [400], 'out': [101], 'sorted_id': 100}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2778', 'op': 'aten::add', 'in': [87, 99, 12], 'output_id': 0, 'shape': [400], 'out': [101], 'sorted_id': 100}
         {
             Tensor::shape_type shape = {400};
             AddOp* op = new AddOp();
@@ -1027,20 +963,18 @@
             op->set_inputs( forward_result[87] );
             op->set_inputs( forward_result[99] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2890', 'op': 'aten::log', 'in': [100], 'output_id': 0, 'shape': [400], 'out': [102], 'sorted_id': 101}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2779', 'op': 'aten::log', 'in': [100], 'output_id': 0, 'shape': [400], 'out': [102], 'sorted_id': 101}
         {
             Tensor::shape_type shape = {400};
             LogOp* op = new LogOp();
             forward_result[101] = op;
             
             op->set_inputs( forward_result[100] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2891', 'op': 'aten::sum', 'in': [101, 20], 'output_id': 0, 'shape': [], 'out': [103], 'sorted_id': 102}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2780', 'op': 'aten::sum', 'in': [101, 20], 'output_id': 0, 'shape': [], 'out': [103], 'sorted_id': 102}
         {
             SumOp* op = new SumOp();
             forward_result[102] = op;
@@ -1049,7 +983,7 @@
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2892', 'op': 'aten::add', 'in': [75, 102, 12], 'output_id': 0, 'shape': [], 'out': [132], 'sorted_id': 103}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2781', 'op': 'aten::add', 'in': [75, 102, 12], 'output_id': 0, 'shape': [], 'out': [132], 'sorted_id': 103}
         {
             AddOp* op = new AddOp();
             forward_result[103] = op;
@@ -1059,43 +993,40 @@
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2893', 'op': 'aten::exp', 'in': [6], 'output_id': 0, 'shape': [400, 784], 'out': [105], 'sorted_id': 104}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2782', 'op': 'aten::exp', 'in': [6], 'output_id': 0, 'shape': [400, 784], 'out': [105], 'sorted_id': 104}
         {
             Tensor::shape_type shape = {400,784};
             ExpOp* op = new ExpOp();
             forward_result[104] = op;
             
             op->set_inputs( forward_result[6] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2894', 'op': 'aten::log1p', 'in': [104], 'output_id': 0, 'shape': [400, 784], 'out': [106], 'sorted_id': 105}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2783', 'op': 'aten::log1p', 'in': [104], 'output_id': 0, 'shape': [400, 784], 'out': [106], 'sorted_id': 105}
         {
             Tensor::shape_type shape = {400,784};
             Log1pOp* op = new Log1pOp();
             forward_result[105] = op;
             
             op->set_inputs( forward_result[104] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2895', 'op': 'aten::log', 'in': [105], 'output_id': 0, 'shape': [400, 784], 'out': [108], 'sorted_id': 106}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2784', 'op': 'aten::log', 'in': [105], 'output_id': 0, 'shape': [400, 784], 'out': [108], 'sorted_id': 106}
         {
             Tensor::shape_type shape = {400,784};
             LogOp* op = new LogOp();
             forward_result[106] = op;
             
             op->set_inputs( forward_result[105] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2789', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': -0.9189385332046727, 'out': [629, 522, 762, 509, 1090, 108, 642, 883, 348, 980, 121, 241, 870, 993, 1103, 228, 361, 749], 'sorted_id': 107}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2691', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': -0.9189385332046727, 'out': [1047, 108, 1034, 240, 480, 586, 718, 599, 829, 467, 816, 925, 359, 121, 346, 227, 705, 938], 'sorted_id': 107}
         {
             Tensor c = (fprec)-0.9189385332046727;
             forward_result[107] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2896', 'op': 'aten::rsub', 'in': [106, 107, 12], 'output_id': 0, 'shape': [400, 784], 'out': [116], 'sorted_id': 108}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2785', 'op': 'aten::rsub', 'in': [106, 107, 12], 'output_id': 0, 'shape': [400, 784], 'out': [116], 'sorted_id': 108}
         {
             Tensor::shape_type shape = {400,784};
             RsubOp* op = new RsubOp();
@@ -1104,10 +1035,9 @@
             op->set_inputs( forward_result[106] );
             op->set_inputs( forward_result[107] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2897', 'op': 'aten::sub', 'in': [26, 5, 12], 'output_id': 0, 'shape': [400, 784], 'out': [110], 'sorted_id': 109}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2786', 'op': 'aten::sub', 'in': [26, 5, 12], 'output_id': 0, 'shape': [400, 784], 'out': [110], 'sorted_id': 109}
         {
             Tensor::shape_type shape = {400,784};
             SubOp* op = new SubOp();
@@ -1116,10 +1046,9 @@
             op->set_inputs( forward_result[26] );
             op->set_inputs( forward_result[5] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2898', 'op': 'aten::pow', 'in': [109, 45], 'output_id': 0, 'shape': [400, 784], 'out': [115], 'sorted_id': 110}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2787', 'op': 'aten::pow', 'in': [109, 45], 'output_id': 0, 'shape': [400, 784], 'out': [115], 'sorted_id': 110}
         {
             Tensor::shape_type shape = {400,784};
             PowOp* op = new PowOp();
@@ -1127,30 +1056,27 @@
             
             op->set_inputs( forward_result[109] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2899', 'op': 'aten::exp', 'in': [6], 'output_id': 0, 'shape': [400, 784], 'out': [112], 'sorted_id': 111}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2788', 'op': 'aten::exp', 'in': [6], 'output_id': 0, 'shape': [400, 784], 'out': [112], 'sorted_id': 111}
         {
             Tensor::shape_type shape = {400,784};
             ExpOp* op = new ExpOp();
             forward_result[111] = op;
             
             op->set_inputs( forward_result[6] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2900', 'op': 'aten::log1p', 'in': [111], 'output_id': 0, 'shape': [400, 784], 'out': [113], 'sorted_id': 112}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2789', 'op': 'aten::log1p', 'in': [111], 'output_id': 0, 'shape': [400, 784], 'out': [113], 'sorted_id': 112}
         {
             Tensor::shape_type shape = {400,784};
             Log1pOp* op = new Log1pOp();
             forward_result[112] = op;
             
             op->set_inputs( forward_result[111] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2901', 'op': 'aten::pow', 'in': [112, 45], 'output_id': 0, 'shape': [400, 784], 'out': [114], 'sorted_id': 113}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2790', 'op': 'aten::pow', 'in': [112, 45], 'output_id': 0, 'shape': [400, 784], 'out': [114], 'sorted_id': 113}
         {
             Tensor::shape_type shape = {400,784};
             PowOp* op = new PowOp();
@@ -1158,10 +1084,9 @@
             
             op->set_inputs( forward_result[112] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2902', 'op': 'aten::mul', 'in': [113, 50], 'output_id': 0, 'shape': [400, 784], 'out': [115], 'sorted_id': 114}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2791', 'op': 'aten::mul', 'in': [113, 50], 'output_id': 0, 'shape': [400, 784], 'out': [115], 'sorted_id': 114}
         {
             Tensor::shape_type shape = {400,784};
             MulOp* op = new MulOp();
@@ -1169,10 +1094,9 @@
             
             op->set_inputs( forward_result[113] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2903', 'op': 'aten::div', 'in': [110, 114], 'output_id': 0, 'shape': [400, 784], 'out': [116], 'sorted_id': 115}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2792', 'op': 'aten::div', 'in': [110, 114], 'output_id': 0, 'shape': [400, 784], 'out': [116], 'sorted_id': 115}
         {
             Tensor::shape_type shape = {400,784};
             DivOp* op = new DivOp();
@@ -1180,10 +1104,9 @@
             
             op->set_inputs( forward_result[110] );
             op->set_inputs( forward_result[114] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2904', 'op': 'aten::sub', 'in': [108, 115, 12], 'output_id': 0, 'shape': [400, 784], 'out': [117], 'sorted_id': 116}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2793', 'op': 'aten::sub', 'in': [108, 115, 12], 'output_id': 0, 'shape': [400, 784], 'out': [117], 'sorted_id': 116}
         {
             Tensor::shape_type shape = {400,784};
             SubOp* op = new SubOp();
@@ -1192,10 +1115,9 @@
             op->set_inputs( forward_result[108] );
             op->set_inputs( forward_result[115] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2905', 'op': 'aten::sum', 'in': [116, 20], 'output_id': 0, 'shape': [], 'out': [131], 'sorted_id': 117}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2794', 'op': 'aten::sum', 'in': [116, 20], 'output_id': 0, 'shape': [], 'out': [131], 'sorted_id': 117}
         {
             SumOp* op = new SumOp();
             forward_result[117] = op;
@@ -1204,37 +1126,34 @@
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2906', 'op': 'aten::exp', 'in': [28], 'output_id': 0, 'shape': [400], 'out': [119], 'sorted_id': 118}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2795', 'op': 'aten::exp', 'in': [28], 'output_id': 0, 'shape': [400], 'out': [119], 'sorted_id': 118}
         {
             Tensor::shape_type shape = {400};
             ExpOp* op = new ExpOp();
             forward_result[118] = op;
             
             op->set_inputs( forward_result[28] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2907', 'op': 'aten::log1p', 'in': [118], 'output_id': 0, 'shape': [400], 'out': [120], 'sorted_id': 119}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2796', 'op': 'aten::log1p', 'in': [118], 'output_id': 0, 'shape': [400], 'out': [120], 'sorted_id': 119}
         {
             Tensor::shape_type shape = {400};
             Log1pOp* op = new Log1pOp();
             forward_result[119] = op;
             
             op->set_inputs( forward_result[118] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2908', 'op': 'aten::log', 'in': [119], 'output_id': 0, 'shape': [400], 'out': [121], 'sorted_id': 120}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2797', 'op': 'aten::log', 'in': [119], 'output_id': 0, 'shape': [400], 'out': [121], 'sorted_id': 120}
         {
             Tensor::shape_type shape = {400};
             LogOp* op = new LogOp();
             forward_result[120] = op;
             
             op->set_inputs( forward_result[119] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2909', 'op': 'aten::rsub', 'in': [120, 107, 12], 'output_id': 0, 'shape': [400], 'out': [129], 'sorted_id': 121}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2798', 'op': 'aten::rsub', 'in': [120, 107, 12], 'output_id': 0, 'shape': [400], 'out': [129], 'sorted_id': 121}
         {
             Tensor::shape_type shape = {400};
             RsubOp* op = new RsubOp();
@@ -1243,10 +1162,9 @@
             op->set_inputs( forward_result[120] );
             op->set_inputs( forward_result[107] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2910', 'op': 'aten::sub', 'in': [41, 27, 12], 'output_id': 0, 'shape': [400], 'out': [123], 'sorted_id': 122}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2799', 'op': 'aten::sub', 'in': [41, 27, 12], 'output_id': 0, 'shape': [400], 'out': [123], 'sorted_id': 122}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
@@ -1255,10 +1173,9 @@
             op->set_inputs( forward_result[41] );
             op->set_inputs( forward_result[27] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2911', 'op': 'aten::pow', 'in': [122, 45], 'output_id': 0, 'shape': [400], 'out': [128], 'sorted_id': 123}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2800', 'op': 'aten::pow', 'in': [122, 45], 'output_id': 0, 'shape': [400], 'out': [128], 'sorted_id': 123}
         {
             Tensor::shape_type shape = {400};
             PowOp* op = new PowOp();
@@ -1266,30 +1183,27 @@
             
             op->set_inputs( forward_result[122] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2912', 'op': 'aten::exp', 'in': [28], 'output_id': 0, 'shape': [400], 'out': [125], 'sorted_id': 124}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2801', 'op': 'aten::exp', 'in': [28], 'output_id': 0, 'shape': [400], 'out': [125], 'sorted_id': 124}
         {
             Tensor::shape_type shape = {400};
             ExpOp* op = new ExpOp();
             forward_result[124] = op;
             
             op->set_inputs( forward_result[28] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2913', 'op': 'aten::log1p', 'in': [124], 'output_id': 0, 'shape': [400], 'out': [126], 'sorted_id': 125}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2802', 'op': 'aten::log1p', 'in': [124], 'output_id': 0, 'shape': [400], 'out': [126], 'sorted_id': 125}
         {
             Tensor::shape_type shape = {400};
             Log1pOp* op = new Log1pOp();
             forward_result[125] = op;
             
             op->set_inputs( forward_result[124] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2914', 'op': 'aten::pow', 'in': [125, 45], 'output_id': 0, 'shape': [400], 'out': [127], 'sorted_id': 126}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2803', 'op': 'aten::pow', 'in': [125, 45], 'output_id': 0, 'shape': [400], 'out': [127], 'sorted_id': 126}
         {
             Tensor::shape_type shape = {400};
             PowOp* op = new PowOp();
@@ -1297,10 +1211,9 @@
             
             op->set_inputs( forward_result[125] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2915', 'op': 'aten::mul', 'in': [126, 50], 'output_id': 0, 'shape': [400], 'out': [128], 'sorted_id': 127}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2804', 'op': 'aten::mul', 'in': [126, 50], 'output_id': 0, 'shape': [400], 'out': [128], 'sorted_id': 127}
         {
             Tensor::shape_type shape = {400};
             MulOp* op = new MulOp();
@@ -1308,10 +1221,9 @@
             
             op->set_inputs( forward_result[126] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2916', 'op': 'aten::div', 'in': [123, 127], 'output_id': 0, 'shape': [400], 'out': [129], 'sorted_id': 128}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2805', 'op': 'aten::div', 'in': [123, 127], 'output_id': 0, 'shape': [400], 'out': [129], 'sorted_id': 128}
         {
             Tensor::shape_type shape = {400};
             DivOp* op = new DivOp();
@@ -1319,10 +1231,9 @@
             
             op->set_inputs( forward_result[123] );
             op->set_inputs( forward_result[127] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2917', 'op': 'aten::sub', 'in': [121, 128, 12], 'output_id': 0, 'shape': [400], 'out': [130], 'sorted_id': 129}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2806', 'op': 'aten::sub', 'in': [121, 128, 12], 'output_id': 0, 'shape': [400], 'out': [130], 'sorted_id': 129}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
@@ -1331,10 +1242,9 @@
             op->set_inputs( forward_result[121] );
             op->set_inputs( forward_result[128] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2918', 'op': 'aten::sum', 'in': [129, 20], 'output_id': 0, 'shape': [], 'out': [131], 'sorted_id': 130}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2807', 'op': 'aten::sum', 'in': [129, 20], 'output_id': 0, 'shape': [], 'out': [131], 'sorted_id': 130}
         {
             SumOp* op = new SumOp();
             forward_result[130] = op;
@@ -1343,7 +1253,7 @@
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/2919', 'op': 'aten::add', 'in': [117, 130, 12], 'output_id': 0, 'shape': [], 'out': [132], 'sorted_id': 131}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/2808', 'op': 'aten::add', 'in': [117, 130, 12], 'output_id': 0, 'shape': [], 'out': [132], 'sorted_id': 131}
         {
             AddOp* op = new AddOp();
             forward_result[131] = op;
@@ -1353,7 +1263,7 @@
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/2921', 'op': 'prim::TupleConstruct', 'in': [42, 103, 131, 9, 17, 31, 35, 48, 43, 64, 60, 76, 88], 'output_id': 0, 'shape': [], 'out': [378, 385, 384, 377, 382, 380, 383, 374, 379, 133, 386, 381, 134], 'sorted_id': 132}
+        // {'name': 'Model/2810', 'op': 'prim::TupleConstruct', 'in': [42, 103, 131, 9, 17, 31, 35, 48, 43, 64, 60, 76, 88], 'output_id': 0, 'shape': [], 'out': [379, 384, 395, 411, 436, 448, 1065, 399, 1083, 420, 133, 424, 407], 'sorted_id': 132}
         {
             TupleConstructOp* op = new TupleConstructOp();
             forward_result[132] = op;
@@ -1373,159 +1283,144 @@
             op->set_inputs( forward_result[88] );
         }
         
-        // {'name': 'Net/2923', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 1, 'shape': [], 'out': [409], 'sorted_id': 133}
+        // {'name': 'Model/2811', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 0, 'shape': [4, 400], 'out': [134], 'sorted_id': 133}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 1 );
+            Tensor::shape_type shape = {4,400};
+            TupleUnpackOp* op = new TupleUnpackOp( 0 );
             forward_result[133] = op;
             
             op->set_inputs( forward_result[132] );
         }
         
-        // {'name': 'Net/2922', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 0, 'shape': [4, 400], 'out': [135], 'sorted_id': 134}
-        {
-            Tensor::shape_type shape = {4,400};
-            TupleUnpackOp* op = new TupleUnpackOp( 0 );
-            forward_result[134] = op;
-            
-            op->set_inputs( forward_result[132] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/input.5', 'op': 'aten::relu', 'in': [134], 'output_id': 0, 'shape': [4, 400], 'out': [167], 'sorted_id': 135}
+        // {'name': 'Model/Net[net]/input.5', 'op': 'aten::relu', 'in': [133], 'output_id': 0, 'shape': [4, 400], 'out': [166], 'sorted_id': 134}
         {
             Tensor::shape_type shape = {4,400};
             ReluOp* op = new ReluOp();
-            forward_result[135] = op;
+            forward_result[134] = op;
             
-            op->set_inputs( forward_result[134] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[133] );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l2]/weight_mu/weight_mu.3', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [229, 151], 'sorted_id': 136}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/weight_mu/weight_mu.3', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [150, 228], 'sorted_id': 135}
         {
             Tensor::shape_type shape = {400,400};
             l2_weight_mu.reshape( shape );
-            forward_result[136] = new VariableTensor( l2_weight_mu, 2 );
+            forward_result[135] = new VariableTensor( l2_weight_mu, 2 );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l2]/weight_rho/weight_rho.3', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [231, 142, 225, 138, 141], 'sorted_id': 137}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/weight_rho/weight_rho.3', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [230, 137, 224, 140, 141], 'sorted_id': 136}
         {
             Tensor::shape_type shape = {400,400};
             l2_weight_rho.reshape( shape );
-            forward_result[137] = new VariableTensor( l2_weight_rho, 2 );
+            forward_result[136] = new VariableTensor( l2_weight_rho, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2953', 'op': 'aten::exp', 'in': [137], 'output_id': 0, 'shape': [400, 400], 'out': [139], 'sorted_id': 138}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2842', 'op': 'aten::exp', 'in': [136], 'output_id': 0, 'shape': [400, 400], 'out': [138], 'sorted_id': 137}
         {
             Tensor::shape_type shape = {400,400};
             ExpOp* op = new ExpOp();
-            forward_result[138] = op;
+            forward_result[137] = op;
             
-            op->set_inputs( forward_result[137] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[136] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2954', 'op': 'aten::log1p', 'in': [138], 'output_id': 0, 'shape': [400, 400], 'out': [150], 'sorted_id': 139}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2843', 'op': 'aten::log1p', 'in': [137], 'output_id': 0, 'shape': [400, 400], 'out': [149], 'sorted_id': 138}
         {
             Tensor::shape_type shape = {400,400};
             Log1pOp* op = new Log1pOp();
-            forward_result[139] = op;
+            forward_result[138] = op;
             
-            op->set_inputs( forward_result[138] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[137] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2940', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [144, 252], 'sorted_id': 140}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2829', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [251, 143], 'sorted_id': 139}
         {
             Tensor c = (fprec)0.0;
-            forward_result[140] = new VariableTensor( c, 1 );
+            forward_result[139] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2945', 'op': 'aten::size', 'in': [137, 10], 'output_id': 0, 'shape': [], 'out': [143, 146], 'sorted_id': 141}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2834', 'op': 'aten::size', 'in': [136, 10], 'output_id': 0, 'shape': [], 'out': [145, 142], 'sorted_id': 140}
+        {
+            SizeOp* op = new SizeOp();
+            forward_result[140] = op;
+            
+            op->set_inputs( forward_result[136] );
+            op->set_inputs( forward_result[10] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2835', 'op': 'aten::size', 'in': [136, 12], 'output_id': 0, 'shape': [], 'out': [145, 142], 'sorted_id': 141}
         {
             SizeOp* op = new SizeOp();
             forward_result[141] = op;
             
-            op->set_inputs( forward_result[137] );
-            op->set_inputs( forward_result[10] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2946', 'op': 'aten::size', 'in': [137, 12], 'output_id': 0, 'shape': [], 'out': [143, 146], 'sorted_id': 142}
-        {
-            SizeOp* op = new SizeOp();
-            forward_result[142] = op;
-            
-            op->set_inputs( forward_result[137] );
+            op->set_inputs( forward_result[136] );
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2947', 'op': 'prim::ListConstruct', 'in': [141, 142], 'output_id': 0, 'shape': [], 'out': [144], 'sorted_id': 143}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2836', 'op': 'prim::ListConstruct', 'in': [140, 141], 'output_id': 0, 'shape': [], 'out': [143], 'sorted_id': 142}
         {
             ListConstructOp* op = new ListConstructOp();
-            forward_result[143] = op;
-            
-            op->set_inputs( forward_result[141] );
-            op->set_inputs( forward_result[142] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2948', 'op': 'aten::expand', 'in': [140, 143, 15], 'output_id': 0, 'shape': [400, 400], 'out': [148], 'sorted_id': 144}
-        {
-            Tensor::shape_type shape = {400,400};
-            ExpandOp* op = new ExpandOp();
-            forward_result[144] = op;
+            forward_result[142] = op;
             
             op->set_inputs( forward_result[140] );
-            op->set_inputs( forward_result[143] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2939', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [252, 147], 'sorted_id': 145}
-        {
-            Tensor c = (fprec)1.0;
-            forward_result[145] = new VariableTensor( c, 1 );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2949', 'op': 'prim::ListConstruct', 'in': [141, 142], 'output_id': 0, 'shape': [], 'out': [147], 'sorted_id': 146}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[146] = op;
-            
             op->set_inputs( forward_result[141] );
-            op->set_inputs( forward_result[142] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2950', 'op': 'aten::expand', 'in': [145, 146, 15], 'output_id': 0, 'shape': [400, 400], 'out': [148], 'sorted_id': 147}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2837', 'op': 'aten::expand', 'in': [139, 142, 15], 'output_id': 0, 'shape': [400, 400], 'out': [147], 'sorted_id': 143}
         {
             Tensor::shape_type shape = {400,400};
             ExpandOp* op = new ExpandOp();
-            forward_result[147] = op;
+            forward_result[143] = op;
             
-            op->set_inputs( forward_result[145] );
-            op->set_inputs( forward_result[146] );
+            op->set_inputs( forward_result[139] );
+            op->set_inputs( forward_result[142] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2951', 'op': 'aten::normal', 'in': [144, 147, 20], 'output_id': 0, 'shape': [400, 400], 'out': [149], 'sorted_id': 148}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2828', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [146, 251], 'sorted_id': 144}
+        {
+            Tensor c = (fprec)1.0;
+            forward_result[144] = new VariableTensor( c, 1 );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2838', 'op': 'prim::ListConstruct', 'in': [140, 141], 'output_id': 0, 'shape': [], 'out': [146], 'sorted_id': 145}
+        {
+            ListConstructOp* op = new ListConstructOp();
+            forward_result[145] = op;
+            
+            op->set_inputs( forward_result[140] );
+            op->set_inputs( forward_result[141] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2839', 'op': 'aten::expand', 'in': [144, 145, 15], 'output_id': 0, 'shape': [400, 400], 'out': [147], 'sorted_id': 146}
+        {
+            Tensor::shape_type shape = {400,400};
+            ExpandOp* op = new ExpandOp();
+            forward_result[146] = op;
+            
+            op->set_inputs( forward_result[144] );
+            op->set_inputs( forward_result[145] );
+            op->set_inputs( forward_result[15] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2840', 'op': 'aten::normal', 'in': [143, 146, 20], 'output_id': 0, 'shape': [400, 400], 'out': [148], 'sorted_id': 147}
         {
             Tensor::shape_type shape = {400,400};
             NormalOp* op = new NormalOp();
-            forward_result[148] = op;
+            forward_result[147] = op;
             
-            op->set_inputs( forward_result[144] );
-            op->set_inputs( forward_result[147] );
+            op->set_inputs( forward_result[143] );
+            op->set_inputs( forward_result[146] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/epsilon.5', 'op': 'aten::to', 'in': [148, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400, 400], 'out': [150], 'sorted_id': 149}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/epsilon.5', 'op': 'aten::to', 'in': [147, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400, 400], 'out': [149], 'sorted_id': 148}
         {
             Tensor::shape_type shape = {400,400};
             ToOp* op = new ToOp();
-            forward_result[149] = op;
+            forward_result[148] = op;
             
-            op->set_inputs( forward_result[148] );
+            op->set_inputs( forward_result[147] );
             op->set_inputs( forward_result[22] );
             op->set_inputs( forward_result[10] );
             op->set_inputs( forward_result[23] );
@@ -1533,146 +1428,138 @@
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2955', 'op': 'aten::mul', 'in': [139, 149], 'output_id': 0, 'shape': [400, 400], 'out': [151], 'sorted_id': 150}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2844', 'op': 'aten::mul', 'in': [138, 148], 'output_id': 0, 'shape': [400, 400], 'out': [150], 'sorted_id': 149}
         {
             Tensor::shape_type shape = {400,400};
             MulOp* op = new MulOp();
-            forward_result[150] = op;
+            forward_result[149] = op;
             
-            op->set_inputs( forward_result[139] );
-            op->set_inputs( forward_result[149] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[138] );
+            op->set_inputs( forward_result[148] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/value.5', 'op': 'aten::add', 'in': [136, 150, 12], 'output_id': 0, 'shape': [400, 400], 'out': [167, 229, 182, 169], 'sorted_id': 151}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/value.5', 'op': 'aten::add', 'in': [135, 149, 12], 'output_id': 0, 'shape': [400, 400], 'out': [168, 181, 166, 228], 'sorted_id': 150}
         {
             Tensor::shape_type shape = {400,400};
             AddOp* op = new AddOp();
-            forward_result[151] = op;
+            forward_result[150] = op;
             
-            op->set_inputs( forward_result[136] );
-            op->set_inputs( forward_result[150] );
+            op->set_inputs( forward_result[135] );
+            op->set_inputs( forward_result[149] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l2]/bias_mu/bias_mu.3', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [166, 242], 'sorted_id': 152}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/bias_mu/bias_mu.3', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [241, 165], 'sorted_id': 151}
         {
             Tensor::shape_type shape = {400};
             l2_bias_mu.reshape( shape );
-            forward_result[152] = new VariableTensor( l2_bias_mu, 2 );
+            forward_result[151] = new VariableTensor( l2_bias_mu, 2 );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l2]/bias_rho/bias_rho.3', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [157, 244, 238, 154], 'sorted_id': 153}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/bias_rho/bias_rho.3', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [237, 243, 153, 156], 'sorted_id': 152}
         {
             Tensor::shape_type shape = {400};
             l2_bias_rho.reshape( shape );
-            forward_result[153] = new VariableTensor( l2_bias_rho, 2 );
+            forward_result[152] = new VariableTensor( l2_bias_rho, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2966', 'op': 'aten::exp', 'in': [153], 'output_id': 0, 'shape': [400], 'out': [155], 'sorted_id': 154}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2855', 'op': 'aten::exp', 'in': [152], 'output_id': 0, 'shape': [400], 'out': [154], 'sorted_id': 153}
         {
             Tensor::shape_type shape = {400};
             ExpOp* op = new ExpOp();
-            forward_result[154] = op;
+            forward_result[153] = op;
             
-            op->set_inputs( forward_result[153] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[152] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2967', 'op': 'aten::log1p', 'in': [154], 'output_id': 0, 'shape': [400], 'out': [165], 'sorted_id': 155}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2856', 'op': 'aten::log1p', 'in': [153], 'output_id': 0, 'shape': [400], 'out': [164], 'sorted_id': 154}
         {
             Tensor::shape_type shape = {400};
             Log1pOp* op = new Log1pOp();
-            forward_result[155] = op;
-            
-            op->set_inputs( forward_result[154] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2958', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [252, 159], 'sorted_id': 156}
-        {
-            Tensor c = (fprec)0.0;
-            forward_result[156] = new VariableTensor( c, 1 );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2957', 'op': 'aten::size', 'in': [153, 10], 'output_id': 0, 'shape': [], 'out': [161, 158], 'sorted_id': 157}
-        {
-            SizeOp* op = new SizeOp();
-            forward_result[157] = op;
+            forward_result[154] = op;
             
             op->set_inputs( forward_result[153] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2847', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [251, 158], 'sorted_id': 155}
+        {
+            Tensor c = (fprec)0.0;
+            forward_result[155] = new VariableTensor( c, 1 );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2846', 'op': 'aten::size', 'in': [152, 10], 'output_id': 0, 'shape': [], 'out': [157, 160], 'sorted_id': 156}
+        {
+            SizeOp* op = new SizeOp();
+            forward_result[156] = op;
+            
+            op->set_inputs( forward_result[152] );
             op->set_inputs( forward_result[10] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2959', 'op': 'prim::ListConstruct', 'in': [157], 'output_id': 0, 'shape': [], 'out': [159], 'sorted_id': 158}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2848', 'op': 'prim::ListConstruct', 'in': [156], 'output_id': 0, 'shape': [], 'out': [158], 'sorted_id': 157}
         {
             ListConstructOp* op = new ListConstructOp();
-            forward_result[158] = op;
-            
-            op->set_inputs( forward_result[157] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2960', 'op': 'aten::expand', 'in': [156, 158, 15], 'output_id': 0, 'shape': [400], 'out': [163], 'sorted_id': 159}
-        {
-            Tensor::shape_type shape = {400};
-            ExpandOp* op = new ExpandOp();
-            forward_result[159] = op;
+            forward_result[157] = op;
             
             op->set_inputs( forward_result[156] );
-            op->set_inputs( forward_result[158] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2961', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [252, 162], 'sorted_id': 160}
-        {
-            Tensor c = (fprec)1.0;
-            forward_result[160] = new VariableTensor( c, 1 );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2962', 'op': 'prim::ListConstruct', 'in': [157], 'output_id': 0, 'shape': [], 'out': [162], 'sorted_id': 161}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[161] = op;
-            
-            op->set_inputs( forward_result[157] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2963', 'op': 'aten::expand', 'in': [160, 161, 15], 'output_id': 0, 'shape': [400], 'out': [163], 'sorted_id': 162}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2849', 'op': 'aten::expand', 'in': [155, 157, 15], 'output_id': 0, 'shape': [400], 'out': [162], 'sorted_id': 158}
         {
             Tensor::shape_type shape = {400};
             ExpandOp* op = new ExpandOp();
-            forward_result[162] = op;
+            forward_result[158] = op;
             
-            op->set_inputs( forward_result[160] );
-            op->set_inputs( forward_result[161] );
+            op->set_inputs( forward_result[155] );
+            op->set_inputs( forward_result[157] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2964', 'op': 'aten::normal', 'in': [159, 162, 20], 'output_id': 0, 'shape': [400], 'out': [164], 'sorted_id': 163}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2850', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [251, 161], 'sorted_id': 159}
+        {
+            Tensor c = (fprec)1.0;
+            forward_result[159] = new VariableTensor( c, 1 );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2851', 'op': 'prim::ListConstruct', 'in': [156], 'output_id': 0, 'shape': [], 'out': [161], 'sorted_id': 160}
+        {
+            ListConstructOp* op = new ListConstructOp();
+            forward_result[160] = op;
+            
+            op->set_inputs( forward_result[156] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2852', 'op': 'aten::expand', 'in': [159, 160, 15], 'output_id': 0, 'shape': [400], 'out': [162], 'sorted_id': 161}
+        {
+            Tensor::shape_type shape = {400};
+            ExpandOp* op = new ExpandOp();
+            forward_result[161] = op;
+            
+            op->set_inputs( forward_result[159] );
+            op->set_inputs( forward_result[160] );
+            op->set_inputs( forward_result[15] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2853', 'op': 'aten::normal', 'in': [158, 161, 20], 'output_id': 0, 'shape': [400], 'out': [163], 'sorted_id': 162}
         {
             Tensor::shape_type shape = {400};
             NormalOp* op = new NormalOp();
-            forward_result[163] = op;
+            forward_result[162] = op;
             
-            op->set_inputs( forward_result[159] );
-            op->set_inputs( forward_result[162] );
+            op->set_inputs( forward_result[158] );
+            op->set_inputs( forward_result[161] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/epsilon.7', 'op': 'aten::to', 'in': [163, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400], 'out': [165], 'sorted_id': 164}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/epsilon.7', 'op': 'aten::to', 'in': [162, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400], 'out': [164], 'sorted_id': 163}
         {
             Tensor::shape_type shape = {400};
             ToOp* op = new ToOp();
-            forward_result[164] = op;
+            forward_result[163] = op;
             
-            op->set_inputs( forward_result[163] );
+            op->set_inputs( forward_result[162] );
             op->set_inputs( forward_result[22] );
             op->set_inputs( forward_result[10] );
             op->set_inputs( forward_result[23] );
@@ -1680,1103 +1567,1012 @@
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2968', 'op': 'aten::mul', 'in': [155, 164], 'output_id': 0, 'shape': [400], 'out': [166], 'sorted_id': 165}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2857', 'op': 'aten::mul', 'in': [154, 163], 'output_id': 0, 'shape': [400], 'out': [165], 'sorted_id': 164}
         {
             Tensor::shape_type shape = {400};
             MulOp* op = new MulOp();
-            forward_result[165] = op;
+            forward_result[164] = op;
             
-            op->set_inputs( forward_result[155] );
-            op->set_inputs( forward_result[164] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[154] );
+            op->set_inputs( forward_result[163] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/value.7', 'op': 'aten::add', 'in': [152, 165, 12], 'output_id': 0, 'shape': [400], 'out': [167, 210, 242, 198], 'sorted_id': 166}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/value.7', 'op': 'aten::add', 'in': [151, 164, 12], 'output_id': 0, 'shape': [400], 'out': [241, 166, 197, 209], 'sorted_id': 165}
         {
             Tensor::shape_type shape = {400};
             AddOp* op = new AddOp();
-            forward_result[166] = op;
+            forward_result[165] = op;
             
-            op->set_inputs( forward_result[152] );
-            op->set_inputs( forward_result[165] );
+            op->set_inputs( forward_result[151] );
+            op->set_inputs( forward_result[164] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/input.7', 'op': 'aten::linear', 'in': [135, 151, 166], 'output_id': 0, 'shape': [4, 400], 'out': [252], 'sorted_id': 167}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/input.7', 'op': 'aten::linear', 'in': [134, 150, 165], 'output_id': 0, 'shape': [4, 400], 'out': [251], 'sorted_id': 166}
         {
             Tensor::shape_type shape = {4,400};
             LinearOp* op = new LinearOp();
-            forward_result[167] = op;
+            forward_result[166] = op;
             
-            op->set_inputs( forward_result[135] );
-            op->set_inputs( forward_result[151] );
-            op->set_inputs( forward_result[166] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[134] );
+            op->set_inputs( forward_result[150] );
+            op->set_inputs( forward_result[165] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2937', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [252, 169], 'sorted_id': 168}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2826', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [168, 251], 'sorted_id': 167}
         {
             Tensor::shape_type shape = {1};
             Constant7.reshape( shape );
-            forward_result[168] = new VariableTensor( Constant7, 1 );
+            forward_result[167] = new VariableTensor( Constant7, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2972', 'op': 'aten::sub', 'in': [151, 168, 12], 'output_id': 0, 'shape': [400, 400], 'out': [170], 'sorted_id': 169}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2861', 'op': 'aten::sub', 'in': [150, 167, 12], 'output_id': 0, 'shape': [400, 400], 'out': [169], 'sorted_id': 168}
         {
             Tensor::shape_type shape = {400,400};
             SubOp* op = new SubOp();
-            forward_result[169] = op;
+            forward_result[168] = op;
             
-            op->set_inputs( forward_result[151] );
-            op->set_inputs( forward_result[168] );
+            op->set_inputs( forward_result[150] );
+            op->set_inputs( forward_result[167] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2973', 'op': 'aten::pow', 'in': [169, 45], 'output_id': 0, 'shape': [400, 400], 'out': [171], 'sorted_id': 170}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2862', 'op': 'aten::pow', 'in': [168, 45], 'output_id': 0, 'shape': [400, 400], 'out': [170], 'sorted_id': 169}
         {
             Tensor::shape_type shape = {400,400};
             PowOp* op = new PowOp();
-            forward_result[170] = op;
+            forward_result[169] = op;
             
-            op->set_inputs( forward_result[169] );
+            op->set_inputs( forward_result[168] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2974', 'op': 'aten::neg', 'in': [170], 'output_id': 0, 'shape': [400, 400], 'out': [175], 'sorted_id': 171}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2863', 'op': 'aten::neg', 'in': [169], 'output_id': 0, 'shape': [400, 400], 'out': [174], 'sorted_id': 170}
         {
             Tensor::shape_type shape = {400,400};
             NegOp* op = new NegOp();
-            forward_result[171] = op;
+            forward_result[170] = op;
             
-            op->set_inputs( forward_result[170] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[169] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2938', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 1.0, 'out': [252, 204, 201, 173, 176], 'sorted_id': 172}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2827', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 1.0, 'out': [200, 172, 175, 251, 203], 'sorted_id': 171}
         {
             Tensor::shape_type shape = {1};
             Constant8.reshape( shape );
-            forward_result[172] = new VariableTensor( Constant8, 1 );
+            forward_result[171] = new VariableTensor( Constant8, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/var.9', 'op': 'aten::pow', 'in': [172, 45], 'output_id': 0, 'shape': [1], 'out': [174], 'sorted_id': 173}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/var.9', 'op': 'aten::pow', 'in': [171, 45], 'output_id': 0, 'shape': [1], 'out': [173], 'sorted_id': 172}
         {
             Tensor::shape_type shape = {1};
             PowOp* op = new PowOp();
-            forward_result[173] = op;
+            forward_result[172] = op;
             
-            op->set_inputs( forward_result[172] );
+            op->set_inputs( forward_result[171] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2975', 'op': 'aten::mul', 'in': [173, 50], 'output_id': 0, 'shape': [1], 'out': [175], 'sorted_id': 174}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2864', 'op': 'aten::mul', 'in': [172, 50], 'output_id': 0, 'shape': [1], 'out': [174], 'sorted_id': 173}
         {
             Tensor::shape_type shape = {1};
             MulOp* op = new MulOp();
-            forward_result[174] = op;
+            forward_result[173] = op;
             
-            op->set_inputs( forward_result[173] );
+            op->set_inputs( forward_result[172] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2976', 'op': 'aten::div', 'in': [171, 174], 'output_id': 0, 'shape': [400, 400], 'out': [177], 'sorted_id': 175}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2865', 'op': 'aten::div', 'in': [170, 173], 'output_id': 0, 'shape': [400, 400], 'out': [176], 'sorted_id': 174}
         {
             Tensor::shape_type shape = {400,400};
             DivOp* op = new DivOp();
-            forward_result[175] = op;
+            forward_result[174] = op;
             
-            op->set_inputs( forward_result[171] );
-            op->set_inputs( forward_result[174] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[170] );
+            op->set_inputs( forward_result[173] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/log_scale.9', 'op': 'aten::log', 'in': [172], 'output_id': 0, 'shape': [1], 'out': [177], 'sorted_id': 176}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/log_scale.9', 'op': 'aten::log', 'in': [171], 'output_id': 0, 'shape': [1], 'out': [176], 'sorted_id': 175}
         {
             Tensor::shape_type shape = {1};
             LogOp* op = new LogOp();
-            forward_result[176] = op;
+            forward_result[175] = op;
             
-            op->set_inputs( forward_result[172] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[171] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2977', 'op': 'aten::sub', 'in': [175, 176, 12], 'output_id': 0, 'shape': [400, 400], 'out': [178], 'sorted_id': 177}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2866', 'op': 'aten::sub', 'in': [174, 175, 12], 'output_id': 0, 'shape': [400, 400], 'out': [177], 'sorted_id': 176}
+        {
+            Tensor::shape_type shape = {400,400};
+            SubOp* op = new SubOp();
+            forward_result[176] = op;
+            
+            op->set_inputs( forward_result[174] );
+            op->set_inputs( forward_result[175] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2867', 'op': 'aten::sub', 'in': [176, 55, 12], 'output_id': 0, 'shape': [400, 400], 'out': [178], 'sorted_id': 177}
         {
             Tensor::shape_type shape = {400,400};
             SubOp* op = new SubOp();
             forward_result[177] = op;
             
-            op->set_inputs( forward_result[175] );
             op->set_inputs( forward_result[176] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2978', 'op': 'aten::sub', 'in': [177, 55, 12], 'output_id': 0, 'shape': [400, 400], 'out': [179], 'sorted_id': 178}
-        {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
-            forward_result[178] = op;
-            
-            op->set_inputs( forward_result[177] );
             op->set_inputs( forward_result[55] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/prob1.5', 'op': 'aten::exp', 'in': [178], 'output_id': 0, 'shape': [400, 400], 'out': [180], 'sorted_id': 179}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/prob1.5', 'op': 'aten::exp', 'in': [177], 'output_id': 0, 'shape': [400, 400], 'out': [179], 'sorted_id': 178}
         {
             Tensor::shape_type shape = {400,400};
             ExpOp* op = new ExpOp();
+            forward_result[178] = op;
+            
+            op->set_inputs( forward_result[177] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2880', 'op': 'aten::mul', 'in': [178, 58], 'output_id': 0, 'shape': [400, 400], 'out': [193], 'sorted_id': 179}
+        {
+            Tensor::shape_type shape = {400,400};
+            MulOp* op = new MulOp();
             forward_result[179] = op;
             
             op->set_inputs( forward_result[178] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2991', 'op': 'aten::mul', 'in': [179, 58], 'output_id': 0, 'shape': [400, 400], 'out': [194], 'sorted_id': 180}
-        {
-            Tensor::shape_type shape = {400,400};
-            MulOp* op = new MulOp();
-            forward_result[180] = op;
-            
-            op->set_inputs( forward_result[179] );
             op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2982', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [182, 252], 'sorted_id': 181}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2871', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [251, 181], 'sorted_id': 180}
         {
             Tensor::shape_type shape = {1};
             Constant9.reshape( shape );
-            forward_result[181] = new VariableTensor( Constant9, 1 );
+            forward_result[180] = new VariableTensor( Constant9, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2983', 'op': 'aten::sub', 'in': [151, 181, 12], 'output_id': 0, 'shape': [400, 400], 'out': [183], 'sorted_id': 182}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2872', 'op': 'aten::sub', 'in': [150, 180, 12], 'output_id': 0, 'shape': [400, 400], 'out': [182], 'sorted_id': 181}
         {
             Tensor::shape_type shape = {400,400};
             SubOp* op = new SubOp();
-            forward_result[182] = op;
+            forward_result[181] = op;
             
-            op->set_inputs( forward_result[151] );
-            op->set_inputs( forward_result[181] );
+            op->set_inputs( forward_result[150] );
+            op->set_inputs( forward_result[180] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2984', 'op': 'aten::pow', 'in': [182, 45], 'output_id': 0, 'shape': [400, 400], 'out': [184], 'sorted_id': 183}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2873', 'op': 'aten::pow', 'in': [181, 45], 'output_id': 0, 'shape': [400, 400], 'out': [183], 'sorted_id': 182}
         {
             Tensor::shape_type shape = {400,400};
             PowOp* op = new PowOp();
-            forward_result[183] = op;
+            forward_result[182] = op;
             
-            op->set_inputs( forward_result[182] );
+            op->set_inputs( forward_result[181] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2985', 'op': 'aten::neg', 'in': [183], 'output_id': 0, 'shape': [400, 400], 'out': [188], 'sorted_id': 184}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2874', 'op': 'aten::neg', 'in': [182], 'output_id': 0, 'shape': [400, 400], 'out': [187], 'sorted_id': 183}
         {
             Tensor::shape_type shape = {400,400};
             NegOp* op = new NegOp();
-            forward_result[184] = op;
+            forward_result[183] = op;
             
-            op->set_inputs( forward_result[183] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[182] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2936', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0025, 'out': [216, 189, 186, 252, 213], 'sorted_id': 185}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2825', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0025, 'out': [185, 188, 215, 212, 251], 'sorted_id': 184}
         {
             Tensor::shape_type shape = {1};
             Constant10.reshape( shape );
-            forward_result[185] = new VariableTensor( Constant10, 1 );
+            forward_result[184] = new VariableTensor( Constant10, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/var.11', 'op': 'aten::pow', 'in': [185, 45], 'output_id': 0, 'shape': [1], 'out': [187], 'sorted_id': 186}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/var.11', 'op': 'aten::pow', 'in': [184, 45], 'output_id': 0, 'shape': [1], 'out': [186], 'sorted_id': 185}
         {
             Tensor::shape_type shape = {1};
             PowOp* op = new PowOp();
-            forward_result[186] = op;
+            forward_result[185] = op;
             
-            op->set_inputs( forward_result[185] );
+            op->set_inputs( forward_result[184] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2986', 'op': 'aten::mul', 'in': [186, 50], 'output_id': 0, 'shape': [1], 'out': [188], 'sorted_id': 187}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2875', 'op': 'aten::mul', 'in': [185, 50], 'output_id': 0, 'shape': [1], 'out': [187], 'sorted_id': 186}
         {
             Tensor::shape_type shape = {1};
             MulOp* op = new MulOp();
-            forward_result[187] = op;
+            forward_result[186] = op;
             
-            op->set_inputs( forward_result[186] );
+            op->set_inputs( forward_result[185] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2987', 'op': 'aten::div', 'in': [184, 187], 'output_id': 0, 'shape': [400, 400], 'out': [190], 'sorted_id': 188}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2876', 'op': 'aten::div', 'in': [183, 186], 'output_id': 0, 'shape': [400, 400], 'out': [189], 'sorted_id': 187}
         {
             Tensor::shape_type shape = {400,400};
             DivOp* op = new DivOp();
-            forward_result[188] = op;
+            forward_result[187] = op;
             
-            op->set_inputs( forward_result[184] );
-            op->set_inputs( forward_result[187] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[183] );
+            op->set_inputs( forward_result[186] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/log_scale.11', 'op': 'aten::log', 'in': [185], 'output_id': 0, 'shape': [1], 'out': [190], 'sorted_id': 189}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/log_scale.11', 'op': 'aten::log', 'in': [184], 'output_id': 0, 'shape': [1], 'out': [189], 'sorted_id': 188}
         {
             Tensor::shape_type shape = {1};
             LogOp* op = new LogOp();
-            forward_result[189] = op;
+            forward_result[188] = op;
             
-            op->set_inputs( forward_result[185] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[184] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2988', 'op': 'aten::sub', 'in': [188, 189, 12], 'output_id': 0, 'shape': [400, 400], 'out': [191], 'sorted_id': 190}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2877', 'op': 'aten::sub', 'in': [187, 188, 12], 'output_id': 0, 'shape': [400, 400], 'out': [190], 'sorted_id': 189}
+        {
+            Tensor::shape_type shape = {400,400};
+            SubOp* op = new SubOp();
+            forward_result[189] = op;
+            
+            op->set_inputs( forward_result[187] );
+            op->set_inputs( forward_result[188] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2878', 'op': 'aten::sub', 'in': [189, 55, 12], 'output_id': 0, 'shape': [400, 400], 'out': [191], 'sorted_id': 190}
         {
             Tensor::shape_type shape = {400,400};
             SubOp* op = new SubOp();
             forward_result[190] = op;
             
-            op->set_inputs( forward_result[188] );
             op->set_inputs( forward_result[189] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2989', 'op': 'aten::sub', 'in': [190, 55, 12], 'output_id': 0, 'shape': [400, 400], 'out': [192], 'sorted_id': 191}
-        {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
-            forward_result[191] = op;
-            
-            op->set_inputs( forward_result[190] );
             op->set_inputs( forward_result[55] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/prob2.5', 'op': 'aten::exp', 'in': [191], 'output_id': 0, 'shape': [400, 400], 'out': [193], 'sorted_id': 192}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/prob2.5', 'op': 'aten::exp', 'in': [190], 'output_id': 0, 'shape': [400, 400], 'out': [192], 'sorted_id': 191}
         {
             Tensor::shape_type shape = {400,400};
             ExpOp* op = new ExpOp();
+            forward_result[191] = op;
+            
+            op->set_inputs( forward_result[190] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2881', 'op': 'aten::mul', 'in': [191, 58], 'output_id': 0, 'shape': [400, 400], 'out': [193], 'sorted_id': 192}
+        {
+            Tensor::shape_type shape = {400,400};
+            MulOp* op = new MulOp();
             forward_result[192] = op;
             
             op->set_inputs( forward_result[191] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2992', 'op': 'aten::mul', 'in': [192, 58], 'output_id': 0, 'shape': [400, 400], 'out': [194], 'sorted_id': 193}
-        {
-            Tensor::shape_type shape = {400,400};
-            MulOp* op = new MulOp();
-            forward_result[193] = op;
-            
-            op->set_inputs( forward_result[192] );
             op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2993', 'op': 'aten::add', 'in': [180, 193, 12], 'output_id': 0, 'shape': [400, 400], 'out': [195], 'sorted_id': 194}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2882', 'op': 'aten::add', 'in': [179, 192, 12], 'output_id': 0, 'shape': [400, 400], 'out': [194], 'sorted_id': 193}
         {
             Tensor::shape_type shape = {400,400};
             AddOp* op = new AddOp();
-            forward_result[194] = op;
+            forward_result[193] = op;
             
-            op->set_inputs( forward_result[180] );
-            op->set_inputs( forward_result[193] );
+            op->set_inputs( forward_result[179] );
+            op->set_inputs( forward_result[192] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2994', 'op': 'aten::log', 'in': [194], 'output_id': 0, 'shape': [400, 400], 'out': [196], 'sorted_id': 195}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2883', 'op': 'aten::log', 'in': [193], 'output_id': 0, 'shape': [400, 400], 'out': [195], 'sorted_id': 194}
         {
             Tensor::shape_type shape = {400,400};
             LogOp* op = new LogOp();
+            forward_result[194] = op;
+            
+            op->set_inputs( forward_result[193] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2884', 'op': 'aten::sum', 'in': [194, 20], 'output_id': 0, 'shape': [], 'out': [223], 'sorted_id': 195}
+        {
+            SumOp* op = new SumOp();
             forward_result[195] = op;
             
             op->set_inputs( forward_result[194] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2995', 'op': 'aten::sum', 'in': [195, 20], 'output_id': 0, 'shape': [], 'out': [224], 'sorted_id': 196}
-        {
-            SumOp* op = new SumOp();
-            forward_result[196] = op;
-            
-            op->set_inputs( forward_result[195] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2998', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [252, 198], 'sorted_id': 197}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2887', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [251, 197], 'sorted_id': 196}
         {
             Tensor::shape_type shape = {1};
             Constant11.reshape( shape );
-            forward_result[197] = new VariableTensor( Constant11, 1 );
+            forward_result[196] = new VariableTensor( Constant11, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/2999', 'op': 'aten::sub', 'in': [166, 197, 12], 'output_id': 0, 'shape': [400], 'out': [199], 'sorted_id': 198}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2888', 'op': 'aten::sub', 'in': [165, 196, 12], 'output_id': 0, 'shape': [400], 'out': [198], 'sorted_id': 197}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
-            forward_result[198] = op;
+            forward_result[197] = op;
             
-            op->set_inputs( forward_result[166] );
-            op->set_inputs( forward_result[197] );
+            op->set_inputs( forward_result[165] );
+            op->set_inputs( forward_result[196] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3000', 'op': 'aten::pow', 'in': [198, 45], 'output_id': 0, 'shape': [400], 'out': [200], 'sorted_id': 199}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2889', 'op': 'aten::pow', 'in': [197, 45], 'output_id': 0, 'shape': [400], 'out': [199], 'sorted_id': 198}
         {
             Tensor::shape_type shape = {400};
             PowOp* op = new PowOp();
-            forward_result[199] = op;
+            forward_result[198] = op;
             
-            op->set_inputs( forward_result[198] );
+            op->set_inputs( forward_result[197] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3001', 'op': 'aten::neg', 'in': [199], 'output_id': 0, 'shape': [400], 'out': [203], 'sorted_id': 200}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2890', 'op': 'aten::neg', 'in': [198], 'output_id': 0, 'shape': [400], 'out': [202], 'sorted_id': 199}
         {
             Tensor::shape_type shape = {400};
             NegOp* op = new NegOp();
-            forward_result[200] = op;
+            forward_result[199] = op;
             
-            op->set_inputs( forward_result[199] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[198] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/var.13', 'op': 'aten::pow', 'in': [172, 45], 'output_id': 0, 'shape': [1], 'out': [202], 'sorted_id': 201}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/var.13', 'op': 'aten::pow', 'in': [171, 45], 'output_id': 0, 'shape': [1], 'out': [201], 'sorted_id': 200}
         {
             Tensor::shape_type shape = {1};
             PowOp* op = new PowOp();
-            forward_result[201] = op;
+            forward_result[200] = op;
             
-            op->set_inputs( forward_result[172] );
+            op->set_inputs( forward_result[171] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3002', 'op': 'aten::mul', 'in': [201, 50], 'output_id': 0, 'shape': [1], 'out': [203], 'sorted_id': 202}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2891', 'op': 'aten::mul', 'in': [200, 50], 'output_id': 0, 'shape': [1], 'out': [202], 'sorted_id': 201}
         {
             Tensor::shape_type shape = {1};
             MulOp* op = new MulOp();
-            forward_result[202] = op;
+            forward_result[201] = op;
             
-            op->set_inputs( forward_result[201] );
+            op->set_inputs( forward_result[200] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3003', 'op': 'aten::div', 'in': [200, 202], 'output_id': 0, 'shape': [400], 'out': [205], 'sorted_id': 203}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2892', 'op': 'aten::div', 'in': [199, 201], 'output_id': 0, 'shape': [400], 'out': [204], 'sorted_id': 202}
         {
             Tensor::shape_type shape = {400};
             DivOp* op = new DivOp();
-            forward_result[203] = op;
+            forward_result[202] = op;
             
-            op->set_inputs( forward_result[200] );
-            op->set_inputs( forward_result[202] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[199] );
+            op->set_inputs( forward_result[201] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/log_scale.13', 'op': 'aten::log', 'in': [172], 'output_id': 0, 'shape': [1], 'out': [205], 'sorted_id': 204}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/log_scale.13', 'op': 'aten::log', 'in': [171], 'output_id': 0, 'shape': [1], 'out': [204], 'sorted_id': 203}
         {
             Tensor::shape_type shape = {1};
             LogOp* op = new LogOp();
-            forward_result[204] = op;
+            forward_result[203] = op;
             
-            op->set_inputs( forward_result[172] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[171] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3004', 'op': 'aten::sub', 'in': [203, 204, 12], 'output_id': 0, 'shape': [400], 'out': [206], 'sorted_id': 205}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2893', 'op': 'aten::sub', 'in': [202, 203, 12], 'output_id': 0, 'shape': [400], 'out': [205], 'sorted_id': 204}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[204] = op;
+            
+            op->set_inputs( forward_result[202] );
+            op->set_inputs( forward_result[203] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2894', 'op': 'aten::sub', 'in': [204, 55, 12], 'output_id': 0, 'shape': [400], 'out': [206], 'sorted_id': 205}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
             forward_result[205] = op;
             
-            op->set_inputs( forward_result[203] );
             op->set_inputs( forward_result[204] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3005', 'op': 'aten::sub', 'in': [205, 55, 12], 'output_id': 0, 'shape': [400], 'out': [207], 'sorted_id': 206}
-        {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
-            forward_result[206] = op;
-            
-            op->set_inputs( forward_result[205] );
             op->set_inputs( forward_result[55] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/prob1.7', 'op': 'aten::exp', 'in': [206], 'output_id': 0, 'shape': [400], 'out': [208], 'sorted_id': 207}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/prob1.7', 'op': 'aten::exp', 'in': [205], 'output_id': 0, 'shape': [400], 'out': [207], 'sorted_id': 206}
         {
             Tensor::shape_type shape = {400};
             ExpOp* op = new ExpOp();
+            forward_result[206] = op;
+            
+            op->set_inputs( forward_result[205] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2907', 'op': 'aten::mul', 'in': [206, 58], 'output_id': 0, 'shape': [400], 'out': [220], 'sorted_id': 207}
+        {
+            Tensor::shape_type shape = {400};
+            MulOp* op = new MulOp();
             forward_result[207] = op;
             
             op->set_inputs( forward_result[206] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3018', 'op': 'aten::mul', 'in': [207, 58], 'output_id': 0, 'shape': [400], 'out': [221], 'sorted_id': 208}
-        {
-            Tensor::shape_type shape = {400};
-            MulOp* op = new MulOp();
-            forward_result[208] = op;
-            
-            op->set_inputs( forward_result[207] );
             op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3009', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [210, 252], 'sorted_id': 209}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2898', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [251, 209], 'sorted_id': 208}
         {
             Tensor::shape_type shape = {1};
             Constant12.reshape( shape );
-            forward_result[209] = new VariableTensor( Constant12, 1 );
+            forward_result[208] = new VariableTensor( Constant12, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3010', 'op': 'aten::sub', 'in': [166, 209, 12], 'output_id': 0, 'shape': [400], 'out': [211], 'sorted_id': 210}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2899', 'op': 'aten::sub', 'in': [165, 208, 12], 'output_id': 0, 'shape': [400], 'out': [210], 'sorted_id': 209}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
-            forward_result[210] = op;
+            forward_result[209] = op;
             
-            op->set_inputs( forward_result[166] );
-            op->set_inputs( forward_result[209] );
+            op->set_inputs( forward_result[165] );
+            op->set_inputs( forward_result[208] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3011', 'op': 'aten::pow', 'in': [210, 45], 'output_id': 0, 'shape': [400], 'out': [212], 'sorted_id': 211}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2900', 'op': 'aten::pow', 'in': [209, 45], 'output_id': 0, 'shape': [400], 'out': [211], 'sorted_id': 210}
         {
             Tensor::shape_type shape = {400};
             PowOp* op = new PowOp();
-            forward_result[211] = op;
+            forward_result[210] = op;
             
-            op->set_inputs( forward_result[210] );
+            op->set_inputs( forward_result[209] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3012', 'op': 'aten::neg', 'in': [211], 'output_id': 0, 'shape': [400], 'out': [215], 'sorted_id': 212}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2901', 'op': 'aten::neg', 'in': [210], 'output_id': 0, 'shape': [400], 'out': [214], 'sorted_id': 211}
         {
             Tensor::shape_type shape = {400};
             NegOp* op = new NegOp();
-            forward_result[212] = op;
+            forward_result[211] = op;
             
-            op->set_inputs( forward_result[211] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[210] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/var.15', 'op': 'aten::pow', 'in': [185, 45], 'output_id': 0, 'shape': [1], 'out': [214], 'sorted_id': 213}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/var.15', 'op': 'aten::pow', 'in': [184, 45], 'output_id': 0, 'shape': [1], 'out': [213], 'sorted_id': 212}
         {
             Tensor::shape_type shape = {1};
             PowOp* op = new PowOp();
-            forward_result[213] = op;
+            forward_result[212] = op;
             
-            op->set_inputs( forward_result[185] );
+            op->set_inputs( forward_result[184] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3013', 'op': 'aten::mul', 'in': [213, 50], 'output_id': 0, 'shape': [1], 'out': [215], 'sorted_id': 214}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2902', 'op': 'aten::mul', 'in': [212, 50], 'output_id': 0, 'shape': [1], 'out': [214], 'sorted_id': 213}
         {
             Tensor::shape_type shape = {1};
             MulOp* op = new MulOp();
-            forward_result[214] = op;
+            forward_result[213] = op;
             
-            op->set_inputs( forward_result[213] );
+            op->set_inputs( forward_result[212] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3014', 'op': 'aten::div', 'in': [212, 214], 'output_id': 0, 'shape': [400], 'out': [217], 'sorted_id': 215}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2903', 'op': 'aten::div', 'in': [211, 213], 'output_id': 0, 'shape': [400], 'out': [216], 'sorted_id': 214}
         {
             Tensor::shape_type shape = {400};
             DivOp* op = new DivOp();
-            forward_result[215] = op;
+            forward_result[214] = op;
             
-            op->set_inputs( forward_result[212] );
-            op->set_inputs( forward_result[214] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[211] );
+            op->set_inputs( forward_result[213] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/log_scale.15', 'op': 'aten::log', 'in': [185], 'output_id': 0, 'shape': [1], 'out': [217], 'sorted_id': 216}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/log_scale.15', 'op': 'aten::log', 'in': [184], 'output_id': 0, 'shape': [1], 'out': [216], 'sorted_id': 215}
         {
             Tensor::shape_type shape = {1};
             LogOp* op = new LogOp();
-            forward_result[216] = op;
+            forward_result[215] = op;
             
-            op->set_inputs( forward_result[185] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[184] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3015', 'op': 'aten::sub', 'in': [215, 216, 12], 'output_id': 0, 'shape': [400], 'out': [218], 'sorted_id': 217}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2904', 'op': 'aten::sub', 'in': [214, 215, 12], 'output_id': 0, 'shape': [400], 'out': [217], 'sorted_id': 216}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[216] = op;
+            
+            op->set_inputs( forward_result[214] );
+            op->set_inputs( forward_result[215] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2905', 'op': 'aten::sub', 'in': [216, 55, 12], 'output_id': 0, 'shape': [400], 'out': [218], 'sorted_id': 217}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
             forward_result[217] = op;
             
-            op->set_inputs( forward_result[215] );
             op->set_inputs( forward_result[216] );
+            op->set_inputs( forward_result[55] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3016', 'op': 'aten::sub', 'in': [217, 55, 12], 'output_id': 0, 'shape': [400], 'out': [219], 'sorted_id': 218}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/prob2.7', 'op': 'aten::exp', 'in': [217], 'output_id': 0, 'shape': [400], 'out': [219], 'sorted_id': 218}
         {
             Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            ExpOp* op = new ExpOp();
             forward_result[218] = op;
             
             op->set_inputs( forward_result[217] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/prob2.7', 'op': 'aten::exp', 'in': [218], 'output_id': 0, 'shape': [400], 'out': [220], 'sorted_id': 219}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2908', 'op': 'aten::mul', 'in': [218, 58], 'output_id': 0, 'shape': [400], 'out': [220], 'sorted_id': 219}
         {
             Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
+            MulOp* op = new MulOp();
             forward_result[219] = op;
             
             op->set_inputs( forward_result[218] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3019', 'op': 'aten::mul', 'in': [219, 58], 'output_id': 0, 'shape': [400], 'out': [221], 'sorted_id': 220}
-        {
-            Tensor::shape_type shape = {400};
-            MulOp* op = new MulOp();
-            forward_result[220] = op;
-            
-            op->set_inputs( forward_result[219] );
             op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3020', 'op': 'aten::add', 'in': [208, 220, 12], 'output_id': 0, 'shape': [400], 'out': [222], 'sorted_id': 221}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2909', 'op': 'aten::add', 'in': [207, 219, 12], 'output_id': 0, 'shape': [400], 'out': [221], 'sorted_id': 220}
         {
             Tensor::shape_type shape = {400};
             AddOp* op = new AddOp();
-            forward_result[221] = op;
+            forward_result[220] = op;
             
-            op->set_inputs( forward_result[208] );
-            op->set_inputs( forward_result[220] );
+            op->set_inputs( forward_result[207] );
+            op->set_inputs( forward_result[219] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3021', 'op': 'aten::log', 'in': [221], 'output_id': 0, 'shape': [400], 'out': [223], 'sorted_id': 222}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2910', 'op': 'aten::log', 'in': [220], 'output_id': 0, 'shape': [400], 'out': [222], 'sorted_id': 221}
         {
             Tensor::shape_type shape = {400};
             LogOp* op = new LogOp();
+            forward_result[221] = op;
+            
+            op->set_inputs( forward_result[220] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2911', 'op': 'aten::sum', 'in': [221, 20], 'output_id': 0, 'shape': [], 'out': [223], 'sorted_id': 222}
+        {
+            SumOp* op = new SumOp();
             forward_result[222] = op;
             
             op->set_inputs( forward_result[221] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3022', 'op': 'aten::sum', 'in': [222, 20], 'output_id': 0, 'shape': [], 'out': [224], 'sorted_id': 223}
-        {
-            SumOp* op = new SumOp();
-            forward_result[223] = op;
-            
-            op->set_inputs( forward_result[222] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3023', 'op': 'aten::add', 'in': [196, 223, 12], 'output_id': 0, 'shape': [], 'out': [252], 'sorted_id': 224}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2912', 'op': 'aten::add', 'in': [195, 222, 12], 'output_id': 0, 'shape': [], 'out': [251], 'sorted_id': 223}
         {
             AddOp* op = new AddOp();
-            forward_result[224] = op;
+            forward_result[223] = op;
             
-            op->set_inputs( forward_result[196] );
-            op->set_inputs( forward_result[223] );
+            op->set_inputs( forward_result[195] );
+            op->set_inputs( forward_result[222] );
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3024', 'op': 'aten::exp', 'in': [137], 'output_id': 0, 'shape': [400, 400], 'out': [226], 'sorted_id': 225}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2913', 'op': 'aten::exp', 'in': [136], 'output_id': 0, 'shape': [400, 400], 'out': [225], 'sorted_id': 224}
         {
             Tensor::shape_type shape = {400,400};
             ExpOp* op = new ExpOp();
-            forward_result[225] = op;
+            forward_result[224] = op;
             
-            op->set_inputs( forward_result[137] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[136] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3025', 'op': 'aten::log1p', 'in': [225], 'output_id': 0, 'shape': [400, 400], 'out': [227], 'sorted_id': 226}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2914', 'op': 'aten::log1p', 'in': [224], 'output_id': 0, 'shape': [400, 400], 'out': [226], 'sorted_id': 225}
         {
             Tensor::shape_type shape = {400,400};
             Log1pOp* op = new Log1pOp();
+            forward_result[225] = op;
+            
+            op->set_inputs( forward_result[224] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2915', 'op': 'aten::log', 'in': [225], 'output_id': 0, 'shape': [400, 400], 'out': [227], 'sorted_id': 226}
+        {
+            Tensor::shape_type shape = {400,400};
+            LogOp* op = new LogOp();
             forward_result[226] = op;
             
             op->set_inputs( forward_result[225] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3026', 'op': 'aten::log', 'in': [226], 'output_id': 0, 'shape': [400, 400], 'out': [228], 'sorted_id': 227}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2916', 'op': 'aten::rsub', 'in': [226, 107, 12], 'output_id': 0, 'shape': [400, 400], 'out': [235], 'sorted_id': 227}
         {
             Tensor::shape_type shape = {400,400};
-            LogOp* op = new LogOp();
+            RsubOp* op = new RsubOp();
             forward_result[227] = op;
             
             op->set_inputs( forward_result[226] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3027', 'op': 'aten::rsub', 'in': [227, 107, 12], 'output_id': 0, 'shape': [400, 400], 'out': [236], 'sorted_id': 228}
-        {
-            Tensor::shape_type shape = {400,400};
-            RsubOp* op = new RsubOp();
-            forward_result[228] = op;
-            
-            op->set_inputs( forward_result[227] );
             op->set_inputs( forward_result[107] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3028', 'op': 'aten::sub', 'in': [151, 136, 12], 'output_id': 0, 'shape': [400, 400], 'out': [230], 'sorted_id': 229}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2917', 'op': 'aten::sub', 'in': [150, 135, 12], 'output_id': 0, 'shape': [400, 400], 'out': [229], 'sorted_id': 228}
         {
             Tensor::shape_type shape = {400,400};
             SubOp* op = new SubOp();
-            forward_result[229] = op;
+            forward_result[228] = op;
             
-            op->set_inputs( forward_result[151] );
-            op->set_inputs( forward_result[136] );
+            op->set_inputs( forward_result[150] );
+            op->set_inputs( forward_result[135] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3029', 'op': 'aten::pow', 'in': [229, 45], 'output_id': 0, 'shape': [400, 400], 'out': [235], 'sorted_id': 230}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2918', 'op': 'aten::pow', 'in': [228, 45], 'output_id': 0, 'shape': [400, 400], 'out': [234], 'sorted_id': 229}
         {
             Tensor::shape_type shape = {400,400};
             PowOp* op = new PowOp();
-            forward_result[230] = op;
+            forward_result[229] = op;
             
-            op->set_inputs( forward_result[229] );
+            op->set_inputs( forward_result[228] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3030', 'op': 'aten::exp', 'in': [137], 'output_id': 0, 'shape': [400, 400], 'out': [232], 'sorted_id': 231}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2919', 'op': 'aten::exp', 'in': [136], 'output_id': 0, 'shape': [400, 400], 'out': [231], 'sorted_id': 230}
         {
             Tensor::shape_type shape = {400,400};
             ExpOp* op = new ExpOp();
-            forward_result[231] = op;
+            forward_result[230] = op;
             
-            op->set_inputs( forward_result[137] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[136] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3031', 'op': 'aten::log1p', 'in': [231], 'output_id': 0, 'shape': [400, 400], 'out': [233], 'sorted_id': 232}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2920', 'op': 'aten::log1p', 'in': [230], 'output_id': 0, 'shape': [400, 400], 'out': [232], 'sorted_id': 231}
         {
             Tensor::shape_type shape = {400,400};
             Log1pOp* op = new Log1pOp();
+            forward_result[231] = op;
+            
+            op->set_inputs( forward_result[230] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2921', 'op': 'aten::pow', 'in': [231, 45], 'output_id': 0, 'shape': [400, 400], 'out': [233], 'sorted_id': 232}
+        {
+            Tensor::shape_type shape = {400,400};
+            PowOp* op = new PowOp();
             forward_result[232] = op;
             
             op->set_inputs( forward_result[231] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3032', 'op': 'aten::pow', 'in': [232, 45], 'output_id': 0, 'shape': [400, 400], 'out': [234], 'sorted_id': 233}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2922', 'op': 'aten::mul', 'in': [232, 50], 'output_id': 0, 'shape': [400, 400], 'out': [234], 'sorted_id': 233}
         {
             Tensor::shape_type shape = {400,400};
-            PowOp* op = new PowOp();
+            MulOp* op = new MulOp();
             forward_result[233] = op;
             
             op->set_inputs( forward_result[232] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3033', 'op': 'aten::mul', 'in': [233, 50], 'output_id': 0, 'shape': [400, 400], 'out': [235], 'sorted_id': 234}
-        {
-            Tensor::shape_type shape = {400,400};
-            MulOp* op = new MulOp();
-            forward_result[234] = op;
-            
-            op->set_inputs( forward_result[233] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3034', 'op': 'aten::div', 'in': [230, 234], 'output_id': 0, 'shape': [400, 400], 'out': [236], 'sorted_id': 235}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2923', 'op': 'aten::div', 'in': [229, 233], 'output_id': 0, 'shape': [400, 400], 'out': [235], 'sorted_id': 234}
         {
             Tensor::shape_type shape = {400,400};
             DivOp* op = new DivOp();
-            forward_result[235] = op;
+            forward_result[234] = op;
             
-            op->set_inputs( forward_result[230] );
-            op->set_inputs( forward_result[234] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[229] );
+            op->set_inputs( forward_result[233] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3035', 'op': 'aten::sub', 'in': [228, 235, 12], 'output_id': 0, 'shape': [400, 400], 'out': [237], 'sorted_id': 236}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2924', 'op': 'aten::sub', 'in': [227, 234, 12], 'output_id': 0, 'shape': [400, 400], 'out': [236], 'sorted_id': 235}
         {
             Tensor::shape_type shape = {400,400};
             SubOp* op = new SubOp();
-            forward_result[236] = op;
+            forward_result[235] = op;
             
-            op->set_inputs( forward_result[228] );
-            op->set_inputs( forward_result[235] );
+            op->set_inputs( forward_result[227] );
+            op->set_inputs( forward_result[234] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3036', 'op': 'aten::sum', 'in': [236, 20], 'output_id': 0, 'shape': [], 'out': [251], 'sorted_id': 237}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2925', 'op': 'aten::sum', 'in': [235, 20], 'output_id': 0, 'shape': [], 'out': [250], 'sorted_id': 236}
         {
             SumOp* op = new SumOp();
-            forward_result[237] = op;
+            forward_result[236] = op;
             
-            op->set_inputs( forward_result[236] );
+            op->set_inputs( forward_result[235] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3037', 'op': 'aten::exp', 'in': [153], 'output_id': 0, 'shape': [400], 'out': [239], 'sorted_id': 238}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2926', 'op': 'aten::exp', 'in': [152], 'output_id': 0, 'shape': [400], 'out': [238], 'sorted_id': 237}
         {
             Tensor::shape_type shape = {400};
             ExpOp* op = new ExpOp();
-            forward_result[238] = op;
+            forward_result[237] = op;
             
-            op->set_inputs( forward_result[153] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[152] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3038', 'op': 'aten::log1p', 'in': [238], 'output_id': 0, 'shape': [400], 'out': [240], 'sorted_id': 239}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2927', 'op': 'aten::log1p', 'in': [237], 'output_id': 0, 'shape': [400], 'out': [239], 'sorted_id': 238}
         {
             Tensor::shape_type shape = {400};
             Log1pOp* op = new Log1pOp();
-            forward_result[239] = op;
+            forward_result[238] = op;
             
-            op->set_inputs( forward_result[238] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[237] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3039', 'op': 'aten::log', 'in': [239], 'output_id': 0, 'shape': [400], 'out': [241], 'sorted_id': 240}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2928', 'op': 'aten::log', 'in': [238], 'output_id': 0, 'shape': [400], 'out': [240], 'sorted_id': 239}
         {
             Tensor::shape_type shape = {400};
             LogOp* op = new LogOp();
-            forward_result[240] = op;
+            forward_result[239] = op;
             
-            op->set_inputs( forward_result[239] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[238] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3040', 'op': 'aten::rsub', 'in': [240, 107, 12], 'output_id': 0, 'shape': [400], 'out': [249], 'sorted_id': 241}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2929', 'op': 'aten::rsub', 'in': [239, 107, 12], 'output_id': 0, 'shape': [400], 'out': [248], 'sorted_id': 240}
         {
             Tensor::shape_type shape = {400};
             RsubOp* op = new RsubOp();
-            forward_result[241] = op;
+            forward_result[240] = op;
             
-            op->set_inputs( forward_result[240] );
+            op->set_inputs( forward_result[239] );
             op->set_inputs( forward_result[107] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3041', 'op': 'aten::sub', 'in': [166, 152, 12], 'output_id': 0, 'shape': [400], 'out': [243], 'sorted_id': 242}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2930', 'op': 'aten::sub', 'in': [165, 151, 12], 'output_id': 0, 'shape': [400], 'out': [242], 'sorted_id': 241}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
-            forward_result[242] = op;
+            forward_result[241] = op;
             
-            op->set_inputs( forward_result[166] );
-            op->set_inputs( forward_result[152] );
+            op->set_inputs( forward_result[165] );
+            op->set_inputs( forward_result[151] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3042', 'op': 'aten::pow', 'in': [242, 45], 'output_id': 0, 'shape': [400], 'out': [248], 'sorted_id': 243}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2931', 'op': 'aten::pow', 'in': [241, 45], 'output_id': 0, 'shape': [400], 'out': [247], 'sorted_id': 242}
         {
             Tensor::shape_type shape = {400};
             PowOp* op = new PowOp();
-            forward_result[243] = op;
+            forward_result[242] = op;
             
-            op->set_inputs( forward_result[242] );
+            op->set_inputs( forward_result[241] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3043', 'op': 'aten::exp', 'in': [153], 'output_id': 0, 'shape': [400], 'out': [245], 'sorted_id': 244}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2932', 'op': 'aten::exp', 'in': [152], 'output_id': 0, 'shape': [400], 'out': [244], 'sorted_id': 243}
         {
             Tensor::shape_type shape = {400};
             ExpOp* op = new ExpOp();
-            forward_result[244] = op;
+            forward_result[243] = op;
             
-            op->set_inputs( forward_result[153] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[152] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3044', 'op': 'aten::log1p', 'in': [244], 'output_id': 0, 'shape': [400], 'out': [246], 'sorted_id': 245}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2933', 'op': 'aten::log1p', 'in': [243], 'output_id': 0, 'shape': [400], 'out': [245], 'sorted_id': 244}
         {
             Tensor::shape_type shape = {400};
             Log1pOp* op = new Log1pOp();
-            forward_result[245] = op;
+            forward_result[244] = op;
             
-            op->set_inputs( forward_result[244] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[243] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3045', 'op': 'aten::pow', 'in': [245, 45], 'output_id': 0, 'shape': [400], 'out': [247], 'sorted_id': 246}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2934', 'op': 'aten::pow', 'in': [244, 45], 'output_id': 0, 'shape': [400], 'out': [246], 'sorted_id': 245}
         {
             Tensor::shape_type shape = {400};
             PowOp* op = new PowOp();
-            forward_result[246] = op;
+            forward_result[245] = op;
             
-            op->set_inputs( forward_result[245] );
+            op->set_inputs( forward_result[244] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3046', 'op': 'aten::mul', 'in': [246, 50], 'output_id': 0, 'shape': [400], 'out': [248], 'sorted_id': 247}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2935', 'op': 'aten::mul', 'in': [245, 50], 'output_id': 0, 'shape': [400], 'out': [247], 'sorted_id': 246}
         {
             Tensor::shape_type shape = {400};
             MulOp* op = new MulOp();
-            forward_result[247] = op;
+            forward_result[246] = op;
             
-            op->set_inputs( forward_result[246] );
+            op->set_inputs( forward_result[245] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3047', 'op': 'aten::div', 'in': [243, 247], 'output_id': 0, 'shape': [400], 'out': [249], 'sorted_id': 248}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2936', 'op': 'aten::div', 'in': [242, 246], 'output_id': 0, 'shape': [400], 'out': [248], 'sorted_id': 247}
         {
             Tensor::shape_type shape = {400};
             DivOp* op = new DivOp();
-            forward_result[248] = op;
+            forward_result[247] = op;
             
-            op->set_inputs( forward_result[243] );
-            op->set_inputs( forward_result[247] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[242] );
+            op->set_inputs( forward_result[246] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3048', 'op': 'aten::sub', 'in': [241, 248, 12], 'output_id': 0, 'shape': [400], 'out': [250], 'sorted_id': 249}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2937', 'op': 'aten::sub', 'in': [240, 247, 12], 'output_id': 0, 'shape': [400], 'out': [249], 'sorted_id': 248}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
-            forward_result[249] = op;
+            forward_result[248] = op;
             
-            op->set_inputs( forward_result[241] );
-            op->set_inputs( forward_result[248] );
+            op->set_inputs( forward_result[240] );
+            op->set_inputs( forward_result[247] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3049', 'op': 'aten::sum', 'in': [249, 20], 'output_id': 0, 'shape': [], 'out': [251], 'sorted_id': 250}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2938', 'op': 'aten::sum', 'in': [248, 20], 'output_id': 0, 'shape': [], 'out': [250], 'sorted_id': 249}
         {
             SumOp* op = new SumOp();
-            forward_result[250] = op;
+            forward_result[249] = op;
             
-            op->set_inputs( forward_result[249] );
+            op->set_inputs( forward_result[248] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3050', 'op': 'aten::add', 'in': [237, 250, 12], 'output_id': 0, 'shape': [], 'out': [252], 'sorted_id': 251}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/2939', 'op': 'aten::add', 'in': [236, 249, 12], 'output_id': 0, 'shape': [], 'out': [251], 'sorted_id': 250}
         {
             AddOp* op = new AddOp();
-            forward_result[251] = op;
+            forward_result[250] = op;
             
-            op->set_inputs( forward_result[237] );
-            op->set_inputs( forward_result[250] );
+            op->set_inputs( forward_result[236] );
+            op->set_inputs( forward_result[249] );
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/3052', 'op': 'prim::TupleConstruct', 'in': [167, 224, 251, 140, 145, 156, 160, 172, 168, 185, 181, 197, 209], 'output_id': 0, 'shape': [], 'out': [393, 253, 387, 389, 390, 394, 254, 388, 396, 392, 395, 391, 375], 'sorted_id': 252}
+        // {'name': 'Model/2941', 'op': 'prim::TupleConstruct', 'in': [166, 223, 250, 139, 144, 155, 159, 171, 167, 184, 180, 196, 208], 'output_id': 0, 'shape': [], 'out': [252, 567, 526, 503, 514, 543, 518, 539, 498, 555, 1066, 530, 1084], 'sorted_id': 251}
         {
             TupleConstructOp* op = new TupleConstructOp();
-            forward_result[252] = op;
+            forward_result[251] = op;
             
+            op->set_inputs( forward_result[166] );
+            op->set_inputs( forward_result[223] );
+            op->set_inputs( forward_result[250] );
+            op->set_inputs( forward_result[139] );
+            op->set_inputs( forward_result[144] );
+            op->set_inputs( forward_result[155] );
+            op->set_inputs( forward_result[159] );
+            op->set_inputs( forward_result[171] );
             op->set_inputs( forward_result[167] );
-            op->set_inputs( forward_result[224] );
-            op->set_inputs( forward_result[251] );
-            op->set_inputs( forward_result[140] );
-            op->set_inputs( forward_result[145] );
-            op->set_inputs( forward_result[156] );
-            op->set_inputs( forward_result[160] );
-            op->set_inputs( forward_result[172] );
-            op->set_inputs( forward_result[168] );
-            op->set_inputs( forward_result[185] );
-            op->set_inputs( forward_result[181] );
-            op->set_inputs( forward_result[197] );
-            op->set_inputs( forward_result[209] );
+            op->set_inputs( forward_result[184] );
+            op->set_inputs( forward_result[180] );
+            op->set_inputs( forward_result[196] );
+            op->set_inputs( forward_result[208] );
         }
         
-        // {'name': 'Net/3054', 'op': 'prim::TupleUnpack', 'in': [252], 'output_id': 1, 'shape': [], 'out': [409], 'sorted_id': 253}
+        // {'name': 'Model/2942', 'op': 'prim::TupleUnpack', 'in': [251], 'output_id': 0, 'shape': [4, 400], 'out': [253], 'sorted_id': 252}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 1 );
+            Tensor::shape_type shape = {4,400};
+            TupleUnpackOp* op = new TupleUnpackOp( 0 );
+            forward_result[252] = op;
+            
+            op->set_inputs( forward_result[251] );
+        }
+        
+        // {'name': 'Model/Net[net]/input.9', 'op': 'aten::relu', 'in': [252], 'output_id': 0, 'shape': [4, 400], 'out': [285], 'sorted_id': 253}
+        {
+            Tensor::shape_type shape = {4,400};
+            ReluOp* op = new ReluOp();
             forward_result[253] = op;
             
             op->set_inputs( forward_result[252] );
         }
         
-        // {'name': 'Net/3053', 'op': 'prim::TupleUnpack', 'in': [252], 'output_id': 0, 'shape': [4, 400], 'out': [255], 'sorted_id': 254}
-        {
-            Tensor::shape_type shape = {4,400};
-            TupleUnpackOp* op = new TupleUnpackOp( 0 );
-            forward_result[254] = op;
-            
-            op->set_inputs( forward_result[252] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/input.9', 'op': 'aten::relu', 'in': [254], 'output_id': 0, 'shape': [4, 400], 'out': [287], 'sorted_id': 255}
-        {
-            Tensor::shape_type shape = {4,400};
-            ReluOp* op = new ReluOp();
-            forward_result[255] = op;
-            
-            op->set_inputs( forward_result[254] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l3]/weight_mu/weight_mu.5', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [349, 271], 'sorted_id': 256}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/weight_mu/weight_mu.5', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [269, 347], 'sorted_id': 254}
         {
             Tensor::shape_type shape = {10,400};
             l3_weight_mu.reshape( shape );
-            forward_result[256] = new VariableTensor( l3_weight_mu, 2 );
+            forward_result[254] = new VariableTensor( l3_weight_mu, 2 );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l3]/weight_rho/weight_rho.5', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [262, 351, 345, 261, 258], 'sorted_id': 257}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/weight_rho/weight_rho.5', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [256, 343, 349, 260, 259], 'sorted_id': 255}
         {
             Tensor::shape_type shape = {10,400};
             l3_weight_rho.reshape( shape );
-            forward_result[257] = new VariableTensor( l3_weight_rho, 2 );
+            forward_result[255] = new VariableTensor( l3_weight_rho, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3084', 'op': 'aten::exp', 'in': [257], 'output_id': 0, 'shape': [10, 400], 'out': [259], 'sorted_id': 258}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2973', 'op': 'aten::exp', 'in': [255], 'output_id': 0, 'shape': [10, 400], 'out': [257], 'sorted_id': 256}
         {
             Tensor::shape_type shape = {10,400};
             ExpOp* op = new ExpOp();
-            forward_result[258] = op;
+            forward_result[256] = op;
             
-            op->set_inputs( forward_result[257] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[255] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3085', 'op': 'aten::log1p', 'in': [258], 'output_id': 0, 'shape': [10, 400], 'out': [270], 'sorted_id': 259}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2974', 'op': 'aten::log1p', 'in': [256], 'output_id': 0, 'shape': [10, 400], 'out': [268], 'sorted_id': 257}
         {
             Tensor::shape_type shape = {10,400};
             Log1pOp* op = new Log1pOp();
-            forward_result[259] = op;
+            forward_result[257] = op;
             
-            op->set_inputs( forward_result[258] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[256] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3071', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [372, 264], 'sorted_id': 260}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2960', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [370, 262], 'sorted_id': 258}
         {
             Tensor c = (fprec)0.0;
-            forward_result[260] = new VariableTensor( c, 1 );
+            forward_result[258] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3076', 'op': 'aten::size', 'in': [257, 10], 'output_id': 0, 'shape': [], 'out': [263, 266], 'sorted_id': 261}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2965', 'op': 'aten::size', 'in': [255, 10], 'output_id': 0, 'shape': [], 'out': [264, 261], 'sorted_id': 259}
         {
             SizeOp* op = new SizeOp();
-            forward_result[261] = op;
+            forward_result[259] = op;
             
-            op->set_inputs( forward_result[257] );
+            op->set_inputs( forward_result[255] );
             op->set_inputs( forward_result[10] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3077', 'op': 'aten::size', 'in': [257, 12], 'output_id': 0, 'shape': [], 'out': [263, 266], 'sorted_id': 262}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2966', 'op': 'aten::size', 'in': [255, 12], 'output_id': 0, 'shape': [], 'out': [264, 261], 'sorted_id': 260}
         {
             SizeOp* op = new SizeOp();
-            forward_result[262] = op;
+            forward_result[260] = op;
             
-            op->set_inputs( forward_result[257] );
+            op->set_inputs( forward_result[255] );
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3078', 'op': 'prim::ListConstruct', 'in': [261, 262], 'output_id': 0, 'shape': [], 'out': [264], 'sorted_id': 263}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2967', 'op': 'prim::ListConstruct', 'in': [259, 260], 'output_id': 0, 'shape': [], 'out': [262], 'sorted_id': 261}
         {
             ListConstructOp* op = new ListConstructOp();
-            forward_result[263] = op;
+            forward_result[261] = op;
             
-            op->set_inputs( forward_result[261] );
-            op->set_inputs( forward_result[262] );
+            op->set_inputs( forward_result[259] );
+            op->set_inputs( forward_result[260] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3079', 'op': 'aten::expand', 'in': [260, 263, 15], 'output_id': 0, 'shape': [10, 400], 'out': [268], 'sorted_id': 264}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2968', 'op': 'aten::expand', 'in': [258, 261, 15], 'output_id': 0, 'shape': [10, 400], 'out': [266], 'sorted_id': 262}
         {
             Tensor::shape_type shape = {10,400};
             ExpandOp* op = new ExpandOp();
-            forward_result[264] = op;
+            forward_result[262] = op;
             
-            op->set_inputs( forward_result[260] );
-            op->set_inputs( forward_result[263] );
+            op->set_inputs( forward_result[258] );
+            op->set_inputs( forward_result[261] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3070', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [372, 267], 'sorted_id': 265}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2959', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [370, 265], 'sorted_id': 263}
         {
             Tensor c = (fprec)1.0;
-            forward_result[265] = new VariableTensor( c, 1 );
+            forward_result[263] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3080', 'op': 'prim::ListConstruct', 'in': [261, 262], 'output_id': 0, 'shape': [], 'out': [267], 'sorted_id': 266}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2969', 'op': 'prim::ListConstruct', 'in': [259, 260], 'output_id': 0, 'shape': [], 'out': [265], 'sorted_id': 264}
         {
             ListConstructOp* op = new ListConstructOp();
-            forward_result[266] = op;
+            forward_result[264] = op;
             
-            op->set_inputs( forward_result[261] );
-            op->set_inputs( forward_result[262] );
+            op->set_inputs( forward_result[259] );
+            op->set_inputs( forward_result[260] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3081', 'op': 'aten::expand', 'in': [265, 266, 15], 'output_id': 0, 'shape': [10, 400], 'out': [268], 'sorted_id': 267}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2970', 'op': 'aten::expand', 'in': [263, 264, 15], 'output_id': 0, 'shape': [10, 400], 'out': [266], 'sorted_id': 265}
         {
             Tensor::shape_type shape = {10,400};
             ExpandOp* op = new ExpandOp();
-            forward_result[267] = op;
+            forward_result[265] = op;
             
-            op->set_inputs( forward_result[265] );
-            op->set_inputs( forward_result[266] );
+            op->set_inputs( forward_result[263] );
+            op->set_inputs( forward_result[264] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3082', 'op': 'aten::normal', 'in': [264, 267, 20], 'output_id': 0, 'shape': [10, 400], 'out': [269], 'sorted_id': 268}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2971', 'op': 'aten::normal', 'in': [262, 265, 20], 'output_id': 0, 'shape': [10, 400], 'out': [267], 'sorted_id': 266}
         {
             Tensor::shape_type shape = {10,400};
             NormalOp* op = new NormalOp();
-            forward_result[268] = op;
+            forward_result[266] = op;
             
-            op->set_inputs( forward_result[264] );
-            op->set_inputs( forward_result[267] );
+            op->set_inputs( forward_result[262] );
+            op->set_inputs( forward_result[265] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/epsilon.9', 'op': 'aten::to', 'in': [268, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [10, 400], 'out': [270], 'sorted_id': 269}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/epsilon.9', 'op': 'aten::to', 'in': [266, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [10, 400], 'out': [268], 'sorted_id': 267}
         {
             Tensor::shape_type shape = {10,400};
             ToOp* op = new ToOp();
-            forward_result[269] = op;
+            forward_result[267] = op;
             
-            op->set_inputs( forward_result[268] );
+            op->set_inputs( forward_result[266] );
             op->set_inputs( forward_result[22] );
             op->set_inputs( forward_result[10] );
             op->set_inputs( forward_result[23] );
@@ -2784,146 +2580,138 @@
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3086', 'op': 'aten::mul', 'in': [259, 269], 'output_id': 0, 'shape': [10, 400], 'out': [271], 'sorted_id': 270}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2975', 'op': 'aten::mul', 'in': [257, 267], 'output_id': 0, 'shape': [10, 400], 'out': [269], 'sorted_id': 268}
         {
             Tensor::shape_type shape = {10,400};
             MulOp* op = new MulOp();
-            forward_result[270] = op;
+            forward_result[268] = op;
             
-            op->set_inputs( forward_result[259] );
-            op->set_inputs( forward_result[269] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[257] );
+            op->set_inputs( forward_result[267] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/value.9', 'op': 'aten::add', 'in': [256, 270, 12], 'output_id': 0, 'shape': [10, 400], 'out': [289, 302, 287, 349], 'sorted_id': 271}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/value.9', 'op': 'aten::add', 'in': [254, 268, 12], 'output_id': 0, 'shape': [10, 400], 'out': [285, 287, 300, 347], 'sorted_id': 269}
         {
             Tensor::shape_type shape = {10,400};
             AddOp* op = new AddOp();
-            forward_result[271] = op;
+            forward_result[269] = op;
             
-            op->set_inputs( forward_result[256] );
-            op->set_inputs( forward_result[270] );
+            op->set_inputs( forward_result[254] );
+            op->set_inputs( forward_result[268] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l3]/bias_mu/bias_mu.5', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [286, 362], 'sorted_id': 272}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/bias_mu/bias_mu.5', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [284, 360], 'sorted_id': 270}
         {
             Tensor::shape_type shape = {10};
             l3_bias_mu.reshape( shape );
-            forward_result[272] = new VariableTensor( l3_bias_mu, 2 );
+            forward_result[270] = new VariableTensor( l3_bias_mu, 2 );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l3]/bias_rho/bias_rho.5', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [277, 364, 358, 274], 'sorted_id': 273}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/bias_rho/bias_rho.5', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [272, 356, 362, 275], 'sorted_id': 271}
         {
             Tensor::shape_type shape = {10};
             l3_bias_rho.reshape( shape );
-            forward_result[273] = new VariableTensor( l3_bias_rho, 2 );
+            forward_result[271] = new VariableTensor( l3_bias_rho, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3097', 'op': 'aten::exp', 'in': [273], 'output_id': 0, 'shape': [10], 'out': [275], 'sorted_id': 274}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2986', 'op': 'aten::exp', 'in': [271], 'output_id': 0, 'shape': [10], 'out': [273], 'sorted_id': 272}
         {
             Tensor::shape_type shape = {10};
             ExpOp* op = new ExpOp();
-            forward_result[274] = op;
+            forward_result[272] = op;
             
-            op->set_inputs( forward_result[273] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[271] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3098', 'op': 'aten::log1p', 'in': [274], 'output_id': 0, 'shape': [10], 'out': [285], 'sorted_id': 275}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2987', 'op': 'aten::log1p', 'in': [272], 'output_id': 0, 'shape': [10], 'out': [283], 'sorted_id': 273}
         {
             Tensor::shape_type shape = {10};
             Log1pOp* op = new Log1pOp();
-            forward_result[275] = op;
+            forward_result[273] = op;
             
-            op->set_inputs( forward_result[274] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[272] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3089', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [279, 372], 'sorted_id': 276}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2978', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 0.0, 'out': [370, 277], 'sorted_id': 274}
         {
             Tensor c = (fprec)0.0;
-            forward_result[276] = new VariableTensor( c, 1 );
+            forward_result[274] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3088', 'op': 'aten::size', 'in': [273, 10], 'output_id': 0, 'shape': [], 'out': [281, 278], 'sorted_id': 277}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2977', 'op': 'aten::size', 'in': [271, 10], 'output_id': 0, 'shape': [], 'out': [279, 276], 'sorted_id': 275}
         {
             SizeOp* op = new SizeOp();
-            forward_result[277] = op;
+            forward_result[275] = op;
             
-            op->set_inputs( forward_result[273] );
+            op->set_inputs( forward_result[271] );
             op->set_inputs( forward_result[10] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3090', 'op': 'prim::ListConstruct', 'in': [277], 'output_id': 0, 'shape': [], 'out': [279], 'sorted_id': 278}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2979', 'op': 'prim::ListConstruct', 'in': [275], 'output_id': 0, 'shape': [], 'out': [277], 'sorted_id': 276}
         {
             ListConstructOp* op = new ListConstructOp();
-            forward_result[278] = op;
+            forward_result[276] = op;
             
-            op->set_inputs( forward_result[277] );
+            op->set_inputs( forward_result[275] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3091', 'op': 'aten::expand', 'in': [276, 278, 15], 'output_id': 0, 'shape': [10], 'out': [283], 'sorted_id': 279}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2980', 'op': 'aten::expand', 'in': [274, 276, 15], 'output_id': 0, 'shape': [10], 'out': [281], 'sorted_id': 277}
         {
             Tensor::shape_type shape = {10};
             ExpandOp* op = new ExpandOp();
-            forward_result[279] = op;
+            forward_result[277] = op;
             
+            op->set_inputs( forward_result[274] );
             op->set_inputs( forward_result[276] );
-            op->set_inputs( forward_result[278] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3092', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [282, 372], 'sorted_id': 280}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2981', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [370, 280], 'sorted_id': 278}
         {
             Tensor c = (fprec)1.0;
-            forward_result[280] = new VariableTensor( c, 1 );
+            forward_result[278] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3093', 'op': 'prim::ListConstruct', 'in': [277], 'output_id': 0, 'shape': [], 'out': [282], 'sorted_id': 281}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2982', 'op': 'prim::ListConstruct', 'in': [275], 'output_id': 0, 'shape': [], 'out': [280], 'sorted_id': 279}
         {
             ListConstructOp* op = new ListConstructOp();
-            forward_result[281] = op;
+            forward_result[279] = op;
             
-            op->set_inputs( forward_result[277] );
+            op->set_inputs( forward_result[275] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3094', 'op': 'aten::expand', 'in': [280, 281, 15], 'output_id': 0, 'shape': [10], 'out': [283], 'sorted_id': 282}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2983', 'op': 'aten::expand', 'in': [278, 279, 15], 'output_id': 0, 'shape': [10], 'out': [281], 'sorted_id': 280}
         {
             Tensor::shape_type shape = {10};
             ExpandOp* op = new ExpandOp();
-            forward_result[282] = op;
+            forward_result[280] = op;
             
-            op->set_inputs( forward_result[280] );
-            op->set_inputs( forward_result[281] );
+            op->set_inputs( forward_result[278] );
+            op->set_inputs( forward_result[279] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3095', 'op': 'aten::normal', 'in': [279, 282, 20], 'output_id': 0, 'shape': [10], 'out': [284], 'sorted_id': 283}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2984', 'op': 'aten::normal', 'in': [277, 280, 20], 'output_id': 0, 'shape': [10], 'out': [282], 'sorted_id': 281}
         {
             Tensor::shape_type shape = {10};
             NormalOp* op = new NormalOp();
-            forward_result[283] = op;
+            forward_result[281] = op;
             
-            op->set_inputs( forward_result[279] );
-            op->set_inputs( forward_result[282] );
+            op->set_inputs( forward_result[277] );
+            op->set_inputs( forward_result[280] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/epsilon.11', 'op': 'aten::to', 'in': [283, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [10], 'out': [285], 'sorted_id': 284}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/epsilon.11', 'op': 'aten::to', 'in': [281, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [10], 'out': [283], 'sorted_id': 282}
         {
             Tensor::shape_type shape = {10};
             ToOp* op = new ToOp();
-            forward_result[284] = op;
+            forward_result[282] = op;
             
-            op->set_inputs( forward_result[283] );
+            op->set_inputs( forward_result[281] );
             op->set_inputs( forward_result[22] );
             op->set_inputs( forward_result[10] );
             op->set_inputs( forward_result[23] );
@@ -2931,1517 +2719,1037 @@
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3099', 'op': 'aten::mul', 'in': [275, 284], 'output_id': 0, 'shape': [10], 'out': [286], 'sorted_id': 285}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2988', 'op': 'aten::mul', 'in': [273, 282], 'output_id': 0, 'shape': [10], 'out': [284], 'sorted_id': 283}
         {
             Tensor::shape_type shape = {10};
             MulOp* op = new MulOp();
-            forward_result[285] = op;
+            forward_result[283] = op;
             
-            op->set_inputs( forward_result[275] );
-            op->set_inputs( forward_result[284] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[273] );
+            op->set_inputs( forward_result[282] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/value.11', 'op': 'aten::add', 'in': [272, 285, 12], 'output_id': 0, 'shape': [10], 'out': [330, 287, 318, 362], 'sorted_id': 286}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/value.11', 'op': 'aten::add', 'in': [270, 283, 12], 'output_id': 0, 'shape': [10], 'out': [285, 328, 316, 360], 'sorted_id': 284}
         {
             Tensor::shape_type shape = {10};
             AddOp* op = new AddOp();
-            forward_result[286] = op;
+            forward_result[284] = op;
             
-            op->set_inputs( forward_result[272] );
-            op->set_inputs( forward_result[285] );
+            op->set_inputs( forward_result[270] );
+            op->set_inputs( forward_result[283] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/input.11', 'op': 'aten::linear', 'in': [255, 271, 286], 'output_id': 0, 'shape': [4, 10], 'out': [372], 'sorted_id': 287}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/input.11', 'op': 'aten::linear', 'in': [253, 269, 284], 'output_id': 0, 'shape': [4, 10], 'out': [370], 'sorted_id': 285}
         {
             Tensor::shape_type shape = {4,10};
             LinearOp* op = new LinearOp();
-            forward_result[287] = op;
+            forward_result[285] = op;
             
-            op->set_inputs( forward_result[255] );
-            op->set_inputs( forward_result[271] );
-            op->set_inputs( forward_result[286] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[253] );
+            op->set_inputs( forward_result[269] );
+            op->set_inputs( forward_result[284] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3068', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [289, 372], 'sorted_id': 288}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2957', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [370, 287], 'sorted_id': 286}
         {
             Tensor::shape_type shape = {1};
             Constant13.reshape( shape );
-            forward_result[288] = new VariableTensor( Constant13, 1 );
+            forward_result[286] = new VariableTensor( Constant13, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3103', 'op': 'aten::sub', 'in': [271, 288, 12], 'output_id': 0, 'shape': [10, 400], 'out': [290], 'sorted_id': 289}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2992', 'op': 'aten::sub', 'in': [269, 286, 12], 'output_id': 0, 'shape': [10, 400], 'out': [288], 'sorted_id': 287}
         {
             Tensor::shape_type shape = {10,400};
             SubOp* op = new SubOp();
-            forward_result[289] = op;
+            forward_result[287] = op;
             
-            op->set_inputs( forward_result[271] );
-            op->set_inputs( forward_result[288] );
+            op->set_inputs( forward_result[269] );
+            op->set_inputs( forward_result[286] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3104', 'op': 'aten::pow', 'in': [289, 45], 'output_id': 0, 'shape': [10, 400], 'out': [291], 'sorted_id': 290}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2993', 'op': 'aten::pow', 'in': [287, 45], 'output_id': 0, 'shape': [10, 400], 'out': [289], 'sorted_id': 288}
         {
             Tensor::shape_type shape = {10,400};
             PowOp* op = new PowOp();
-            forward_result[290] = op;
+            forward_result[288] = op;
             
-            op->set_inputs( forward_result[289] );
+            op->set_inputs( forward_result[287] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3105', 'op': 'aten::neg', 'in': [290], 'output_id': 0, 'shape': [10, 400], 'out': [295], 'sorted_id': 291}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2994', 'op': 'aten::neg', 'in': [288], 'output_id': 0, 'shape': [10, 400], 'out': [293], 'sorted_id': 289}
         {
             Tensor::shape_type shape = {10,400};
             NegOp* op = new NegOp();
-            forward_result[291] = op;
+            forward_result[289] = op;
             
-            op->set_inputs( forward_result[290] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[288] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3069', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 1.0, 'out': [321, 296, 293, 324, 372], 'sorted_id': 292}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2958', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 1.0, 'out': [294, 322, 291, 370, 319], 'sorted_id': 290}
         {
             Tensor::shape_type shape = {1};
             Constant14.reshape( shape );
-            forward_result[292] = new VariableTensor( Constant14, 1 );
+            forward_result[290] = new VariableTensor( Constant14, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/var.17', 'op': 'aten::pow', 'in': [292, 45], 'output_id': 0, 'shape': [1], 'out': [294], 'sorted_id': 293}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/var.17', 'op': 'aten::pow', 'in': [290, 45], 'output_id': 0, 'shape': [1], 'out': [292], 'sorted_id': 291}
         {
             Tensor::shape_type shape = {1};
             PowOp* op = new PowOp();
-            forward_result[293] = op;
+            forward_result[291] = op;
             
-            op->set_inputs( forward_result[292] );
+            op->set_inputs( forward_result[290] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3106', 'op': 'aten::mul', 'in': [293, 50], 'output_id': 0, 'shape': [1], 'out': [295], 'sorted_id': 294}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2995', 'op': 'aten::mul', 'in': [291, 50], 'output_id': 0, 'shape': [1], 'out': [293], 'sorted_id': 292}
         {
             Tensor::shape_type shape = {1};
             MulOp* op = new MulOp();
-            forward_result[294] = op;
+            forward_result[292] = op;
             
-            op->set_inputs( forward_result[293] );
+            op->set_inputs( forward_result[291] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3107', 'op': 'aten::div', 'in': [291, 294], 'output_id': 0, 'shape': [10, 400], 'out': [297], 'sorted_id': 295}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2996', 'op': 'aten::div', 'in': [289, 292], 'output_id': 0, 'shape': [10, 400], 'out': [295], 'sorted_id': 293}
         {
             Tensor::shape_type shape = {10,400};
             DivOp* op = new DivOp();
-            forward_result[295] = op;
+            forward_result[293] = op;
             
-            op->set_inputs( forward_result[291] );
-            op->set_inputs( forward_result[294] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[289] );
+            op->set_inputs( forward_result[292] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/log_scale.17', 'op': 'aten::log', 'in': [292], 'output_id': 0, 'shape': [1], 'out': [297], 'sorted_id': 296}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/log_scale.17', 'op': 'aten::log', 'in': [290], 'output_id': 0, 'shape': [1], 'out': [295], 'sorted_id': 294}
         {
             Tensor::shape_type shape = {1};
             LogOp* op = new LogOp();
+            forward_result[294] = op;
+            
+            op->set_inputs( forward_result[290] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2997', 'op': 'aten::sub', 'in': [293, 294, 12], 'output_id': 0, 'shape': [10, 400], 'out': [296], 'sorted_id': 295}
+        {
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
+            forward_result[295] = op;
+            
+            op->set_inputs( forward_result[293] );
+            op->set_inputs( forward_result[294] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2998', 'op': 'aten::sub', 'in': [295, 55, 12], 'output_id': 0, 'shape': [10, 400], 'out': [297], 'sorted_id': 296}
+        {
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
             forward_result[296] = op;
             
-            op->set_inputs( forward_result[292] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[295] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3108', 'op': 'aten::sub', 'in': [295, 296, 12], 'output_id': 0, 'shape': [10, 400], 'out': [298], 'sorted_id': 297}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/prob1.9', 'op': 'aten::exp', 'in': [296], 'output_id': 0, 'shape': [10, 400], 'out': [298], 'sorted_id': 297}
         {
             Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
+            ExpOp* op = new ExpOp();
             forward_result[297] = op;
             
-            op->set_inputs( forward_result[295] );
             op->set_inputs( forward_result[296] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3109', 'op': 'aten::sub', 'in': [297, 55, 12], 'output_id': 0, 'shape': [10, 400], 'out': [299], 'sorted_id': 298}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3011', 'op': 'aten::mul', 'in': [297, 58], 'output_id': 0, 'shape': [10, 400], 'out': [312], 'sorted_id': 298}
         {
             Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
+            MulOp* op = new MulOp();
             forward_result[298] = op;
             
             op->set_inputs( forward_result[297] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/prob1.9', 'op': 'aten::exp', 'in': [298], 'output_id': 0, 'shape': [10, 400], 'out': [300], 'sorted_id': 299}
-        {
-            Tensor::shape_type shape = {10,400};
-            ExpOp* op = new ExpOp();
-            forward_result[299] = op;
-            
-            op->set_inputs( forward_result[298] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3122', 'op': 'aten::mul', 'in': [299, 58], 'output_id': 0, 'shape': [10, 400], 'out': [314], 'sorted_id': 300}
-        {
-            Tensor::shape_type shape = {10,400};
-            MulOp* op = new MulOp();
-            forward_result[300] = op;
-            
-            op->set_inputs( forward_result[299] );
             op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3113', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [302, 372], 'sorted_id': 301}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3002', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [370, 300], 'sorted_id': 299}
         {
             Tensor::shape_type shape = {1};
             Constant15.reshape( shape );
-            forward_result[301] = new VariableTensor( Constant15, 1 );
+            forward_result[299] = new VariableTensor( Constant15, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3114', 'op': 'aten::sub', 'in': [271, 301, 12], 'output_id': 0, 'shape': [10, 400], 'out': [303], 'sorted_id': 302}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3003', 'op': 'aten::sub', 'in': [269, 299, 12], 'output_id': 0, 'shape': [10, 400], 'out': [301], 'sorted_id': 300}
         {
             Tensor::shape_type shape = {10,400};
             SubOp* op = new SubOp();
-            forward_result[302] = op;
+            forward_result[300] = op;
             
-            op->set_inputs( forward_result[271] );
-            op->set_inputs( forward_result[301] );
+            op->set_inputs( forward_result[269] );
+            op->set_inputs( forward_result[299] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3115', 'op': 'aten::pow', 'in': [302, 45], 'output_id': 0, 'shape': [10, 400], 'out': [304], 'sorted_id': 303}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3004', 'op': 'aten::pow', 'in': [300, 45], 'output_id': 0, 'shape': [10, 400], 'out': [302], 'sorted_id': 301}
         {
             Tensor::shape_type shape = {10,400};
             PowOp* op = new PowOp();
-            forward_result[303] = op;
+            forward_result[301] = op;
             
-            op->set_inputs( forward_result[302] );
+            op->set_inputs( forward_result[300] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3116', 'op': 'aten::neg', 'in': [303], 'output_id': 0, 'shape': [10, 400], 'out': [308], 'sorted_id': 304}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3005', 'op': 'aten::neg', 'in': [301], 'output_id': 0, 'shape': [10, 400], 'out': [306], 'sorted_id': 302}
         {
             Tensor::shape_type shape = {10,400};
             NegOp* op = new NegOp();
-            forward_result[304] = op;
+            forward_result[302] = op;
             
-            op->set_inputs( forward_result[303] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[301] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3067', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0025, 'out': [336, 333, 309, 306, 372], 'sorted_id': 305}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/2956', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0025, 'out': [331, 334, 370, 304, 307], 'sorted_id': 303}
         {
             Tensor::shape_type shape = {1};
             Constant16.reshape( shape );
-            forward_result[305] = new VariableTensor( Constant16, 1 );
+            forward_result[303] = new VariableTensor( Constant16, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/var.19', 'op': 'aten::pow', 'in': [305, 45], 'output_id': 0, 'shape': [1], 'out': [307], 'sorted_id': 306}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/var.19', 'op': 'aten::pow', 'in': [303, 45], 'output_id': 0, 'shape': [1], 'out': [305], 'sorted_id': 304}
         {
             Tensor::shape_type shape = {1};
             PowOp* op = new PowOp();
-            forward_result[306] = op;
+            forward_result[304] = op;
             
-            op->set_inputs( forward_result[305] );
+            op->set_inputs( forward_result[303] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3117', 'op': 'aten::mul', 'in': [306, 50], 'output_id': 0, 'shape': [1], 'out': [308], 'sorted_id': 307}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3006', 'op': 'aten::mul', 'in': [304, 50], 'output_id': 0, 'shape': [1], 'out': [306], 'sorted_id': 305}
         {
             Tensor::shape_type shape = {1};
             MulOp* op = new MulOp();
-            forward_result[307] = op;
+            forward_result[305] = op;
             
-            op->set_inputs( forward_result[306] );
+            op->set_inputs( forward_result[304] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3118', 'op': 'aten::div', 'in': [304, 307], 'output_id': 0, 'shape': [10, 400], 'out': [310], 'sorted_id': 308}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3007', 'op': 'aten::div', 'in': [302, 305], 'output_id': 0, 'shape': [10, 400], 'out': [308], 'sorted_id': 306}
         {
             Tensor::shape_type shape = {10,400};
             DivOp* op = new DivOp();
-            forward_result[308] = op;
+            forward_result[306] = op;
             
-            op->set_inputs( forward_result[304] );
-            op->set_inputs( forward_result[307] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[302] );
+            op->set_inputs( forward_result[305] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/log_scale.19', 'op': 'aten::log', 'in': [305], 'output_id': 0, 'shape': [1], 'out': [310], 'sorted_id': 309}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/log_scale.19', 'op': 'aten::log', 'in': [303], 'output_id': 0, 'shape': [1], 'out': [308], 'sorted_id': 307}
         {
             Tensor::shape_type shape = {1};
             LogOp* op = new LogOp();
+            forward_result[307] = op;
+            
+            op->set_inputs( forward_result[303] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3008', 'op': 'aten::sub', 'in': [306, 307, 12], 'output_id': 0, 'shape': [10, 400], 'out': [309], 'sorted_id': 308}
+        {
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
+            forward_result[308] = op;
+            
+            op->set_inputs( forward_result[306] );
+            op->set_inputs( forward_result[307] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3009', 'op': 'aten::sub', 'in': [308, 55, 12], 'output_id': 0, 'shape': [10, 400], 'out': [310], 'sorted_id': 309}
+        {
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
             forward_result[309] = op;
             
-            op->set_inputs( forward_result[305] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[308] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3119', 'op': 'aten::sub', 'in': [308, 309, 12], 'output_id': 0, 'shape': [10, 400], 'out': [311], 'sorted_id': 310}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/prob2.9', 'op': 'aten::exp', 'in': [309], 'output_id': 0, 'shape': [10, 400], 'out': [311], 'sorted_id': 310}
         {
             Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
+            ExpOp* op = new ExpOp();
             forward_result[310] = op;
             
-            op->set_inputs( forward_result[308] );
             op->set_inputs( forward_result[309] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3120', 'op': 'aten::sub', 'in': [310, 55, 12], 'output_id': 0, 'shape': [10, 400], 'out': [312], 'sorted_id': 311}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3012', 'op': 'aten::mul', 'in': [310, 58], 'output_id': 0, 'shape': [10, 400], 'out': [312], 'sorted_id': 311}
         {
             Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
+            MulOp* op = new MulOp();
             forward_result[311] = op;
             
             op->set_inputs( forward_result[310] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[58] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/prob2.9', 'op': 'aten::exp', 'in': [311], 'output_id': 0, 'shape': [10, 400], 'out': [313], 'sorted_id': 312}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3013', 'op': 'aten::add', 'in': [298, 311, 12], 'output_id': 0, 'shape': [10, 400], 'out': [313], 'sorted_id': 312}
         {
             Tensor::shape_type shape = {10,400};
-            ExpOp* op = new ExpOp();
+            AddOp* op = new AddOp();
             forward_result[312] = op;
             
+            op->set_inputs( forward_result[298] );
             op->set_inputs( forward_result[311] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3123', 'op': 'aten::mul', 'in': [312, 58], 'output_id': 0, 'shape': [10, 400], 'out': [314], 'sorted_id': 313}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3014', 'op': 'aten::log', 'in': [312], 'output_id': 0, 'shape': [10, 400], 'out': [314], 'sorted_id': 313}
         {
             Tensor::shape_type shape = {10,400};
-            MulOp* op = new MulOp();
+            LogOp* op = new LogOp();
             forward_result[313] = op;
             
             op->set_inputs( forward_result[312] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3124', 'op': 'aten::add', 'in': [300, 313, 12], 'output_id': 0, 'shape': [10, 400], 'out': [315], 'sorted_id': 314}
-        {
-            Tensor::shape_type shape = {10,400};
-            AddOp* op = new AddOp();
-            forward_result[314] = op;
-            
-            op->set_inputs( forward_result[300] );
-            op->set_inputs( forward_result[313] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3125', 'op': 'aten::log', 'in': [314], 'output_id': 0, 'shape': [10, 400], 'out': [316], 'sorted_id': 315}
-        {
-            Tensor::shape_type shape = {10,400};
-            LogOp* op = new LogOp();
-            forward_result[315] = op;
-            
-            op->set_inputs( forward_result[314] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3126', 'op': 'aten::sum', 'in': [315, 20], 'output_id': 0, 'shape': [], 'out': [344], 'sorted_id': 316}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3015', 'op': 'aten::sum', 'in': [313, 20], 'output_id': 0, 'shape': [], 'out': [342], 'sorted_id': 314}
         {
             SumOp* op = new SumOp();
-            forward_result[316] = op;
+            forward_result[314] = op;
             
-            op->set_inputs( forward_result[315] );
+            op->set_inputs( forward_result[313] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3129', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [372, 318], 'sorted_id': 317}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3018', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [370, 316], 'sorted_id': 315}
         {
             Tensor::shape_type shape = {1};
             Constant17.reshape( shape );
-            forward_result[317] = new VariableTensor( Constant17, 1 );
+            forward_result[315] = new VariableTensor( Constant17, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3130', 'op': 'aten::sub', 'in': [286, 317, 12], 'output_id': 0, 'shape': [10], 'out': [319], 'sorted_id': 318}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3019', 'op': 'aten::sub', 'in': [284, 315, 12], 'output_id': 0, 'shape': [10], 'out': [317], 'sorted_id': 316}
         {
             Tensor::shape_type shape = {10};
             SubOp* op = new SubOp();
-            forward_result[318] = op;
+            forward_result[316] = op;
             
-            op->set_inputs( forward_result[286] );
-            op->set_inputs( forward_result[317] );
+            op->set_inputs( forward_result[284] );
+            op->set_inputs( forward_result[315] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3131', 'op': 'aten::pow', 'in': [318, 45], 'output_id': 0, 'shape': [10], 'out': [320], 'sorted_id': 319}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3020', 'op': 'aten::pow', 'in': [316, 45], 'output_id': 0, 'shape': [10], 'out': [318], 'sorted_id': 317}
         {
             Tensor::shape_type shape = {10};
+            PowOp* op = new PowOp();
+            forward_result[317] = op;
+            
+            op->set_inputs( forward_result[316] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3021', 'op': 'aten::neg', 'in': [317], 'output_id': 0, 'shape': [10], 'out': [321], 'sorted_id': 318}
+        {
+            Tensor::shape_type shape = {10};
+            NegOp* op = new NegOp();
+            forward_result[318] = op;
+            
+            op->set_inputs( forward_result[317] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/var.21', 'op': 'aten::pow', 'in': [290, 45], 'output_id': 0, 'shape': [1], 'out': [320], 'sorted_id': 319}
+        {
+            Tensor::shape_type shape = {1};
             PowOp* op = new PowOp();
             forward_result[319] = op;
             
-            op->set_inputs( forward_result[318] );
+            op->set_inputs( forward_result[290] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3132', 'op': 'aten::neg', 'in': [319], 'output_id': 0, 'shape': [10], 'out': [323], 'sorted_id': 320}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3022', 'op': 'aten::mul', 'in': [319, 50], 'output_id': 0, 'shape': [1], 'out': [321], 'sorted_id': 320}
         {
-            Tensor::shape_type shape = {10};
-            NegOp* op = new NegOp();
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
             forward_result[320] = op;
             
             op->set_inputs( forward_result[319] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/var.21', 'op': 'aten::pow', 'in': [292, 45], 'output_id': 0, 'shape': [1], 'out': [322], 'sorted_id': 321}
-        {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[321] = op;
-            
-            op->set_inputs( forward_result[292] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3133', 'op': 'aten::mul', 'in': [321, 50], 'output_id': 0, 'shape': [1], 'out': [323], 'sorted_id': 322}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[322] = op;
-            
-            op->set_inputs( forward_result[321] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3134', 'op': 'aten::div', 'in': [320, 322], 'output_id': 0, 'shape': [10], 'out': [325], 'sorted_id': 323}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3023', 'op': 'aten::div', 'in': [318, 320], 'output_id': 0, 'shape': [10], 'out': [323], 'sorted_id': 321}
         {
             Tensor::shape_type shape = {10};
             DivOp* op = new DivOp();
-            forward_result[323] = op;
+            forward_result[321] = op;
             
+            op->set_inputs( forward_result[318] );
             op->set_inputs( forward_result[320] );
-            op->set_inputs( forward_result[322] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/log_scale.21', 'op': 'aten::log', 'in': [292], 'output_id': 0, 'shape': [1], 'out': [325], 'sorted_id': 324}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/log_scale.21', 'op': 'aten::log', 'in': [290], 'output_id': 0, 'shape': [1], 'out': [323], 'sorted_id': 322}
         {
             Tensor::shape_type shape = {1};
             LogOp* op = new LogOp();
+            forward_result[322] = op;
+            
+            op->set_inputs( forward_result[290] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3024', 'op': 'aten::sub', 'in': [321, 322, 12], 'output_id': 0, 'shape': [10], 'out': [324], 'sorted_id': 323}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[323] = op;
+            
+            op->set_inputs( forward_result[321] );
+            op->set_inputs( forward_result[322] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3025', 'op': 'aten::sub', 'in': [323, 55, 12], 'output_id': 0, 'shape': [10], 'out': [325], 'sorted_id': 324}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
             forward_result[324] = op;
             
-            op->set_inputs( forward_result[292] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[323] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3135', 'op': 'aten::sub', 'in': [323, 324, 12], 'output_id': 0, 'shape': [10], 'out': [326], 'sorted_id': 325}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/prob1.11', 'op': 'aten::exp', 'in': [324], 'output_id': 0, 'shape': [10], 'out': [326], 'sorted_id': 325}
         {
             Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
+            ExpOp* op = new ExpOp();
             forward_result[325] = op;
             
-            op->set_inputs( forward_result[323] );
             op->set_inputs( forward_result[324] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3136', 'op': 'aten::sub', 'in': [325, 55, 12], 'output_id': 0, 'shape': [10], 'out': [327], 'sorted_id': 326}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3038', 'op': 'aten::mul', 'in': [325, 58], 'output_id': 0, 'shape': [10], 'out': [339], 'sorted_id': 326}
         {
             Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
+            MulOp* op = new MulOp();
             forward_result[326] = op;
             
             op->set_inputs( forward_result[325] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/prob1.11', 'op': 'aten::exp', 'in': [326], 'output_id': 0, 'shape': [10], 'out': [328], 'sorted_id': 327}
-        {
-            Tensor::shape_type shape = {10};
-            ExpOp* op = new ExpOp();
-            forward_result[327] = op;
-            
-            op->set_inputs( forward_result[326] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3149', 'op': 'aten::mul', 'in': [327, 58], 'output_id': 0, 'shape': [10], 'out': [341], 'sorted_id': 328}
-        {
-            Tensor::shape_type shape = {10};
-            MulOp* op = new MulOp();
-            forward_result[328] = op;
-            
-            op->set_inputs( forward_result[327] );
             op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3140', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [330, 372], 'sorted_id': 329}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3029', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [1], 'constant_value': 0.0, 'out': [370, 328], 'sorted_id': 327}
         {
             Tensor::shape_type shape = {1};
             Constant18.reshape( shape );
-            forward_result[329] = new VariableTensor( Constant18, 1 );
+            forward_result[327] = new VariableTensor( Constant18, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3141', 'op': 'aten::sub', 'in': [286, 329, 12], 'output_id': 0, 'shape': [10], 'out': [331], 'sorted_id': 330}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3030', 'op': 'aten::sub', 'in': [284, 327, 12], 'output_id': 0, 'shape': [10], 'out': [329], 'sorted_id': 328}
         {
             Tensor::shape_type shape = {10};
             SubOp* op = new SubOp();
-            forward_result[330] = op;
+            forward_result[328] = op;
             
-            op->set_inputs( forward_result[286] );
-            op->set_inputs( forward_result[329] );
+            op->set_inputs( forward_result[284] );
+            op->set_inputs( forward_result[327] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3142', 'op': 'aten::pow', 'in': [330, 45], 'output_id': 0, 'shape': [10], 'out': [332], 'sorted_id': 331}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3031', 'op': 'aten::pow', 'in': [328, 45], 'output_id': 0, 'shape': [10], 'out': [330], 'sorted_id': 329}
         {
             Tensor::shape_type shape = {10};
             PowOp* op = new PowOp();
-            forward_result[331] = op;
+            forward_result[329] = op;
             
-            op->set_inputs( forward_result[330] );
+            op->set_inputs( forward_result[328] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3143', 'op': 'aten::neg', 'in': [331], 'output_id': 0, 'shape': [10], 'out': [335], 'sorted_id': 332}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3032', 'op': 'aten::neg', 'in': [329], 'output_id': 0, 'shape': [10], 'out': [333], 'sorted_id': 330}
         {
             Tensor::shape_type shape = {10};
             NegOp* op = new NegOp();
-            forward_result[332] = op;
+            forward_result[330] = op;
             
-            op->set_inputs( forward_result[331] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/var.23', 'op': 'aten::pow', 'in': [305, 45], 'output_id': 0, 'shape': [1], 'out': [334], 'sorted_id': 333}
-        {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[333] = op;
-            
-            op->set_inputs( forward_result[305] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3144', 'op': 'aten::mul', 'in': [333, 50], 'output_id': 0, 'shape': [1], 'out': [335], 'sorted_id': 334}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[334] = op;
-            
-            op->set_inputs( forward_result[333] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3145', 'op': 'aten::div', 'in': [332, 334], 'output_id': 0, 'shape': [10], 'out': [337], 'sorted_id': 335}
-        {
-            Tensor::shape_type shape = {10};
-            DivOp* op = new DivOp();
-            forward_result[335] = op;
-            
-            op->set_inputs( forward_result[332] );
-            op->set_inputs( forward_result[334] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/log_scale.23', 'op': 'aten::log', 'in': [305], 'output_id': 0, 'shape': [1], 'out': [337], 'sorted_id': 336}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[336] = op;
-            
-            op->set_inputs( forward_result[305] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3146', 'op': 'aten::sub', 'in': [335, 336, 12], 'output_id': 0, 'shape': [10], 'out': [338], 'sorted_id': 337}
-        {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
-            forward_result[337] = op;
-            
-            op->set_inputs( forward_result[335] );
-            op->set_inputs( forward_result[336] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3147', 'op': 'aten::sub', 'in': [337, 55, 12], 'output_id': 0, 'shape': [10], 'out': [339], 'sorted_id': 338}
-        {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
-            forward_result[338] = op;
-            
-            op->set_inputs( forward_result[337] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/prob2.11', 'op': 'aten::exp', 'in': [338], 'output_id': 0, 'shape': [10], 'out': [340], 'sorted_id': 339}
-        {
-            Tensor::shape_type shape = {10};
-            ExpOp* op = new ExpOp();
-            forward_result[339] = op;
-            
-            op->set_inputs( forward_result[338] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3150', 'op': 'aten::mul', 'in': [339, 58], 'output_id': 0, 'shape': [10], 'out': [341], 'sorted_id': 340}
-        {
-            Tensor::shape_type shape = {10};
-            MulOp* op = new MulOp();
-            forward_result[340] = op;
-            
-            op->set_inputs( forward_result[339] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3151', 'op': 'aten::add', 'in': [328, 340, 12], 'output_id': 0, 'shape': [10], 'out': [342], 'sorted_id': 341}
-        {
-            Tensor::shape_type shape = {10};
-            AddOp* op = new AddOp();
-            forward_result[341] = op;
-            
-            op->set_inputs( forward_result[328] );
-            op->set_inputs( forward_result[340] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3152', 'op': 'aten::log', 'in': [341], 'output_id': 0, 'shape': [10], 'out': [343], 'sorted_id': 342}
-        {
-            Tensor::shape_type shape = {10};
-            LogOp* op = new LogOp();
-            forward_result[342] = op;
-            
-            op->set_inputs( forward_result[341] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3153', 'op': 'aten::sum', 'in': [342, 20], 'output_id': 0, 'shape': [], 'out': [344], 'sorted_id': 343}
-        {
-            SumOp* op = new SumOp();
-            forward_result[343] = op;
-            
-            op->set_inputs( forward_result[342] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3154', 'op': 'aten::add', 'in': [316, 343, 12], 'output_id': 0, 'shape': [], 'out': [372], 'sorted_id': 344}
-        {
-            AddOp* op = new AddOp();
-            forward_result[344] = op;
-            
-            op->set_inputs( forward_result[316] );
-            op->set_inputs( forward_result[343] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3155', 'op': 'aten::exp', 'in': [257], 'output_id': 0, 'shape': [10, 400], 'out': [346], 'sorted_id': 345}
-        {
-            Tensor::shape_type shape = {10,400};
-            ExpOp* op = new ExpOp();
-            forward_result[345] = op;
-            
-            op->set_inputs( forward_result[257] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3156', 'op': 'aten::log1p', 'in': [345], 'output_id': 0, 'shape': [10, 400], 'out': [347], 'sorted_id': 346}
-        {
-            Tensor::shape_type shape = {10,400};
-            Log1pOp* op = new Log1pOp();
-            forward_result[346] = op;
-            
-            op->set_inputs( forward_result[345] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3157', 'op': 'aten::log', 'in': [346], 'output_id': 0, 'shape': [10, 400], 'out': [348], 'sorted_id': 347}
-        {
-            Tensor::shape_type shape = {10,400};
-            LogOp* op = new LogOp();
-            forward_result[347] = op;
-            
-            op->set_inputs( forward_result[346] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3158', 'op': 'aten::rsub', 'in': [347, 107, 12], 'output_id': 0, 'shape': [10, 400], 'out': [356], 'sorted_id': 348}
-        {
-            Tensor::shape_type shape = {10,400};
-            RsubOp* op = new RsubOp();
-            forward_result[348] = op;
-            
-            op->set_inputs( forward_result[347] );
-            op->set_inputs( forward_result[107] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3159', 'op': 'aten::sub', 'in': [271, 256, 12], 'output_id': 0, 'shape': [10, 400], 'out': [350], 'sorted_id': 349}
-        {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
-            forward_result[349] = op;
-            
-            op->set_inputs( forward_result[271] );
-            op->set_inputs( forward_result[256] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3160', 'op': 'aten::pow', 'in': [349, 45], 'output_id': 0, 'shape': [10, 400], 'out': [355], 'sorted_id': 350}
-        {
-            Tensor::shape_type shape = {10,400};
-            PowOp* op = new PowOp();
-            forward_result[350] = op;
-            
-            op->set_inputs( forward_result[349] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3161', 'op': 'aten::exp', 'in': [257], 'output_id': 0, 'shape': [10, 400], 'out': [352], 'sorted_id': 351}
-        {
-            Tensor::shape_type shape = {10,400};
-            ExpOp* op = new ExpOp();
-            forward_result[351] = op;
-            
-            op->set_inputs( forward_result[257] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3162', 'op': 'aten::log1p', 'in': [351], 'output_id': 0, 'shape': [10, 400], 'out': [353], 'sorted_id': 352}
-        {
-            Tensor::shape_type shape = {10,400};
-            Log1pOp* op = new Log1pOp();
-            forward_result[352] = op;
-            
-            op->set_inputs( forward_result[351] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3163', 'op': 'aten::pow', 'in': [352, 45], 'output_id': 0, 'shape': [10, 400], 'out': [354], 'sorted_id': 353}
-        {
-            Tensor::shape_type shape = {10,400};
-            PowOp* op = new PowOp();
-            forward_result[353] = op;
-            
-            op->set_inputs( forward_result[352] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3164', 'op': 'aten::mul', 'in': [353, 50], 'output_id': 0, 'shape': [10, 400], 'out': [355], 'sorted_id': 354}
-        {
-            Tensor::shape_type shape = {10,400};
-            MulOp* op = new MulOp();
-            forward_result[354] = op;
-            
-            op->set_inputs( forward_result[353] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3165', 'op': 'aten::div', 'in': [350, 354], 'output_id': 0, 'shape': [10, 400], 'out': [356], 'sorted_id': 355}
-        {
-            Tensor::shape_type shape = {10,400};
-            DivOp* op = new DivOp();
-            forward_result[355] = op;
-            
-            op->set_inputs( forward_result[350] );
-            op->set_inputs( forward_result[354] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3166', 'op': 'aten::sub', 'in': [348, 355, 12], 'output_id': 0, 'shape': [10, 400], 'out': [357], 'sorted_id': 356}
-        {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
-            forward_result[356] = op;
-            
-            op->set_inputs( forward_result[348] );
-            op->set_inputs( forward_result[355] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3167', 'op': 'aten::sum', 'in': [356, 20], 'output_id': 0, 'shape': [], 'out': [371], 'sorted_id': 357}
-        {
-            SumOp* op = new SumOp();
-            forward_result[357] = op;
-            
-            op->set_inputs( forward_result[356] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3168', 'op': 'aten::exp', 'in': [273], 'output_id': 0, 'shape': [10], 'out': [359], 'sorted_id': 358}
-        {
-            Tensor::shape_type shape = {10};
-            ExpOp* op = new ExpOp();
-            forward_result[358] = op;
-            
-            op->set_inputs( forward_result[273] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3169', 'op': 'aten::log1p', 'in': [358], 'output_id': 0, 'shape': [10], 'out': [360], 'sorted_id': 359}
-        {
-            Tensor::shape_type shape = {10};
-            Log1pOp* op = new Log1pOp();
-            forward_result[359] = op;
-            
-            op->set_inputs( forward_result[358] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3170', 'op': 'aten::log', 'in': [359], 'output_id': 0, 'shape': [10], 'out': [361], 'sorted_id': 360}
-        {
-            Tensor::shape_type shape = {10};
-            LogOp* op = new LogOp();
-            forward_result[360] = op;
-            
-            op->set_inputs( forward_result[359] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3171', 'op': 'aten::rsub', 'in': [360, 107, 12], 'output_id': 0, 'shape': [10], 'out': [369], 'sorted_id': 361}
-        {
-            Tensor::shape_type shape = {10};
-            RsubOp* op = new RsubOp();
-            forward_result[361] = op;
-            
-            op->set_inputs( forward_result[360] );
-            op->set_inputs( forward_result[107] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3172', 'op': 'aten::sub', 'in': [286, 272, 12], 'output_id': 0, 'shape': [10], 'out': [363], 'sorted_id': 362}
-        {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
-            forward_result[362] = op;
-            
-            op->set_inputs( forward_result[286] );
-            op->set_inputs( forward_result[272] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3173', 'op': 'aten::pow', 'in': [362, 45], 'output_id': 0, 'shape': [10], 'out': [368], 'sorted_id': 363}
-        {
-            Tensor::shape_type shape = {10};
-            PowOp* op = new PowOp();
-            forward_result[363] = op;
-            
-            op->set_inputs( forward_result[362] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3174', 'op': 'aten::exp', 'in': [273], 'output_id': 0, 'shape': [10], 'out': [365], 'sorted_id': 364}
-        {
-            Tensor::shape_type shape = {10};
-            ExpOp* op = new ExpOp();
-            forward_result[364] = op;
-            
-            op->set_inputs( forward_result[273] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3175', 'op': 'aten::log1p', 'in': [364], 'output_id': 0, 'shape': [10], 'out': [366], 'sorted_id': 365}
-        {
-            Tensor::shape_type shape = {10};
-            Log1pOp* op = new Log1pOp();
-            forward_result[365] = op;
-            
-            op->set_inputs( forward_result[364] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3176', 'op': 'aten::pow', 'in': [365, 45], 'output_id': 0, 'shape': [10], 'out': [367], 'sorted_id': 366}
-        {
-            Tensor::shape_type shape = {10};
-            PowOp* op = new PowOp();
-            forward_result[366] = op;
-            
-            op->set_inputs( forward_result[365] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3177', 'op': 'aten::mul', 'in': [366, 50], 'output_id': 0, 'shape': [10], 'out': [368], 'sorted_id': 367}
-        {
-            Tensor::shape_type shape = {10};
-            MulOp* op = new MulOp();
-            forward_result[367] = op;
-            
-            op->set_inputs( forward_result[366] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3178', 'op': 'aten::div', 'in': [363, 367], 'output_id': 0, 'shape': [10], 'out': [369], 'sorted_id': 368}
-        {
-            Tensor::shape_type shape = {10};
-            DivOp* op = new DivOp();
-            forward_result[368] = op;
-            
-            op->set_inputs( forward_result[363] );
-            op->set_inputs( forward_result[367] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3179', 'op': 'aten::sub', 'in': [361, 368, 12], 'output_id': 0, 'shape': [10], 'out': [370], 'sorted_id': 369}
-        {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
-            forward_result[369] = op;
-            
-            op->set_inputs( forward_result[361] );
-            op->set_inputs( forward_result[368] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3180', 'op': 'aten::sum', 'in': [369, 20], 'output_id': 0, 'shape': [], 'out': [371], 'sorted_id': 370}
-        {
-            SumOp* op = new SumOp();
-            forward_result[370] = op;
-            
-            op->set_inputs( forward_result[369] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3181', 'op': 'aten::add', 'in': [357, 370, 12], 'output_id': 0, 'shape': [], 'out': [372], 'sorted_id': 371}
-        {
-            AddOp* op = new AddOp();
-            forward_result[371] = op;
-            
-            op->set_inputs( forward_result[357] );
-            op->set_inputs( forward_result[370] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/3183', 'op': 'prim::TupleConstruct', 'in': [287, 344, 371, 260, 265, 276, 280, 292, 288, 305, 301, 317, 329], 'output_id': 0, 'shape': [], 'out': [402, 400, 376, 407, 399, 403, 406, 373, 397, 404, 401, 398, 405], 'sorted_id': 372}
-        {
-            TupleConstructOp* op = new TupleConstructOp();
-            forward_result[372] = op;
-            
-            op->set_inputs( forward_result[287] );
-            op->set_inputs( forward_result[344] );
-            op->set_inputs( forward_result[371] );
-            op->set_inputs( forward_result[260] );
-            op->set_inputs( forward_result[265] );
-            op->set_inputs( forward_result[276] );
-            op->set_inputs( forward_result[280] );
-            op->set_inputs( forward_result[292] );
-            op->set_inputs( forward_result[288] );
-            op->set_inputs( forward_result[305] );
-            op->set_inputs( forward_result[301] );
-            op->set_inputs( forward_result[317] );
             op->set_inputs( forward_result[329] );
         }
         
-        // {'name': 'Net/3185', 'op': 'prim::TupleUnpack', 'in': [372], 'output_id': 1, 'shape': [], 'out': [409], 'sorted_id': 373}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 1 );
-            forward_result[373] = op;
-            
-            op->set_inputs( forward_result[372] );
-        }
-        
-        // {'name': 'Net/2924', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 2, 'shape': [], 'out': [409], 'sorted_id': 374}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 2 );
-            forward_result[374] = op;
-            
-            op->set_inputs( forward_result[132] );
-        }
-        
-        // {'name': 'Net/3055', 'op': 'prim::TupleUnpack', 'in': [252], 'output_id': 2, 'shape': [], 'out': [409], 'sorted_id': 375}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 2 );
-            forward_result[375] = op;
-            
-            op->set_inputs( forward_result[252] );
-        }
-        
-        // {'name': 'Net/3186', 'op': 'prim::TupleUnpack', 'in': [372], 'output_id': 2, 'shape': [], 'out': [409], 'sorted_id': 376}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 2 );
-            forward_result[376] = op;
-            
-            op->set_inputs( forward_result[372] );
-        }
-        
-        // {'name': 'Net/2925', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 3, 'shape': [], 'out': [409], 'sorted_id': 377}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 3 );
-            forward_result[377] = op;
-            
-            op->set_inputs( forward_result[132] );
-        }
-        
-        // {'name': 'Net/2926', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 4, 'shape': [], 'out': [409], 'sorted_id': 378}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 4 );
-            forward_result[378] = op;
-            
-            op->set_inputs( forward_result[132] );
-        }
-        
-        // {'name': 'Net/2927', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 5, 'shape': [], 'out': [409], 'sorted_id': 379}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 5 );
-            forward_result[379] = op;
-            
-            op->set_inputs( forward_result[132] );
-        }
-        
-        // {'name': 'Net/2928', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 6, 'shape': [], 'out': [409], 'sorted_id': 380}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 6 );
-            forward_result[380] = op;
-            
-            op->set_inputs( forward_result[132] );
-        }
-        
-        // {'name': 'Net/2929', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 7, 'shape': [1], 'out': [409], 'sorted_id': 381}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/var.23', 'op': 'aten::pow', 'in': [303, 45], 'output_id': 0, 'shape': [1], 'out': [332], 'sorted_id': 331}
         {
             Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 7 );
-            forward_result[381] = op;
+            PowOp* op = new PowOp();
+            forward_result[331] = op;
             
-            op->set_inputs( forward_result[132] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[303] );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/2930', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 8, 'shape': [1], 'out': [409], 'sorted_id': 382}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3033', 'op': 'aten::mul', 'in': [331, 50], 'output_id': 0, 'shape': [1], 'out': [333], 'sorted_id': 332}
         {
             Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 8 );
-            forward_result[382] = op;
+            MulOp* op = new MulOp();
+            forward_result[332] = op;
             
-            op->set_inputs( forward_result[132] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[331] );
+            op->set_inputs( forward_result[50] );
         }
         
-        // {'name': 'Net/2931', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 9, 'shape': [1], 'out': [409], 'sorted_id': 383}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3034', 'op': 'aten::div', 'in': [330, 332], 'output_id': 0, 'shape': [10], 'out': [335], 'sorted_id': 333}
+        {
+            Tensor::shape_type shape = {10};
+            DivOp* op = new DivOp();
+            forward_result[333] = op;
+            
+            op->set_inputs( forward_result[330] );
+            op->set_inputs( forward_result[332] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/log_scale.23', 'op': 'aten::log', 'in': [303], 'output_id': 0, 'shape': [1], 'out': [335], 'sorted_id': 334}
         {
             Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 9 );
-            forward_result[383] = op;
+            LogOp* op = new LogOp();
+            forward_result[334] = op;
             
-            op->set_inputs( forward_result[132] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[303] );
         }
         
-        // {'name': 'Net/2932', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 10, 'shape': [1], 'out': [409], 'sorted_id': 384}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3035', 'op': 'aten::sub', 'in': [333, 334, 12], 'output_id': 0, 'shape': [10], 'out': [336], 'sorted_id': 335}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 10 );
-            forward_result[384] = op;
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[335] = op;
             
-            op->set_inputs( forward_result[132] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[333] );
+            op->set_inputs( forward_result[334] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/2933', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 11, 'shape': [1], 'out': [409], 'sorted_id': 385}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3036', 'op': 'aten::sub', 'in': [335, 55, 12], 'output_id': 0, 'shape': [10], 'out': [337], 'sorted_id': 336}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 11 );
-            forward_result[385] = op;
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[336] = op;
             
-            op->set_inputs( forward_result[132] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[335] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/2934', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 12, 'shape': [1], 'out': [409], 'sorted_id': 386}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/prob2.11', 'op': 'aten::exp', 'in': [336], 'output_id': 0, 'shape': [10], 'out': [338], 'sorted_id': 337}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 12 );
-            forward_result[386] = op;
+            Tensor::shape_type shape = {10};
+            ExpOp* op = new ExpOp();
+            forward_result[337] = op;
             
-            op->set_inputs( forward_result[132] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[336] );
         }
         
-        // {'name': 'Net/3056', 'op': 'prim::TupleUnpack', 'in': [252], 'output_id': 3, 'shape': [], 'out': [409], 'sorted_id': 387}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3039', 'op': 'aten::mul', 'in': [337, 58], 'output_id': 0, 'shape': [10], 'out': [339], 'sorted_id': 338}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 3 );
-            forward_result[387] = op;
+            Tensor::shape_type shape = {10};
+            MulOp* op = new MulOp();
+            forward_result[338] = op;
             
-            op->set_inputs( forward_result[252] );
+            op->set_inputs( forward_result[337] );
+            op->set_inputs( forward_result[58] );
         }
         
-        // {'name': 'Net/3057', 'op': 'prim::TupleUnpack', 'in': [252], 'output_id': 4, 'shape': [], 'out': [409], 'sorted_id': 388}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3040', 'op': 'aten::add', 'in': [326, 338, 12], 'output_id': 0, 'shape': [10], 'out': [340], 'sorted_id': 339}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 4 );
-            forward_result[388] = op;
+            Tensor::shape_type shape = {10};
+            AddOp* op = new AddOp();
+            forward_result[339] = op;
             
-            op->set_inputs( forward_result[252] );
+            op->set_inputs( forward_result[326] );
+            op->set_inputs( forward_result[338] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/3058', 'op': 'prim::TupleUnpack', 'in': [252], 'output_id': 5, 'shape': [], 'out': [409], 'sorted_id': 389}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3041', 'op': 'aten::log', 'in': [339], 'output_id': 0, 'shape': [10], 'out': [341], 'sorted_id': 340}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 5 );
-            forward_result[389] = op;
+            Tensor::shape_type shape = {10};
+            LogOp* op = new LogOp();
+            forward_result[340] = op;
             
-            op->set_inputs( forward_result[252] );
+            op->set_inputs( forward_result[339] );
         }
         
-        // {'name': 'Net/3059', 'op': 'prim::TupleUnpack', 'in': [252], 'output_id': 6, 'shape': [], 'out': [409], 'sorted_id': 390}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3042', 'op': 'aten::sum', 'in': [340, 20], 'output_id': 0, 'shape': [], 'out': [342], 'sorted_id': 341}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 6 );
-            forward_result[390] = op;
+            SumOp* op = new SumOp();
+            forward_result[341] = op;
             
-            op->set_inputs( forward_result[252] );
+            op->set_inputs( forward_result[340] );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/3060', 'op': 'prim::TupleUnpack', 'in': [252], 'output_id': 7, 'shape': [1], 'out': [409], 'sorted_id': 391}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3043', 'op': 'aten::add', 'in': [314, 341, 12], 'output_id': 0, 'shape': [], 'out': [370], 'sorted_id': 342}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 7 );
-            forward_result[391] = op;
+            AddOp* op = new AddOp();
+            forward_result[342] = op;
             
-            op->set_inputs( forward_result[252] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[314] );
+            op->set_inputs( forward_result[341] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/3061', 'op': 'prim::TupleUnpack', 'in': [252], 'output_id': 8, 'shape': [1], 'out': [409], 'sorted_id': 392}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3044', 'op': 'aten::exp', 'in': [255], 'output_id': 0, 'shape': [10, 400], 'out': [344], 'sorted_id': 343}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 8 );
-            forward_result[392] = op;
+            Tensor::shape_type shape = {10,400};
+            ExpOp* op = new ExpOp();
+            forward_result[343] = op;
             
-            op->set_inputs( forward_result[252] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[255] );
         }
         
-        // {'name': 'Net/3062', 'op': 'prim::TupleUnpack', 'in': [252], 'output_id': 9, 'shape': [1], 'out': [409], 'sorted_id': 393}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3045', 'op': 'aten::log1p', 'in': [343], 'output_id': 0, 'shape': [10, 400], 'out': [345], 'sorted_id': 344}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 9 );
-            forward_result[393] = op;
+            Tensor::shape_type shape = {10,400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[344] = op;
             
-            op->set_inputs( forward_result[252] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[343] );
         }
         
-        // {'name': 'Net/3063', 'op': 'prim::TupleUnpack', 'in': [252], 'output_id': 10, 'shape': [1], 'out': [409], 'sorted_id': 394}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3046', 'op': 'aten::log', 'in': [344], 'output_id': 0, 'shape': [10, 400], 'out': [346], 'sorted_id': 345}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 10 );
-            forward_result[394] = op;
+            Tensor::shape_type shape = {10,400};
+            LogOp* op = new LogOp();
+            forward_result[345] = op;
             
-            op->set_inputs( forward_result[252] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[344] );
         }
         
-        // {'name': 'Net/3064', 'op': 'prim::TupleUnpack', 'in': [252], 'output_id': 11, 'shape': [1], 'out': [409], 'sorted_id': 395}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3047', 'op': 'aten::rsub', 'in': [345, 107, 12], 'output_id': 0, 'shape': [10, 400], 'out': [354], 'sorted_id': 346}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 11 );
-            forward_result[395] = op;
+            Tensor::shape_type shape = {10,400};
+            RsubOp* op = new RsubOp();
+            forward_result[346] = op;
             
-            op->set_inputs( forward_result[252] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[345] );
+            op->set_inputs( forward_result[107] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/3065', 'op': 'prim::TupleUnpack', 'in': [252], 'output_id': 12, 'shape': [1], 'out': [409], 'sorted_id': 396}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3048', 'op': 'aten::sub', 'in': [269, 254, 12], 'output_id': 0, 'shape': [10, 400], 'out': [348], 'sorted_id': 347}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 12 );
-            forward_result[396] = op;
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
+            forward_result[347] = op;
             
-            op->set_inputs( forward_result[252] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[269] );
+            op->set_inputs( forward_result[254] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/3187', 'op': 'prim::TupleUnpack', 'in': [372], 'output_id': 3, 'shape': [], 'out': [409], 'sorted_id': 397}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3049', 'op': 'aten::pow', 'in': [347, 45], 'output_id': 0, 'shape': [10, 400], 'out': [353], 'sorted_id': 348}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 3 );
-            forward_result[397] = op;
+            Tensor::shape_type shape = {10,400};
+            PowOp* op = new PowOp();
+            forward_result[348] = op;
             
-            op->set_inputs( forward_result[372] );
+            op->set_inputs( forward_result[347] );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/3188', 'op': 'prim::TupleUnpack', 'in': [372], 'output_id': 4, 'shape': [], 'out': [409], 'sorted_id': 398}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3050', 'op': 'aten::exp', 'in': [255], 'output_id': 0, 'shape': [10, 400], 'out': [350], 'sorted_id': 349}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 4 );
-            forward_result[398] = op;
+            Tensor::shape_type shape = {10,400};
+            ExpOp* op = new ExpOp();
+            forward_result[349] = op;
             
-            op->set_inputs( forward_result[372] );
+            op->set_inputs( forward_result[255] );
         }
         
-        // {'name': 'Net/3189', 'op': 'prim::TupleUnpack', 'in': [372], 'output_id': 5, 'shape': [], 'out': [409], 'sorted_id': 399}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3051', 'op': 'aten::log1p', 'in': [349], 'output_id': 0, 'shape': [10, 400], 'out': [351], 'sorted_id': 350}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 5 );
-            forward_result[399] = op;
+            Tensor::shape_type shape = {10,400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[350] = op;
             
-            op->set_inputs( forward_result[372] );
+            op->set_inputs( forward_result[349] );
         }
         
-        // {'name': 'Net/3190', 'op': 'prim::TupleUnpack', 'in': [372], 'output_id': 6, 'shape': [], 'out': [409], 'sorted_id': 400}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3052', 'op': 'aten::pow', 'in': [350, 45], 'output_id': 0, 'shape': [10, 400], 'out': [352], 'sorted_id': 351}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 6 );
-            forward_result[400] = op;
+            Tensor::shape_type shape = {10,400};
+            PowOp* op = new PowOp();
+            forward_result[351] = op;
             
-            op->set_inputs( forward_result[372] );
+            op->set_inputs( forward_result[350] );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/3191', 'op': 'prim::TupleUnpack', 'in': [372], 'output_id': 7, 'shape': [1], 'out': [409], 'sorted_id': 401}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3053', 'op': 'aten::mul', 'in': [351, 50], 'output_id': 0, 'shape': [10, 400], 'out': [353], 'sorted_id': 352}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 7 );
-            forward_result[401] = op;
+            Tensor::shape_type shape = {10,400};
+            MulOp* op = new MulOp();
+            forward_result[352] = op;
             
-            op->set_inputs( forward_result[372] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[351] );
+            op->set_inputs( forward_result[50] );
         }
         
-        // {'name': 'Net/3192', 'op': 'prim::TupleUnpack', 'in': [372], 'output_id': 8, 'shape': [1], 'out': [409], 'sorted_id': 402}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3054', 'op': 'aten::div', 'in': [348, 352], 'output_id': 0, 'shape': [10, 400], 'out': [354], 'sorted_id': 353}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 8 );
-            forward_result[402] = op;
+            Tensor::shape_type shape = {10,400};
+            DivOp* op = new DivOp();
+            forward_result[353] = op;
             
-            op->set_inputs( forward_result[372] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[348] );
+            op->set_inputs( forward_result[352] );
         }
         
-        // {'name': 'Net/3193', 'op': 'prim::TupleUnpack', 'in': [372], 'output_id': 9, 'shape': [1], 'out': [409], 'sorted_id': 403}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3055', 'op': 'aten::sub', 'in': [346, 353, 12], 'output_id': 0, 'shape': [10, 400], 'out': [355], 'sorted_id': 354}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 9 );
-            forward_result[403] = op;
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
+            forward_result[354] = op;
             
-            op->set_inputs( forward_result[372] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[346] );
+            op->set_inputs( forward_result[353] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/3194', 'op': 'prim::TupleUnpack', 'in': [372], 'output_id': 10, 'shape': [1], 'out': [409], 'sorted_id': 404}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3056', 'op': 'aten::sum', 'in': [354, 20], 'output_id': 0, 'shape': [], 'out': [369], 'sorted_id': 355}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 10 );
-            forward_result[404] = op;
+            SumOp* op = new SumOp();
+            forward_result[355] = op;
             
-            op->set_inputs( forward_result[372] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[354] );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/3195', 'op': 'prim::TupleUnpack', 'in': [372], 'output_id': 11, 'shape': [1], 'out': [409], 'sorted_id': 405}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3057', 'op': 'aten::exp', 'in': [271], 'output_id': 0, 'shape': [10], 'out': [357], 'sorted_id': 356}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 11 );
-            forward_result[405] = op;
+            Tensor::shape_type shape = {10};
+            ExpOp* op = new ExpOp();
+            forward_result[356] = op;
             
-            op->set_inputs( forward_result[372] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[271] );
         }
         
-        // {'name': 'Net/3196', 'op': 'prim::TupleUnpack', 'in': [372], 'output_id': 12, 'shape': [1], 'out': [409], 'sorted_id': 406}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3058', 'op': 'aten::log1p', 'in': [356], 'output_id': 0, 'shape': [10], 'out': [358], 'sorted_id': 357}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 12 );
-            forward_result[406] = op;
+            Tensor::shape_type shape = {10};
+            Log1pOp* op = new Log1pOp();
+            forward_result[357] = op;
             
-            op->set_inputs( forward_result[372] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[356] );
         }
         
-        // {'name': 'Net/3184', 'op': 'prim::TupleUnpack', 'in': [372], 'output_id': 0, 'shape': [4, 10], 'out': [408], 'sorted_id': 407}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3059', 'op': 'aten::log', 'in': [357], 'output_id': 0, 'shape': [10], 'out': [359], 'sorted_id': 358}
+        {
+            Tensor::shape_type shape = {10};
+            LogOp* op = new LogOp();
+            forward_result[358] = op;
+            
+            op->set_inputs( forward_result[357] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3060', 'op': 'aten::rsub', 'in': [358, 107, 12], 'output_id': 0, 'shape': [10], 'out': [367], 'sorted_id': 359}
+        {
+            Tensor::shape_type shape = {10};
+            RsubOp* op = new RsubOp();
+            forward_result[359] = op;
+            
+            op->set_inputs( forward_result[358] );
+            op->set_inputs( forward_result[107] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3061', 'op': 'aten::sub', 'in': [284, 270, 12], 'output_id': 0, 'shape': [10], 'out': [361], 'sorted_id': 360}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[360] = op;
+            
+            op->set_inputs( forward_result[284] );
+            op->set_inputs( forward_result[270] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3062', 'op': 'aten::pow', 'in': [360, 45], 'output_id': 0, 'shape': [10], 'out': [366], 'sorted_id': 361}
+        {
+            Tensor::shape_type shape = {10};
+            PowOp* op = new PowOp();
+            forward_result[361] = op;
+            
+            op->set_inputs( forward_result[360] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3063', 'op': 'aten::exp', 'in': [271], 'output_id': 0, 'shape': [10], 'out': [363], 'sorted_id': 362}
+        {
+            Tensor::shape_type shape = {10};
+            ExpOp* op = new ExpOp();
+            forward_result[362] = op;
+            
+            op->set_inputs( forward_result[271] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3064', 'op': 'aten::log1p', 'in': [362], 'output_id': 0, 'shape': [10], 'out': [364], 'sorted_id': 363}
+        {
+            Tensor::shape_type shape = {10};
+            Log1pOp* op = new Log1pOp();
+            forward_result[363] = op;
+            
+            op->set_inputs( forward_result[362] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3065', 'op': 'aten::pow', 'in': [363, 45], 'output_id': 0, 'shape': [10], 'out': [365], 'sorted_id': 364}
+        {
+            Tensor::shape_type shape = {10};
+            PowOp* op = new PowOp();
+            forward_result[364] = op;
+            
+            op->set_inputs( forward_result[363] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3066', 'op': 'aten::mul', 'in': [364, 50], 'output_id': 0, 'shape': [10], 'out': [366], 'sorted_id': 365}
+        {
+            Tensor::shape_type shape = {10};
+            MulOp* op = new MulOp();
+            forward_result[365] = op;
+            
+            op->set_inputs( forward_result[364] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3067', 'op': 'aten::div', 'in': [361, 365], 'output_id': 0, 'shape': [10], 'out': [367], 'sorted_id': 366}
+        {
+            Tensor::shape_type shape = {10};
+            DivOp* op = new DivOp();
+            forward_result[366] = op;
+            
+            op->set_inputs( forward_result[361] );
+            op->set_inputs( forward_result[365] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3068', 'op': 'aten::sub', 'in': [359, 366, 12], 'output_id': 0, 'shape': [10], 'out': [368], 'sorted_id': 367}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[367] = op;
+            
+            op->set_inputs( forward_result[359] );
+            op->set_inputs( forward_result[366] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3069', 'op': 'aten::sum', 'in': [367, 20], 'output_id': 0, 'shape': [], 'out': [369], 'sorted_id': 368}
+        {
+            SumOp* op = new SumOp();
+            forward_result[368] = op;
+            
+            op->set_inputs( forward_result[367] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3070', 'op': 'aten::add', 'in': [355, 368, 12], 'output_id': 0, 'shape': [], 'out': [370], 'sorted_id': 369}
+        {
+            AddOp* op = new AddOp();
+            forward_result[369] = op;
+            
+            op->set_inputs( forward_result[355] );
+            op->set_inputs( forward_result[368] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/3072', 'op': 'prim::TupleConstruct', 'in': [285, 342, 369, 258, 263, 274, 278, 290, 286, 303, 299, 315, 327], 'output_id': 0, 'shape': [], 'out': [674, 1086, 649, 637, 662, 622, 1068, 633, 645, 686, 658, 617, 371], 'sorted_id': 370}
+        {
+            TupleConstructOp* op = new TupleConstructOp();
+            forward_result[370] = op;
+            
+            op->set_inputs( forward_result[285] );
+            op->set_inputs( forward_result[342] );
+            op->set_inputs( forward_result[369] );
+            op->set_inputs( forward_result[258] );
+            op->set_inputs( forward_result[263] );
+            op->set_inputs( forward_result[274] );
+            op->set_inputs( forward_result[278] );
+            op->set_inputs( forward_result[290] );
+            op->set_inputs( forward_result[286] );
+            op->set_inputs( forward_result[303] );
+            op->set_inputs( forward_result[299] );
+            op->set_inputs( forward_result[315] );
+            op->set_inputs( forward_result[327] );
+        }
+        
+        // {'name': 'Model/3073', 'op': 'prim::TupleUnpack', 'in': [370], 'output_id': 0, 'shape': [4, 10], 'out': [372], 'sorted_id': 371}
         {
             Tensor::shape_type shape = {4,10};
             TupleUnpackOp* op = new TupleUnpackOp( 0 );
-            forward_result[407] = op;
+            forward_result[371] = op;
             
-            op->set_inputs( forward_result[372] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[370] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/3197', 'op': 'aten::log_softmax', 'in': [407, 12, 20], 'output_id': 0, 'shape': [4, 10], 'out': [409], 'sorted_id': 408}
+        // {'name': 'Model/Net[net]/3086', 'op': 'aten::log_softmax', 'in': [371, 12, 20], 'output_id': 0, 'shape': [4, 10], 'out': [1061], 'sorted_id': 372}
         {
             Tensor::shape_type shape = {4,10};
             LogSoftmaxOp* op = new LogSoftmaxOp();
-            forward_result[408] = op;
+            forward_result[372] = op;
             
-            op->set_inputs( forward_result[407] );
+            op->set_inputs( forward_result[371] );
             op->set_inputs( forward_result[12] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/3198', 'op': 'prim::TupleConstruct', 'in': [133, 253, 373, 374, 375, 376, 377, 378, 379, 380, 381, 382, 383, 384, 385, 386, 387, 388, 389, 390, 391, 392, 393, 394, 395, 396, 397, 398, 399, 400, 401, 402, 403, 404, 405, 406, 408], 'output_id': 0, 'shape': [], 'out': [689, 666, 1151, 557, 441, 410, 1130, 693, 586, 718, 582, 573, 598, 478, 677, 437, 462, 610, 541, 702, 426, 449, 1131, 569, 490, 453, 546, 413, 661, 1133, 466, 561, 706, 411, 730, 681, 421], 'sorted_id': 409}
-        {
-            TupleConstructOp* op = new TupleConstructOp();
-            forward_result[409] = op;
-            
-            op->set_inputs( forward_result[133] );
-            op->set_inputs( forward_result[253] );
-            op->set_inputs( forward_result[373] );
-            op->set_inputs( forward_result[374] );
-            op->set_inputs( forward_result[375] );
-            op->set_inputs( forward_result[376] );
-            op->set_inputs( forward_result[377] );
-            op->set_inputs( forward_result[378] );
-            op->set_inputs( forward_result[379] );
-            op->set_inputs( forward_result[380] );
-            op->set_inputs( forward_result[381] );
-            op->set_inputs( forward_result[382] );
-            op->set_inputs( forward_result[383] );
-            op->set_inputs( forward_result[384] );
-            op->set_inputs( forward_result[385] );
-            op->set_inputs( forward_result[386] );
-            op->set_inputs( forward_result[387] );
-            op->set_inputs( forward_result[388] );
-            op->set_inputs( forward_result[389] );
-            op->set_inputs( forward_result[390] );
-            op->set_inputs( forward_result[391] );
-            op->set_inputs( forward_result[392] );
-            op->set_inputs( forward_result[393] );
-            op->set_inputs( forward_result[394] );
-            op->set_inputs( forward_result[395] );
-            op->set_inputs( forward_result[396] );
-            op->set_inputs( forward_result[397] );
-            op->set_inputs( forward_result[398] );
-            op->set_inputs( forward_result[399] );
-            op->set_inputs( forward_result[400] );
-            op->set_inputs( forward_result[401] );
-            op->set_inputs( forward_result[402] );
-            op->set_inputs( forward_result[403] );
-            op->set_inputs( forward_result[404] );
-            op->set_inputs( forward_result[405] );
-            op->set_inputs( forward_result[406] );
-            op->set_inputs( forward_result[408] );
-        }
-        
-        // {'name': 'Net/3202', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 3, 'shape': [], 'out': [412], 'sorted_id': 410}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 3 );
-            forward_result[410] = op;
-            
-            op->set_inputs( forward_result[409] );
-        }
-        
-        // {'name': 'Net/3203', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 4, 'shape': [], 'out': [412], 'sorted_id': 411}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 4 );
-            forward_result[411] = op;
-            
-            op->set_inputs( forward_result[409] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3238', 'op': 'aten::add', 'in': [410, 411, 12], 'output_id': 0, 'shape': [], 'out': [414], 'sorted_id': 412}
-        {
-            AddOp* op = new AddOp();
-            forward_result[412] = op;
-            
-            op->set_inputs( forward_result[410] );
-            op->set_inputs( forward_result[411] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/3204', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 5, 'shape': [], 'out': [414], 'sorted_id': 413}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 5 );
-            forward_result[413] = op;
-            
-            op->set_inputs( forward_result[409] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3239', 'op': 'aten::add', 'in': [412, 413, 12], 'output_id': 0, 'shape': [], 'out': [1127], 'sorted_id': 414}
-        {
-            AddOp* op = new AddOp();
-            forward_result[414] = op;
-            
-            op->set_inputs( forward_result[412] );
-            op->set_inputs( forward_result[413] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/3243', 'op': 'prim::ListConstruct', 'in': [1, 2], 'output_id': 0, 'shape': [], 'out': [416], 'sorted_id': 415}
+        // {'name': 'Model/Net[net]/3091', 'op': 'prim::ListConstruct', 'in': [1, 2], 'output_id': 0, 'shape': [], 'out': [374], 'sorted_id': 373}
         {
             ListConstructOp* op = new ListConstructOp();
-            forward_result[415] = op;
+            forward_result[373] = op;
             
             op->set_inputs( forward_result[1] );
             op->set_inputs( forward_result[2] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/input.13', 'op': 'aten::view', 'in': [0, 415], 'output_id': 0, 'shape': [4, 784], 'out': [448], 'sorted_id': 416}
+        // {'name': 'Model/Net[net]/input.13', 'op': 'aten::view', 'in': [0, 373], 'output_id': 0, 'shape': [4, 784], 'out': [406], 'sorted_id': 374}
         {
             Tensor::shape_type shape = {4,784};
             ViewOp* op = new ViewOp();
-            forward_result[416] = op;
+            forward_result[374] = op;
             
             op->set_inputs( forward_result[0] );
-            op->set_inputs( forward_result[415] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[373] );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l1]/weight_mu/weight_mu.7', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [510, 432], 'sorted_id': 417}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/weight_mu/weight_mu.7', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [390, 468], 'sorted_id': 375}
         {
             Tensor::shape_type shape = {400,784};
             l1_weight_mu.reshape( shape );
-            forward_result[417] = new VariableTensor( l1_weight_mu, 2 );
+            forward_result[375] = new VariableTensor( l1_weight_mu, 2 );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l1]/weight_rho/weight_rho.7', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [423, 422, 512, 506, 419], 'sorted_id': 418}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/weight_rho/weight_rho.7', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [464, 377, 381, 470, 380], 'sorted_id': 376}
         {
             Tensor::shape_type shape = {400,784};
             l1_weight_rho.reshape( shape );
-            forward_result[418] = new VariableTensor( l1_weight_rho, 2 );
+            forward_result[376] = new VariableTensor( l1_weight_rho, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3257', 'op': 'aten::exp', 'in': [418], 'output_id': 0, 'shape': [400, 784], 'out': [420], 'sorted_id': 419}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3105', 'op': 'aten::exp', 'in': [376], 'output_id': 0, 'shape': [400, 784], 'out': [378], 'sorted_id': 377}
         {
             Tensor::shape_type shape = {400,784};
             ExpOp* op = new ExpOp();
-            forward_result[419] = op;
+            forward_result[377] = op;
             
-            op->set_inputs( forward_result[418] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[376] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3258', 'op': 'aten::log1p', 'in': [419], 'output_id': 0, 'shape': [400, 784], 'out': [431], 'sorted_id': 420}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3106', 'op': 'aten::log1p', 'in': [377], 'output_id': 0, 'shape': [400, 784], 'out': [389], 'sorted_id': 378}
         {
             Tensor::shape_type shape = {400,784};
             Log1pOp* op = new Log1pOp();
-            forward_result[420] = op;
+            forward_result[378] = op;
             
-            op->set_inputs( forward_result[419] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[377] );
         }
         
-        // {'name': 'Net/3205', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 6, 'shape': [], 'out': [425, 795], 'sorted_id': 421}
+        // {'name': 'Model/2814', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 3, 'shape': [], 'out': [741, 383], 'sorted_id': 379}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 6 );
-            forward_result[421] = op;
+            TupleUnpackOp* op = new TupleUnpackOp( 3 );
+            forward_result[379] = op;
             
-            op->set_inputs( forward_result[409] );
+            op->set_inputs( forward_result[132] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3249', 'op': 'aten::size', 'in': [418, 10], 'output_id': 0, 'shape': [], 'out': [427, 424], 'sorted_id': 422}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3097', 'op': 'aten::size', 'in': [376, 10], 'output_id': 0, 'shape': [], 'out': [385, 382], 'sorted_id': 380}
         {
             SizeOp* op = new SizeOp();
-            forward_result[422] = op;
+            forward_result[380] = op;
             
-            op->set_inputs( forward_result[418] );
+            op->set_inputs( forward_result[376] );
             op->set_inputs( forward_result[10] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3250', 'op': 'aten::size', 'in': [418, 12], 'output_id': 0, 'shape': [], 'out': [427, 424], 'sorted_id': 423}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3098', 'op': 'aten::size', 'in': [376, 12], 'output_id': 0, 'shape': [], 'out': [385, 382], 'sorted_id': 381}
         {
             SizeOp* op = new SizeOp();
-            forward_result[423] = op;
+            forward_result[381] = op;
             
-            op->set_inputs( forward_result[418] );
+            op->set_inputs( forward_result[376] );
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3251', 'op': 'prim::ListConstruct', 'in': [422, 423], 'output_id': 0, 'shape': [], 'out': [425], 'sorted_id': 424}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3099', 'op': 'prim::ListConstruct', 'in': [380, 381], 'output_id': 0, 'shape': [], 'out': [383], 'sorted_id': 382}
         {
             ListConstructOp* op = new ListConstructOp();
-            forward_result[424] = op;
+            forward_result[382] = op;
             
-            op->set_inputs( forward_result[422] );
-            op->set_inputs( forward_result[423] );
+            op->set_inputs( forward_result[380] );
+            op->set_inputs( forward_result[381] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3252', 'op': 'aten::expand', 'in': [421, 424, 15], 'output_id': 0, 'shape': [400, 784], 'out': [429], 'sorted_id': 425}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3100', 'op': 'aten::expand', 'in': [379, 382, 15], 'output_id': 0, 'shape': [400, 784], 'out': [387], 'sorted_id': 383}
         {
             Tensor::shape_type shape = {400,784};
             ExpandOp* op = new ExpandOp();
-            forward_result[425] = op;
+            forward_result[383] = op;
             
-            op->set_inputs( forward_result[421] );
-            op->set_inputs( forward_result[424] );
+            op->set_inputs( forward_result[379] );
+            op->set_inputs( forward_result[382] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/3206', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 7, 'shape': [], 'out': [797, 428], 'sorted_id': 426}
+        // {'name': 'Model/2815', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 4, 'shape': [], 'out': [386, 743], 'sorted_id': 384}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 7 );
-            forward_result[426] = op;
+            TupleUnpackOp* op = new TupleUnpackOp( 4 );
+            forward_result[384] = op;
             
-            op->set_inputs( forward_result[409] );
+            op->set_inputs( forward_result[132] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3253', 'op': 'prim::ListConstruct', 'in': [422, 423], 'output_id': 0, 'shape': [], 'out': [428], 'sorted_id': 427}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3101', 'op': 'prim::ListConstruct', 'in': [380, 381], 'output_id': 0, 'shape': [], 'out': [386], 'sorted_id': 385}
         {
             ListConstructOp* op = new ListConstructOp();
-            forward_result[427] = op;
+            forward_result[385] = op;
             
-            op->set_inputs( forward_result[422] );
-            op->set_inputs( forward_result[423] );
+            op->set_inputs( forward_result[380] );
+            op->set_inputs( forward_result[381] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3254', 'op': 'aten::expand', 'in': [426, 427, 15], 'output_id': 0, 'shape': [400, 784], 'out': [429], 'sorted_id': 428}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3102', 'op': 'aten::expand', 'in': [384, 385, 15], 'output_id': 0, 'shape': [400, 784], 'out': [387], 'sorted_id': 386}
         {
             Tensor::shape_type shape = {400,784};
             ExpandOp* op = new ExpandOp();
-            forward_result[428] = op;
+            forward_result[386] = op;
             
-            op->set_inputs( forward_result[426] );
-            op->set_inputs( forward_result[427] );
+            op->set_inputs( forward_result[384] );
+            op->set_inputs( forward_result[385] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3255', 'op': 'aten::normal', 'in': [425, 428, 20], 'output_id': 0, 'shape': [400, 784], 'out': [430], 'sorted_id': 429}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3103', 'op': 'aten::normal', 'in': [383, 386, 20], 'output_id': 0, 'shape': [400, 784], 'out': [388], 'sorted_id': 387}
         {
             Tensor::shape_type shape = {400,784};
             NormalOp* op = new NormalOp();
-            forward_result[429] = op;
+            forward_result[387] = op;
             
-            op->set_inputs( forward_result[425] );
-            op->set_inputs( forward_result[428] );
+            op->set_inputs( forward_result[383] );
+            op->set_inputs( forward_result[386] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/epsilon.13', 'op': 'aten::to', 'in': [429, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400, 784], 'out': [431], 'sorted_id': 430}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/epsilon.13', 'op': 'aten::to', 'in': [387, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400, 784], 'out': [389], 'sorted_id': 388}
         {
             Tensor::shape_type shape = {400,784};
             ToOp* op = new ToOp();
-            forward_result[430] = op;
+            forward_result[388] = op;
             
-            op->set_inputs( forward_result[429] );
+            op->set_inputs( forward_result[387] );
             op->set_inputs( forward_result[22] );
             op->set_inputs( forward_result[10] );
             op->set_inputs( forward_result[23] );
@@ -4449,150 +3757,1161 @@
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3259', 'op': 'aten::mul', 'in': [420, 430], 'output_id': 0, 'shape': [400, 784], 'out': [432], 'sorted_id': 431}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3107', 'op': 'aten::mul', 'in': [378, 388], 'output_id': 0, 'shape': [400, 784], 'out': [390], 'sorted_id': 389}
         {
             Tensor::shape_type shape = {400,784};
             MulOp* op = new MulOp();
-            forward_result[431] = op;
+            forward_result[389] = op;
             
-            op->set_inputs( forward_result[420] );
-            op->set_inputs( forward_result[430] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[378] );
+            op->set_inputs( forward_result[388] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/value.13', 'op': 'aten::add', 'in': [417, 431, 12], 'output_id': 0, 'shape': [400, 784], 'out': [510, 450, 463, 448], 'sorted_id': 432}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/value.13', 'op': 'aten::add', 'in': [375, 389, 12], 'output_id': 0, 'shape': [400, 784], 'out': [468, 406, 421, 408], 'sorted_id': 390}
         {
             Tensor::shape_type shape = {400,784};
             AddOp* op = new AddOp();
-            forward_result[432] = op;
+            forward_result[390] = op;
             
-            op->set_inputs( forward_result[417] );
-            op->set_inputs( forward_result[431] );
+            op->set_inputs( forward_result[375] );
+            op->set_inputs( forward_result[389] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l1]/bias_mu/bias_mu.7', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [523, 447], 'sorted_id': 433}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/bias_mu/bias_mu.7', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [405, 481], 'sorted_id': 391}
         {
             Tensor::shape_type shape = {400};
             l1_bias_mu.reshape( shape );
-            forward_result[433] = new VariableTensor( l1_bias_mu, 2 );
+            forward_result[391] = new VariableTensor( l1_bias_mu, 2 );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l1]/bias_rho/bias_rho.7', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [525, 519, 438, 435], 'sorted_id': 434}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/bias_rho/bias_rho.7', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [483, 393, 396, 477], 'sorted_id': 392}
         {
             Tensor::shape_type shape = {400};
             l1_bias_rho.reshape( shape );
-            forward_result[434] = new VariableTensor( l1_bias_rho, 2 );
+            forward_result[392] = new VariableTensor( l1_bias_rho, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3268', 'op': 'aten::exp', 'in': [434], 'output_id': 0, 'shape': [400], 'out': [436], 'sorted_id': 435}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3116', 'op': 'aten::exp', 'in': [392], 'output_id': 0, 'shape': [400], 'out': [394], 'sorted_id': 393}
         {
             Tensor::shape_type shape = {400};
             ExpOp* op = new ExpOp();
-            forward_result[435] = op;
+            forward_result[393] = op;
             
-            op->set_inputs( forward_result[434] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[392] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3269', 'op': 'aten::log1p', 'in': [435], 'output_id': 0, 'shape': [400], 'out': [446], 'sorted_id': 436}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3117', 'op': 'aten::log1p', 'in': [393], 'output_id': 0, 'shape': [400], 'out': [404], 'sorted_id': 394}
         {
             Tensor::shape_type shape = {400};
             Log1pOp* op = new Log1pOp();
-            forward_result[436] = op;
+            forward_result[394] = op;
             
-            op->set_inputs( forward_result[435] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[393] );
         }
         
-        // {'name': 'Net/3207', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 8, 'shape': [], 'out': [808, 440], 'sorted_id': 437}
+        // {'name': 'Model/2816', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 5, 'shape': [], 'out': [398, 754], 'sorted_id': 395}
         {
+            TupleUnpackOp* op = new TupleUnpackOp( 5 );
+            forward_result[395] = op;
+            
+            op->set_inputs( forward_result[132] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3109', 'op': 'aten::size', 'in': [392, 10], 'output_id': 0, 'shape': [], 'out': [397, 400], 'sorted_id': 396}
+        {
+            SizeOp* op = new SizeOp();
+            forward_result[396] = op;
+            
+            op->set_inputs( forward_result[392] );
+            op->set_inputs( forward_result[10] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3110', 'op': 'prim::ListConstruct', 'in': [396], 'output_id': 0, 'shape': [], 'out': [398], 'sorted_id': 397}
+        {
+            ListConstructOp* op = new ListConstructOp();
+            forward_result[397] = op;
+            
+            op->set_inputs( forward_result[396] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3111', 'op': 'aten::expand', 'in': [395, 397, 15], 'output_id': 0, 'shape': [400], 'out': [402], 'sorted_id': 398}
+        {
+            Tensor::shape_type shape = {400};
+            ExpandOp* op = new ExpandOp();
+            forward_result[398] = op;
+            
+            op->set_inputs( forward_result[395] );
+            op->set_inputs( forward_result[397] );
+            op->set_inputs( forward_result[15] );
+        }
+        
+        // {'name': 'Model/2817', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 6, 'shape': [], 'out': [401, 756], 'sorted_id': 399}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 6 );
+            forward_result[399] = op;
+            
+            op->set_inputs( forward_result[132] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3112', 'op': 'prim::ListConstruct', 'in': [396], 'output_id': 0, 'shape': [], 'out': [401], 'sorted_id': 400}
+        {
+            ListConstructOp* op = new ListConstructOp();
+            forward_result[400] = op;
+            
+            op->set_inputs( forward_result[396] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3113', 'op': 'aten::expand', 'in': [399, 400, 15], 'output_id': 0, 'shape': [400], 'out': [402], 'sorted_id': 401}
+        {
+            Tensor::shape_type shape = {400};
+            ExpandOp* op = new ExpandOp();
+            forward_result[401] = op;
+            
+            op->set_inputs( forward_result[399] );
+            op->set_inputs( forward_result[400] );
+            op->set_inputs( forward_result[15] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3114', 'op': 'aten::normal', 'in': [398, 401, 20], 'output_id': 0, 'shape': [400], 'out': [403], 'sorted_id': 402}
+        {
+            Tensor::shape_type shape = {400};
+            NormalOp* op = new NormalOp();
+            forward_result[402] = op;
+            
+            op->set_inputs( forward_result[398] );
+            op->set_inputs( forward_result[401] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/epsilon.15', 'op': 'aten::to', 'in': [402, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400], 'out': [404], 'sorted_id': 403}
+        {
+            Tensor::shape_type shape = {400};
+            ToOp* op = new ToOp();
+            forward_result[403] = op;
+            
+            op->set_inputs( forward_result[402] );
+            op->set_inputs( forward_result[22] );
+            op->set_inputs( forward_result[10] );
+            op->set_inputs( forward_result[23] );
+            op->set_inputs( forward_result[20] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3118', 'op': 'aten::mul', 'in': [394, 403], 'output_id': 0, 'shape': [400], 'out': [405], 'sorted_id': 404}
+        {
+            Tensor::shape_type shape = {400};
+            MulOp* op = new MulOp();
+            forward_result[404] = op;
+            
+            op->set_inputs( forward_result[394] );
+            op->set_inputs( forward_result[403] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/value.15', 'op': 'aten::add', 'in': [391, 404, 12], 'output_id': 0, 'shape': [400], 'out': [406, 449, 481, 437], 'sorted_id': 405}
+        {
+            Tensor::shape_type shape = {400};
+            AddOp* op = new AddOp();
+            forward_result[405] = op;
+            
+            op->set_inputs( forward_result[391] );
+            op->set_inputs( forward_result[404] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/input.15', 'op': 'aten::linear', 'in': [374, 390, 405], 'output_id': 0, 'shape': [4, 400], 'out': [491], 'sorted_id': 406}
+        {
+            Tensor::shape_type shape = {4,400};
+            LinearOp* op = new LinearOp();
+            forward_result[406] = op;
+            
+            op->set_inputs( forward_result[374] );
+            op->set_inputs( forward_result[390] );
+            op->set_inputs( forward_result[405] );
+        }
+        
+        // {'name': 'Model/2819', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 8, 'shape': [1], 'out': [762, 408], 'sorted_id': 407}
+        {
+            Tensor::shape_type shape = {1};
             TupleUnpackOp* op = new TupleUnpackOp( 8 );
-            forward_result[437] = op;
+            forward_result[407] = op;
+            
+            op->set_inputs( forward_result[132] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3122', 'op': 'aten::sub', 'in': [390, 407, 12], 'output_id': 0, 'shape': [400, 784], 'out': [409], 'sorted_id': 408}
+        {
+            Tensor::shape_type shape = {400,784};
+            SubOp* op = new SubOp();
+            forward_result[408] = op;
+            
+            op->set_inputs( forward_result[390] );
+            op->set_inputs( forward_result[407] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3123', 'op': 'aten::pow', 'in': [408, 45], 'output_id': 0, 'shape': [400, 784], 'out': [410], 'sorted_id': 409}
+        {
+            Tensor::shape_type shape = {400,784};
+            PowOp* op = new PowOp();
+            forward_result[409] = op;
+            
+            op->set_inputs( forward_result[408] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3124', 'op': 'aten::neg', 'in': [409], 'output_id': 0, 'shape': [400, 784], 'out': [414], 'sorted_id': 410}
+        {
+            Tensor::shape_type shape = {400,784};
+            NegOp* op = new NegOp();
+            forward_result[410] = op;
             
             op->set_inputs( forward_result[409] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3261', 'op': 'aten::size', 'in': [434, 10], 'output_id': 0, 'shape': [], 'out': [439, 442], 'sorted_id': 438}
+        // {'name': 'Model/2818', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 7, 'shape': [1], 'out': [440, 415, 443, 412, 790, 768, 765, 793], 'sorted_id': 411}
         {
-            SizeOp* op = new SizeOp();
-            forward_result[438] = op;
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 7 );
+            forward_result[411] = op;
             
-            op->set_inputs( forward_result[434] );
-            op->set_inputs( forward_result[10] );
+            op->set_inputs( forward_result[132] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3262', 'op': 'prim::ListConstruct', 'in': [438], 'output_id': 0, 'shape': [], 'out': [440], 'sorted_id': 439}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/var.25', 'op': 'aten::pow', 'in': [411, 45], 'output_id': 0, 'shape': [1], 'out': [413], 'sorted_id': 412}
         {
-            ListConstructOp* op = new ListConstructOp();
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[412] = op;
+            
+            op->set_inputs( forward_result[411] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3125', 'op': 'aten::mul', 'in': [412, 50], 'output_id': 0, 'shape': [1], 'out': [414], 'sorted_id': 413}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[413] = op;
+            
+            op->set_inputs( forward_result[412] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3126', 'op': 'aten::div', 'in': [410, 413], 'output_id': 0, 'shape': [400, 784], 'out': [416], 'sorted_id': 414}
+        {
+            Tensor::shape_type shape = {400,784};
+            DivOp* op = new DivOp();
+            forward_result[414] = op;
+            
+            op->set_inputs( forward_result[410] );
+            op->set_inputs( forward_result[413] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/log_scale.25', 'op': 'aten::log', 'in': [411], 'output_id': 0, 'shape': [1], 'out': [416], 'sorted_id': 415}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[415] = op;
+            
+            op->set_inputs( forward_result[411] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3127', 'op': 'aten::sub', 'in': [414, 415, 12], 'output_id': 0, 'shape': [400, 784], 'out': [417], 'sorted_id': 416}
+        {
+            Tensor::shape_type shape = {400,784};
+            SubOp* op = new SubOp();
+            forward_result[416] = op;
+            
+            op->set_inputs( forward_result[414] );
+            op->set_inputs( forward_result[415] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3128', 'op': 'aten::sub', 'in': [416, 55, 12], 'output_id': 0, 'shape': [400, 784], 'out': [418], 'sorted_id': 417}
+        {
+            Tensor::shape_type shape = {400,784};
+            SubOp* op = new SubOp();
+            forward_result[417] = op;
+            
+            op->set_inputs( forward_result[416] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/prob1.13', 'op': 'aten::exp', 'in': [417], 'output_id': 0, 'shape': [400, 784], 'out': [419], 'sorted_id': 418}
+        {
+            Tensor::shape_type shape = {400,784};
+            ExpOp* op = new ExpOp();
+            forward_result[418] = op;
+            
+            op->set_inputs( forward_result[417] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3140', 'op': 'aten::mul', 'in': [418, 58], 'output_id': 0, 'shape': [400, 784], 'out': [433], 'sorted_id': 419}
+        {
+            Tensor::shape_type shape = {400,784};
+            MulOp* op = new MulOp();
+            forward_result[419] = op;
+            
+            op->set_inputs( forward_result[418] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/2821', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 10, 'shape': [1], 'out': [421, 773], 'sorted_id': 420}
+        {
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 10 );
+            forward_result[420] = op;
+            
+            op->set_inputs( forward_result[132] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3132', 'op': 'aten::sub', 'in': [390, 420, 12], 'output_id': 0, 'shape': [400, 784], 'out': [422], 'sorted_id': 421}
+        {
+            Tensor::shape_type shape = {400,784};
+            SubOp* op = new SubOp();
+            forward_result[421] = op;
+            
+            op->set_inputs( forward_result[390] );
+            op->set_inputs( forward_result[420] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3133', 'op': 'aten::pow', 'in': [421, 45], 'output_id': 0, 'shape': [400, 784], 'out': [423], 'sorted_id': 422}
+        {
+            Tensor::shape_type shape = {400,784};
+            PowOp* op = new PowOp();
+            forward_result[422] = op;
+            
+            op->set_inputs( forward_result[421] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3134', 'op': 'aten::neg', 'in': [422], 'output_id': 0, 'shape': [400, 784], 'out': [427], 'sorted_id': 423}
+        {
+            Tensor::shape_type shape = {400,784};
+            NegOp* op = new NegOp();
+            forward_result[423] = op;
+            
+            op->set_inputs( forward_result[422] );
+        }
+        
+        // {'name': 'Model/2820', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 9, 'shape': [1], 'out': [804, 425, 428, 801, 452, 779, 455, 776], 'sorted_id': 424}
+        {
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 9 );
+            forward_result[424] = op;
+            
+            op->set_inputs( forward_result[132] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/var.27', 'op': 'aten::pow', 'in': [424, 45], 'output_id': 0, 'shape': [1], 'out': [426], 'sorted_id': 425}
+        {
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[425] = op;
+            
+            op->set_inputs( forward_result[424] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3135', 'op': 'aten::mul', 'in': [425, 50], 'output_id': 0, 'shape': [1], 'out': [427], 'sorted_id': 426}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[426] = op;
+            
+            op->set_inputs( forward_result[425] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3136', 'op': 'aten::div', 'in': [423, 426], 'output_id': 0, 'shape': [400, 784], 'out': [429], 'sorted_id': 427}
+        {
+            Tensor::shape_type shape = {400,784};
+            DivOp* op = new DivOp();
+            forward_result[427] = op;
+            
+            op->set_inputs( forward_result[423] );
+            op->set_inputs( forward_result[426] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/log_scale.27', 'op': 'aten::log', 'in': [424], 'output_id': 0, 'shape': [1], 'out': [429], 'sorted_id': 428}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[428] = op;
+            
+            op->set_inputs( forward_result[424] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3137', 'op': 'aten::sub', 'in': [427, 428, 12], 'output_id': 0, 'shape': [400, 784], 'out': [430], 'sorted_id': 429}
+        {
+            Tensor::shape_type shape = {400,784};
+            SubOp* op = new SubOp();
+            forward_result[429] = op;
+            
+            op->set_inputs( forward_result[427] );
+            op->set_inputs( forward_result[428] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3138', 'op': 'aten::sub', 'in': [429, 55, 12], 'output_id': 0, 'shape': [400, 784], 'out': [431], 'sorted_id': 430}
+        {
+            Tensor::shape_type shape = {400,784};
+            SubOp* op = new SubOp();
+            forward_result[430] = op;
+            
+            op->set_inputs( forward_result[429] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/prob2.13', 'op': 'aten::exp', 'in': [430], 'output_id': 0, 'shape': [400, 784], 'out': [432], 'sorted_id': 431}
+        {
+            Tensor::shape_type shape = {400,784};
+            ExpOp* op = new ExpOp();
+            forward_result[431] = op;
+            
+            op->set_inputs( forward_result[430] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3141', 'op': 'aten::mul', 'in': [431, 58], 'output_id': 0, 'shape': [400, 784], 'out': [433], 'sorted_id': 432}
+        {
+            Tensor::shape_type shape = {400,784};
+            MulOp* op = new MulOp();
+            forward_result[432] = op;
+            
+            op->set_inputs( forward_result[431] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3142', 'op': 'aten::add', 'in': [419, 432, 12], 'output_id': 0, 'shape': [400, 784], 'out': [434], 'sorted_id': 433}
+        {
+            Tensor::shape_type shape = {400,784};
+            AddOp* op = new AddOp();
+            forward_result[433] = op;
+            
+            op->set_inputs( forward_result[419] );
+            op->set_inputs( forward_result[432] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3143', 'op': 'aten::log', 'in': [433], 'output_id': 0, 'shape': [400, 784], 'out': [435], 'sorted_id': 434}
+        {
+            Tensor::shape_type shape = {400,784};
+            LogOp* op = new LogOp();
+            forward_result[434] = op;
+            
+            op->set_inputs( forward_result[433] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3144', 'op': 'aten::sum', 'in': [434, 20], 'output_id': 0, 'shape': [], 'out': [463], 'sorted_id': 435}
+        {
+            SumOp* op = new SumOp();
+            forward_result[435] = op;
+            
+            op->set_inputs( forward_result[434] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/2822', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 11, 'shape': [1], 'out': [787, 437], 'sorted_id': 436}
+        {
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 11 );
+            forward_result[436] = op;
+            
+            op->set_inputs( forward_result[132] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3147', 'op': 'aten::sub', 'in': [405, 436, 12], 'output_id': 0, 'shape': [400], 'out': [438], 'sorted_id': 437}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[437] = op;
+            
+            op->set_inputs( forward_result[405] );
+            op->set_inputs( forward_result[436] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3148', 'op': 'aten::pow', 'in': [437, 45], 'output_id': 0, 'shape': [400], 'out': [439], 'sorted_id': 438}
+        {
+            Tensor::shape_type shape = {400};
+            PowOp* op = new PowOp();
+            forward_result[438] = op;
+            
+            op->set_inputs( forward_result[437] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3149', 'op': 'aten::neg', 'in': [438], 'output_id': 0, 'shape': [400], 'out': [442], 'sorted_id': 439}
+        {
+            Tensor::shape_type shape = {400};
+            NegOp* op = new NegOp();
             forward_result[439] = op;
             
             op->set_inputs( forward_result[438] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3263', 'op': 'aten::expand', 'in': [437, 439, 15], 'output_id': 0, 'shape': [400], 'out': [444], 'sorted_id': 440}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/var.29', 'op': 'aten::pow', 'in': [411, 45], 'output_id': 0, 'shape': [1], 'out': [441], 'sorted_id': 440}
         {
-            Tensor::shape_type shape = {400};
-            ExpandOp* op = new ExpandOp();
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
             forward_result[440] = op;
             
-            op->set_inputs( forward_result[437] );
-            op->set_inputs( forward_result[439] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[411] );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/3208', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 9, 'shape': [], 'out': [810, 443], 'sorted_id': 441}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3150', 'op': 'aten::mul', 'in': [440, 50], 'output_id': 0, 'shape': [1], 'out': [442], 'sorted_id': 441}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 9 );
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
             forward_result[441] = op;
             
-            op->set_inputs( forward_result[409] );
+            op->set_inputs( forward_result[440] );
+            op->set_inputs( forward_result[50] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3264', 'op': 'prim::ListConstruct', 'in': [438], 'output_id': 0, 'shape': [], 'out': [443], 'sorted_id': 442}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3151', 'op': 'aten::div', 'in': [439, 441], 'output_id': 0, 'shape': [400], 'out': [444], 'sorted_id': 442}
         {
-            ListConstructOp* op = new ListConstructOp();
+            Tensor::shape_type shape = {400};
+            DivOp* op = new DivOp();
             forward_result[442] = op;
             
-            op->set_inputs( forward_result[438] );
+            op->set_inputs( forward_result[439] );
+            op->set_inputs( forward_result[441] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3265', 'op': 'aten::expand', 'in': [441, 442, 15], 'output_id': 0, 'shape': [400], 'out': [444], 'sorted_id': 443}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/log_scale.29', 'op': 'aten::log', 'in': [411], 'output_id': 0, 'shape': [1], 'out': [444], 'sorted_id': 443}
         {
-            Tensor::shape_type shape = {400};
-            ExpandOp* op = new ExpandOp();
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
             forward_result[443] = op;
             
-            op->set_inputs( forward_result[441] );
-            op->set_inputs( forward_result[442] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[411] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3266', 'op': 'aten::normal', 'in': [440, 443, 20], 'output_id': 0, 'shape': [400], 'out': [445], 'sorted_id': 444}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3152', 'op': 'aten::sub', 'in': [442, 443, 12], 'output_id': 0, 'shape': [400], 'out': [445], 'sorted_id': 444}
         {
             Tensor::shape_type shape = {400};
-            NormalOp* op = new NormalOp();
+            SubOp* op = new SubOp();
             forward_result[444] = op;
             
-            op->set_inputs( forward_result[440] );
+            op->set_inputs( forward_result[442] );
             op->set_inputs( forward_result[443] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/epsilon.15', 'op': 'aten::to', 'in': [444, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400], 'out': [446], 'sorted_id': 445}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3153', 'op': 'aten::sub', 'in': [444, 55, 12], 'output_id': 0, 'shape': [400], 'out': [446], 'sorted_id': 445}
         {
             Tensor::shape_type shape = {400};
-            ToOp* op = new ToOp();
+            SubOp* op = new SubOp();
             forward_result[445] = op;
             
             op->set_inputs( forward_result[444] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/prob1.15', 'op': 'aten::exp', 'in': [445], 'output_id': 0, 'shape': [400], 'out': [447], 'sorted_id': 446}
+        {
+            Tensor::shape_type shape = {400};
+            ExpOp* op = new ExpOp();
+            forward_result[446] = op;
+            
+            op->set_inputs( forward_result[445] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3165', 'op': 'aten::mul', 'in': [446, 58], 'output_id': 0, 'shape': [400], 'out': [460], 'sorted_id': 447}
+        {
+            Tensor::shape_type shape = {400};
+            MulOp* op = new MulOp();
+            forward_result[447] = op;
+            
+            op->set_inputs( forward_result[446] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/2823', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 12, 'shape': [1], 'out': [449, 798], 'sorted_id': 448}
+        {
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 12 );
+            forward_result[448] = op;
+            
+            op->set_inputs( forward_result[132] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3157', 'op': 'aten::sub', 'in': [405, 448, 12], 'output_id': 0, 'shape': [400], 'out': [450], 'sorted_id': 449}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[449] = op;
+            
+            op->set_inputs( forward_result[405] );
+            op->set_inputs( forward_result[448] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3158', 'op': 'aten::pow', 'in': [449, 45], 'output_id': 0, 'shape': [400], 'out': [451], 'sorted_id': 450}
+        {
+            Tensor::shape_type shape = {400};
+            PowOp* op = new PowOp();
+            forward_result[450] = op;
+            
+            op->set_inputs( forward_result[449] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3159', 'op': 'aten::neg', 'in': [450], 'output_id': 0, 'shape': [400], 'out': [454], 'sorted_id': 451}
+        {
+            Tensor::shape_type shape = {400};
+            NegOp* op = new NegOp();
+            forward_result[451] = op;
+            
+            op->set_inputs( forward_result[450] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/var.31', 'op': 'aten::pow', 'in': [424, 45], 'output_id': 0, 'shape': [1], 'out': [453], 'sorted_id': 452}
+        {
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[452] = op;
+            
+            op->set_inputs( forward_result[424] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3160', 'op': 'aten::mul', 'in': [452, 50], 'output_id': 0, 'shape': [1], 'out': [454], 'sorted_id': 453}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[453] = op;
+            
+            op->set_inputs( forward_result[452] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3161', 'op': 'aten::div', 'in': [451, 453], 'output_id': 0, 'shape': [400], 'out': [456], 'sorted_id': 454}
+        {
+            Tensor::shape_type shape = {400};
+            DivOp* op = new DivOp();
+            forward_result[454] = op;
+            
+            op->set_inputs( forward_result[451] );
+            op->set_inputs( forward_result[453] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/log_scale.31', 'op': 'aten::log', 'in': [424], 'output_id': 0, 'shape': [1], 'out': [456], 'sorted_id': 455}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[455] = op;
+            
+            op->set_inputs( forward_result[424] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3162', 'op': 'aten::sub', 'in': [454, 455, 12], 'output_id': 0, 'shape': [400], 'out': [457], 'sorted_id': 456}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[456] = op;
+            
+            op->set_inputs( forward_result[454] );
+            op->set_inputs( forward_result[455] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3163', 'op': 'aten::sub', 'in': [456, 55, 12], 'output_id': 0, 'shape': [400], 'out': [458], 'sorted_id': 457}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[457] = op;
+            
+            op->set_inputs( forward_result[456] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/prob2.15', 'op': 'aten::exp', 'in': [457], 'output_id': 0, 'shape': [400], 'out': [459], 'sorted_id': 458}
+        {
+            Tensor::shape_type shape = {400};
+            ExpOp* op = new ExpOp();
+            forward_result[458] = op;
+            
+            op->set_inputs( forward_result[457] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3166', 'op': 'aten::mul', 'in': [458, 58], 'output_id': 0, 'shape': [400], 'out': [460], 'sorted_id': 459}
+        {
+            Tensor::shape_type shape = {400};
+            MulOp* op = new MulOp();
+            forward_result[459] = op;
+            
+            op->set_inputs( forward_result[458] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3167', 'op': 'aten::add', 'in': [447, 459, 12], 'output_id': 0, 'shape': [400], 'out': [461], 'sorted_id': 460}
+        {
+            Tensor::shape_type shape = {400};
+            AddOp* op = new AddOp();
+            forward_result[460] = op;
+            
+            op->set_inputs( forward_result[447] );
+            op->set_inputs( forward_result[459] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3168', 'op': 'aten::log', 'in': [460], 'output_id': 0, 'shape': [400], 'out': [462], 'sorted_id': 461}
+        {
+            Tensor::shape_type shape = {400};
+            LogOp* op = new LogOp();
+            forward_result[461] = op;
+            
+            op->set_inputs( forward_result[460] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3169', 'op': 'aten::sum', 'in': [461, 20], 'output_id': 0, 'shape': [], 'out': [463], 'sorted_id': 462}
+        {
+            SumOp* op = new SumOp();
+            forward_result[462] = op;
+            
+            op->set_inputs( forward_result[461] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3170', 'op': 'aten::add', 'in': [435, 462, 12], 'output_id': 0, 'shape': [], 'out': [491], 'sorted_id': 463}
+        {
+            AddOp* op = new AddOp();
+            forward_result[463] = op;
+            
+            op->set_inputs( forward_result[435] );
+            op->set_inputs( forward_result[462] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3171', 'op': 'aten::exp', 'in': [376], 'output_id': 0, 'shape': [400, 784], 'out': [465], 'sorted_id': 464}
+        {
+            Tensor::shape_type shape = {400,784};
+            ExpOp* op = new ExpOp();
+            forward_result[464] = op;
+            
+            op->set_inputs( forward_result[376] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3172', 'op': 'aten::log1p', 'in': [464], 'output_id': 0, 'shape': [400, 784], 'out': [466], 'sorted_id': 465}
+        {
+            Tensor::shape_type shape = {400,784};
+            Log1pOp* op = new Log1pOp();
+            forward_result[465] = op;
+            
+            op->set_inputs( forward_result[464] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3173', 'op': 'aten::log', 'in': [465], 'output_id': 0, 'shape': [400, 784], 'out': [467], 'sorted_id': 466}
+        {
+            Tensor::shape_type shape = {400,784};
+            LogOp* op = new LogOp();
+            forward_result[466] = op;
+            
+            op->set_inputs( forward_result[465] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3174', 'op': 'aten::rsub', 'in': [466, 107, 12], 'output_id': 0, 'shape': [400, 784], 'out': [475], 'sorted_id': 467}
+        {
+            Tensor::shape_type shape = {400,784};
+            RsubOp* op = new RsubOp();
+            forward_result[467] = op;
+            
+            op->set_inputs( forward_result[466] );
+            op->set_inputs( forward_result[107] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3175', 'op': 'aten::sub', 'in': [390, 375, 12], 'output_id': 0, 'shape': [400, 784], 'out': [469], 'sorted_id': 468}
+        {
+            Tensor::shape_type shape = {400,784};
+            SubOp* op = new SubOp();
+            forward_result[468] = op;
+            
+            op->set_inputs( forward_result[390] );
+            op->set_inputs( forward_result[375] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3176', 'op': 'aten::pow', 'in': [468, 45], 'output_id': 0, 'shape': [400, 784], 'out': [474], 'sorted_id': 469}
+        {
+            Tensor::shape_type shape = {400,784};
+            PowOp* op = new PowOp();
+            forward_result[469] = op;
+            
+            op->set_inputs( forward_result[468] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3177', 'op': 'aten::exp', 'in': [376], 'output_id': 0, 'shape': [400, 784], 'out': [471], 'sorted_id': 470}
+        {
+            Tensor::shape_type shape = {400,784};
+            ExpOp* op = new ExpOp();
+            forward_result[470] = op;
+            
+            op->set_inputs( forward_result[376] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3178', 'op': 'aten::log1p', 'in': [470], 'output_id': 0, 'shape': [400, 784], 'out': [472], 'sorted_id': 471}
+        {
+            Tensor::shape_type shape = {400,784};
+            Log1pOp* op = new Log1pOp();
+            forward_result[471] = op;
+            
+            op->set_inputs( forward_result[470] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3179', 'op': 'aten::pow', 'in': [471, 45], 'output_id': 0, 'shape': [400, 784], 'out': [473], 'sorted_id': 472}
+        {
+            Tensor::shape_type shape = {400,784};
+            PowOp* op = new PowOp();
+            forward_result[472] = op;
+            
+            op->set_inputs( forward_result[471] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3180', 'op': 'aten::mul', 'in': [472, 50], 'output_id': 0, 'shape': [400, 784], 'out': [474], 'sorted_id': 473}
+        {
+            Tensor::shape_type shape = {400,784};
+            MulOp* op = new MulOp();
+            forward_result[473] = op;
+            
+            op->set_inputs( forward_result[472] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3181', 'op': 'aten::div', 'in': [469, 473], 'output_id': 0, 'shape': [400, 784], 'out': [475], 'sorted_id': 474}
+        {
+            Tensor::shape_type shape = {400,784};
+            DivOp* op = new DivOp();
+            forward_result[474] = op;
+            
+            op->set_inputs( forward_result[469] );
+            op->set_inputs( forward_result[473] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3182', 'op': 'aten::sub', 'in': [467, 474, 12], 'output_id': 0, 'shape': [400, 784], 'out': [476], 'sorted_id': 475}
+        {
+            Tensor::shape_type shape = {400,784};
+            SubOp* op = new SubOp();
+            forward_result[475] = op;
+            
+            op->set_inputs( forward_result[467] );
+            op->set_inputs( forward_result[474] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3183', 'op': 'aten::sum', 'in': [475, 20], 'output_id': 0, 'shape': [], 'out': [490], 'sorted_id': 476}
+        {
+            SumOp* op = new SumOp();
+            forward_result[476] = op;
+            
+            op->set_inputs( forward_result[475] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3184', 'op': 'aten::exp', 'in': [392], 'output_id': 0, 'shape': [400], 'out': [478], 'sorted_id': 477}
+        {
+            Tensor::shape_type shape = {400};
+            ExpOp* op = new ExpOp();
+            forward_result[477] = op;
+            
+            op->set_inputs( forward_result[392] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3185', 'op': 'aten::log1p', 'in': [477], 'output_id': 0, 'shape': [400], 'out': [479], 'sorted_id': 478}
+        {
+            Tensor::shape_type shape = {400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[478] = op;
+            
+            op->set_inputs( forward_result[477] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3186', 'op': 'aten::log', 'in': [478], 'output_id': 0, 'shape': [400], 'out': [480], 'sorted_id': 479}
+        {
+            Tensor::shape_type shape = {400};
+            LogOp* op = new LogOp();
+            forward_result[479] = op;
+            
+            op->set_inputs( forward_result[478] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3187', 'op': 'aten::rsub', 'in': [479, 107, 12], 'output_id': 0, 'shape': [400], 'out': [488], 'sorted_id': 480}
+        {
+            Tensor::shape_type shape = {400};
+            RsubOp* op = new RsubOp();
+            forward_result[480] = op;
+            
+            op->set_inputs( forward_result[479] );
+            op->set_inputs( forward_result[107] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3188', 'op': 'aten::sub', 'in': [405, 391, 12], 'output_id': 0, 'shape': [400], 'out': [482], 'sorted_id': 481}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[481] = op;
+            
+            op->set_inputs( forward_result[405] );
+            op->set_inputs( forward_result[391] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3189', 'op': 'aten::pow', 'in': [481, 45], 'output_id': 0, 'shape': [400], 'out': [487], 'sorted_id': 482}
+        {
+            Tensor::shape_type shape = {400};
+            PowOp* op = new PowOp();
+            forward_result[482] = op;
+            
+            op->set_inputs( forward_result[481] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3190', 'op': 'aten::exp', 'in': [392], 'output_id': 0, 'shape': [400], 'out': [484], 'sorted_id': 483}
+        {
+            Tensor::shape_type shape = {400};
+            ExpOp* op = new ExpOp();
+            forward_result[483] = op;
+            
+            op->set_inputs( forward_result[392] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3191', 'op': 'aten::log1p', 'in': [483], 'output_id': 0, 'shape': [400], 'out': [485], 'sorted_id': 484}
+        {
+            Tensor::shape_type shape = {400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[484] = op;
+            
+            op->set_inputs( forward_result[483] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3192', 'op': 'aten::pow', 'in': [484, 45], 'output_id': 0, 'shape': [400], 'out': [486], 'sorted_id': 485}
+        {
+            Tensor::shape_type shape = {400};
+            PowOp* op = new PowOp();
+            forward_result[485] = op;
+            
+            op->set_inputs( forward_result[484] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3193', 'op': 'aten::mul', 'in': [485, 50], 'output_id': 0, 'shape': [400], 'out': [487], 'sorted_id': 486}
+        {
+            Tensor::shape_type shape = {400};
+            MulOp* op = new MulOp();
+            forward_result[486] = op;
+            
+            op->set_inputs( forward_result[485] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3194', 'op': 'aten::div', 'in': [482, 486], 'output_id': 0, 'shape': [400], 'out': [488], 'sorted_id': 487}
+        {
+            Tensor::shape_type shape = {400};
+            DivOp* op = new DivOp();
+            forward_result[487] = op;
+            
+            op->set_inputs( forward_result[482] );
+            op->set_inputs( forward_result[486] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3195', 'op': 'aten::sub', 'in': [480, 487, 12], 'output_id': 0, 'shape': [400], 'out': [489], 'sorted_id': 488}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[488] = op;
+            
+            op->set_inputs( forward_result[480] );
+            op->set_inputs( forward_result[487] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3196', 'op': 'aten::sum', 'in': [488, 20], 'output_id': 0, 'shape': [], 'out': [490], 'sorted_id': 489}
+        {
+            SumOp* op = new SumOp();
+            forward_result[489] = op;
+            
+            op->set_inputs( forward_result[488] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3197', 'op': 'aten::add', 'in': [476, 489, 12], 'output_id': 0, 'shape': [], 'out': [491], 'sorted_id': 490}
+        {
+            AddOp* op = new AddOp();
+            forward_result[490] = op;
+            
+            op->set_inputs( forward_result[476] );
+            op->set_inputs( forward_result[489] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/3199', 'op': 'prim::TupleConstruct', 'in': [406, 463, 490], 'output_id': 0, 'shape': [], 'out': [1088, 492, 1070], 'sorted_id': 491}
+        {
+            TupleConstructOp* op = new TupleConstructOp();
+            forward_result[491] = op;
+            
+            op->set_inputs( forward_result[406] );
+            op->set_inputs( forward_result[463] );
+            op->set_inputs( forward_result[490] );
+        }
+        
+        // {'name': 'Model/3200', 'op': 'prim::TupleUnpack', 'in': [491], 'output_id': 0, 'shape': [4, 400], 'out': [493], 'sorted_id': 492}
+        {
+            Tensor::shape_type shape = {4,400};
+            TupleUnpackOp* op = new TupleUnpackOp( 0 );
+            forward_result[492] = op;
+            
+            op->set_inputs( forward_result[491] );
+        }
+        
+        // {'name': 'Model/Net[net]/input.17', 'op': 'aten::relu', 'in': [492], 'output_id': 0, 'shape': [4, 400], 'out': [525], 'sorted_id': 493}
+        {
+            Tensor::shape_type shape = {4,400};
+            ReluOp* op = new ReluOp();
+            forward_result[493] = op;
+            
+            op->set_inputs( forward_result[492] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/weight_mu/weight_mu.9', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [509, 587], 'sorted_id': 494}
+        {
+            Tensor::shape_type shape = {400,400};
+            l2_weight_mu.reshape( shape );
+            forward_result[494] = new VariableTensor( l2_weight_mu, 2 );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/weight_rho/weight_rho.9', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [499, 583, 496, 589, 500], 'sorted_id': 495}
+        {
+            Tensor::shape_type shape = {400,400};
+            l2_weight_rho.reshape( shape );
+            forward_result[495] = new VariableTensor( l2_weight_rho, 2 );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3216', 'op': 'aten::exp', 'in': [495], 'output_id': 0, 'shape': [400, 400], 'out': [497], 'sorted_id': 496}
+        {
+            Tensor::shape_type shape = {400,400};
+            ExpOp* op = new ExpOp();
+            forward_result[496] = op;
+            
+            op->set_inputs( forward_result[495] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3217', 'op': 'aten::log1p', 'in': [496], 'output_id': 0, 'shape': [400, 400], 'out': [508], 'sorted_id': 497}
+        {
+            Tensor::shape_type shape = {400,400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[497] = op;
+            
+            op->set_inputs( forward_result[496] );
+        }
+        
+        // {'name': 'Model/2945', 'op': 'prim::TupleUnpack', 'in': [251], 'output_id': 3, 'shape': [], 'out': [850, 502], 'sorted_id': 498}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 3 );
+            forward_result[498] = op;
+            
+            op->set_inputs( forward_result[251] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3208', 'op': 'aten::size', 'in': [495, 10], 'output_id': 0, 'shape': [], 'out': [501, 504], 'sorted_id': 499}
+        {
+            SizeOp* op = new SizeOp();
+            forward_result[499] = op;
+            
+            op->set_inputs( forward_result[495] );
+            op->set_inputs( forward_result[10] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3209', 'op': 'aten::size', 'in': [495, 12], 'output_id': 0, 'shape': [], 'out': [501, 504], 'sorted_id': 500}
+        {
+            SizeOp* op = new SizeOp();
+            forward_result[500] = op;
+            
+            op->set_inputs( forward_result[495] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3210', 'op': 'prim::ListConstruct', 'in': [499, 500], 'output_id': 0, 'shape': [], 'out': [502], 'sorted_id': 501}
+        {
+            ListConstructOp* op = new ListConstructOp();
+            forward_result[501] = op;
+            
+            op->set_inputs( forward_result[499] );
+            op->set_inputs( forward_result[500] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3211', 'op': 'aten::expand', 'in': [498, 501, 15], 'output_id': 0, 'shape': [400, 400], 'out': [506], 'sorted_id': 502}
+        {
+            Tensor::shape_type shape = {400,400};
+            ExpandOp* op = new ExpandOp();
+            forward_result[502] = op;
+            
+            op->set_inputs( forward_result[498] );
+            op->set_inputs( forward_result[501] );
+            op->set_inputs( forward_result[15] );
+        }
+        
+        // {'name': 'Model/2946', 'op': 'prim::TupleUnpack', 'in': [251], 'output_id': 4, 'shape': [], 'out': [505, 852], 'sorted_id': 503}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 4 );
+            forward_result[503] = op;
+            
+            op->set_inputs( forward_result[251] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3212', 'op': 'prim::ListConstruct', 'in': [499, 500], 'output_id': 0, 'shape': [], 'out': [505], 'sorted_id': 504}
+        {
+            ListConstructOp* op = new ListConstructOp();
+            forward_result[504] = op;
+            
+            op->set_inputs( forward_result[499] );
+            op->set_inputs( forward_result[500] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3213', 'op': 'aten::expand', 'in': [503, 504, 15], 'output_id': 0, 'shape': [400, 400], 'out': [506], 'sorted_id': 505}
+        {
+            Tensor::shape_type shape = {400,400};
+            ExpandOp* op = new ExpandOp();
+            forward_result[505] = op;
+            
+            op->set_inputs( forward_result[503] );
+            op->set_inputs( forward_result[504] );
+            op->set_inputs( forward_result[15] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3214', 'op': 'aten::normal', 'in': [502, 505, 20], 'output_id': 0, 'shape': [400, 400], 'out': [507], 'sorted_id': 506}
+        {
+            Tensor::shape_type shape = {400,400};
+            NormalOp* op = new NormalOp();
+            forward_result[506] = op;
+            
+            op->set_inputs( forward_result[502] );
+            op->set_inputs( forward_result[505] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/epsilon.17', 'op': 'aten::to', 'in': [506, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400, 400], 'out': [508], 'sorted_id': 507}
+        {
+            Tensor::shape_type shape = {400,400};
+            ToOp* op = new ToOp();
+            forward_result[507] = op;
+            
+            op->set_inputs( forward_result[506] );
             op->set_inputs( forward_result[22] );
             op->set_inputs( forward_result[10] );
             op->set_inputs( forward_result[23] );
@@ -4600,1115 +4919,142 @@
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3270', 'op': 'aten::mul', 'in': [436, 445], 'output_id': 0, 'shape': [400], 'out': [447], 'sorted_id': 446}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3218', 'op': 'aten::mul', 'in': [497, 507], 'output_id': 0, 'shape': [400, 400], 'out': [509], 'sorted_id': 508}
         {
-            Tensor::shape_type shape = {400};
+            Tensor::shape_type shape = {400,400};
             MulOp* op = new MulOp();
-            forward_result[446] = op;
-            
-            op->set_inputs( forward_result[436] );
-            op->set_inputs( forward_result[445] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/value.15', 'op': 'aten::add', 'in': [433, 446, 12], 'output_id': 0, 'shape': [400], 'out': [523, 448, 479, 491], 'sorted_id': 447}
-        {
-            Tensor::shape_type shape = {400};
-            AddOp* op = new AddOp();
-            forward_result[447] = op;
-            
-            op->set_inputs( forward_result[433] );
-            op->set_inputs( forward_result[446] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/input.15', 'op': 'aten::linear', 'in': [416, 432, 447], 'output_id': 0, 'shape': [4, 400], 'out': [533], 'sorted_id': 448}
-        {
-            Tensor::shape_type shape = {4,400};
-            LinearOp* op = new LinearOp();
-            forward_result[448] = op;
-            
-            op->set_inputs( forward_result[416] );
-            op->set_inputs( forward_result[432] );
-            op->set_inputs( forward_result[447] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/3210', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 11, 'shape': [1], 'out': [450, 816], 'sorted_id': 449}
-        {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 11 );
-            forward_result[449] = op;
-            
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3274', 'op': 'aten::sub', 'in': [432, 449, 12], 'output_id': 0, 'shape': [400, 784], 'out': [451], 'sorted_id': 450}
-        {
-            Tensor::shape_type shape = {400,784};
-            SubOp* op = new SubOp();
-            forward_result[450] = op;
-            
-            op->set_inputs( forward_result[432] );
-            op->set_inputs( forward_result[449] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3275', 'op': 'aten::pow', 'in': [450, 45], 'output_id': 0, 'shape': [400, 784], 'out': [452], 'sorted_id': 451}
-        {
-            Tensor::shape_type shape = {400,784};
-            PowOp* op = new PowOp();
-            forward_result[451] = op;
-            
-            op->set_inputs( forward_result[450] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3276', 'op': 'aten::neg', 'in': [451], 'output_id': 0, 'shape': [400, 784], 'out': [456], 'sorted_id': 452}
-        {
-            Tensor::shape_type shape = {400,784};
-            NegOp* op = new NegOp();
-            forward_result[452] = op;
-            
-            op->set_inputs( forward_result[451] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/3209', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 10, 'shape': [1], 'out': [457, 844, 454, 485, 819, 847, 822, 482], 'sorted_id': 453}
-        {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 10 );
-            forward_result[453] = op;
-            
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/var.25', 'op': 'aten::pow', 'in': [453, 45], 'output_id': 0, 'shape': [1], 'out': [455], 'sorted_id': 454}
-        {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[454] = op;
-            
-            op->set_inputs( forward_result[453] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3277', 'op': 'aten::mul', 'in': [454, 50], 'output_id': 0, 'shape': [1], 'out': [456], 'sorted_id': 455}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[455] = op;
-            
-            op->set_inputs( forward_result[454] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3278', 'op': 'aten::div', 'in': [452, 455], 'output_id': 0, 'shape': [400, 784], 'out': [458], 'sorted_id': 456}
-        {
-            Tensor::shape_type shape = {400,784};
-            DivOp* op = new DivOp();
-            forward_result[456] = op;
-            
-            op->set_inputs( forward_result[452] );
-            op->set_inputs( forward_result[455] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/log_scale.25', 'op': 'aten::log', 'in': [453], 'output_id': 0, 'shape': [1], 'out': [458], 'sorted_id': 457}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[457] = op;
-            
-            op->set_inputs( forward_result[453] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3279', 'op': 'aten::sub', 'in': [456, 457, 12], 'output_id': 0, 'shape': [400, 784], 'out': [459], 'sorted_id': 458}
-        {
-            Tensor::shape_type shape = {400,784};
-            SubOp* op = new SubOp();
-            forward_result[458] = op;
-            
-            op->set_inputs( forward_result[456] );
-            op->set_inputs( forward_result[457] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3280', 'op': 'aten::sub', 'in': [458, 55, 12], 'output_id': 0, 'shape': [400, 784], 'out': [460], 'sorted_id': 459}
-        {
-            Tensor::shape_type shape = {400,784};
-            SubOp* op = new SubOp();
-            forward_result[459] = op;
-            
-            op->set_inputs( forward_result[458] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/prob1.13', 'op': 'aten::exp', 'in': [459], 'output_id': 0, 'shape': [400, 784], 'out': [461], 'sorted_id': 460}
-        {
-            Tensor::shape_type shape = {400,784};
-            ExpOp* op = new ExpOp();
-            forward_result[460] = op;
-            
-            op->set_inputs( forward_result[459] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3292', 'op': 'aten::mul', 'in': [460, 58], 'output_id': 0, 'shape': [400, 784], 'out': [475], 'sorted_id': 461}
-        {
-            Tensor::shape_type shape = {400,784};
-            MulOp* op = new MulOp();
-            forward_result[461] = op;
-            
-            op->set_inputs( forward_result[460] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/3212', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 13, 'shape': [1], 'out': [463, 827], 'sorted_id': 462}
-        {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 13 );
-            forward_result[462] = op;
-            
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3284', 'op': 'aten::sub', 'in': [432, 462, 12], 'output_id': 0, 'shape': [400, 784], 'out': [464], 'sorted_id': 463}
-        {
-            Tensor::shape_type shape = {400,784};
-            SubOp* op = new SubOp();
-            forward_result[463] = op;
-            
-            op->set_inputs( forward_result[432] );
-            op->set_inputs( forward_result[462] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3285', 'op': 'aten::pow', 'in': [463, 45], 'output_id': 0, 'shape': [400, 784], 'out': [465], 'sorted_id': 464}
-        {
-            Tensor::shape_type shape = {400,784};
-            PowOp* op = new PowOp();
-            forward_result[464] = op;
-            
-            op->set_inputs( forward_result[463] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3286', 'op': 'aten::neg', 'in': [464], 'output_id': 0, 'shape': [400, 784], 'out': [469], 'sorted_id': 465}
-        {
-            Tensor::shape_type shape = {400,784};
-            NegOp* op = new NegOp();
-            forward_result[465] = op;
-            
-            op->set_inputs( forward_result[464] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/3211', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 12, 'shape': [1], 'out': [833, 470, 855, 467, 830, 494, 858, 497], 'sorted_id': 466}
-        {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 12 );
-            forward_result[466] = op;
-            
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/var.27', 'op': 'aten::pow', 'in': [466, 45], 'output_id': 0, 'shape': [1], 'out': [468], 'sorted_id': 467}
-        {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[467] = op;
-            
-            op->set_inputs( forward_result[466] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3287', 'op': 'aten::mul', 'in': [467, 50], 'output_id': 0, 'shape': [1], 'out': [469], 'sorted_id': 468}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[468] = op;
-            
-            op->set_inputs( forward_result[467] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3288', 'op': 'aten::div', 'in': [465, 468], 'output_id': 0, 'shape': [400, 784], 'out': [471], 'sorted_id': 469}
-        {
-            Tensor::shape_type shape = {400,784};
-            DivOp* op = new DivOp();
-            forward_result[469] = op;
-            
-            op->set_inputs( forward_result[465] );
-            op->set_inputs( forward_result[468] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/log_scale.27', 'op': 'aten::log', 'in': [466], 'output_id': 0, 'shape': [1], 'out': [471], 'sorted_id': 470}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[470] = op;
-            
-            op->set_inputs( forward_result[466] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3289', 'op': 'aten::sub', 'in': [469, 470, 12], 'output_id': 0, 'shape': [400, 784], 'out': [472], 'sorted_id': 471}
-        {
-            Tensor::shape_type shape = {400,784};
-            SubOp* op = new SubOp();
-            forward_result[471] = op;
-            
-            op->set_inputs( forward_result[469] );
-            op->set_inputs( forward_result[470] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3290', 'op': 'aten::sub', 'in': [471, 55, 12], 'output_id': 0, 'shape': [400, 784], 'out': [473], 'sorted_id': 472}
-        {
-            Tensor::shape_type shape = {400,784};
-            SubOp* op = new SubOp();
-            forward_result[472] = op;
-            
-            op->set_inputs( forward_result[471] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/prob2.13', 'op': 'aten::exp', 'in': [472], 'output_id': 0, 'shape': [400, 784], 'out': [474], 'sorted_id': 473}
-        {
-            Tensor::shape_type shape = {400,784};
-            ExpOp* op = new ExpOp();
-            forward_result[473] = op;
-            
-            op->set_inputs( forward_result[472] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3293', 'op': 'aten::mul', 'in': [473, 58], 'output_id': 0, 'shape': [400, 784], 'out': [475], 'sorted_id': 474}
-        {
-            Tensor::shape_type shape = {400,784};
-            MulOp* op = new MulOp();
-            forward_result[474] = op;
-            
-            op->set_inputs( forward_result[473] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3294', 'op': 'aten::add', 'in': [461, 474, 12], 'output_id': 0, 'shape': [400, 784], 'out': [476], 'sorted_id': 475}
-        {
-            Tensor::shape_type shape = {400,784};
-            AddOp* op = new AddOp();
-            forward_result[475] = op;
-            
-            op->set_inputs( forward_result[461] );
-            op->set_inputs( forward_result[474] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3295', 'op': 'aten::log', 'in': [475], 'output_id': 0, 'shape': [400, 784], 'out': [477], 'sorted_id': 476}
-        {
-            Tensor::shape_type shape = {400,784};
-            LogOp* op = new LogOp();
-            forward_result[476] = op;
-            
-            op->set_inputs( forward_result[475] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3296', 'op': 'aten::sum', 'in': [476, 20], 'output_id': 0, 'shape': [], 'out': [505], 'sorted_id': 477}
-        {
-            SumOp* op = new SumOp();
-            forward_result[477] = op;
-            
-            op->set_inputs( forward_result[476] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/3213', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 14, 'shape': [1], 'out': [841, 479], 'sorted_id': 478}
-        {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 14 );
-            forward_result[478] = op;
-            
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3299', 'op': 'aten::sub', 'in': [447, 478, 12], 'output_id': 0, 'shape': [400], 'out': [480], 'sorted_id': 479}
-        {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
-            forward_result[479] = op;
-            
-            op->set_inputs( forward_result[447] );
-            op->set_inputs( forward_result[478] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3300', 'op': 'aten::pow', 'in': [479, 45], 'output_id': 0, 'shape': [400], 'out': [481], 'sorted_id': 480}
-        {
-            Tensor::shape_type shape = {400};
-            PowOp* op = new PowOp();
-            forward_result[480] = op;
-            
-            op->set_inputs( forward_result[479] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3301', 'op': 'aten::neg', 'in': [480], 'output_id': 0, 'shape': [400], 'out': [484], 'sorted_id': 481}
-        {
-            Tensor::shape_type shape = {400};
-            NegOp* op = new NegOp();
-            forward_result[481] = op;
-            
-            op->set_inputs( forward_result[480] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/var.29', 'op': 'aten::pow', 'in': [453, 45], 'output_id': 0, 'shape': [1], 'out': [483], 'sorted_id': 482}
-        {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[482] = op;
-            
-            op->set_inputs( forward_result[453] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3302', 'op': 'aten::mul', 'in': [482, 50], 'output_id': 0, 'shape': [1], 'out': [484], 'sorted_id': 483}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[483] = op;
-            
-            op->set_inputs( forward_result[482] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3303', 'op': 'aten::div', 'in': [481, 483], 'output_id': 0, 'shape': [400], 'out': [486], 'sorted_id': 484}
-        {
-            Tensor::shape_type shape = {400};
-            DivOp* op = new DivOp();
-            forward_result[484] = op;
-            
-            op->set_inputs( forward_result[481] );
-            op->set_inputs( forward_result[483] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/log_scale.29', 'op': 'aten::log', 'in': [453], 'output_id': 0, 'shape': [1], 'out': [486], 'sorted_id': 485}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[485] = op;
-            
-            op->set_inputs( forward_result[453] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3304', 'op': 'aten::sub', 'in': [484, 485, 12], 'output_id': 0, 'shape': [400], 'out': [487], 'sorted_id': 486}
-        {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
-            forward_result[486] = op;
-            
-            op->set_inputs( forward_result[484] );
-            op->set_inputs( forward_result[485] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3305', 'op': 'aten::sub', 'in': [486, 55, 12], 'output_id': 0, 'shape': [400], 'out': [488], 'sorted_id': 487}
-        {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
-            forward_result[487] = op;
-            
-            op->set_inputs( forward_result[486] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/prob1.15', 'op': 'aten::exp', 'in': [487], 'output_id': 0, 'shape': [400], 'out': [489], 'sorted_id': 488}
-        {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
-            forward_result[488] = op;
-            
-            op->set_inputs( forward_result[487] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3317', 'op': 'aten::mul', 'in': [488, 58], 'output_id': 0, 'shape': [400], 'out': [502], 'sorted_id': 489}
-        {
-            Tensor::shape_type shape = {400};
-            MulOp* op = new MulOp();
-            forward_result[489] = op;
-            
-            op->set_inputs( forward_result[488] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/3214', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 15, 'shape': [1], 'out': [852, 491], 'sorted_id': 490}
-        {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 15 );
-            forward_result[490] = op;
-            
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3309', 'op': 'aten::sub', 'in': [447, 490, 12], 'output_id': 0, 'shape': [400], 'out': [492], 'sorted_id': 491}
-        {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
-            forward_result[491] = op;
-            
-            op->set_inputs( forward_result[447] );
-            op->set_inputs( forward_result[490] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3310', 'op': 'aten::pow', 'in': [491, 45], 'output_id': 0, 'shape': [400], 'out': [493], 'sorted_id': 492}
-        {
-            Tensor::shape_type shape = {400};
-            PowOp* op = new PowOp();
-            forward_result[492] = op;
-            
-            op->set_inputs( forward_result[491] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3311', 'op': 'aten::neg', 'in': [492], 'output_id': 0, 'shape': [400], 'out': [496], 'sorted_id': 493}
-        {
-            Tensor::shape_type shape = {400};
-            NegOp* op = new NegOp();
-            forward_result[493] = op;
-            
-            op->set_inputs( forward_result[492] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/var.31', 'op': 'aten::pow', 'in': [466, 45], 'output_id': 0, 'shape': [1], 'out': [495], 'sorted_id': 494}
-        {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[494] = op;
-            
-            op->set_inputs( forward_result[466] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3312', 'op': 'aten::mul', 'in': [494, 50], 'output_id': 0, 'shape': [1], 'out': [496], 'sorted_id': 495}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[495] = op;
-            
-            op->set_inputs( forward_result[494] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3313', 'op': 'aten::div', 'in': [493, 495], 'output_id': 0, 'shape': [400], 'out': [498], 'sorted_id': 496}
-        {
-            Tensor::shape_type shape = {400};
-            DivOp* op = new DivOp();
-            forward_result[496] = op;
-            
-            op->set_inputs( forward_result[493] );
-            op->set_inputs( forward_result[495] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/log_scale.31', 'op': 'aten::log', 'in': [466], 'output_id': 0, 'shape': [1], 'out': [498], 'sorted_id': 497}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[497] = op;
-            
-            op->set_inputs( forward_result[466] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3314', 'op': 'aten::sub', 'in': [496, 497, 12], 'output_id': 0, 'shape': [400], 'out': [499], 'sorted_id': 498}
-        {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
-            forward_result[498] = op;
-            
-            op->set_inputs( forward_result[496] );
-            op->set_inputs( forward_result[497] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3315', 'op': 'aten::sub', 'in': [498, 55, 12], 'output_id': 0, 'shape': [400], 'out': [500], 'sorted_id': 499}
-        {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
-            forward_result[499] = op;
-            
-            op->set_inputs( forward_result[498] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/prob2.15', 'op': 'aten::exp', 'in': [499], 'output_id': 0, 'shape': [400], 'out': [501], 'sorted_id': 500}
-        {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
-            forward_result[500] = op;
-            
-            op->set_inputs( forward_result[499] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3318', 'op': 'aten::mul', 'in': [500, 58], 'output_id': 0, 'shape': [400], 'out': [502], 'sorted_id': 501}
-        {
-            Tensor::shape_type shape = {400};
-            MulOp* op = new MulOp();
-            forward_result[501] = op;
-            
-            op->set_inputs( forward_result[500] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3319', 'op': 'aten::add', 'in': [489, 501, 12], 'output_id': 0, 'shape': [400], 'out': [503], 'sorted_id': 502}
-        {
-            Tensor::shape_type shape = {400};
-            AddOp* op = new AddOp();
-            forward_result[502] = op;
-            
-            op->set_inputs( forward_result[489] );
-            op->set_inputs( forward_result[501] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3320', 'op': 'aten::log', 'in': [502], 'output_id': 0, 'shape': [400], 'out': [504], 'sorted_id': 503}
-        {
-            Tensor::shape_type shape = {400};
-            LogOp* op = new LogOp();
-            forward_result[503] = op;
-            
-            op->set_inputs( forward_result[502] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3321', 'op': 'aten::sum', 'in': [503, 20], 'output_id': 0, 'shape': [], 'out': [505], 'sorted_id': 504}
-        {
-            SumOp* op = new SumOp();
-            forward_result[504] = op;
-            
-            op->set_inputs( forward_result[503] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3322', 'op': 'aten::add', 'in': [477, 504, 12], 'output_id': 0, 'shape': [], 'out': [533], 'sorted_id': 505}
-        {
-            AddOp* op = new AddOp();
-            forward_result[505] = op;
-            
-            op->set_inputs( forward_result[477] );
-            op->set_inputs( forward_result[504] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3323', 'op': 'aten::exp', 'in': [418], 'output_id': 0, 'shape': [400, 784], 'out': [507], 'sorted_id': 506}
-        {
-            Tensor::shape_type shape = {400,784};
-            ExpOp* op = new ExpOp();
-            forward_result[506] = op;
-            
-            op->set_inputs( forward_result[418] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3324', 'op': 'aten::log1p', 'in': [506], 'output_id': 0, 'shape': [400, 784], 'out': [508], 'sorted_id': 507}
-        {
-            Tensor::shape_type shape = {400,784};
-            Log1pOp* op = new Log1pOp();
-            forward_result[507] = op;
-            
-            op->set_inputs( forward_result[506] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3325', 'op': 'aten::log', 'in': [507], 'output_id': 0, 'shape': [400, 784], 'out': [509], 'sorted_id': 508}
-        {
-            Tensor::shape_type shape = {400,784};
-            LogOp* op = new LogOp();
             forward_result[508] = op;
             
+            op->set_inputs( forward_result[497] );
             op->set_inputs( forward_result[507] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3326', 'op': 'aten::rsub', 'in': [508, 107, 12], 'output_id': 0, 'shape': [400, 784], 'out': [517], 'sorted_id': 509}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/value.17', 'op': 'aten::add', 'in': [494, 508, 12], 'output_id': 0, 'shape': [400, 400], 'out': [525, 587, 540, 527], 'sorted_id': 509}
         {
-            Tensor::shape_type shape = {400,784};
-            RsubOp* op = new RsubOp();
+            Tensor::shape_type shape = {400,400};
+            AddOp* op = new AddOp();
             forward_result[509] = op;
             
+            op->set_inputs( forward_result[494] );
             op->set_inputs( forward_result[508] );
-            op->set_inputs( forward_result[107] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3327', 'op': 'aten::sub', 'in': [432, 417, 12], 'output_id': 0, 'shape': [400, 784], 'out': [511], 'sorted_id': 510}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/bias_mu/bias_mu.9', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [524, 600], 'sorted_id': 510}
         {
-            Tensor::shape_type shape = {400,784};
-            SubOp* op = new SubOp();
-            forward_result[510] = op;
-            
-            op->set_inputs( forward_result[432] );
-            op->set_inputs( forward_result[417] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            Tensor::shape_type shape = {400};
+            l2_bias_mu.reshape( shape );
+            forward_result[510] = new VariableTensor( l2_bias_mu, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3328', 'op': 'aten::pow', 'in': [510, 45], 'output_id': 0, 'shape': [400, 784], 'out': [516], 'sorted_id': 511}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/bias_rho/bias_rho.9', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [515, 512, 596, 602], 'sorted_id': 511}
         {
-            Tensor::shape_type shape = {400,784};
-            PowOp* op = new PowOp();
-            forward_result[511] = op;
-            
-            op->set_inputs( forward_result[510] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            Tensor::shape_type shape = {400};
+            l2_bias_rho.reshape( shape );
+            forward_result[511] = new VariableTensor( l2_bias_rho, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3329', 'op': 'aten::exp', 'in': [418], 'output_id': 0, 'shape': [400, 784], 'out': [513], 'sorted_id': 512}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3227', 'op': 'aten::exp', 'in': [511], 'output_id': 0, 'shape': [400], 'out': [513], 'sorted_id': 512}
         {
-            Tensor::shape_type shape = {400,784};
+            Tensor::shape_type shape = {400};
             ExpOp* op = new ExpOp();
             forward_result[512] = op;
             
-            op->set_inputs( forward_result[418] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[511] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3330', 'op': 'aten::log1p', 'in': [512], 'output_id': 0, 'shape': [400, 784], 'out': [514], 'sorted_id': 513}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3228', 'op': 'aten::log1p', 'in': [512], 'output_id': 0, 'shape': [400], 'out': [523], 'sorted_id': 513}
         {
-            Tensor::shape_type shape = {400,784};
+            Tensor::shape_type shape = {400};
             Log1pOp* op = new Log1pOp();
             forward_result[513] = op;
             
             op->set_inputs( forward_result[512] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3331', 'op': 'aten::pow', 'in': [513, 45], 'output_id': 0, 'shape': [400, 784], 'out': [515], 'sorted_id': 514}
+        // {'name': 'Model/2947', 'op': 'prim::TupleUnpack', 'in': [251], 'output_id': 5, 'shape': [], 'out': [863, 517], 'sorted_id': 514}
         {
-            Tensor::shape_type shape = {400,784};
-            PowOp* op = new PowOp();
+            TupleUnpackOp* op = new TupleUnpackOp( 5 );
             forward_result[514] = op;
             
-            op->set_inputs( forward_result[513] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[251] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3332', 'op': 'aten::mul', 'in': [514, 50], 'output_id': 0, 'shape': [400, 784], 'out': [516], 'sorted_id': 515}
-        {
-            Tensor::shape_type shape = {400,784};
-            MulOp* op = new MulOp();
-            forward_result[515] = op;
-            
-            op->set_inputs( forward_result[514] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3333', 'op': 'aten::div', 'in': [511, 515], 'output_id': 0, 'shape': [400, 784], 'out': [517], 'sorted_id': 516}
-        {
-            Tensor::shape_type shape = {400,784};
-            DivOp* op = new DivOp();
-            forward_result[516] = op;
-            
-            op->set_inputs( forward_result[511] );
-            op->set_inputs( forward_result[515] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3334', 'op': 'aten::sub', 'in': [509, 516, 12], 'output_id': 0, 'shape': [400, 784], 'out': [518], 'sorted_id': 517}
-        {
-            Tensor::shape_type shape = {400,784};
-            SubOp* op = new SubOp();
-            forward_result[517] = op;
-            
-            op->set_inputs( forward_result[509] );
-            op->set_inputs( forward_result[516] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3335', 'op': 'aten::sum', 'in': [517, 20], 'output_id': 0, 'shape': [], 'out': [532], 'sorted_id': 518}
-        {
-            SumOp* op = new SumOp();
-            forward_result[518] = op;
-            
-            op->set_inputs( forward_result[517] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3336', 'op': 'aten::exp', 'in': [434], 'output_id': 0, 'shape': [400], 'out': [520], 'sorted_id': 519}
-        {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
-            forward_result[519] = op;
-            
-            op->set_inputs( forward_result[434] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3337', 'op': 'aten::log1p', 'in': [519], 'output_id': 0, 'shape': [400], 'out': [521], 'sorted_id': 520}
-        {
-            Tensor::shape_type shape = {400};
-            Log1pOp* op = new Log1pOp();
-            forward_result[520] = op;
-            
-            op->set_inputs( forward_result[519] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3338', 'op': 'aten::log', 'in': [520], 'output_id': 0, 'shape': [400], 'out': [522], 'sorted_id': 521}
-        {
-            Tensor::shape_type shape = {400};
-            LogOp* op = new LogOp();
-            forward_result[521] = op;
-            
-            op->set_inputs( forward_result[520] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3339', 'op': 'aten::rsub', 'in': [521, 107, 12], 'output_id': 0, 'shape': [400], 'out': [530], 'sorted_id': 522}
-        {
-            Tensor::shape_type shape = {400};
-            RsubOp* op = new RsubOp();
-            forward_result[522] = op;
-            
-            op->set_inputs( forward_result[521] );
-            op->set_inputs( forward_result[107] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3340', 'op': 'aten::sub', 'in': [447, 433, 12], 'output_id': 0, 'shape': [400], 'out': [524], 'sorted_id': 523}
-        {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
-            forward_result[523] = op;
-            
-            op->set_inputs( forward_result[447] );
-            op->set_inputs( forward_result[433] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3341', 'op': 'aten::pow', 'in': [523, 45], 'output_id': 0, 'shape': [400], 'out': [529], 'sorted_id': 524}
-        {
-            Tensor::shape_type shape = {400};
-            PowOp* op = new PowOp();
-            forward_result[524] = op;
-            
-            op->set_inputs( forward_result[523] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3342', 'op': 'aten::exp', 'in': [434], 'output_id': 0, 'shape': [400], 'out': [526], 'sorted_id': 525}
-        {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
-            forward_result[525] = op;
-            
-            op->set_inputs( forward_result[434] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3343', 'op': 'aten::log1p', 'in': [525], 'output_id': 0, 'shape': [400], 'out': [527], 'sorted_id': 526}
-        {
-            Tensor::shape_type shape = {400};
-            Log1pOp* op = new Log1pOp();
-            forward_result[526] = op;
-            
-            op->set_inputs( forward_result[525] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3344', 'op': 'aten::pow', 'in': [526, 45], 'output_id': 0, 'shape': [400], 'out': [528], 'sorted_id': 527}
-        {
-            Tensor::shape_type shape = {400};
-            PowOp* op = new PowOp();
-            forward_result[527] = op;
-            
-            op->set_inputs( forward_result[526] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3345', 'op': 'aten::mul', 'in': [527, 50], 'output_id': 0, 'shape': [400], 'out': [529], 'sorted_id': 528}
-        {
-            Tensor::shape_type shape = {400};
-            MulOp* op = new MulOp();
-            forward_result[528] = op;
-            
-            op->set_inputs( forward_result[527] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3346', 'op': 'aten::div', 'in': [524, 528], 'output_id': 0, 'shape': [400], 'out': [530], 'sorted_id': 529}
-        {
-            Tensor::shape_type shape = {400};
-            DivOp* op = new DivOp();
-            forward_result[529] = op;
-            
-            op->set_inputs( forward_result[524] );
-            op->set_inputs( forward_result[528] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3347', 'op': 'aten::sub', 'in': [522, 529, 12], 'output_id': 0, 'shape': [400], 'out': [531], 'sorted_id': 530}
-        {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
-            forward_result[530] = op;
-            
-            op->set_inputs( forward_result[522] );
-            op->set_inputs( forward_result[529] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3348', 'op': 'aten::sum', 'in': [530, 20], 'output_id': 0, 'shape': [], 'out': [532], 'sorted_id': 531}
-        {
-            SumOp* op = new SumOp();
-            forward_result[531] = op;
-            
-            op->set_inputs( forward_result[530] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3349', 'op': 'aten::add', 'in': [518, 531, 12], 'output_id': 0, 'shape': [], 'out': [533], 'sorted_id': 532}
-        {
-            AddOp* op = new AddOp();
-            forward_result[532] = op;
-            
-            op->set_inputs( forward_result[518] );
-            op->set_inputs( forward_result[531] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/3351', 'op': 'prim::TupleConstruct', 'in': [448, 505, 532], 'output_id': 0, 'shape': [], 'out': [775, 535, 534], 'sorted_id': 533}
-        {
-            TupleConstructOp* op = new TupleConstructOp();
-            forward_result[533] = op;
-            
-            op->set_inputs( forward_result[448] );
-            op->set_inputs( forward_result[505] );
-            op->set_inputs( forward_result[532] );
-        }
-        
-        // {'name': 'Net/3353', 'op': 'prim::TupleUnpack', 'in': [533], 'output_id': 1, 'shape': [], 'out': [780], 'sorted_id': 534}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 1 );
-            forward_result[534] = op;
-            
-            op->set_inputs( forward_result[533] );
-        }
-        
-        // {'name': 'Net/3352', 'op': 'prim::TupleUnpack', 'in': [533], 'output_id': 0, 'shape': [4, 400], 'out': [536], 'sorted_id': 535}
-        {
-            Tensor::shape_type shape = {4,400};
-            TupleUnpackOp* op = new TupleUnpackOp( 0 );
-            forward_result[535] = op;
-            
-            op->set_inputs( forward_result[533] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/input.17', 'op': 'aten::relu', 'in': [535], 'output_id': 0, 'shape': [4, 400], 'out': [568], 'sorted_id': 536}
-        {
-            Tensor::shape_type shape = {4,400};
-            ReluOp* op = new ReluOp();
-            forward_result[536] = op;
-            
-            op->set_inputs( forward_result[535] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l2]/weight_mu/weight_mu.9', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [630, 552], 'sorted_id': 537}
-        {
-            Tensor::shape_type shape = {400,400};
-            l2_weight_mu.reshape( shape );
-            forward_result[537] = new VariableTensor( l2_weight_mu, 2 );
-        }
-        
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l2]/weight_rho/weight_rho.9', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [542, 539, 632, 626, 543], 'sorted_id': 538}
-        {
-            Tensor::shape_type shape = {400,400};
-            l2_weight_rho.reshape( shape );
-            forward_result[538] = new VariableTensor( l2_weight_rho, 2 );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3368', 'op': 'aten::exp', 'in': [538], 'output_id': 0, 'shape': [400, 400], 'out': [540], 'sorted_id': 539}
-        {
-            Tensor::shape_type shape = {400,400};
-            ExpOp* op = new ExpOp();
-            forward_result[539] = op;
-            
-            op->set_inputs( forward_result[538] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3369', 'op': 'aten::log1p', 'in': [539], 'output_id': 0, 'shape': [400, 400], 'out': [551], 'sorted_id': 540}
-        {
-            Tensor::shape_type shape = {400,400};
-            Log1pOp* op = new Log1pOp();
-            forward_result[540] = op;
-            
-            op->set_inputs( forward_result[539] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/3215', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 16, 'shape': [], 'out': [545, 905], 'sorted_id': 541}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 16 );
-            forward_result[541] = op;
-            
-            op->set_inputs( forward_result[409] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3360', 'op': 'aten::size', 'in': [538, 10], 'output_id': 0, 'shape': [], 'out': [544, 547], 'sorted_id': 542}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3220', 'op': 'aten::size', 'in': [511, 10], 'output_id': 0, 'shape': [], 'out': [519, 516], 'sorted_id': 515}
         {
             SizeOp* op = new SizeOp();
-            forward_result[542] = op;
+            forward_result[515] = op;
             
-            op->set_inputs( forward_result[538] );
+            op->set_inputs( forward_result[511] );
             op->set_inputs( forward_result[10] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3361', 'op': 'aten::size', 'in': [538, 12], 'output_id': 0, 'shape': [], 'out': [544, 547], 'sorted_id': 543}
-        {
-            SizeOp* op = new SizeOp();
-            forward_result[543] = op;
-            
-            op->set_inputs( forward_result[538] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3362', 'op': 'prim::ListConstruct', 'in': [542, 543], 'output_id': 0, 'shape': [], 'out': [545], 'sorted_id': 544}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3221', 'op': 'prim::ListConstruct', 'in': [515], 'output_id': 0, 'shape': [], 'out': [517], 'sorted_id': 516}
         {
             ListConstructOp* op = new ListConstructOp();
-            forward_result[544] = op;
+            forward_result[516] = op;
             
-            op->set_inputs( forward_result[542] );
-            op->set_inputs( forward_result[543] );
+            op->set_inputs( forward_result[515] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3363', 'op': 'aten::expand', 'in': [541, 544, 15], 'output_id': 0, 'shape': [400, 400], 'out': [549], 'sorted_id': 545}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3222', 'op': 'aten::expand', 'in': [514, 516, 15], 'output_id': 0, 'shape': [400], 'out': [521], 'sorted_id': 517}
         {
-            Tensor::shape_type shape = {400,400};
+            Tensor::shape_type shape = {400};
             ExpandOp* op = new ExpandOp();
-            forward_result[545] = op;
+            forward_result[517] = op;
             
-            op->set_inputs( forward_result[541] );
-            op->set_inputs( forward_result[544] );
+            op->set_inputs( forward_result[514] );
+            op->set_inputs( forward_result[516] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/3216', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 17, 'shape': [], 'out': [907, 548], 'sorted_id': 546}
+        // {'name': 'Model/2948', 'op': 'prim::TupleUnpack', 'in': [251], 'output_id': 6, 'shape': [], 'out': [865, 520], 'sorted_id': 518}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 17 );
-            forward_result[546] = op;
+            TupleUnpackOp* op = new TupleUnpackOp( 6 );
+            forward_result[518] = op;
             
-            op->set_inputs( forward_result[409] );
+            op->set_inputs( forward_result[251] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3364', 'op': 'prim::ListConstruct', 'in': [542, 543], 'output_id': 0, 'shape': [], 'out': [548], 'sorted_id': 547}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3223', 'op': 'prim::ListConstruct', 'in': [515], 'output_id': 0, 'shape': [], 'out': [520], 'sorted_id': 519}
         {
             ListConstructOp* op = new ListConstructOp();
-            forward_result[547] = op;
+            forward_result[519] = op;
             
-            op->set_inputs( forward_result[542] );
-            op->set_inputs( forward_result[543] );
+            op->set_inputs( forward_result[515] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3365', 'op': 'aten::expand', 'in': [546, 547, 15], 'output_id': 0, 'shape': [400, 400], 'out': [549], 'sorted_id': 548}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3224', 'op': 'aten::expand', 'in': [518, 519, 15], 'output_id': 0, 'shape': [400], 'out': [521], 'sorted_id': 520}
         {
-            Tensor::shape_type shape = {400,400};
+            Tensor::shape_type shape = {400};
             ExpandOp* op = new ExpandOp();
-            forward_result[548] = op;
+            forward_result[520] = op;
             
-            op->set_inputs( forward_result[546] );
-            op->set_inputs( forward_result[547] );
+            op->set_inputs( forward_result[518] );
+            op->set_inputs( forward_result[519] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3366', 'op': 'aten::normal', 'in': [545, 548, 20], 'output_id': 0, 'shape': [400, 400], 'out': [550], 'sorted_id': 549}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3225', 'op': 'aten::normal', 'in': [517, 520, 20], 'output_id': 0, 'shape': [400], 'out': [522], 'sorted_id': 521}
         {
-            Tensor::shape_type shape = {400,400};
+            Tensor::shape_type shape = {400};
             NormalOp* op = new NormalOp();
-            forward_result[549] = op;
+            forward_result[521] = op;
             
-            op->set_inputs( forward_result[545] );
-            op->set_inputs( forward_result[548] );
+            op->set_inputs( forward_result[517] );
+            op->set_inputs( forward_result[520] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/epsilon.17', 'op': 'aten::to', 'in': [549, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400, 400], 'out': [551], 'sorted_id': 550}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/epsilon.19', 'op': 'aten::to', 'in': [521, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400], 'out': [523], 'sorted_id': 522}
         {
-            Tensor::shape_type shape = {400,400};
+            Tensor::shape_type shape = {400};
             ToOp* op = new ToOp();
-            forward_result[550] = op;
+            forward_result[522] = op;
             
-            op->set_inputs( forward_result[549] );
+            op->set_inputs( forward_result[521] );
             op->set_inputs( forward_result[22] );
             op->set_inputs( forward_result[10] );
             op->set_inputs( forward_result[23] );
@@ -5716,1798 +5062,1941 @@
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3370', 'op': 'aten::mul', 'in': [540, 550], 'output_id': 0, 'shape': [400, 400], 'out': [552], 'sorted_id': 551}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3229', 'op': 'aten::mul', 'in': [513, 522], 'output_id': 0, 'shape': [400], 'out': [524], 'sorted_id': 523}
+        {
+            Tensor::shape_type shape = {400};
+            MulOp* op = new MulOp();
+            forward_result[523] = op;
+            
+            op->set_inputs( forward_result[513] );
+            op->set_inputs( forward_result[522] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/value.19', 'op': 'aten::add', 'in': [510, 523, 12], 'output_id': 0, 'shape': [400], 'out': [525, 568, 556, 600], 'sorted_id': 524}
+        {
+            Tensor::shape_type shape = {400};
+            AddOp* op = new AddOp();
+            forward_result[524] = op;
+            
+            op->set_inputs( forward_result[510] );
+            op->set_inputs( forward_result[523] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/input.19', 'op': 'aten::linear', 'in': [493, 509, 524], 'output_id': 0, 'shape': [4, 400], 'out': [610], 'sorted_id': 525}
+        {
+            Tensor::shape_type shape = {4,400};
+            LinearOp* op = new LinearOp();
+            forward_result[525] = op;
+            
+            op->set_inputs( forward_result[493] );
+            op->set_inputs( forward_result[509] );
+            op->set_inputs( forward_result[524] );
+        }
+        
+        // {'name': 'Model/2950', 'op': 'prim::TupleUnpack', 'in': [251], 'output_id': 8, 'shape': [1], 'out': [871, 527], 'sorted_id': 526}
+        {
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 8 );
+            forward_result[526] = op;
+            
+            op->set_inputs( forward_result[251] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3233', 'op': 'aten::sub', 'in': [509, 526, 12], 'output_id': 0, 'shape': [400, 400], 'out': [528], 'sorted_id': 527}
+        {
+            Tensor::shape_type shape = {400,400};
+            SubOp* op = new SubOp();
+            forward_result[527] = op;
+            
+            op->set_inputs( forward_result[509] );
+            op->set_inputs( forward_result[526] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3234', 'op': 'aten::pow', 'in': [527, 45], 'output_id': 0, 'shape': [400, 400], 'out': [529], 'sorted_id': 528}
+        {
+            Tensor::shape_type shape = {400,400};
+            PowOp* op = new PowOp();
+            forward_result[528] = op;
+            
+            op->set_inputs( forward_result[527] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3235', 'op': 'aten::neg', 'in': [528], 'output_id': 0, 'shape': [400, 400], 'out': [533], 'sorted_id': 529}
+        {
+            Tensor::shape_type shape = {400,400};
+            NegOp* op = new NegOp();
+            forward_result[529] = op;
+            
+            op->set_inputs( forward_result[528] );
+        }
+        
+        // {'name': 'Model/2949', 'op': 'prim::TupleUnpack', 'in': [251], 'output_id': 7, 'shape': [1], 'out': [899, 877, 559, 902, 562, 534, 531, 874], 'sorted_id': 530}
+        {
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 7 );
+            forward_result[530] = op;
+            
+            op->set_inputs( forward_result[251] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/var.33', 'op': 'aten::pow', 'in': [530, 45], 'output_id': 0, 'shape': [1], 'out': [532], 'sorted_id': 531}
+        {
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[531] = op;
+            
+            op->set_inputs( forward_result[530] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3236', 'op': 'aten::mul', 'in': [531, 50], 'output_id': 0, 'shape': [1], 'out': [533], 'sorted_id': 532}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[532] = op;
+            
+            op->set_inputs( forward_result[531] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3237', 'op': 'aten::div', 'in': [529, 532], 'output_id': 0, 'shape': [400, 400], 'out': [535], 'sorted_id': 533}
+        {
+            Tensor::shape_type shape = {400,400};
+            DivOp* op = new DivOp();
+            forward_result[533] = op;
+            
+            op->set_inputs( forward_result[529] );
+            op->set_inputs( forward_result[532] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/log_scale.33', 'op': 'aten::log', 'in': [530], 'output_id': 0, 'shape': [1], 'out': [535], 'sorted_id': 534}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[534] = op;
+            
+            op->set_inputs( forward_result[530] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3238', 'op': 'aten::sub', 'in': [533, 534, 12], 'output_id': 0, 'shape': [400, 400], 'out': [536], 'sorted_id': 535}
+        {
+            Tensor::shape_type shape = {400,400};
+            SubOp* op = new SubOp();
+            forward_result[535] = op;
+            
+            op->set_inputs( forward_result[533] );
+            op->set_inputs( forward_result[534] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3239', 'op': 'aten::sub', 'in': [535, 55, 12], 'output_id': 0, 'shape': [400, 400], 'out': [537], 'sorted_id': 536}
+        {
+            Tensor::shape_type shape = {400,400};
+            SubOp* op = new SubOp();
+            forward_result[536] = op;
+            
+            op->set_inputs( forward_result[535] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/prob1.17', 'op': 'aten::exp', 'in': [536], 'output_id': 0, 'shape': [400, 400], 'out': [538], 'sorted_id': 537}
+        {
+            Tensor::shape_type shape = {400,400};
+            ExpOp* op = new ExpOp();
+            forward_result[537] = op;
+            
+            op->set_inputs( forward_result[536] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3251', 'op': 'aten::mul', 'in': [537, 58], 'output_id': 0, 'shape': [400, 400], 'out': [552], 'sorted_id': 538}
+        {
+            Tensor::shape_type shape = {400,400};
+            MulOp* op = new MulOp();
+            forward_result[538] = op;
+            
+            op->set_inputs( forward_result[537] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/2952', 'op': 'prim::TupleUnpack', 'in': [251], 'output_id': 10, 'shape': [1], 'out': [540, 882], 'sorted_id': 539}
+        {
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 10 );
+            forward_result[539] = op;
+            
+            op->set_inputs( forward_result[251] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3243', 'op': 'aten::sub', 'in': [509, 539, 12], 'output_id': 0, 'shape': [400, 400], 'out': [541], 'sorted_id': 540}
+        {
+            Tensor::shape_type shape = {400,400};
+            SubOp* op = new SubOp();
+            forward_result[540] = op;
+            
+            op->set_inputs( forward_result[509] );
+            op->set_inputs( forward_result[539] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3244', 'op': 'aten::pow', 'in': [540, 45], 'output_id': 0, 'shape': [400, 400], 'out': [542], 'sorted_id': 541}
+        {
+            Tensor::shape_type shape = {400,400};
+            PowOp* op = new PowOp();
+            forward_result[541] = op;
+            
+            op->set_inputs( forward_result[540] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3245', 'op': 'aten::neg', 'in': [541], 'output_id': 0, 'shape': [400, 400], 'out': [546], 'sorted_id': 542}
+        {
+            Tensor::shape_type shape = {400,400};
+            NegOp* op = new NegOp();
+            forward_result[542] = op;
+            
+            op->set_inputs( forward_result[541] );
+        }
+        
+        // {'name': 'Model/2951', 'op': 'prim::TupleUnpack', 'in': [251], 'output_id': 9, 'shape': [1], 'out': [913, 544, 574, 885, 888, 910, 571, 547], 'sorted_id': 543}
+        {
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 9 );
+            forward_result[543] = op;
+            
+            op->set_inputs( forward_result[251] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/var.35', 'op': 'aten::pow', 'in': [543, 45], 'output_id': 0, 'shape': [1], 'out': [545], 'sorted_id': 544}
+        {
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[544] = op;
+            
+            op->set_inputs( forward_result[543] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3246', 'op': 'aten::mul', 'in': [544, 50], 'output_id': 0, 'shape': [1], 'out': [546], 'sorted_id': 545}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[545] = op;
+            
+            op->set_inputs( forward_result[544] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3247', 'op': 'aten::div', 'in': [542, 545], 'output_id': 0, 'shape': [400, 400], 'out': [548], 'sorted_id': 546}
+        {
+            Tensor::shape_type shape = {400,400};
+            DivOp* op = new DivOp();
+            forward_result[546] = op;
+            
+            op->set_inputs( forward_result[542] );
+            op->set_inputs( forward_result[545] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/log_scale.35', 'op': 'aten::log', 'in': [543], 'output_id': 0, 'shape': [1], 'out': [548], 'sorted_id': 547}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[547] = op;
+            
+            op->set_inputs( forward_result[543] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3248', 'op': 'aten::sub', 'in': [546, 547, 12], 'output_id': 0, 'shape': [400, 400], 'out': [549], 'sorted_id': 548}
+        {
+            Tensor::shape_type shape = {400,400};
+            SubOp* op = new SubOp();
+            forward_result[548] = op;
+            
+            op->set_inputs( forward_result[546] );
+            op->set_inputs( forward_result[547] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3249', 'op': 'aten::sub', 'in': [548, 55, 12], 'output_id': 0, 'shape': [400, 400], 'out': [550], 'sorted_id': 549}
+        {
+            Tensor::shape_type shape = {400,400};
+            SubOp* op = new SubOp();
+            forward_result[549] = op;
+            
+            op->set_inputs( forward_result[548] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/prob2.17', 'op': 'aten::exp', 'in': [549], 'output_id': 0, 'shape': [400, 400], 'out': [551], 'sorted_id': 550}
+        {
+            Tensor::shape_type shape = {400,400};
+            ExpOp* op = new ExpOp();
+            forward_result[550] = op;
+            
+            op->set_inputs( forward_result[549] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3252', 'op': 'aten::mul', 'in': [550, 58], 'output_id': 0, 'shape': [400, 400], 'out': [552], 'sorted_id': 551}
         {
             Tensor::shape_type shape = {400,400};
             MulOp* op = new MulOp();
             forward_result[551] = op;
             
-            op->set_inputs( forward_result[540] );
             op->set_inputs( forward_result[550] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[58] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/value.17', 'op': 'aten::add', 'in': [537, 551, 12], 'output_id': 0, 'shape': [400, 400], 'out': [630, 583, 570, 568], 'sorted_id': 552}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3253', 'op': 'aten::add', 'in': [538, 551, 12], 'output_id': 0, 'shape': [400, 400], 'out': [553], 'sorted_id': 552}
         {
             Tensor::shape_type shape = {400,400};
             AddOp* op = new AddOp();
             forward_result[552] = op;
             
-            op->set_inputs( forward_result[537] );
+            op->set_inputs( forward_result[538] );
             op->set_inputs( forward_result[551] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l2]/bias_mu/bias_mu.9', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [643, 567], 'sorted_id': 553}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3254', 'op': 'aten::log', 'in': [552], 'output_id': 0, 'shape': [400, 400], 'out': [554], 'sorted_id': 553}
         {
-            Tensor::shape_type shape = {400};
-            l2_bias_mu.reshape( shape );
-            forward_result[553] = new VariableTensor( l2_bias_mu, 2 );
+            Tensor::shape_type shape = {400,400};
+            LogOp* op = new LogOp();
+            forward_result[553] = op;
+            
+            op->set_inputs( forward_result[552] );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l2]/bias_rho/bias_rho.9', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [558, 645, 555, 639], 'sorted_id': 554}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3255', 'op': 'aten::sum', 'in': [553, 20], 'output_id': 0, 'shape': [], 'out': [582], 'sorted_id': 554}
         {
-            Tensor::shape_type shape = {400};
-            l2_bias_rho.reshape( shape );
-            forward_result[554] = new VariableTensor( l2_bias_rho, 2 );
+            SumOp* op = new SumOp();
+            forward_result[554] = op;
+            
+            op->set_inputs( forward_result[553] );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3379', 'op': 'aten::exp', 'in': [554], 'output_id': 0, 'shape': [400], 'out': [556], 'sorted_id': 555}
+        // {'name': 'Model/2953', 'op': 'prim::TupleUnpack', 'in': [251], 'output_id': 11, 'shape': [1], 'out': [556, 896], 'sorted_id': 555}
         {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 11 );
             forward_result[555] = op;
             
-            op->set_inputs( forward_result[554] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[251] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3380', 'op': 'aten::log1p', 'in': [555], 'output_id': 0, 'shape': [400], 'out': [566], 'sorted_id': 556}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3258', 'op': 'aten::sub', 'in': [524, 555, 12], 'output_id': 0, 'shape': [400], 'out': [557], 'sorted_id': 556}
         {
             Tensor::shape_type shape = {400};
-            Log1pOp* op = new Log1pOp();
+            SubOp* op = new SubOp();
             forward_result[556] = op;
             
+            op->set_inputs( forward_result[524] );
             op->set_inputs( forward_result[555] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/3217', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 18, 'shape': [], 'out': [560, 918], 'sorted_id': 557}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3259', 'op': 'aten::pow', 'in': [556, 45], 'output_id': 0, 'shape': [400], 'out': [558], 'sorted_id': 557}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 18 );
+            Tensor::shape_type shape = {400};
+            PowOp* op = new PowOp();
             forward_result[557] = op;
             
-            op->set_inputs( forward_result[409] );
+            op->set_inputs( forward_result[556] );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3372', 'op': 'aten::size', 'in': [554, 10], 'output_id': 0, 'shape': [], 'out': [559, 562], 'sorted_id': 558}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3260', 'op': 'aten::neg', 'in': [557], 'output_id': 0, 'shape': [400], 'out': [561], 'sorted_id': 558}
         {
-            SizeOp* op = new SizeOp();
+            Tensor::shape_type shape = {400};
+            NegOp* op = new NegOp();
             forward_result[558] = op;
             
-            op->set_inputs( forward_result[554] );
-            op->set_inputs( forward_result[10] );
+            op->set_inputs( forward_result[557] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3373', 'op': 'prim::ListConstruct', 'in': [558], 'output_id': 0, 'shape': [], 'out': [560], 'sorted_id': 559}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/var.37', 'op': 'aten::pow', 'in': [530, 45], 'output_id': 0, 'shape': [1], 'out': [560], 'sorted_id': 559}
         {
-            ListConstructOp* op = new ListConstructOp();
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
             forward_result[559] = op;
             
-            op->set_inputs( forward_result[558] );
+            op->set_inputs( forward_result[530] );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3374', 'op': 'aten::expand', 'in': [557, 559, 15], 'output_id': 0, 'shape': [400], 'out': [564], 'sorted_id': 560}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3261', 'op': 'aten::mul', 'in': [559, 50], 'output_id': 0, 'shape': [1], 'out': [561], 'sorted_id': 560}
         {
-            Tensor::shape_type shape = {400};
-            ExpandOp* op = new ExpandOp();
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
             forward_result[560] = op;
             
-            op->set_inputs( forward_result[557] );
             op->set_inputs( forward_result[559] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[50] );
         }
         
-        // {'name': 'Net/3218', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 19, 'shape': [], 'out': [920, 563], 'sorted_id': 561}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 19 );
-            forward_result[561] = op;
-            
-            op->set_inputs( forward_result[409] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3375', 'op': 'prim::ListConstruct', 'in': [558], 'output_id': 0, 'shape': [], 'out': [563], 'sorted_id': 562}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[562] = op;
-            
-            op->set_inputs( forward_result[558] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3376', 'op': 'aten::expand', 'in': [561, 562, 15], 'output_id': 0, 'shape': [400], 'out': [564], 'sorted_id': 563}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3262', 'op': 'aten::div', 'in': [558, 560], 'output_id': 0, 'shape': [400], 'out': [563], 'sorted_id': 561}
         {
             Tensor::shape_type shape = {400};
-            ExpandOp* op = new ExpandOp();
+            DivOp* op = new DivOp();
+            forward_result[561] = op;
+            
+            op->set_inputs( forward_result[558] );
+            op->set_inputs( forward_result[560] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/log_scale.37', 'op': 'aten::log', 'in': [530], 'output_id': 0, 'shape': [1], 'out': [563], 'sorted_id': 562}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[562] = op;
+            
+            op->set_inputs( forward_result[530] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3263', 'op': 'aten::sub', 'in': [561, 562, 12], 'output_id': 0, 'shape': [400], 'out': [564], 'sorted_id': 563}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
             forward_result[563] = op;
             
             op->set_inputs( forward_result[561] );
             op->set_inputs( forward_result[562] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3377', 'op': 'aten::normal', 'in': [560, 563, 20], 'output_id': 0, 'shape': [400], 'out': [565], 'sorted_id': 564}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3264', 'op': 'aten::sub', 'in': [563, 55, 12], 'output_id': 0, 'shape': [400], 'out': [565], 'sorted_id': 564}
         {
             Tensor::shape_type shape = {400};
-            NormalOp* op = new NormalOp();
+            SubOp* op = new SubOp();
             forward_result[564] = op;
             
-            op->set_inputs( forward_result[560] );
             op->set_inputs( forward_result[563] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/epsilon.19', 'op': 'aten::to', 'in': [564, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400], 'out': [566], 'sorted_id': 565}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/prob1.19', 'op': 'aten::exp', 'in': [564], 'output_id': 0, 'shape': [400], 'out': [566], 'sorted_id': 565}
         {
             Tensor::shape_type shape = {400};
-            ToOp* op = new ToOp();
+            ExpOp* op = new ExpOp();
             forward_result[565] = op;
             
             op->set_inputs( forward_result[564] );
-            op->set_inputs( forward_result[22] );
-            op->set_inputs( forward_result[10] );
-            op->set_inputs( forward_result[23] );
-            op->set_inputs( forward_result[20] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3381', 'op': 'aten::mul', 'in': [556, 565], 'output_id': 0, 'shape': [400], 'out': [567], 'sorted_id': 566}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3276', 'op': 'aten::mul', 'in': [565, 58], 'output_id': 0, 'shape': [400], 'out': [579], 'sorted_id': 566}
         {
             Tensor::shape_type shape = {400};
             MulOp* op = new MulOp();
             forward_result[566] = op;
             
-            op->set_inputs( forward_result[556] );
             op->set_inputs( forward_result[565] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[58] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/value.19', 'op': 'aten::add', 'in': [553, 566, 12], 'output_id': 0, 'shape': [400], 'out': [643, 611, 599, 568], 'sorted_id': 567}
-        {
-            Tensor::shape_type shape = {400};
-            AddOp* op = new AddOp();
-            forward_result[567] = op;
-            
-            op->set_inputs( forward_result[553] );
-            op->set_inputs( forward_result[566] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/input.19', 'op': 'aten::linear', 'in': [536, 552, 567], 'output_id': 0, 'shape': [4, 400], 'out': [653], 'sorted_id': 568}
-        {
-            Tensor::shape_type shape = {4,400};
-            LinearOp* op = new LinearOp();
-            forward_result[568] = op;
-            
-            op->set_inputs( forward_result[536] );
-            op->set_inputs( forward_result[552] );
-            op->set_inputs( forward_result[567] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/3220', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 21, 'shape': [1], 'out': [926, 570], 'sorted_id': 569}
+        // {'name': 'Model/2954', 'op': 'prim::TupleUnpack', 'in': [251], 'output_id': 12, 'shape': [1], 'out': [907, 568], 'sorted_id': 567}
         {
             Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 21 );
+            TupleUnpackOp* op = new TupleUnpackOp( 12 );
+            forward_result[567] = op;
+            
+            op->set_inputs( forward_result[251] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3268', 'op': 'aten::sub', 'in': [524, 567, 12], 'output_id': 0, 'shape': [400], 'out': [569], 'sorted_id': 568}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[568] = op;
+            
+            op->set_inputs( forward_result[524] );
+            op->set_inputs( forward_result[567] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3269', 'op': 'aten::pow', 'in': [568, 45], 'output_id': 0, 'shape': [400], 'out': [570], 'sorted_id': 569}
+        {
+            Tensor::shape_type shape = {400};
+            PowOp* op = new PowOp();
             forward_result[569] = op;
             
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[568] );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3385', 'op': 'aten::sub', 'in': [552, 569, 12], 'output_id': 0, 'shape': [400, 400], 'out': [571], 'sorted_id': 570}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3270', 'op': 'aten::neg', 'in': [569], 'output_id': 0, 'shape': [400], 'out': [573], 'sorted_id': 570}
         {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {400};
+            NegOp* op = new NegOp();
             forward_result[570] = op;
             
-            op->set_inputs( forward_result[552] );
             op->set_inputs( forward_result[569] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3386', 'op': 'aten::pow', 'in': [570, 45], 'output_id': 0, 'shape': [400, 400], 'out': [572], 'sorted_id': 571}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/var.39', 'op': 'aten::pow', 'in': [543, 45], 'output_id': 0, 'shape': [1], 'out': [572], 'sorted_id': 571}
         {
-            Tensor::shape_type shape = {400,400};
+            Tensor::shape_type shape = {1};
             PowOp* op = new PowOp();
             forward_result[571] = op;
             
-            op->set_inputs( forward_result[570] );
+            op->set_inputs( forward_result[543] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3387', 'op': 'aten::neg', 'in': [571], 'output_id': 0, 'shape': [400, 400], 'out': [576], 'sorted_id': 572}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3271', 'op': 'aten::mul', 'in': [571, 50], 'output_id': 0, 'shape': [1], 'out': [573], 'sorted_id': 572}
         {
-            Tensor::shape_type shape = {400,400};
-            NegOp* op = new NegOp();
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
             forward_result[572] = op;
             
             op->set_inputs( forward_result[571] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[50] );
         }
         
-        // {'name': 'Net/3219', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 20, 'shape': [1], 'out': [929, 932, 602, 957, 954, 574, 577, 605], 'sorted_id': 573}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3272', 'op': 'aten::div', 'in': [570, 572], 'output_id': 0, 'shape': [400], 'out': [575], 'sorted_id': 573}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 20 );
+            Tensor::shape_type shape = {400};
+            DivOp* op = new DivOp();
             forward_result[573] = op;
             
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/var.33', 'op': 'aten::pow', 'in': [573, 45], 'output_id': 0, 'shape': [1], 'out': [575], 'sorted_id': 574}
-        {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[574] = op;
-            
-            op->set_inputs( forward_result[573] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3388', 'op': 'aten::mul', 'in': [574, 50], 'output_id': 0, 'shape': [1], 'out': [576], 'sorted_id': 575}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[575] = op;
-            
-            op->set_inputs( forward_result[574] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3389', 'op': 'aten::div', 'in': [572, 575], 'output_id': 0, 'shape': [400, 400], 'out': [578], 'sorted_id': 576}
-        {
-            Tensor::shape_type shape = {400,400};
-            DivOp* op = new DivOp();
-            forward_result[576] = op;
-            
+            op->set_inputs( forward_result[570] );
             op->set_inputs( forward_result[572] );
-            op->set_inputs( forward_result[575] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/log_scale.33', 'op': 'aten::log', 'in': [573], 'output_id': 0, 'shape': [1], 'out': [578], 'sorted_id': 577}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/log_scale.39', 'op': 'aten::log', 'in': [543], 'output_id': 0, 'shape': [1], 'out': [575], 'sorted_id': 574}
         {
             Tensor::shape_type shape = {1};
             LogOp* op = new LogOp();
-            forward_result[577] = op;
+            forward_result[574] = op;
+            
+            op->set_inputs( forward_result[543] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3273', 'op': 'aten::sub', 'in': [573, 574, 12], 'output_id': 0, 'shape': [400], 'out': [576], 'sorted_id': 575}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[575] = op;
             
             op->set_inputs( forward_result[573] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3390', 'op': 'aten::sub', 'in': [576, 577, 12], 'output_id': 0, 'shape': [400, 400], 'out': [579], 'sorted_id': 578}
-        {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
-            forward_result[578] = op;
-            
-            op->set_inputs( forward_result[576] );
-            op->set_inputs( forward_result[577] );
+            op->set_inputs( forward_result[574] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3391', 'op': 'aten::sub', 'in': [578, 55, 12], 'output_id': 0, 'shape': [400, 400], 'out': [580], 'sorted_id': 579}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3274', 'op': 'aten::sub', 'in': [575, 55, 12], 'output_id': 0, 'shape': [400], 'out': [577], 'sorted_id': 576}
         {
-            Tensor::shape_type shape = {400,400};
+            Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
-            forward_result[579] = op;
+            forward_result[576] = op;
             
-            op->set_inputs( forward_result[578] );
+            op->set_inputs( forward_result[575] );
             op->set_inputs( forward_result[55] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/prob1.17', 'op': 'aten::exp', 'in': [579], 'output_id': 0, 'shape': [400, 400], 'out': [581], 'sorted_id': 580}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/prob2.19', 'op': 'aten::exp', 'in': [576], 'output_id': 0, 'shape': [400], 'out': [578], 'sorted_id': 577}
         {
-            Tensor::shape_type shape = {400,400};
+            Tensor::shape_type shape = {400};
             ExpOp* op = new ExpOp();
+            forward_result[577] = op;
+            
+            op->set_inputs( forward_result[576] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3277', 'op': 'aten::mul', 'in': [577, 58], 'output_id': 0, 'shape': [400], 'out': [579], 'sorted_id': 578}
+        {
+            Tensor::shape_type shape = {400};
+            MulOp* op = new MulOp();
+            forward_result[578] = op;
+            
+            op->set_inputs( forward_result[577] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3278', 'op': 'aten::add', 'in': [566, 578, 12], 'output_id': 0, 'shape': [400], 'out': [580], 'sorted_id': 579}
+        {
+            Tensor::shape_type shape = {400};
+            AddOp* op = new AddOp();
+            forward_result[579] = op;
+            
+            op->set_inputs( forward_result[566] );
+            op->set_inputs( forward_result[578] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3279', 'op': 'aten::log', 'in': [579], 'output_id': 0, 'shape': [400], 'out': [581], 'sorted_id': 580}
+        {
+            Tensor::shape_type shape = {400};
+            LogOp* op = new LogOp();
             forward_result[580] = op;
             
             op->set_inputs( forward_result[579] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3403', 'op': 'aten::mul', 'in': [580, 58], 'output_id': 0, 'shape': [400, 400], 'out': [595], 'sorted_id': 581}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3280', 'op': 'aten::sum', 'in': [580, 20], 'output_id': 0, 'shape': [], 'out': [582], 'sorted_id': 581}
         {
-            Tensor::shape_type shape = {400,400};
-            MulOp* op = new MulOp();
+            SumOp* op = new SumOp();
             forward_result[581] = op;
             
             op->set_inputs( forward_result[580] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/3222', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 23, 'shape': [1], 'out': [583, 937], 'sorted_id': 582}
-        {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 23 );
-            forward_result[582] = op;
-            
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3395', 'op': 'aten::sub', 'in': [552, 582, 12], 'output_id': 0, 'shape': [400, 400], 'out': [584], 'sorted_id': 583}
-        {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
-            forward_result[583] = op;
-            
-            op->set_inputs( forward_result[552] );
-            op->set_inputs( forward_result[582] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3396', 'op': 'aten::pow', 'in': [583, 45], 'output_id': 0, 'shape': [400, 400], 'out': [585], 'sorted_id': 584}
-        {
-            Tensor::shape_type shape = {400,400};
-            PowOp* op = new PowOp();
-            forward_result[584] = op;
-            
-            op->set_inputs( forward_result[583] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3397', 'op': 'aten::neg', 'in': [584], 'output_id': 0, 'shape': [400, 400], 'out': [589], 'sorted_id': 585}
-        {
-            Tensor::shape_type shape = {400,400};
-            NegOp* op = new NegOp();
-            forward_result[585] = op;
-            
-            op->set_inputs( forward_result[584] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/3221', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 22, 'shape': [1], 'out': [614, 587, 590, 965, 943, 940, 968, 617], 'sorted_id': 586}
-        {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 22 );
-            forward_result[586] = op;
-            
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/var.35', 'op': 'aten::pow', 'in': [586, 45], 'output_id': 0, 'shape': [1], 'out': [588], 'sorted_id': 587}
-        {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[587] = op;
-            
-            op->set_inputs( forward_result[586] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3398', 'op': 'aten::mul', 'in': [587, 50], 'output_id': 0, 'shape': [1], 'out': [589], 'sorted_id': 588}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[588] = op;
-            
-            op->set_inputs( forward_result[587] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3399', 'op': 'aten::div', 'in': [585, 588], 'output_id': 0, 'shape': [400, 400], 'out': [591], 'sorted_id': 589}
-        {
-            Tensor::shape_type shape = {400,400};
-            DivOp* op = new DivOp();
-            forward_result[589] = op;
-            
-            op->set_inputs( forward_result[585] );
-            op->set_inputs( forward_result[588] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/log_scale.35', 'op': 'aten::log', 'in': [586], 'output_id': 0, 'shape': [1], 'out': [591], 'sorted_id': 590}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[590] = op;
-            
-            op->set_inputs( forward_result[586] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3400', 'op': 'aten::sub', 'in': [589, 590, 12], 'output_id': 0, 'shape': [400, 400], 'out': [592], 'sorted_id': 591}
-        {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
-            forward_result[591] = op;
-            
-            op->set_inputs( forward_result[589] );
-            op->set_inputs( forward_result[590] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3401', 'op': 'aten::sub', 'in': [591, 55, 12], 'output_id': 0, 'shape': [400, 400], 'out': [593], 'sorted_id': 592}
-        {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
-            forward_result[592] = op;
-            
-            op->set_inputs( forward_result[591] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/prob2.17', 'op': 'aten::exp', 'in': [592], 'output_id': 0, 'shape': [400, 400], 'out': [594], 'sorted_id': 593}
-        {
-            Tensor::shape_type shape = {400,400};
-            ExpOp* op = new ExpOp();
-            forward_result[593] = op;
-            
-            op->set_inputs( forward_result[592] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3404', 'op': 'aten::mul', 'in': [593, 58], 'output_id': 0, 'shape': [400, 400], 'out': [595], 'sorted_id': 594}
-        {
-            Tensor::shape_type shape = {400,400};
-            MulOp* op = new MulOp();
-            forward_result[594] = op;
-            
-            op->set_inputs( forward_result[593] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3405', 'op': 'aten::add', 'in': [581, 594, 12], 'output_id': 0, 'shape': [400, 400], 'out': [596], 'sorted_id': 595}
-        {
-            Tensor::shape_type shape = {400,400};
-            AddOp* op = new AddOp();
-            forward_result[595] = op;
-            
-            op->set_inputs( forward_result[581] );
-            op->set_inputs( forward_result[594] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3406', 'op': 'aten::log', 'in': [595], 'output_id': 0, 'shape': [400, 400], 'out': [597], 'sorted_id': 596}
-        {
-            Tensor::shape_type shape = {400,400};
-            LogOp* op = new LogOp();
-            forward_result[596] = op;
-            
-            op->set_inputs( forward_result[595] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3407', 'op': 'aten::sum', 'in': [596, 20], 'output_id': 0, 'shape': [], 'out': [625], 'sorted_id': 597}
-        {
-            SumOp* op = new SumOp();
-            forward_result[597] = op;
-            
-            op->set_inputs( forward_result[596] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/3223', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 24, 'shape': [1], 'out': [951, 599], 'sorted_id': 598}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3281', 'op': 'aten::add', 'in': [554, 581, 12], 'output_id': 0, 'shape': [], 'out': [610], 'sorted_id': 582}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 24 );
-            forward_result[598] = op;
+            AddOp* op = new AddOp();
+            forward_result[582] = op;
             
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[554] );
+            op->set_inputs( forward_result[581] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3410', 'op': 'aten::sub', 'in': [567, 598, 12], 'output_id': 0, 'shape': [400], 'out': [600], 'sorted_id': 599}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3282', 'op': 'aten::exp', 'in': [495], 'output_id': 0, 'shape': [400, 400], 'out': [584], 'sorted_id': 583}
+        {
+            Tensor::shape_type shape = {400,400};
+            ExpOp* op = new ExpOp();
+            forward_result[583] = op;
+            
+            op->set_inputs( forward_result[495] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3283', 'op': 'aten::log1p', 'in': [583], 'output_id': 0, 'shape': [400, 400], 'out': [585], 'sorted_id': 584}
+        {
+            Tensor::shape_type shape = {400,400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[584] = op;
+            
+            op->set_inputs( forward_result[583] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3284', 'op': 'aten::log', 'in': [584], 'output_id': 0, 'shape': [400, 400], 'out': [586], 'sorted_id': 585}
+        {
+            Tensor::shape_type shape = {400,400};
+            LogOp* op = new LogOp();
+            forward_result[585] = op;
+            
+            op->set_inputs( forward_result[584] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3285', 'op': 'aten::rsub', 'in': [585, 107, 12], 'output_id': 0, 'shape': [400, 400], 'out': [594], 'sorted_id': 586}
+        {
+            Tensor::shape_type shape = {400,400};
+            RsubOp* op = new RsubOp();
+            forward_result[586] = op;
+            
+            op->set_inputs( forward_result[585] );
+            op->set_inputs( forward_result[107] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3286', 'op': 'aten::sub', 'in': [509, 494, 12], 'output_id': 0, 'shape': [400, 400], 'out': [588], 'sorted_id': 587}
+        {
+            Tensor::shape_type shape = {400,400};
+            SubOp* op = new SubOp();
+            forward_result[587] = op;
+            
+            op->set_inputs( forward_result[509] );
+            op->set_inputs( forward_result[494] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3287', 'op': 'aten::pow', 'in': [587, 45], 'output_id': 0, 'shape': [400, 400], 'out': [593], 'sorted_id': 588}
+        {
+            Tensor::shape_type shape = {400,400};
+            PowOp* op = new PowOp();
+            forward_result[588] = op;
+            
+            op->set_inputs( forward_result[587] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3288', 'op': 'aten::exp', 'in': [495], 'output_id': 0, 'shape': [400, 400], 'out': [590], 'sorted_id': 589}
+        {
+            Tensor::shape_type shape = {400,400};
+            ExpOp* op = new ExpOp();
+            forward_result[589] = op;
+            
+            op->set_inputs( forward_result[495] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3289', 'op': 'aten::log1p', 'in': [589], 'output_id': 0, 'shape': [400, 400], 'out': [591], 'sorted_id': 590}
+        {
+            Tensor::shape_type shape = {400,400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[590] = op;
+            
+            op->set_inputs( forward_result[589] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3290', 'op': 'aten::pow', 'in': [590, 45], 'output_id': 0, 'shape': [400, 400], 'out': [592], 'sorted_id': 591}
+        {
+            Tensor::shape_type shape = {400,400};
+            PowOp* op = new PowOp();
+            forward_result[591] = op;
+            
+            op->set_inputs( forward_result[590] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3291', 'op': 'aten::mul', 'in': [591, 50], 'output_id': 0, 'shape': [400, 400], 'out': [593], 'sorted_id': 592}
+        {
+            Tensor::shape_type shape = {400,400};
+            MulOp* op = new MulOp();
+            forward_result[592] = op;
+            
+            op->set_inputs( forward_result[591] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3292', 'op': 'aten::div', 'in': [588, 592], 'output_id': 0, 'shape': [400, 400], 'out': [594], 'sorted_id': 593}
+        {
+            Tensor::shape_type shape = {400,400};
+            DivOp* op = new DivOp();
+            forward_result[593] = op;
+            
+            op->set_inputs( forward_result[588] );
+            op->set_inputs( forward_result[592] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3293', 'op': 'aten::sub', 'in': [586, 593, 12], 'output_id': 0, 'shape': [400, 400], 'out': [595], 'sorted_id': 594}
+        {
+            Tensor::shape_type shape = {400,400};
+            SubOp* op = new SubOp();
+            forward_result[594] = op;
+            
+            op->set_inputs( forward_result[586] );
+            op->set_inputs( forward_result[593] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3294', 'op': 'aten::sum', 'in': [594, 20], 'output_id': 0, 'shape': [], 'out': [609], 'sorted_id': 595}
+        {
+            SumOp* op = new SumOp();
+            forward_result[595] = op;
+            
+            op->set_inputs( forward_result[594] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3295', 'op': 'aten::exp', 'in': [511], 'output_id': 0, 'shape': [400], 'out': [597], 'sorted_id': 596}
+        {
+            Tensor::shape_type shape = {400};
+            ExpOp* op = new ExpOp();
+            forward_result[596] = op;
+            
+            op->set_inputs( forward_result[511] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3296', 'op': 'aten::log1p', 'in': [596], 'output_id': 0, 'shape': [400], 'out': [598], 'sorted_id': 597}
+        {
+            Tensor::shape_type shape = {400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[597] = op;
+            
+            op->set_inputs( forward_result[596] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3297', 'op': 'aten::log', 'in': [597], 'output_id': 0, 'shape': [400], 'out': [599], 'sorted_id': 598}
+        {
+            Tensor::shape_type shape = {400};
+            LogOp* op = new LogOp();
+            forward_result[598] = op;
+            
+            op->set_inputs( forward_result[597] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3298', 'op': 'aten::rsub', 'in': [598, 107, 12], 'output_id': 0, 'shape': [400], 'out': [607], 'sorted_id': 599}
+        {
+            Tensor::shape_type shape = {400};
+            RsubOp* op = new RsubOp();
+            forward_result[599] = op;
+            
+            op->set_inputs( forward_result[598] );
+            op->set_inputs( forward_result[107] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3299', 'op': 'aten::sub', 'in': [524, 510, 12], 'output_id': 0, 'shape': [400], 'out': [601], 'sorted_id': 600}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
-            forward_result[599] = op;
+            forward_result[600] = op;
             
-            op->set_inputs( forward_result[567] );
-            op->set_inputs( forward_result[598] );
+            op->set_inputs( forward_result[524] );
+            op->set_inputs( forward_result[510] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3411', 'op': 'aten::pow', 'in': [599, 45], 'output_id': 0, 'shape': [400], 'out': [601], 'sorted_id': 600}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3300', 'op': 'aten::pow', 'in': [600, 45], 'output_id': 0, 'shape': [400], 'out': [606], 'sorted_id': 601}
         {
             Tensor::shape_type shape = {400};
             PowOp* op = new PowOp();
-            forward_result[600] = op;
-            
-            op->set_inputs( forward_result[599] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3412', 'op': 'aten::neg', 'in': [600], 'output_id': 0, 'shape': [400], 'out': [604], 'sorted_id': 601}
-        {
-            Tensor::shape_type shape = {400};
-            NegOp* op = new NegOp();
             forward_result[601] = op;
             
             op->set_inputs( forward_result[600] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/var.37', 'op': 'aten::pow', 'in': [573, 45], 'output_id': 0, 'shape': [1], 'out': [603], 'sorted_id': 602}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3301', 'op': 'aten::exp', 'in': [511], 'output_id': 0, 'shape': [400], 'out': [603], 'sorted_id': 602}
         {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
+            Tensor::shape_type shape = {400};
+            ExpOp* op = new ExpOp();
             forward_result[602] = op;
             
-            op->set_inputs( forward_result[573] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[511] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3413', 'op': 'aten::mul', 'in': [602, 50], 'output_id': 0, 'shape': [1], 'out': [604], 'sorted_id': 603}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3302', 'op': 'aten::log1p', 'in': [602], 'output_id': 0, 'shape': [400], 'out': [604], 'sorted_id': 603}
         {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
+            Tensor::shape_type shape = {400};
+            Log1pOp* op = new Log1pOp();
             forward_result[603] = op;
             
             op->set_inputs( forward_result[602] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3414', 'op': 'aten::div', 'in': [601, 603], 'output_id': 0, 'shape': [400], 'out': [606], 'sorted_id': 604}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3303', 'op': 'aten::pow', 'in': [603, 45], 'output_id': 0, 'shape': [400], 'out': [605], 'sorted_id': 604}
+        {
+            Tensor::shape_type shape = {400};
+            PowOp* op = new PowOp();
+            forward_result[604] = op;
+            
+            op->set_inputs( forward_result[603] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3304', 'op': 'aten::mul', 'in': [604, 50], 'output_id': 0, 'shape': [400], 'out': [606], 'sorted_id': 605}
+        {
+            Tensor::shape_type shape = {400};
+            MulOp* op = new MulOp();
+            forward_result[605] = op;
+            
+            op->set_inputs( forward_result[604] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3305', 'op': 'aten::div', 'in': [601, 605], 'output_id': 0, 'shape': [400], 'out': [607], 'sorted_id': 606}
         {
             Tensor::shape_type shape = {400};
             DivOp* op = new DivOp();
-            forward_result[604] = op;
-            
-            op->set_inputs( forward_result[601] );
-            op->set_inputs( forward_result[603] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/log_scale.37', 'op': 'aten::log', 'in': [573], 'output_id': 0, 'shape': [1], 'out': [606], 'sorted_id': 605}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[605] = op;
-            
-            op->set_inputs( forward_result[573] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3415', 'op': 'aten::sub', 'in': [604, 605, 12], 'output_id': 0, 'shape': [400], 'out': [607], 'sorted_id': 606}
-        {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
             forward_result[606] = op;
             
-            op->set_inputs( forward_result[604] );
+            op->set_inputs( forward_result[601] );
             op->set_inputs( forward_result[605] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3416', 'op': 'aten::sub', 'in': [606, 55, 12], 'output_id': 0, 'shape': [400], 'out': [608], 'sorted_id': 607}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3306', 'op': 'aten::sub', 'in': [599, 606, 12], 'output_id': 0, 'shape': [400], 'out': [608], 'sorted_id': 607}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
             forward_result[607] = op;
             
+            op->set_inputs( forward_result[599] );
             op->set_inputs( forward_result[606] );
-            op->set_inputs( forward_result[55] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/prob1.19', 'op': 'aten::exp', 'in': [607], 'output_id': 0, 'shape': [400], 'out': [609], 'sorted_id': 608}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3307', 'op': 'aten::sum', 'in': [607, 20], 'output_id': 0, 'shape': [], 'out': [609], 'sorted_id': 608}
         {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
+            SumOp* op = new SumOp();
             forward_result[608] = op;
             
             op->set_inputs( forward_result[607] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3428', 'op': 'aten::mul', 'in': [608, 58], 'output_id': 0, 'shape': [400], 'out': [622], 'sorted_id': 609}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3308', 'op': 'aten::add', 'in': [595, 608, 12], 'output_id': 0, 'shape': [], 'out': [610], 'sorted_id': 609}
         {
-            Tensor::shape_type shape = {400};
-            MulOp* op = new MulOp();
+            AddOp* op = new AddOp();
             forward_result[609] = op;
             
+            op->set_inputs( forward_result[595] );
             op->set_inputs( forward_result[608] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/3224', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 25, 'shape': [1], 'out': [962, 611], 'sorted_id': 610}
+        // {'name': 'Model/3310', 'op': 'prim::TupleConstruct', 'in': [525, 582, 609], 'output_id': 0, 'shape': [], 'out': [1071, 1089, 611], 'sorted_id': 610}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 25 );
+            TupleConstructOp* op = new TupleConstructOp();
             forward_result[610] = op;
             
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[525] );
+            op->set_inputs( forward_result[582] );
+            op->set_inputs( forward_result[609] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3420', 'op': 'aten::sub', 'in': [567, 610, 12], 'output_id': 0, 'shape': [400], 'out': [612], 'sorted_id': 611}
+        // {'name': 'Model/3311', 'op': 'prim::TupleUnpack', 'in': [610], 'output_id': 0, 'shape': [4, 400], 'out': [612], 'sorted_id': 611}
         {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {4,400};
+            TupleUnpackOp* op = new TupleUnpackOp( 0 );
             forward_result[611] = op;
             
-            op->set_inputs( forward_result[567] );
             op->set_inputs( forward_result[610] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3421', 'op': 'aten::pow', 'in': [611, 45], 'output_id': 0, 'shape': [400], 'out': [613], 'sorted_id': 612}
+        // {'name': 'Model/Net[net]/input.21', 'op': 'aten::relu', 'in': [611], 'output_id': 0, 'shape': [4, 400], 'out': [644], 'sorted_id': 612}
         {
-            Tensor::shape_type shape = {400};
-            PowOp* op = new PowOp();
+            Tensor::shape_type shape = {4,400};
+            ReluOp* op = new ReluOp();
             forward_result[612] = op;
             
             op->set_inputs( forward_result[611] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3422', 'op': 'aten::neg', 'in': [612], 'output_id': 0, 'shape': [400], 'out': [616], 'sorted_id': 613}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/weight_mu/weight_mu.11', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [706, 628], 'sorted_id': 613}
         {
-            Tensor::shape_type shape = {400};
-            NegOp* op = new NegOp();
-            forward_result[613] = op;
-            
-            op->set_inputs( forward_result[612] );
-            op->set_shape( shape );
+            Tensor::shape_type shape = {10,400};
+            l3_weight_mu.reshape( shape );
+            forward_result[613] = new VariableTensor( l3_weight_mu, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/var.39', 'op': 'aten::pow', 'in': [586, 45], 'output_id': 0, 'shape': [1], 'out': [615], 'sorted_id': 614}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/weight_rho/weight_rho.11', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [708, 702, 618, 619, 615], 'sorted_id': 614}
         {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[614] = op;
-            
-            op->set_inputs( forward_result[586] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            Tensor::shape_type shape = {10,400};
+            l3_weight_rho.reshape( shape );
+            forward_result[614] = new VariableTensor( l3_weight_rho, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3423', 'op': 'aten::mul', 'in': [614, 50], 'output_id': 0, 'shape': [1], 'out': [616], 'sorted_id': 615}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3327', 'op': 'aten::exp', 'in': [614], 'output_id': 0, 'shape': [10, 400], 'out': [616], 'sorted_id': 615}
         {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
+            Tensor::shape_type shape = {10,400};
+            ExpOp* op = new ExpOp();
             forward_result[615] = op;
             
             op->set_inputs( forward_result[614] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3424', 'op': 'aten::div', 'in': [613, 615], 'output_id': 0, 'shape': [400], 'out': [618], 'sorted_id': 616}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3328', 'op': 'aten::log1p', 'in': [615], 'output_id': 0, 'shape': [10, 400], 'out': [627], 'sorted_id': 616}
         {
-            Tensor::shape_type shape = {400};
-            DivOp* op = new DivOp();
+            Tensor::shape_type shape = {10,400};
+            Log1pOp* op = new Log1pOp();
             forward_result[616] = op;
             
-            op->set_inputs( forward_result[613] );
             op->set_inputs( forward_result[615] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/log_scale.39', 'op': 'aten::log', 'in': [586], 'output_id': 0, 'shape': [1], 'out': [618], 'sorted_id': 617}
+        // {'name': 'Model/3076', 'op': 'prim::TupleUnpack', 'in': [370], 'output_id': 3, 'shape': [], 'out': [959, 621], 'sorted_id': 617}
         {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
+            TupleUnpackOp* op = new TupleUnpackOp( 3 );
             forward_result[617] = op;
             
-            op->set_inputs( forward_result[586] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[370] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3425', 'op': 'aten::sub', 'in': [616, 617, 12], 'output_id': 0, 'shape': [400], 'out': [619], 'sorted_id': 618}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3319', 'op': 'aten::size', 'in': [614, 10], 'output_id': 0, 'shape': [], 'out': [620, 623], 'sorted_id': 618}
         {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            SizeOp* op = new SizeOp();
             forward_result[618] = op;
             
-            op->set_inputs( forward_result[616] );
-            op->set_inputs( forward_result[617] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[614] );
+            op->set_inputs( forward_result[10] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3426', 'op': 'aten::sub', 'in': [618, 55, 12], 'output_id': 0, 'shape': [400], 'out': [620], 'sorted_id': 619}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3320', 'op': 'aten::size', 'in': [614, 12], 'output_id': 0, 'shape': [], 'out': [620, 623], 'sorted_id': 619}
         {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            SizeOp* op = new SizeOp();
             forward_result[619] = op;
             
-            op->set_inputs( forward_result[618] );
-            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[614] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/prob2.19', 'op': 'aten::exp', 'in': [619], 'output_id': 0, 'shape': [400], 'out': [621], 'sorted_id': 620}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3321', 'op': 'prim::ListConstruct', 'in': [618, 619], 'output_id': 0, 'shape': [], 'out': [621], 'sorted_id': 620}
         {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
+            ListConstructOp* op = new ListConstructOp();
             forward_result[620] = op;
             
+            op->set_inputs( forward_result[618] );
             op->set_inputs( forward_result[619] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3429', 'op': 'aten::mul', 'in': [620, 58], 'output_id': 0, 'shape': [400], 'out': [622], 'sorted_id': 621}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3322', 'op': 'aten::expand', 'in': [617, 620, 15], 'output_id': 0, 'shape': [10, 400], 'out': [625], 'sorted_id': 621}
         {
-            Tensor::shape_type shape = {400};
-            MulOp* op = new MulOp();
+            Tensor::shape_type shape = {10,400};
+            ExpandOp* op = new ExpandOp();
             forward_result[621] = op;
             
+            op->set_inputs( forward_result[617] );
             op->set_inputs( forward_result[620] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[15] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3430', 'op': 'aten::add', 'in': [609, 621, 12], 'output_id': 0, 'shape': [400], 'out': [623], 'sorted_id': 622}
+        // {'name': 'Model/3077', 'op': 'prim::TupleUnpack', 'in': [370], 'output_id': 4, 'shape': [], 'out': [624, 961], 'sorted_id': 622}
         {
-            Tensor::shape_type shape = {400};
-            AddOp* op = new AddOp();
+            TupleUnpackOp* op = new TupleUnpackOp( 4 );
             forward_result[622] = op;
             
-            op->set_inputs( forward_result[609] );
-            op->set_inputs( forward_result[621] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[370] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3431', 'op': 'aten::log', 'in': [622], 'output_id': 0, 'shape': [400], 'out': [624], 'sorted_id': 623}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3323', 'op': 'prim::ListConstruct', 'in': [618, 619], 'output_id': 0, 'shape': [], 'out': [624], 'sorted_id': 623}
         {
-            Tensor::shape_type shape = {400};
-            LogOp* op = new LogOp();
+            ListConstructOp* op = new ListConstructOp();
             forward_result[623] = op;
             
-            op->set_inputs( forward_result[622] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[618] );
+            op->set_inputs( forward_result[619] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3432', 'op': 'aten::sum', 'in': [623, 20], 'output_id': 0, 'shape': [], 'out': [625], 'sorted_id': 624}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3324', 'op': 'aten::expand', 'in': [622, 623, 15], 'output_id': 0, 'shape': [10, 400], 'out': [625], 'sorted_id': 624}
         {
-            SumOp* op = new SumOp();
+            Tensor::shape_type shape = {10,400};
+            ExpandOp* op = new ExpandOp();
             forward_result[624] = op;
             
+            op->set_inputs( forward_result[622] );
             op->set_inputs( forward_result[623] );
+            op->set_inputs( forward_result[15] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3325', 'op': 'aten::normal', 'in': [621, 624, 20], 'output_id': 0, 'shape': [10, 400], 'out': [626], 'sorted_id': 625}
+        {
+            Tensor::shape_type shape = {10,400};
+            NormalOp* op = new NormalOp();
+            forward_result[625] = op;
+            
+            op->set_inputs( forward_result[621] );
+            op->set_inputs( forward_result[624] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3433', 'op': 'aten::add', 'in': [597, 624, 12], 'output_id': 0, 'shape': [], 'out': [653], 'sorted_id': 625}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/epsilon.21', 'op': 'aten::to', 'in': [625, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [10, 400], 'out': [627], 'sorted_id': 626}
         {
-            AddOp* op = new AddOp();
-            forward_result[625] = op;
-            
-            op->set_inputs( forward_result[597] );
-            op->set_inputs( forward_result[624] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3434', 'op': 'aten::exp', 'in': [538], 'output_id': 0, 'shape': [400, 400], 'out': [627], 'sorted_id': 626}
-        {
-            Tensor::shape_type shape = {400,400};
-            ExpOp* op = new ExpOp();
+            Tensor::shape_type shape = {10,400};
+            ToOp* op = new ToOp();
             forward_result[626] = op;
             
-            op->set_inputs( forward_result[538] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[625] );
+            op->set_inputs( forward_result[22] );
+            op->set_inputs( forward_result[10] );
+            op->set_inputs( forward_result[23] );
+            op->set_inputs( forward_result[20] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3435', 'op': 'aten::log1p', 'in': [626], 'output_id': 0, 'shape': [400, 400], 'out': [628], 'sorted_id': 627}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3329', 'op': 'aten::mul', 'in': [616, 626], 'output_id': 0, 'shape': [10, 400], 'out': [628], 'sorted_id': 627}
         {
-            Tensor::shape_type shape = {400,400};
-            Log1pOp* op = new Log1pOp();
+            Tensor::shape_type shape = {10,400};
+            MulOp* op = new MulOp();
             forward_result[627] = op;
             
+            op->set_inputs( forward_result[616] );
             op->set_inputs( forward_result[626] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3436', 'op': 'aten::log', 'in': [627], 'output_id': 0, 'shape': [400, 400], 'out': [629], 'sorted_id': 628}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/value.21', 'op': 'aten::add', 'in': [613, 627, 12], 'output_id': 0, 'shape': [10, 400], 'out': [706, 659, 646, 644], 'sorted_id': 628}
         {
-            Tensor::shape_type shape = {400,400};
-            LogOp* op = new LogOp();
+            Tensor::shape_type shape = {10,400};
+            AddOp* op = new AddOp();
             forward_result[628] = op;
             
+            op->set_inputs( forward_result[613] );
             op->set_inputs( forward_result[627] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3437', 'op': 'aten::rsub', 'in': [628, 107, 12], 'output_id': 0, 'shape': [400, 400], 'out': [637], 'sorted_id': 629}
-        {
-            Tensor::shape_type shape = {400,400};
-            RsubOp* op = new RsubOp();
-            forward_result[629] = op;
-            
-            op->set_inputs( forward_result[628] );
-            op->set_inputs( forward_result[107] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3438', 'op': 'aten::sub', 'in': [552, 537, 12], 'output_id': 0, 'shape': [400, 400], 'out': [631], 'sorted_id': 630}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/bias_mu/bias_mu.11', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [719, 643], 'sorted_id': 629}
         {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
-            forward_result[630] = op;
-            
-            op->set_inputs( forward_result[552] );
-            op->set_inputs( forward_result[537] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            Tensor::shape_type shape = {10};
+            l3_bias_mu.reshape( shape );
+            forward_result[629] = new VariableTensor( l3_bias_mu, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3439', 'op': 'aten::pow', 'in': [630, 45], 'output_id': 0, 'shape': [400, 400], 'out': [636], 'sorted_id': 631}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/bias_rho/bias_rho.11', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [634, 715, 631, 721], 'sorted_id': 630}
         {
-            Tensor::shape_type shape = {400,400};
-            PowOp* op = new PowOp();
+            Tensor::shape_type shape = {10};
+            l3_bias_rho.reshape( shape );
+            forward_result[630] = new VariableTensor( l3_bias_rho, 2 );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3338', 'op': 'aten::exp', 'in': [630], 'output_id': 0, 'shape': [10], 'out': [632], 'sorted_id': 631}
+        {
+            Tensor::shape_type shape = {10};
+            ExpOp* op = new ExpOp();
             forward_result[631] = op;
             
             op->set_inputs( forward_result[630] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3440', 'op': 'aten::exp', 'in': [538], 'output_id': 0, 'shape': [400, 400], 'out': [633], 'sorted_id': 632}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3339', 'op': 'aten::log1p', 'in': [631], 'output_id': 0, 'shape': [10], 'out': [642], 'sorted_id': 632}
         {
-            Tensor::shape_type shape = {400,400};
-            ExpOp* op = new ExpOp();
+            Tensor::shape_type shape = {10};
+            Log1pOp* op = new Log1pOp();
             forward_result[632] = op;
             
-            op->set_inputs( forward_result[538] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[631] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3441', 'op': 'aten::log1p', 'in': [632], 'output_id': 0, 'shape': [400, 400], 'out': [634], 'sorted_id': 633}
+        // {'name': 'Model/3078', 'op': 'prim::TupleUnpack', 'in': [370], 'output_id': 5, 'shape': [], 'out': [636, 972], 'sorted_id': 633}
         {
-            Tensor::shape_type shape = {400,400};
-            Log1pOp* op = new Log1pOp();
+            TupleUnpackOp* op = new TupleUnpackOp( 5 );
             forward_result[633] = op;
             
-            op->set_inputs( forward_result[632] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[370] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3442', 'op': 'aten::pow', 'in': [633, 45], 'output_id': 0, 'shape': [400, 400], 'out': [635], 'sorted_id': 634}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3331', 'op': 'aten::size', 'in': [630, 10], 'output_id': 0, 'shape': [], 'out': [638, 635], 'sorted_id': 634}
         {
-            Tensor::shape_type shape = {400,400};
-            PowOp* op = new PowOp();
+            SizeOp* op = new SizeOp();
             forward_result[634] = op;
             
-            op->set_inputs( forward_result[633] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[630] );
+            op->set_inputs( forward_result[10] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3443', 'op': 'aten::mul', 'in': [634, 50], 'output_id': 0, 'shape': [400, 400], 'out': [636], 'sorted_id': 635}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3332', 'op': 'prim::ListConstruct', 'in': [634], 'output_id': 0, 'shape': [], 'out': [636], 'sorted_id': 635}
         {
-            Tensor::shape_type shape = {400,400};
-            MulOp* op = new MulOp();
+            ListConstructOp* op = new ListConstructOp();
             forward_result[635] = op;
             
             op->set_inputs( forward_result[634] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3444', 'op': 'aten::div', 'in': [631, 635], 'output_id': 0, 'shape': [400, 400], 'out': [637], 'sorted_id': 636}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3333', 'op': 'aten::expand', 'in': [633, 635, 15], 'output_id': 0, 'shape': [10], 'out': [640], 'sorted_id': 636}
         {
-            Tensor::shape_type shape = {400,400};
-            DivOp* op = new DivOp();
+            Tensor::shape_type shape = {10};
+            ExpandOp* op = new ExpandOp();
             forward_result[636] = op;
             
-            op->set_inputs( forward_result[631] );
+            op->set_inputs( forward_result[633] );
             op->set_inputs( forward_result[635] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[15] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3445', 'op': 'aten::sub', 'in': [629, 636, 12], 'output_id': 0, 'shape': [400, 400], 'out': [638], 'sorted_id': 637}
+        // {'name': 'Model/3079', 'op': 'prim::TupleUnpack', 'in': [370], 'output_id': 6, 'shape': [], 'out': [974, 639], 'sorted_id': 637}
         {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
+            TupleUnpackOp* op = new TupleUnpackOp( 6 );
             forward_result[637] = op;
             
-            op->set_inputs( forward_result[629] );
-            op->set_inputs( forward_result[636] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[370] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3446', 'op': 'aten::sum', 'in': [637, 20], 'output_id': 0, 'shape': [], 'out': [652], 'sorted_id': 638}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3334', 'op': 'prim::ListConstruct', 'in': [634], 'output_id': 0, 'shape': [], 'out': [639], 'sorted_id': 638}
         {
-            SumOp* op = new SumOp();
+            ListConstructOp* op = new ListConstructOp();
             forward_result[638] = op;
             
+            op->set_inputs( forward_result[634] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3335', 'op': 'aten::expand', 'in': [637, 638, 15], 'output_id': 0, 'shape': [10], 'out': [640], 'sorted_id': 639}
+        {
+            Tensor::shape_type shape = {10};
+            ExpandOp* op = new ExpandOp();
+            forward_result[639] = op;
+            
             op->set_inputs( forward_result[637] );
+            op->set_inputs( forward_result[638] );
+            op->set_inputs( forward_result[15] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3336', 'op': 'aten::normal', 'in': [636, 639, 20], 'output_id': 0, 'shape': [10], 'out': [641], 'sorted_id': 640}
+        {
+            Tensor::shape_type shape = {10};
+            NormalOp* op = new NormalOp();
+            forward_result[640] = op;
+            
+            op->set_inputs( forward_result[636] );
+            op->set_inputs( forward_result[639] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3447', 'op': 'aten::exp', 'in': [554], 'output_id': 0, 'shape': [400], 'out': [640], 'sorted_id': 639}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/epsilon.23', 'op': 'aten::to', 'in': [640, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [10], 'out': [642], 'sorted_id': 641}
         {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
-            forward_result[639] = op;
-            
-            op->set_inputs( forward_result[554] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3448', 'op': 'aten::log1p', 'in': [639], 'output_id': 0, 'shape': [400], 'out': [641], 'sorted_id': 640}
-        {
-            Tensor::shape_type shape = {400};
-            Log1pOp* op = new Log1pOp();
-            forward_result[640] = op;
-            
-            op->set_inputs( forward_result[639] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3449', 'op': 'aten::log', 'in': [640], 'output_id': 0, 'shape': [400], 'out': [642], 'sorted_id': 641}
-        {
-            Tensor::shape_type shape = {400};
-            LogOp* op = new LogOp();
+            Tensor::shape_type shape = {10};
+            ToOp* op = new ToOp();
             forward_result[641] = op;
             
             op->set_inputs( forward_result[640] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[22] );
+            op->set_inputs( forward_result[10] );
+            op->set_inputs( forward_result[23] );
+            op->set_inputs( forward_result[20] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3450', 'op': 'aten::rsub', 'in': [641, 107, 12], 'output_id': 0, 'shape': [400], 'out': [650], 'sorted_id': 642}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3340', 'op': 'aten::mul', 'in': [632, 641], 'output_id': 0, 'shape': [10], 'out': [643], 'sorted_id': 642}
         {
-            Tensor::shape_type shape = {400};
-            RsubOp* op = new RsubOp();
+            Tensor::shape_type shape = {10};
+            MulOp* op = new MulOp();
             forward_result[642] = op;
             
+            op->set_inputs( forward_result[632] );
             op->set_inputs( forward_result[641] );
-            op->set_inputs( forward_result[107] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3451', 'op': 'aten::sub', 'in': [567, 553, 12], 'output_id': 0, 'shape': [400], 'out': [644], 'sorted_id': 643}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/value.23', 'op': 'aten::add', 'in': [629, 642, 12], 'output_id': 0, 'shape': [10], 'out': [644, 719, 687, 675], 'sorted_id': 643}
         {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {10};
+            AddOp* op = new AddOp();
             forward_result[643] = op;
             
-            op->set_inputs( forward_result[567] );
-            op->set_inputs( forward_result[553] );
+            op->set_inputs( forward_result[629] );
+            op->set_inputs( forward_result[642] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3452', 'op': 'aten::pow', 'in': [643, 45], 'output_id': 0, 'shape': [400], 'out': [649], 'sorted_id': 644}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/input.23', 'op': 'aten::linear', 'in': [612, 628, 643], 'output_id': 0, 'shape': [4, 10], 'out': [729], 'sorted_id': 644}
         {
-            Tensor::shape_type shape = {400};
-            PowOp* op = new PowOp();
+            Tensor::shape_type shape = {4,10};
+            LinearOp* op = new LinearOp();
             forward_result[644] = op;
             
+            op->set_inputs( forward_result[612] );
+            op->set_inputs( forward_result[628] );
             op->set_inputs( forward_result[643] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3453', 'op': 'aten::exp', 'in': [554], 'output_id': 0, 'shape': [400], 'out': [646], 'sorted_id': 645}
+        // {'name': 'Model/3081', 'op': 'prim::TupleUnpack', 'in': [370], 'output_id': 8, 'shape': [1], 'out': [980, 646], 'sorted_id': 645}
         {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 8 );
             forward_result[645] = op;
             
-            op->set_inputs( forward_result[554] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[370] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3454', 'op': 'aten::log1p', 'in': [645], 'output_id': 0, 'shape': [400], 'out': [647], 'sorted_id': 646}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3344', 'op': 'aten::sub', 'in': [628, 645, 12], 'output_id': 0, 'shape': [10, 400], 'out': [647], 'sorted_id': 646}
         {
-            Tensor::shape_type shape = {400};
-            Log1pOp* op = new Log1pOp();
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
             forward_result[646] = op;
             
+            op->set_inputs( forward_result[628] );
             op->set_inputs( forward_result[645] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3455', 'op': 'aten::pow', 'in': [646, 45], 'output_id': 0, 'shape': [400], 'out': [648], 'sorted_id': 647}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3345', 'op': 'aten::pow', 'in': [646, 45], 'output_id': 0, 'shape': [10, 400], 'out': [648], 'sorted_id': 647}
         {
-            Tensor::shape_type shape = {400};
+            Tensor::shape_type shape = {10,400};
             PowOp* op = new PowOp();
             forward_result[647] = op;
             
             op->set_inputs( forward_result[646] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3456', 'op': 'aten::mul', 'in': [647, 50], 'output_id': 0, 'shape': [400], 'out': [649], 'sorted_id': 648}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3346', 'op': 'aten::neg', 'in': [647], 'output_id': 0, 'shape': [10, 400], 'out': [652], 'sorted_id': 648}
         {
-            Tensor::shape_type shape = {400};
-            MulOp* op = new MulOp();
+            Tensor::shape_type shape = {10,400};
+            NegOp* op = new NegOp();
             forward_result[648] = op;
             
             op->set_inputs( forward_result[647] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3457', 'op': 'aten::div', 'in': [644, 648], 'output_id': 0, 'shape': [400], 'out': [650], 'sorted_id': 649}
+        // {'name': 'Model/3080', 'op': 'prim::TupleUnpack', 'in': [370], 'output_id': 7, 'shape': [1], 'out': [983, 678, 986, 653, 650, 681, 1008, 1011], 'sorted_id': 649}
         {
-            Tensor::shape_type shape = {400};
-            DivOp* op = new DivOp();
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 7 );
             forward_result[649] = op;
             
-            op->set_inputs( forward_result[644] );
-            op->set_inputs( forward_result[648] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[370] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3458', 'op': 'aten::sub', 'in': [642, 649, 12], 'output_id': 0, 'shape': [400], 'out': [651], 'sorted_id': 650}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/var.41', 'op': 'aten::pow', 'in': [649, 45], 'output_id': 0, 'shape': [1], 'out': [651], 'sorted_id': 650}
         {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
             forward_result[650] = op;
             
-            op->set_inputs( forward_result[642] );
             op->set_inputs( forward_result[649] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3459', 'op': 'aten::sum', 'in': [650, 20], 'output_id': 0, 'shape': [], 'out': [652], 'sorted_id': 651}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3347', 'op': 'aten::mul', 'in': [650, 50], 'output_id': 0, 'shape': [1], 'out': [652], 'sorted_id': 651}
         {
-            SumOp* op = new SumOp();
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
             forward_result[651] = op;
             
             op->set_inputs( forward_result[650] );
-            op->set_inputs( forward_result[20] );
+            op->set_inputs( forward_result[50] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3460', 'op': 'aten::add', 'in': [638, 651, 12], 'output_id': 0, 'shape': [], 'out': [653], 'sorted_id': 652}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3348', 'op': 'aten::div', 'in': [648, 651], 'output_id': 0, 'shape': [10, 400], 'out': [654], 'sorted_id': 652}
         {
-            AddOp* op = new AddOp();
+            Tensor::shape_type shape = {10,400};
+            DivOp* op = new DivOp();
             forward_result[652] = op;
             
-            op->set_inputs( forward_result[638] );
+            op->set_inputs( forward_result[648] );
             op->set_inputs( forward_result[651] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/log_scale.41', 'op': 'aten::log', 'in': [649], 'output_id': 0, 'shape': [1], 'out': [654], 'sorted_id': 653}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[653] = op;
+            
+            op->set_inputs( forward_result[649] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3349', 'op': 'aten::sub', 'in': [652, 653, 12], 'output_id': 0, 'shape': [10, 400], 'out': [655], 'sorted_id': 654}
+        {
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
+            forward_result[654] = op;
+            
+            op->set_inputs( forward_result[652] );
+            op->set_inputs( forward_result[653] );
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/3462', 'op': 'prim::TupleConstruct', 'in': [568, 625, 652], 'output_id': 0, 'shape': [], 'out': [655, 654, 776], 'sorted_id': 653}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3350', 'op': 'aten::sub', 'in': [654, 55, 12], 'output_id': 0, 'shape': [10, 400], 'out': [656], 'sorted_id': 655}
         {
-            TupleConstructOp* op = new TupleConstructOp();
-            forward_result[653] = op;
-            
-            op->set_inputs( forward_result[568] );
-            op->set_inputs( forward_result[625] );
-            op->set_inputs( forward_result[652] );
-        }
-        
-        // {'name': 'Net/3464', 'op': 'prim::TupleUnpack', 'in': [653], 'output_id': 1, 'shape': [], 'out': [780], 'sorted_id': 654}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 1 );
-            forward_result[654] = op;
-            
-            op->set_inputs( forward_result[653] );
-        }
-        
-        // {'name': 'Net/3463', 'op': 'prim::TupleUnpack', 'in': [653], 'output_id': 0, 'shape': [4, 400], 'out': [656], 'sorted_id': 655}
-        {
-            Tensor::shape_type shape = {4,400};
-            TupleUnpackOp* op = new TupleUnpackOp( 0 );
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
             forward_result[655] = op;
             
-            op->set_inputs( forward_result[653] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[654] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/input.21', 'op': 'aten::relu', 'in': [655], 'output_id': 0, 'shape': [4, 400], 'out': [688], 'sorted_id': 656}
-        {
-            Tensor::shape_type shape = {4,400};
-            ReluOp* op = new ReluOp();
-            forward_result[656] = op;
-            
-            op->set_inputs( forward_result[655] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l3]/weight_mu/weight_mu.11', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [750, 672], 'sorted_id': 657}
-        {
-            Tensor::shape_type shape = {10,400};
-            l3_weight_mu.reshape( shape );
-            forward_result[657] = new VariableTensor( l3_weight_mu, 2 );
-        }
-        
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l3]/weight_rho/weight_rho.11', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [752, 662, 659, 746, 663], 'sorted_id': 658}
-        {
-            Tensor::shape_type shape = {10,400};
-            l3_weight_rho.reshape( shape );
-            forward_result[658] = new VariableTensor( l3_weight_rho, 2 );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3479', 'op': 'aten::exp', 'in': [658], 'output_id': 0, 'shape': [10, 400], 'out': [660], 'sorted_id': 659}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/prob1.21', 'op': 'aten::exp', 'in': [655], 'output_id': 0, 'shape': [10, 400], 'out': [657], 'sorted_id': 656}
         {
             Tensor::shape_type shape = {10,400};
             ExpOp* op = new ExpOp();
-            forward_result[659] = op;
+            forward_result[656] = op;
             
-            op->set_inputs( forward_result[658] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[655] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3480', 'op': 'aten::log1p', 'in': [659], 'output_id': 0, 'shape': [10, 400], 'out': [671], 'sorted_id': 660}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3362', 'op': 'aten::mul', 'in': [656, 58], 'output_id': 0, 'shape': [10, 400], 'out': [671], 'sorted_id': 657}
         {
             Tensor::shape_type shape = {10,400};
-            Log1pOp* op = new Log1pOp();
-            forward_result[660] = op;
+            MulOp* op = new MulOp();
+            forward_result[657] = op;
             
-            op->set_inputs( forward_result[659] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[656] );
+            op->set_inputs( forward_result[58] );
         }
         
-        // {'name': 'Net/3225', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 26, 'shape': [], 'out': [665, 1015], 'sorted_id': 661}
+        // {'name': 'Model/3083', 'op': 'prim::TupleUnpack', 'in': [370], 'output_id': 10, 'shape': [1], 'out': [991, 659], 'sorted_id': 658}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 26 );
-            forward_result[661] = op;
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 10 );
+            forward_result[658] = op;
             
-            op->set_inputs( forward_result[409] );
+            op->set_inputs( forward_result[370] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3471', 'op': 'aten::size', 'in': [658, 10], 'output_id': 0, 'shape': [], 'out': [667, 664], 'sorted_id': 662}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3354', 'op': 'aten::sub', 'in': [628, 658, 12], 'output_id': 0, 'shape': [10, 400], 'out': [660], 'sorted_id': 659}
         {
-            SizeOp* op = new SizeOp();
-            forward_result[662] = op;
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
+            forward_result[659] = op;
             
-            op->set_inputs( forward_result[658] );
-            op->set_inputs( forward_result[10] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3472', 'op': 'aten::size', 'in': [658, 12], 'output_id': 0, 'shape': [], 'out': [667, 664], 'sorted_id': 663}
-        {
-            SizeOp* op = new SizeOp();
-            forward_result[663] = op;
-            
+            op->set_inputs( forward_result[628] );
             op->set_inputs( forward_result[658] );
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3473', 'op': 'prim::ListConstruct', 'in': [662, 663], 'output_id': 0, 'shape': [], 'out': [665], 'sorted_id': 664}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[664] = op;
-            
-            op->set_inputs( forward_result[662] );
-            op->set_inputs( forward_result[663] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3474', 'op': 'aten::expand', 'in': [661, 664, 15], 'output_id': 0, 'shape': [10, 400], 'out': [669], 'sorted_id': 665}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3355', 'op': 'aten::pow', 'in': [659, 45], 'output_id': 0, 'shape': [10, 400], 'out': [661], 'sorted_id': 660}
         {
             Tensor::shape_type shape = {10,400};
-            ExpandOp* op = new ExpandOp();
+            PowOp* op = new PowOp();
+            forward_result[660] = op;
+            
+            op->set_inputs( forward_result[659] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3356', 'op': 'aten::neg', 'in': [660], 'output_id': 0, 'shape': [10, 400], 'out': [665], 'sorted_id': 661}
+        {
+            Tensor::shape_type shape = {10,400};
+            NegOp* op = new NegOp();
+            forward_result[661] = op;
+            
+            op->set_inputs( forward_result[660] );
+        }
+        
+        // {'name': 'Model/3082', 'op': 'prim::TupleUnpack', 'in': [370], 'output_id': 9, 'shape': [1], 'out': [666, 693, 1019, 663, 1022, 994, 997, 690], 'sorted_id': 662}
+        {
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 9 );
+            forward_result[662] = op;
+            
+            op->set_inputs( forward_result[370] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/var.43', 'op': 'aten::pow', 'in': [662, 45], 'output_id': 0, 'shape': [1], 'out': [664], 'sorted_id': 663}
+        {
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[663] = op;
+            
+            op->set_inputs( forward_result[662] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3357', 'op': 'aten::mul', 'in': [663, 50], 'output_id': 0, 'shape': [1], 'out': [665], 'sorted_id': 664}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[664] = op;
+            
+            op->set_inputs( forward_result[663] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3358', 'op': 'aten::div', 'in': [661, 664], 'output_id': 0, 'shape': [10, 400], 'out': [667], 'sorted_id': 665}
+        {
+            Tensor::shape_type shape = {10,400};
+            DivOp* op = new DivOp();
             forward_result[665] = op;
             
             op->set_inputs( forward_result[661] );
             op->set_inputs( forward_result[664] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/3226', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 27, 'shape': [], 'out': [668, 1017], 'sorted_id': 666}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/log_scale.43', 'op': 'aten::log', 'in': [662], 'output_id': 0, 'shape': [1], 'out': [667], 'sorted_id': 666}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 27 );
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
             forward_result[666] = op;
             
-            op->set_inputs( forward_result[409] );
+            op->set_inputs( forward_result[662] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3475', 'op': 'prim::ListConstruct', 'in': [662, 663], 'output_id': 0, 'shape': [], 'out': [668], 'sorted_id': 667}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3359', 'op': 'aten::sub', 'in': [665, 666, 12], 'output_id': 0, 'shape': [10, 400], 'out': [668], 'sorted_id': 667}
         {
-            ListConstructOp* op = new ListConstructOp();
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
             forward_result[667] = op;
             
-            op->set_inputs( forward_result[662] );
-            op->set_inputs( forward_result[663] );
+            op->set_inputs( forward_result[665] );
+            op->set_inputs( forward_result[666] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3476', 'op': 'aten::expand', 'in': [666, 667, 15], 'output_id': 0, 'shape': [10, 400], 'out': [669], 'sorted_id': 668}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3360', 'op': 'aten::sub', 'in': [667, 55, 12], 'output_id': 0, 'shape': [10, 400], 'out': [669], 'sorted_id': 668}
         {
             Tensor::shape_type shape = {10,400};
-            ExpandOp* op = new ExpandOp();
+            SubOp* op = new SubOp();
             forward_result[668] = op;
             
-            op->set_inputs( forward_result[666] );
             op->set_inputs( forward_result[667] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3477', 'op': 'aten::normal', 'in': [665, 668, 20], 'output_id': 0, 'shape': [10, 400], 'out': [670], 'sorted_id': 669}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/prob2.21', 'op': 'aten::exp', 'in': [668], 'output_id': 0, 'shape': [10, 400], 'out': [670], 'sorted_id': 669}
         {
             Tensor::shape_type shape = {10,400};
-            NormalOp* op = new NormalOp();
+            ExpOp* op = new ExpOp();
             forward_result[669] = op;
             
-            op->set_inputs( forward_result[665] );
             op->set_inputs( forward_result[668] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/epsilon.21', 'op': 'aten::to', 'in': [669, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [10, 400], 'out': [671], 'sorted_id': 670}
-        {
-            Tensor::shape_type shape = {10,400};
-            ToOp* op = new ToOp();
-            forward_result[670] = op;
-            
-            op->set_inputs( forward_result[669] );
-            op->set_inputs( forward_result[22] );
-            op->set_inputs( forward_result[10] );
-            op->set_inputs( forward_result[23] );
-            op->set_inputs( forward_result[20] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3481', 'op': 'aten::mul', 'in': [660, 670], 'output_id': 0, 'shape': [10, 400], 'out': [672], 'sorted_id': 671}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3363', 'op': 'aten::mul', 'in': [669, 58], 'output_id': 0, 'shape': [10, 400], 'out': [671], 'sorted_id': 670}
         {
             Tensor::shape_type shape = {10,400};
             MulOp* op = new MulOp();
-            forward_result[671] = op;
+            forward_result[670] = op;
             
-            op->set_inputs( forward_result[660] );
-            op->set_inputs( forward_result[670] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[669] );
+            op->set_inputs( forward_result[58] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/value.21', 'op': 'aten::add', 'in': [657, 671, 12], 'output_id': 0, 'shape': [10, 400], 'out': [703, 688, 750, 690], 'sorted_id': 672}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3364', 'op': 'aten::add', 'in': [657, 670, 12], 'output_id': 0, 'shape': [10, 400], 'out': [672], 'sorted_id': 671}
         {
             Tensor::shape_type shape = {10,400};
             AddOp* op = new AddOp();
-            forward_result[672] = op;
+            forward_result[671] = op;
             
             op->set_inputs( forward_result[657] );
-            op->set_inputs( forward_result[671] );
+            op->set_inputs( forward_result[670] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l3]/bias_mu/bias_mu.11', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [687, 763], 'sorted_id': 673}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3365', 'op': 'aten::log', 'in': [671], 'output_id': 0, 'shape': [10, 400], 'out': [673], 'sorted_id': 672}
         {
-            Tensor::shape_type shape = {10};
-            l3_bias_mu.reshape( shape );
-            forward_result[673] = new VariableTensor( l3_bias_mu, 2 );
+            Tensor::shape_type shape = {10,400};
+            LogOp* op = new LogOp();
+            forward_result[672] = op;
+            
+            op->set_inputs( forward_result[671] );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l3]/bias_rho/bias_rho.11', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [675, 759, 678, 765], 'sorted_id': 674}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3366', 'op': 'aten::sum', 'in': [672, 20], 'output_id': 0, 'shape': [], 'out': [701], 'sorted_id': 673}
         {
-            Tensor::shape_type shape = {10};
-            l3_bias_rho.reshape( shape );
-            forward_result[674] = new VariableTensor( l3_bias_rho, 2 );
+            SumOp* op = new SumOp();
+            forward_result[673] = op;
+            
+            op->set_inputs( forward_result[672] );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3490', 'op': 'aten::exp', 'in': [674], 'output_id': 0, 'shape': [10], 'out': [676], 'sorted_id': 675}
+        // {'name': 'Model/3084', 'op': 'prim::TupleUnpack', 'in': [370], 'output_id': 11, 'shape': [1], 'out': [1005, 675], 'sorted_id': 674}
+        {
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 11 );
+            forward_result[674] = op;
+            
+            op->set_inputs( forward_result[370] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3369', 'op': 'aten::sub', 'in': [643, 674, 12], 'output_id': 0, 'shape': [10], 'out': [676], 'sorted_id': 675}
         {
             Tensor::shape_type shape = {10};
-            ExpOp* op = new ExpOp();
+            SubOp* op = new SubOp();
             forward_result[675] = op;
             
+            op->set_inputs( forward_result[643] );
             op->set_inputs( forward_result[674] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3491', 'op': 'aten::log1p', 'in': [675], 'output_id': 0, 'shape': [10], 'out': [686], 'sorted_id': 676}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3370', 'op': 'aten::pow', 'in': [675, 45], 'output_id': 0, 'shape': [10], 'out': [677], 'sorted_id': 676}
         {
             Tensor::shape_type shape = {10};
-            Log1pOp* op = new Log1pOp();
+            PowOp* op = new PowOp();
             forward_result[676] = op;
             
             op->set_inputs( forward_result[675] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/3227', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 28, 'shape': [], 'out': [680, 1028], 'sorted_id': 677}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3371', 'op': 'aten::neg', 'in': [676], 'output_id': 0, 'shape': [10], 'out': [680], 'sorted_id': 677}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 28 );
+            Tensor::shape_type shape = {10};
+            NegOp* op = new NegOp();
             forward_result[677] = op;
             
-            op->set_inputs( forward_result[409] );
+            op->set_inputs( forward_result[676] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3483', 'op': 'aten::size', 'in': [674, 10], 'output_id': 0, 'shape': [], 'out': [679, 682], 'sorted_id': 678}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/var.45', 'op': 'aten::pow', 'in': [649, 45], 'output_id': 0, 'shape': [1], 'out': [679], 'sorted_id': 678}
         {
-            SizeOp* op = new SizeOp();
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
             forward_result[678] = op;
             
-            op->set_inputs( forward_result[674] );
-            op->set_inputs( forward_result[10] );
+            op->set_inputs( forward_result[649] );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3484', 'op': 'prim::ListConstruct', 'in': [678], 'output_id': 0, 'shape': [], 'out': [680], 'sorted_id': 679}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3372', 'op': 'aten::mul', 'in': [678, 50], 'output_id': 0, 'shape': [1], 'out': [680], 'sorted_id': 679}
         {
-            ListConstructOp* op = new ListConstructOp();
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
             forward_result[679] = op;
             
             op->set_inputs( forward_result[678] );
+            op->set_inputs( forward_result[50] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3485', 'op': 'aten::expand', 'in': [677, 679, 15], 'output_id': 0, 'shape': [10], 'out': [684], 'sorted_id': 680}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3373', 'op': 'aten::div', 'in': [677, 679], 'output_id': 0, 'shape': [10], 'out': [682], 'sorted_id': 680}
         {
             Tensor::shape_type shape = {10};
-            ExpandOp* op = new ExpandOp();
+            DivOp* op = new DivOp();
             forward_result[680] = op;
             
             op->set_inputs( forward_result[677] );
             op->set_inputs( forward_result[679] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/3228', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 29, 'shape': [], 'out': [683, 1030], 'sorted_id': 681}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 29 );
-            forward_result[681] = op;
-            
-            op->set_inputs( forward_result[409] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3486', 'op': 'prim::ListConstruct', 'in': [678], 'output_id': 0, 'shape': [], 'out': [683], 'sorted_id': 682}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[682] = op;
-            
-            op->set_inputs( forward_result[678] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3487', 'op': 'aten::expand', 'in': [681, 682, 15], 'output_id': 0, 'shape': [10], 'out': [684], 'sorted_id': 683}
-        {
-            Tensor::shape_type shape = {10};
-            ExpandOp* op = new ExpandOp();
-            forward_result[683] = op;
-            
-            op->set_inputs( forward_result[681] );
-            op->set_inputs( forward_result[682] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3488', 'op': 'aten::normal', 'in': [680, 683, 20], 'output_id': 0, 'shape': [10], 'out': [685], 'sorted_id': 684}
-        {
-            Tensor::shape_type shape = {10};
-            NormalOp* op = new NormalOp();
-            forward_result[684] = op;
-            
-            op->set_inputs( forward_result[680] );
-            op->set_inputs( forward_result[683] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/epsilon.23', 'op': 'aten::to', 'in': [684, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [10], 'out': [686], 'sorted_id': 685}
-        {
-            Tensor::shape_type shape = {10};
-            ToOp* op = new ToOp();
-            forward_result[685] = op;
-            
-            op->set_inputs( forward_result[684] );
-            op->set_inputs( forward_result[22] );
-            op->set_inputs( forward_result[10] );
-            op->set_inputs( forward_result[23] );
-            op->set_inputs( forward_result[20] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3492', 'op': 'aten::mul', 'in': [676, 685], 'output_id': 0, 'shape': [10], 'out': [687], 'sorted_id': 686}
-        {
-            Tensor::shape_type shape = {10};
-            MulOp* op = new MulOp();
-            forward_result[686] = op;
-            
-            op->set_inputs( forward_result[676] );
-            op->set_inputs( forward_result[685] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/value.23', 'op': 'aten::add', 'in': [673, 686, 12], 'output_id': 0, 'shape': [10], 'out': [719, 731, 688, 763], 'sorted_id': 687}
-        {
-            Tensor::shape_type shape = {10};
-            AddOp* op = new AddOp();
-            forward_result[687] = op;
-            
-            op->set_inputs( forward_result[673] );
-            op->set_inputs( forward_result[686] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/input.23', 'op': 'aten::linear', 'in': [656, 672, 687], 'output_id': 0, 'shape': [4, 10], 'out': [773], 'sorted_id': 688}
-        {
-            Tensor::shape_type shape = {4,10};
-            LinearOp* op = new LinearOp();
-            forward_result[688] = op;
-            
-            op->set_inputs( forward_result[656] );
-            op->set_inputs( forward_result[672] );
-            op->set_inputs( forward_result[687] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/3230', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 31, 'shape': [1], 'out': [1036, 690], 'sorted_id': 689}
-        {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 31 );
-            forward_result[689] = op;
-            
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3496', 'op': 'aten::sub', 'in': [672, 689, 12], 'output_id': 0, 'shape': [10, 400], 'out': [691], 'sorted_id': 690}
-        {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
-            forward_result[690] = op;
-            
-            op->set_inputs( forward_result[672] );
-            op->set_inputs( forward_result[689] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3497', 'op': 'aten::pow', 'in': [690, 45], 'output_id': 0, 'shape': [10, 400], 'out': [692], 'sorted_id': 691}
-        {
-            Tensor::shape_type shape = {10,400};
-            PowOp* op = new PowOp();
-            forward_result[691] = op;
-            
-            op->set_inputs( forward_result[690] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3498', 'op': 'aten::neg', 'in': [691], 'output_id': 0, 'shape': [10, 400], 'out': [696], 'sorted_id': 692}
-        {
-            Tensor::shape_type shape = {10,400};
-            NegOp* op = new NegOp();
-            forward_result[692] = op;
-            
-            op->set_inputs( forward_result[691] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/3229', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 30, 'shape': [1], 'out': [694, 1042, 1039, 1067, 1064, 722, 697, 725], 'sorted_id': 693}
-        {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 30 );
-            forward_result[693] = op;
-            
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/var.41', 'op': 'aten::pow', 'in': [693, 45], 'output_id': 0, 'shape': [1], 'out': [695], 'sorted_id': 694}
-        {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[694] = op;
-            
-            op->set_inputs( forward_result[693] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3499', 'op': 'aten::mul', 'in': [694, 50], 'output_id': 0, 'shape': [1], 'out': [696], 'sorted_id': 695}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[695] = op;
-            
-            op->set_inputs( forward_result[694] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3500', 'op': 'aten::div', 'in': [692, 695], 'output_id': 0, 'shape': [10, 400], 'out': [698], 'sorted_id': 696}
-        {
-            Tensor::shape_type shape = {10,400};
-            DivOp* op = new DivOp();
-            forward_result[696] = op;
-            
-            op->set_inputs( forward_result[692] );
-            op->set_inputs( forward_result[695] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/log_scale.41', 'op': 'aten::log', 'in': [693], 'output_id': 0, 'shape': [1], 'out': [698], 'sorted_id': 697}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/log_scale.45', 'op': 'aten::log', 'in': [649], 'output_id': 0, 'shape': [1], 'out': [682], 'sorted_id': 681}
         {
             Tensor::shape_type shape = {1};
             LogOp* op = new LogOp();
+            forward_result[681] = op;
+            
+            op->set_inputs( forward_result[649] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3374', 'op': 'aten::sub', 'in': [680, 681, 12], 'output_id': 0, 'shape': [10], 'out': [683], 'sorted_id': 682}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[682] = op;
+            
+            op->set_inputs( forward_result[680] );
+            op->set_inputs( forward_result[681] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3375', 'op': 'aten::sub', 'in': [682, 55, 12], 'output_id': 0, 'shape': [10], 'out': [684], 'sorted_id': 683}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[683] = op;
+            
+            op->set_inputs( forward_result[682] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/prob1.23', 'op': 'aten::exp', 'in': [683], 'output_id': 0, 'shape': [10], 'out': [685], 'sorted_id': 684}
+        {
+            Tensor::shape_type shape = {10};
+            ExpOp* op = new ExpOp();
+            forward_result[684] = op;
+            
+            op->set_inputs( forward_result[683] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3387', 'op': 'aten::mul', 'in': [684, 58], 'output_id': 0, 'shape': [10], 'out': [698], 'sorted_id': 685}
+        {
+            Tensor::shape_type shape = {10};
+            MulOp* op = new MulOp();
+            forward_result[685] = op;
+            
+            op->set_inputs( forward_result[684] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/3085', 'op': 'prim::TupleUnpack', 'in': [370], 'output_id': 12, 'shape': [1], 'out': [1016, 687], 'sorted_id': 686}
+        {
+            Tensor::shape_type shape = {1};
+            TupleUnpackOp* op = new TupleUnpackOp( 12 );
+            forward_result[686] = op;
+            
+            op->set_inputs( forward_result[370] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3379', 'op': 'aten::sub', 'in': [643, 686, 12], 'output_id': 0, 'shape': [10], 'out': [688], 'sorted_id': 687}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[687] = op;
+            
+            op->set_inputs( forward_result[643] );
+            op->set_inputs( forward_result[686] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3380', 'op': 'aten::pow', 'in': [687, 45], 'output_id': 0, 'shape': [10], 'out': [689], 'sorted_id': 688}
+        {
+            Tensor::shape_type shape = {10};
+            PowOp* op = new PowOp();
+            forward_result[688] = op;
+            
+            op->set_inputs( forward_result[687] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3381', 'op': 'aten::neg', 'in': [688], 'output_id': 0, 'shape': [10], 'out': [692], 'sorted_id': 689}
+        {
+            Tensor::shape_type shape = {10};
+            NegOp* op = new NegOp();
+            forward_result[689] = op;
+            
+            op->set_inputs( forward_result[688] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/var.47', 'op': 'aten::pow', 'in': [662, 45], 'output_id': 0, 'shape': [1], 'out': [691], 'sorted_id': 690}
+        {
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[690] = op;
+            
+            op->set_inputs( forward_result[662] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3382', 'op': 'aten::mul', 'in': [690, 50], 'output_id': 0, 'shape': [1], 'out': [692], 'sorted_id': 691}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[691] = op;
+            
+            op->set_inputs( forward_result[690] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3383', 'op': 'aten::div', 'in': [689, 691], 'output_id': 0, 'shape': [10], 'out': [694], 'sorted_id': 692}
+        {
+            Tensor::shape_type shape = {10};
+            DivOp* op = new DivOp();
+            forward_result[692] = op;
+            
+            op->set_inputs( forward_result[689] );
+            op->set_inputs( forward_result[691] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/log_scale.47', 'op': 'aten::log', 'in': [662], 'output_id': 0, 'shape': [1], 'out': [694], 'sorted_id': 693}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[693] = op;
+            
+            op->set_inputs( forward_result[662] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3384', 'op': 'aten::sub', 'in': [692, 693, 12], 'output_id': 0, 'shape': [10], 'out': [695], 'sorted_id': 694}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[694] = op;
+            
+            op->set_inputs( forward_result[692] );
+            op->set_inputs( forward_result[693] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3385', 'op': 'aten::sub', 'in': [694, 55, 12], 'output_id': 0, 'shape': [10], 'out': [696], 'sorted_id': 695}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[695] = op;
+            
+            op->set_inputs( forward_result[694] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/prob2.23', 'op': 'aten::exp', 'in': [695], 'output_id': 0, 'shape': [10], 'out': [697], 'sorted_id': 696}
+        {
+            Tensor::shape_type shape = {10};
+            ExpOp* op = new ExpOp();
+            forward_result[696] = op;
+            
+            op->set_inputs( forward_result[695] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3388', 'op': 'aten::mul', 'in': [696, 58], 'output_id': 0, 'shape': [10], 'out': [698], 'sorted_id': 697}
+        {
+            Tensor::shape_type shape = {10};
+            MulOp* op = new MulOp();
             forward_result[697] = op;
             
-            op->set_inputs( forward_result[693] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[696] );
+            op->set_inputs( forward_result[58] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3501', 'op': 'aten::sub', 'in': [696, 697, 12], 'output_id': 0, 'shape': [10, 400], 'out': [699], 'sorted_id': 698}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3389', 'op': 'aten::add', 'in': [685, 697, 12], 'output_id': 0, 'shape': [10], 'out': [699], 'sorted_id': 698}
         {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {10};
+            AddOp* op = new AddOp();
             forward_result[698] = op;
             
-            op->set_inputs( forward_result[696] );
+            op->set_inputs( forward_result[685] );
             op->set_inputs( forward_result[697] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3502', 'op': 'aten::sub', 'in': [698, 55, 12], 'output_id': 0, 'shape': [10, 400], 'out': [700], 'sorted_id': 699}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3390', 'op': 'aten::log', 'in': [698], 'output_id': 0, 'shape': [10], 'out': [700], 'sorted_id': 699}
         {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {10};
+            LogOp* op = new LogOp();
             forward_result[699] = op;
             
             op->set_inputs( forward_result[698] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/prob1.21', 'op': 'aten::exp', 'in': [699], 'output_id': 0, 'shape': [10, 400], 'out': [701], 'sorted_id': 700}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3391', 'op': 'aten::sum', 'in': [699, 20], 'output_id': 0, 'shape': [], 'out': [701], 'sorted_id': 700}
         {
-            Tensor::shape_type shape = {10,400};
-            ExpOp* op = new ExpOp();
+            SumOp* op = new SumOp();
             forward_result[700] = op;
             
             op->set_inputs( forward_result[699] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3514', 'op': 'aten::mul', 'in': [700, 58], 'output_id': 0, 'shape': [10, 400], 'out': [715], 'sorted_id': 701}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3392', 'op': 'aten::add', 'in': [673, 700, 12], 'output_id': 0, 'shape': [], 'out': [729], 'sorted_id': 701}
         {
-            Tensor::shape_type shape = {10,400};
-            MulOp* op = new MulOp();
+            AddOp* op = new AddOp();
             forward_result[701] = op;
             
+            op->set_inputs( forward_result[673] );
             op->set_inputs( forward_result[700] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/3232', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 33, 'shape': [1], 'out': [703, 1047], 'sorted_id': 702}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3393', 'op': 'aten::exp', 'in': [614], 'output_id': 0, 'shape': [10, 400], 'out': [703], 'sorted_id': 702}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 33 );
+            Tensor::shape_type shape = {10,400};
+            ExpOp* op = new ExpOp();
             forward_result[702] = op;
             
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[614] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3506', 'op': 'aten::sub', 'in': [672, 702, 12], 'output_id': 0, 'shape': [10, 400], 'out': [704], 'sorted_id': 703}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3394', 'op': 'aten::log1p', 'in': [702], 'output_id': 0, 'shape': [10, 400], 'out': [704], 'sorted_id': 703}
         {
             Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
+            Log1pOp* op = new Log1pOp();
             forward_result[703] = op;
             
-            op->set_inputs( forward_result[672] );
             op->set_inputs( forward_result[702] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3507', 'op': 'aten::pow', 'in': [703, 45], 'output_id': 0, 'shape': [10, 400], 'out': [705], 'sorted_id': 704}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3395', 'op': 'aten::log', 'in': [703], 'output_id': 0, 'shape': [10, 400], 'out': [705], 'sorted_id': 704}
         {
             Tensor::shape_type shape = {10,400};
-            PowOp* op = new PowOp();
+            LogOp* op = new LogOp();
             forward_result[704] = op;
             
             op->set_inputs( forward_result[703] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3508', 'op': 'aten::neg', 'in': [704], 'output_id': 0, 'shape': [10, 400], 'out': [709], 'sorted_id': 705}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3396', 'op': 'aten::rsub', 'in': [704, 107, 12], 'output_id': 0, 'shape': [10, 400], 'out': [713], 'sorted_id': 705}
         {
             Tensor::shape_type shape = {10,400};
-            NegOp* op = new NegOp();
+            RsubOp* op = new RsubOp();
             forward_result[705] = op;
             
             op->set_inputs( forward_result[704] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[107] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/3231', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 32, 'shape': [1], 'out': [707, 1075, 1050, 737, 1078, 1053, 710, 734], 'sorted_id': 706}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3397', 'op': 'aten::sub', 'in': [628, 613, 12], 'output_id': 0, 'shape': [10, 400], 'out': [707], 'sorted_id': 706}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 32 );
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
             forward_result[706] = op;
             
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[628] );
+            op->set_inputs( forward_result[613] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/var.43', 'op': 'aten::pow', 'in': [706, 45], 'output_id': 0, 'shape': [1], 'out': [708], 'sorted_id': 707}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3398', 'op': 'aten::pow', 'in': [706, 45], 'output_id': 0, 'shape': [10, 400], 'out': [712], 'sorted_id': 707}
         {
-            Tensor::shape_type shape = {1};
+            Tensor::shape_type shape = {10,400};
             PowOp* op = new PowOp();
             forward_result[707] = op;
             
             op->set_inputs( forward_result[706] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3509', 'op': 'aten::mul', 'in': [707, 50], 'output_id': 0, 'shape': [1], 'out': [709], 'sorted_id': 708}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[708] = op;
-            
-            op->set_inputs( forward_result[707] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3510', 'op': 'aten::div', 'in': [705, 708], 'output_id': 0, 'shape': [10, 400], 'out': [711], 'sorted_id': 709}
-        {
-            Tensor::shape_type shape = {10,400};
-            DivOp* op = new DivOp();
-            forward_result[709] = op;
-            
-            op->set_inputs( forward_result[705] );
-            op->set_inputs( forward_result[708] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/log_scale.43', 'op': 'aten::log', 'in': [706], 'output_id': 0, 'shape': [1], 'out': [711], 'sorted_id': 710}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[710] = op;
-            
-            op->set_inputs( forward_result[706] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3511', 'op': 'aten::sub', 'in': [709, 710, 12], 'output_id': 0, 'shape': [10, 400], 'out': [712], 'sorted_id': 711}
-        {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
-            forward_result[711] = op;
-            
-            op->set_inputs( forward_result[709] );
-            op->set_inputs( forward_result[710] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3512', 'op': 'aten::sub', 'in': [711, 55, 12], 'output_id': 0, 'shape': [10, 400], 'out': [713], 'sorted_id': 712}
-        {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
-            forward_result[712] = op;
-            
-            op->set_inputs( forward_result[711] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/prob2.21', 'op': 'aten::exp', 'in': [712], 'output_id': 0, 'shape': [10, 400], 'out': [714], 'sorted_id': 713}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3399', 'op': 'aten::exp', 'in': [614], 'output_id': 0, 'shape': [10, 400], 'out': [709], 'sorted_id': 708}
         {
             Tensor::shape_type shape = {10,400};
             ExpOp* op = new ExpOp();
-            forward_result[713] = op;
+            forward_result[708] = op;
             
-            op->set_inputs( forward_result[712] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[614] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3515', 'op': 'aten::mul', 'in': [713, 58], 'output_id': 0, 'shape': [10, 400], 'out': [715], 'sorted_id': 714}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3400', 'op': 'aten::log1p', 'in': [708], 'output_id': 0, 'shape': [10, 400], 'out': [710], 'sorted_id': 709}
+        {
+            Tensor::shape_type shape = {10,400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[709] = op;
+            
+            op->set_inputs( forward_result[708] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3401', 'op': 'aten::pow', 'in': [709, 45], 'output_id': 0, 'shape': [10, 400], 'out': [711], 'sorted_id': 710}
+        {
+            Tensor::shape_type shape = {10,400};
+            PowOp* op = new PowOp();
+            forward_result[710] = op;
+            
+            op->set_inputs( forward_result[709] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3402', 'op': 'aten::mul', 'in': [710, 50], 'output_id': 0, 'shape': [10, 400], 'out': [712], 'sorted_id': 711}
         {
             Tensor::shape_type shape = {10,400};
             MulOp* op = new MulOp();
+            forward_result[711] = op;
+            
+            op->set_inputs( forward_result[710] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3403', 'op': 'aten::div', 'in': [707, 711], 'output_id': 0, 'shape': [10, 400], 'out': [713], 'sorted_id': 712}
+        {
+            Tensor::shape_type shape = {10,400};
+            DivOp* op = new DivOp();
+            forward_result[712] = op;
+            
+            op->set_inputs( forward_result[707] );
+            op->set_inputs( forward_result[711] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3404', 'op': 'aten::sub', 'in': [705, 712, 12], 'output_id': 0, 'shape': [10, 400], 'out': [714], 'sorted_id': 713}
+        {
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
+            forward_result[713] = op;
+            
+            op->set_inputs( forward_result[705] );
+            op->set_inputs( forward_result[712] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3405', 'op': 'aten::sum', 'in': [713, 20], 'output_id': 0, 'shape': [], 'out': [728], 'sorted_id': 714}
+        {
+            SumOp* op = new SumOp();
             forward_result[714] = op;
             
             op->set_inputs( forward_result[713] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3516', 'op': 'aten::add', 'in': [701, 714, 12], 'output_id': 0, 'shape': [10, 400], 'out': [716], 'sorted_id': 715}
-        {
-            Tensor::shape_type shape = {10,400};
-            AddOp* op = new AddOp();
-            forward_result[715] = op;
-            
-            op->set_inputs( forward_result[701] );
-            op->set_inputs( forward_result[714] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3517', 'op': 'aten::log', 'in': [715], 'output_id': 0, 'shape': [10, 400], 'out': [717], 'sorted_id': 716}
-        {
-            Tensor::shape_type shape = {10,400};
-            LogOp* op = new LogOp();
-            forward_result[716] = op;
-            
-            op->set_inputs( forward_result[715] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3518', 'op': 'aten::sum', 'in': [716, 20], 'output_id': 0, 'shape': [], 'out': [745], 'sorted_id': 717}
-        {
-            SumOp* op = new SumOp();
-            forward_result[717] = op;
-            
-            op->set_inputs( forward_result[716] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/3233', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 34, 'shape': [1], 'out': [719, 1061], 'sorted_id': 718}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3406', 'op': 'aten::exp', 'in': [630], 'output_id': 0, 'shape': [10], 'out': [716], 'sorted_id': 715}
         {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 34 );
-            forward_result[718] = op;
+            Tensor::shape_type shape = {10};
+            ExpOp* op = new ExpOp();
+            forward_result[715] = op;
             
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[630] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3521', 'op': 'aten::sub', 'in': [687, 718, 12], 'output_id': 0, 'shape': [10], 'out': [720], 'sorted_id': 719}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3407', 'op': 'aten::log1p', 'in': [715], 'output_id': 0, 'shape': [10], 'out': [717], 'sorted_id': 716}
+        {
+            Tensor::shape_type shape = {10};
+            Log1pOp* op = new Log1pOp();
+            forward_result[716] = op;
+            
+            op->set_inputs( forward_result[715] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3408', 'op': 'aten::log', 'in': [716], 'output_id': 0, 'shape': [10], 'out': [718], 'sorted_id': 717}
+        {
+            Tensor::shape_type shape = {10};
+            LogOp* op = new LogOp();
+            forward_result[717] = op;
+            
+            op->set_inputs( forward_result[716] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3409', 'op': 'aten::rsub', 'in': [717, 107, 12], 'output_id': 0, 'shape': [10], 'out': [726], 'sorted_id': 718}
+        {
+            Tensor::shape_type shape = {10};
+            RsubOp* op = new RsubOp();
+            forward_result[718] = op;
+            
+            op->set_inputs( forward_result[717] );
+            op->set_inputs( forward_result[107] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3410', 'op': 'aten::sub', 'in': [643, 629, 12], 'output_id': 0, 'shape': [10], 'out': [720], 'sorted_id': 719}
         {
             Tensor::shape_type shape = {10};
             SubOp* op = new SubOp();
             forward_result[719] = op;
             
-            op->set_inputs( forward_result[687] );
-            op->set_inputs( forward_result[718] );
+            op->set_inputs( forward_result[643] );
+            op->set_inputs( forward_result[629] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3522', 'op': 'aten::pow', 'in': [719, 45], 'output_id': 0, 'shape': [10], 'out': [721], 'sorted_id': 720}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3411', 'op': 'aten::pow', 'in': [719, 45], 'output_id': 0, 'shape': [10], 'out': [725], 'sorted_id': 720}
         {
             Tensor::shape_type shape = {10};
             PowOp* op = new PowOp();
@@ -7515,822 +7004,243 @@
             
             op->set_inputs( forward_result[719] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3523', 'op': 'aten::neg', 'in': [720], 'output_id': 0, 'shape': [10], 'out': [724], 'sorted_id': 721}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3412', 'op': 'aten::exp', 'in': [630], 'output_id': 0, 'shape': [10], 'out': [722], 'sorted_id': 721}
         {
             Tensor::shape_type shape = {10};
-            NegOp* op = new NegOp();
+            ExpOp* op = new ExpOp();
             forward_result[721] = op;
             
-            op->set_inputs( forward_result[720] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[630] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/var.45', 'op': 'aten::pow', 'in': [693, 45], 'output_id': 0, 'shape': [1], 'out': [723], 'sorted_id': 722}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3413', 'op': 'aten::log1p', 'in': [721], 'output_id': 0, 'shape': [10], 'out': [723], 'sorted_id': 722}
         {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
+            Tensor::shape_type shape = {10};
+            Log1pOp* op = new Log1pOp();
             forward_result[722] = op;
             
-            op->set_inputs( forward_result[693] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[721] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3524', 'op': 'aten::mul', 'in': [722, 50], 'output_id': 0, 'shape': [1], 'out': [724], 'sorted_id': 723}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3414', 'op': 'aten::pow', 'in': [722, 45], 'output_id': 0, 'shape': [10], 'out': [724], 'sorted_id': 723}
         {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
+            Tensor::shape_type shape = {10};
+            PowOp* op = new PowOp();
             forward_result[723] = op;
             
             op->set_inputs( forward_result[722] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3525', 'op': 'aten::div', 'in': [721, 723], 'output_id': 0, 'shape': [10], 'out': [726], 'sorted_id': 724}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3415', 'op': 'aten::mul', 'in': [723, 50], 'output_id': 0, 'shape': [10], 'out': [725], 'sorted_id': 724}
+        {
+            Tensor::shape_type shape = {10};
+            MulOp* op = new MulOp();
+            forward_result[724] = op;
+            
+            op->set_inputs( forward_result[723] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3416', 'op': 'aten::div', 'in': [720, 724], 'output_id': 0, 'shape': [10], 'out': [726], 'sorted_id': 725}
         {
             Tensor::shape_type shape = {10};
             DivOp* op = new DivOp();
-            forward_result[724] = op;
-            
-            op->set_inputs( forward_result[721] );
-            op->set_inputs( forward_result[723] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/log_scale.45', 'op': 'aten::log', 'in': [693], 'output_id': 0, 'shape': [1], 'out': [726], 'sorted_id': 725}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
             forward_result[725] = op;
             
-            op->set_inputs( forward_result[693] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[720] );
+            op->set_inputs( forward_result[724] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3526', 'op': 'aten::sub', 'in': [724, 725, 12], 'output_id': 0, 'shape': [10], 'out': [727], 'sorted_id': 726}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3417', 'op': 'aten::sub', 'in': [718, 725, 12], 'output_id': 0, 'shape': [10], 'out': [727], 'sorted_id': 726}
         {
             Tensor::shape_type shape = {10};
             SubOp* op = new SubOp();
             forward_result[726] = op;
             
-            op->set_inputs( forward_result[724] );
+            op->set_inputs( forward_result[718] );
             op->set_inputs( forward_result[725] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3527', 'op': 'aten::sub', 'in': [726, 55, 12], 'output_id': 0, 'shape': [10], 'out': [728], 'sorted_id': 727}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3418', 'op': 'aten::sum', 'in': [726, 20], 'output_id': 0, 'shape': [], 'out': [728], 'sorted_id': 727}
         {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
+            SumOp* op = new SumOp();
             forward_result[727] = op;
             
             op->set_inputs( forward_result[726] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/prob1.23', 'op': 'aten::exp', 'in': [727], 'output_id': 0, 'shape': [10], 'out': [729], 'sorted_id': 728}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3419', 'op': 'aten::add', 'in': [714, 727, 12], 'output_id': 0, 'shape': [], 'out': [729], 'sorted_id': 728}
         {
-            Tensor::shape_type shape = {10};
-            ExpOp* op = new ExpOp();
+            AddOp* op = new AddOp();
             forward_result[728] = op;
             
+            op->set_inputs( forward_result[714] );
             op->set_inputs( forward_result[727] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3539', 'op': 'aten::mul', 'in': [728, 58], 'output_id': 0, 'shape': [10], 'out': [742], 'sorted_id': 729}
-        {
-            Tensor::shape_type shape = {10};
-            MulOp* op = new MulOp();
-            forward_result[729] = op;
-            
-            op->set_inputs( forward_result[728] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/3234', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 35, 'shape': [1], 'out': [731, 1072], 'sorted_id': 730}
-        {
-            Tensor::shape_type shape = {1};
-            TupleUnpackOp* op = new TupleUnpackOp( 35 );
-            forward_result[730] = op;
-            
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3531', 'op': 'aten::sub', 'in': [687, 730, 12], 'output_id': 0, 'shape': [10], 'out': [732], 'sorted_id': 731}
-        {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
-            forward_result[731] = op;
-            
-            op->set_inputs( forward_result[687] );
-            op->set_inputs( forward_result[730] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3532', 'op': 'aten::pow', 'in': [731, 45], 'output_id': 0, 'shape': [10], 'out': [733], 'sorted_id': 732}
-        {
-            Tensor::shape_type shape = {10};
-            PowOp* op = new PowOp();
-            forward_result[732] = op;
-            
-            op->set_inputs( forward_result[731] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3533', 'op': 'aten::neg', 'in': [732], 'output_id': 0, 'shape': [10], 'out': [736], 'sorted_id': 733}
-        {
-            Tensor::shape_type shape = {10};
-            NegOp* op = new NegOp();
-            forward_result[733] = op;
-            
-            op->set_inputs( forward_result[732] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/var.47', 'op': 'aten::pow', 'in': [706, 45], 'output_id': 0, 'shape': [1], 'out': [735], 'sorted_id': 734}
-        {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[734] = op;
-            
-            op->set_inputs( forward_result[706] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3534', 'op': 'aten::mul', 'in': [734, 50], 'output_id': 0, 'shape': [1], 'out': [736], 'sorted_id': 735}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[735] = op;
-            
-            op->set_inputs( forward_result[734] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3535', 'op': 'aten::div', 'in': [733, 735], 'output_id': 0, 'shape': [10], 'out': [738], 'sorted_id': 736}
-        {
-            Tensor::shape_type shape = {10};
-            DivOp* op = new DivOp();
-            forward_result[736] = op;
-            
-            op->set_inputs( forward_result[733] );
-            op->set_inputs( forward_result[735] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/log_scale.47', 'op': 'aten::log', 'in': [706], 'output_id': 0, 'shape': [1], 'out': [738], 'sorted_id': 737}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[737] = op;
-            
-            op->set_inputs( forward_result[706] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3536', 'op': 'aten::sub', 'in': [736, 737, 12], 'output_id': 0, 'shape': [10], 'out': [739], 'sorted_id': 738}
-        {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
-            forward_result[738] = op;
-            
-            op->set_inputs( forward_result[736] );
-            op->set_inputs( forward_result[737] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3537', 'op': 'aten::sub', 'in': [738, 55, 12], 'output_id': 0, 'shape': [10], 'out': [740], 'sorted_id': 739}
-        {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
-            forward_result[739] = op;
-            
-            op->set_inputs( forward_result[738] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/prob2.23', 'op': 'aten::exp', 'in': [739], 'output_id': 0, 'shape': [10], 'out': [741], 'sorted_id': 740}
-        {
-            Tensor::shape_type shape = {10};
-            ExpOp* op = new ExpOp();
-            forward_result[740] = op;
-            
-            op->set_inputs( forward_result[739] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3540', 'op': 'aten::mul', 'in': [740, 58], 'output_id': 0, 'shape': [10], 'out': [742], 'sorted_id': 741}
-        {
-            Tensor::shape_type shape = {10};
-            MulOp* op = new MulOp();
-            forward_result[741] = op;
-            
-            op->set_inputs( forward_result[740] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3541', 'op': 'aten::add', 'in': [729, 741, 12], 'output_id': 0, 'shape': [10], 'out': [743], 'sorted_id': 742}
-        {
-            Tensor::shape_type shape = {10};
-            AddOp* op = new AddOp();
-            forward_result[742] = op;
-            
-            op->set_inputs( forward_result[729] );
-            op->set_inputs( forward_result[741] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3542', 'op': 'aten::log', 'in': [742], 'output_id': 0, 'shape': [10], 'out': [744], 'sorted_id': 743}
-        {
-            Tensor::shape_type shape = {10};
-            LogOp* op = new LogOp();
-            forward_result[743] = op;
-            
-            op->set_inputs( forward_result[742] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3543', 'op': 'aten::sum', 'in': [743, 20], 'output_id': 0, 'shape': [], 'out': [745], 'sorted_id': 744}
-        {
-            SumOp* op = new SumOp();
-            forward_result[744] = op;
-            
-            op->set_inputs( forward_result[743] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3544', 'op': 'aten::add', 'in': [717, 744, 12], 'output_id': 0, 'shape': [], 'out': [773], 'sorted_id': 745}
-        {
-            AddOp* op = new AddOp();
-            forward_result[745] = op;
-            
-            op->set_inputs( forward_result[717] );
-            op->set_inputs( forward_result[744] );
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3545', 'op': 'aten::exp', 'in': [658], 'output_id': 0, 'shape': [10, 400], 'out': [747], 'sorted_id': 746}
-        {
-            Tensor::shape_type shape = {10,400};
-            ExpOp* op = new ExpOp();
-            forward_result[746] = op;
-            
-            op->set_inputs( forward_result[658] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3546', 'op': 'aten::log1p', 'in': [746], 'output_id': 0, 'shape': [10, 400], 'out': [748], 'sorted_id': 747}
-        {
-            Tensor::shape_type shape = {10,400};
-            Log1pOp* op = new Log1pOp();
-            forward_result[747] = op;
-            
-            op->set_inputs( forward_result[746] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3547', 'op': 'aten::log', 'in': [747], 'output_id': 0, 'shape': [10, 400], 'out': [749], 'sorted_id': 748}
-        {
-            Tensor::shape_type shape = {10,400};
-            LogOp* op = new LogOp();
-            forward_result[748] = op;
-            
-            op->set_inputs( forward_result[747] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3548', 'op': 'aten::rsub', 'in': [748, 107, 12], 'output_id': 0, 'shape': [10, 400], 'out': [757], 'sorted_id': 749}
-        {
-            Tensor::shape_type shape = {10,400};
-            RsubOp* op = new RsubOp();
-            forward_result[749] = op;
-            
-            op->set_inputs( forward_result[748] );
-            op->set_inputs( forward_result[107] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3549', 'op': 'aten::sub', 'in': [672, 657, 12], 'output_id': 0, 'shape': [10, 400], 'out': [751], 'sorted_id': 750}
-        {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
-            forward_result[750] = op;
-            
-            op->set_inputs( forward_result[672] );
-            op->set_inputs( forward_result[657] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3550', 'op': 'aten::pow', 'in': [750, 45], 'output_id': 0, 'shape': [10, 400], 'out': [756], 'sorted_id': 751}
-        {
-            Tensor::shape_type shape = {10,400};
-            PowOp* op = new PowOp();
-            forward_result[751] = op;
-            
-            op->set_inputs( forward_result[750] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3551', 'op': 'aten::exp', 'in': [658], 'output_id': 0, 'shape': [10, 400], 'out': [753], 'sorted_id': 752}
-        {
-            Tensor::shape_type shape = {10,400};
-            ExpOp* op = new ExpOp();
-            forward_result[752] = op;
-            
-            op->set_inputs( forward_result[658] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3552', 'op': 'aten::log1p', 'in': [752], 'output_id': 0, 'shape': [10, 400], 'out': [754], 'sorted_id': 753}
-        {
-            Tensor::shape_type shape = {10,400};
-            Log1pOp* op = new Log1pOp();
-            forward_result[753] = op;
-            
-            op->set_inputs( forward_result[752] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3553', 'op': 'aten::pow', 'in': [753, 45], 'output_id': 0, 'shape': [10, 400], 'out': [755], 'sorted_id': 754}
-        {
-            Tensor::shape_type shape = {10,400};
-            PowOp* op = new PowOp();
-            forward_result[754] = op;
-            
-            op->set_inputs( forward_result[753] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3554', 'op': 'aten::mul', 'in': [754, 50], 'output_id': 0, 'shape': [10, 400], 'out': [756], 'sorted_id': 755}
-        {
-            Tensor::shape_type shape = {10,400};
-            MulOp* op = new MulOp();
-            forward_result[755] = op;
-            
-            op->set_inputs( forward_result[754] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3555', 'op': 'aten::div', 'in': [751, 755], 'output_id': 0, 'shape': [10, 400], 'out': [757], 'sorted_id': 756}
-        {
-            Tensor::shape_type shape = {10,400};
-            DivOp* op = new DivOp();
-            forward_result[756] = op;
-            
-            op->set_inputs( forward_result[751] );
-            op->set_inputs( forward_result[755] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3556', 'op': 'aten::sub', 'in': [749, 756, 12], 'output_id': 0, 'shape': [10, 400], 'out': [758], 'sorted_id': 757}
-        {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
-            forward_result[757] = op;
-            
-            op->set_inputs( forward_result[749] );
-            op->set_inputs( forward_result[756] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3557', 'op': 'aten::sum', 'in': [757, 20], 'output_id': 0, 'shape': [], 'out': [772], 'sorted_id': 758}
-        {
-            SumOp* op = new SumOp();
-            forward_result[758] = op;
-            
-            op->set_inputs( forward_result[757] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3558', 'op': 'aten::exp', 'in': [674], 'output_id': 0, 'shape': [10], 'out': [760], 'sorted_id': 759}
-        {
-            Tensor::shape_type shape = {10};
-            ExpOp* op = new ExpOp();
-            forward_result[759] = op;
-            
-            op->set_inputs( forward_result[674] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3559', 'op': 'aten::log1p', 'in': [759], 'output_id': 0, 'shape': [10], 'out': [761], 'sorted_id': 760}
-        {
-            Tensor::shape_type shape = {10};
-            Log1pOp* op = new Log1pOp();
-            forward_result[760] = op;
-            
-            op->set_inputs( forward_result[759] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3560', 'op': 'aten::log', 'in': [760], 'output_id': 0, 'shape': [10], 'out': [762], 'sorted_id': 761}
-        {
-            Tensor::shape_type shape = {10};
-            LogOp* op = new LogOp();
-            forward_result[761] = op;
-            
-            op->set_inputs( forward_result[760] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3561', 'op': 'aten::rsub', 'in': [761, 107, 12], 'output_id': 0, 'shape': [10], 'out': [770], 'sorted_id': 762}
-        {
-            Tensor::shape_type shape = {10};
-            RsubOp* op = new RsubOp();
-            forward_result[762] = op;
-            
-            op->set_inputs( forward_result[761] );
-            op->set_inputs( forward_result[107] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3562', 'op': 'aten::sub', 'in': [687, 673, 12], 'output_id': 0, 'shape': [10], 'out': [764], 'sorted_id': 763}
-        {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
-            forward_result[763] = op;
-            
-            op->set_inputs( forward_result[687] );
-            op->set_inputs( forward_result[673] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3563', 'op': 'aten::pow', 'in': [763, 45], 'output_id': 0, 'shape': [10], 'out': [769], 'sorted_id': 764}
-        {
-            Tensor::shape_type shape = {10};
-            PowOp* op = new PowOp();
-            forward_result[764] = op;
-            
-            op->set_inputs( forward_result[763] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3564', 'op': 'aten::exp', 'in': [674], 'output_id': 0, 'shape': [10], 'out': [766], 'sorted_id': 765}
-        {
-            Tensor::shape_type shape = {10};
-            ExpOp* op = new ExpOp();
-            forward_result[765] = op;
-            
-            op->set_inputs( forward_result[674] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3565', 'op': 'aten::log1p', 'in': [765], 'output_id': 0, 'shape': [10], 'out': [767], 'sorted_id': 766}
-        {
-            Tensor::shape_type shape = {10};
-            Log1pOp* op = new Log1pOp();
-            forward_result[766] = op;
-            
-            op->set_inputs( forward_result[765] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3566', 'op': 'aten::pow', 'in': [766, 45], 'output_id': 0, 'shape': [10], 'out': [768], 'sorted_id': 767}
-        {
-            Tensor::shape_type shape = {10};
-            PowOp* op = new PowOp();
-            forward_result[767] = op;
-            
-            op->set_inputs( forward_result[766] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3567', 'op': 'aten::mul', 'in': [767, 50], 'output_id': 0, 'shape': [10], 'out': [769], 'sorted_id': 768}
-        {
-            Tensor::shape_type shape = {10};
-            MulOp* op = new MulOp();
-            forward_result[768] = op;
-            
-            op->set_inputs( forward_result[767] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3568', 'op': 'aten::div', 'in': [764, 768], 'output_id': 0, 'shape': [10], 'out': [770], 'sorted_id': 769}
-        {
-            Tensor::shape_type shape = {10};
-            DivOp* op = new DivOp();
-            forward_result[769] = op;
-            
-            op->set_inputs( forward_result[764] );
-            op->set_inputs( forward_result[768] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3569', 'op': 'aten::sub', 'in': [762, 769, 12], 'output_id': 0, 'shape': [10], 'out': [771], 'sorted_id': 770}
-        {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
-            forward_result[770] = op;
-            
-            op->set_inputs( forward_result[762] );
-            op->set_inputs( forward_result[769] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3570', 'op': 'aten::sum', 'in': [770, 20], 'output_id': 0, 'shape': [], 'out': [772], 'sorted_id': 771}
-        {
-            SumOp* op = new SumOp();
-            forward_result[771] = op;
-            
-            op->set_inputs( forward_result[770] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3571', 'op': 'aten::add', 'in': [758, 771, 12], 'output_id': 0, 'shape': [], 'out': [773], 'sorted_id': 772}
-        {
-            AddOp* op = new AddOp();
-            forward_result[772] = op;
-            
-            op->set_inputs( forward_result[758] );
-            op->set_inputs( forward_result[771] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/3573', 'op': 'prim::TupleConstruct', 'in': [688, 745, 772], 'output_id': 0, 'shape': [], 'out': [778, 774, 777], 'sorted_id': 773}
+        // {'name': 'Model/3421', 'op': 'prim::TupleConstruct', 'in': [644, 701, 728], 'output_id': 0, 'shape': [], 'out': [1073, 1091, 730], 'sorted_id': 729}
         {
             TupleConstructOp* op = new TupleConstructOp();
-            forward_result[773] = op;
+            forward_result[729] = op;
             
-            op->set_inputs( forward_result[688] );
-            op->set_inputs( forward_result[745] );
-            op->set_inputs( forward_result[772] );
+            op->set_inputs( forward_result[644] );
+            op->set_inputs( forward_result[701] );
+            op->set_inputs( forward_result[728] );
         }
         
-        // {'name': 'Net/3575', 'op': 'prim::TupleUnpack', 'in': [773], 'output_id': 1, 'shape': [], 'out': [780], 'sorted_id': 774}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 1 );
-            forward_result[774] = op;
-            
-            op->set_inputs( forward_result[773] );
-        }
-        
-        // {'name': 'Net/3354', 'op': 'prim::TupleUnpack', 'in': [533], 'output_id': 2, 'shape': [], 'out': [780], 'sorted_id': 775}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 2 );
-            forward_result[775] = op;
-            
-            op->set_inputs( forward_result[533] );
-        }
-        
-        // {'name': 'Net/3465', 'op': 'prim::TupleUnpack', 'in': [653], 'output_id': 2, 'shape': [], 'out': [780], 'sorted_id': 776}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 2 );
-            forward_result[776] = op;
-            
-            op->set_inputs( forward_result[653] );
-        }
-        
-        // {'name': 'Net/3576', 'op': 'prim::TupleUnpack', 'in': [773], 'output_id': 2, 'shape': [], 'out': [780], 'sorted_id': 777}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 2 );
-            forward_result[777] = op;
-            
-            op->set_inputs( forward_result[773] );
-        }
-        
-        // {'name': 'Net/3574', 'op': 'prim::TupleUnpack', 'in': [773], 'output_id': 0, 'shape': [4, 10], 'out': [779], 'sorted_id': 778}
+        // {'name': 'Model/3422', 'op': 'prim::TupleUnpack', 'in': [729], 'output_id': 0, 'shape': [4, 10], 'out': [731], 'sorted_id': 730}
         {
             Tensor::shape_type shape = {4,10};
             TupleUnpackOp* op = new TupleUnpackOp( 0 );
-            forward_result[778] = op;
+            forward_result[730] = op;
             
-            op->set_inputs( forward_result[773] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[729] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/3577', 'op': 'aten::log_softmax', 'in': [778, 12, 20], 'output_id': 0, 'shape': [4, 10], 'out': [780], 'sorted_id': 779}
+        // {'name': 'Model/Net[net]/3425', 'op': 'aten::log_softmax', 'in': [730, 12, 20], 'output_id': 0, 'shape': [4, 10], 'out': [1061], 'sorted_id': 731}
         {
             Tensor::shape_type shape = {4,10};
             LogSoftmaxOp* op = new LogSoftmaxOp();
-            forward_result[779] = op;
+            forward_result[731] = op;
             
-            op->set_inputs( forward_result[778] );
+            op->set_inputs( forward_result[730] );
             op->set_inputs( forward_result[12] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/3578', 'op': 'prim::TupleConstruct', 'in': [534, 654, 774, 775, 776, 777, 779], 'output_id': 0, 'shape': [], 'out': [1138, 1135, 781, 1152, 782, 1136, 784], 'sorted_id': 780}
-        {
-            TupleConstructOp* op = new TupleConstructOp();
-            forward_result[780] = op;
-            
-            op->set_inputs( forward_result[534] );
-            op->set_inputs( forward_result[654] );
-            op->set_inputs( forward_result[774] );
-            op->set_inputs( forward_result[775] );
-            op->set_inputs( forward_result[776] );
-            op->set_inputs( forward_result[777] );
-            op->set_inputs( forward_result[779] );
-        }
-        
-        // {'name': 'Net/3582', 'op': 'prim::TupleUnpack', 'in': [780], 'output_id': 3, 'shape': [], 'out': [783], 'sorted_id': 781}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 3 );
-            forward_result[781] = op;
-            
-            op->set_inputs( forward_result[780] );
-        }
-        
-        // {'name': 'Net/3583', 'op': 'prim::TupleUnpack', 'in': [780], 'output_id': 4, 'shape': [], 'out': [783], 'sorted_id': 782}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 4 );
-            forward_result[782] = op;
-            
-            op->set_inputs( forward_result[780] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3588', 'op': 'aten::add', 'in': [781, 782, 12], 'output_id': 0, 'shape': [], 'out': [785], 'sorted_id': 783}
-        {
-            AddOp* op = new AddOp();
-            forward_result[783] = op;
-            
-            op->set_inputs( forward_result[781] );
-            op->set_inputs( forward_result[782] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/3584', 'op': 'prim::TupleUnpack', 'in': [780], 'output_id': 5, 'shape': [], 'out': [785], 'sorted_id': 784}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 5 );
-            forward_result[784] = op;
-            
-            op->set_inputs( forward_result[780] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3589', 'op': 'aten::add', 'in': [783, 784, 12], 'output_id': 0, 'shape': [], 'out': [1127], 'sorted_id': 785}
-        {
-            AddOp* op = new AddOp();
-            forward_result[785] = op;
-            
-            op->set_inputs( forward_result[783] );
-            op->set_inputs( forward_result[784] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/3593', 'op': 'prim::ListConstruct', 'in': [1, 2], 'output_id': 0, 'shape': [], 'out': [787], 'sorted_id': 786}
+        // {'name': 'Model/Net[net]/3430', 'op': 'prim::ListConstruct', 'in': [1, 2], 'output_id': 0, 'shape': [], 'out': [733], 'sorted_id': 732}
         {
             ListConstructOp* op = new ListConstructOp();
-            forward_result[786] = op;
+            forward_result[732] = op;
             
             op->set_inputs( forward_result[1] );
             op->set_inputs( forward_result[2] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/input.25', 'op': 'aten::view', 'in': [0, 786], 'output_id': 0, 'shape': [4, 784], 'out': [815], 'sorted_id': 787}
+        // {'name': 'Model/Net[net]/input.25', 'op': 'aten::view', 'in': [0, 732], 'output_id': 0, 'shape': [4, 784], 'out': [761], 'sorted_id': 733}
         {
             Tensor::shape_type shape = {4,784};
             ViewOp* op = new ViewOp();
-            forward_result[787] = op;
+            forward_result[733] = op;
             
             op->set_inputs( forward_result[0] );
-            op->set_inputs( forward_result[786] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[732] );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l1]/weight_mu/weight_mu.13', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [801, 871], 'sorted_id': 788}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/weight_mu/weight_mu.13', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [817, 747], 'sorted_id': 734}
         {
             Tensor::shape_type shape = {400,784};
             l1_weight_mu.reshape( shape );
-            forward_result[788] = new VariableTensor( l1_weight_mu, 2 );
+            forward_result[734] = new VariableTensor( l1_weight_mu, 2 );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l1]/weight_rho/weight_rho.13', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [792, 873, 790, 793, 867], 'sorted_id': 789}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/weight_rho/weight_rho.13', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [819, 736, 739, 738, 813], 'sorted_id': 735}
         {
             Tensor::shape_type shape = {400,784};
             l1_weight_rho.reshape( shape );
-            forward_result[789] = new VariableTensor( l1_weight_rho, 2 );
+            forward_result[735] = new VariableTensor( l1_weight_rho, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3607', 'op': 'aten::exp', 'in': [789], 'output_id': 0, 'shape': [400, 784], 'out': [791], 'sorted_id': 790}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3444', 'op': 'aten::exp', 'in': [735], 'output_id': 0, 'shape': [400, 784], 'out': [737], 'sorted_id': 736}
         {
             Tensor::shape_type shape = {400,784};
             ExpOp* op = new ExpOp();
-            forward_result[790] = op;
+            forward_result[736] = op;
             
-            op->set_inputs( forward_result[789] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[735] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3608', 'op': 'aten::log1p', 'in': [790], 'output_id': 0, 'shape': [400, 784], 'out': [800], 'sorted_id': 791}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3445', 'op': 'aten::log1p', 'in': [736], 'output_id': 0, 'shape': [400, 784], 'out': [746], 'sorted_id': 737}
         {
             Tensor::shape_type shape = {400,784};
             Log1pOp* op = new Log1pOp();
-            forward_result[791] = op;
+            forward_result[737] = op;
             
-            op->set_inputs( forward_result[790] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[736] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3599', 'op': 'aten::size', 'in': [789, 10], 'output_id': 0, 'shape': [], 'out': [794, 796], 'sorted_id': 792}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3436', 'op': 'aten::size', 'in': [735, 10], 'output_id': 0, 'shape': [], 'out': [742, 740], 'sorted_id': 738}
         {
             SizeOp* op = new SizeOp();
-            forward_result[792] = op;
+            forward_result[738] = op;
             
-            op->set_inputs( forward_result[789] );
+            op->set_inputs( forward_result[735] );
             op->set_inputs( forward_result[10] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3600', 'op': 'aten::size', 'in': [789, 12], 'output_id': 0, 'shape': [], 'out': [794, 796], 'sorted_id': 793}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3437', 'op': 'aten::size', 'in': [735, 12], 'output_id': 0, 'shape': [], 'out': [742, 740], 'sorted_id': 739}
         {
             SizeOp* op = new SizeOp();
-            forward_result[793] = op;
+            forward_result[739] = op;
             
-            op->set_inputs( forward_result[789] );
+            op->set_inputs( forward_result[735] );
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3601', 'op': 'prim::ListConstruct', 'in': [792, 793], 'output_id': 0, 'shape': [], 'out': [795], 'sorted_id': 794}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3438', 'op': 'prim::ListConstruct', 'in': [738, 739], 'output_id': 0, 'shape': [], 'out': [741], 'sorted_id': 740}
         {
             ListConstructOp* op = new ListConstructOp();
-            forward_result[794] = op;
+            forward_result[740] = op;
             
-            op->set_inputs( forward_result[792] );
-            op->set_inputs( forward_result[793] );
+            op->set_inputs( forward_result[738] );
+            op->set_inputs( forward_result[739] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3602', 'op': 'aten::expand', 'in': [421, 794, 15], 'output_id': 0, 'shape': [400, 784], 'out': [798], 'sorted_id': 795}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3439', 'op': 'aten::expand', 'in': [379, 740, 15], 'output_id': 0, 'shape': [400, 784], 'out': [744], 'sorted_id': 741}
         {
             Tensor::shape_type shape = {400,784};
             ExpandOp* op = new ExpandOp();
-            forward_result[795] = op;
+            forward_result[741] = op;
             
-            op->set_inputs( forward_result[421] );
-            op->set_inputs( forward_result[794] );
+            op->set_inputs( forward_result[379] );
+            op->set_inputs( forward_result[740] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3603', 'op': 'prim::ListConstruct', 'in': [792, 793], 'output_id': 0, 'shape': [], 'out': [797], 'sorted_id': 796}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3440', 'op': 'prim::ListConstruct', 'in': [738, 739], 'output_id': 0, 'shape': [], 'out': [743], 'sorted_id': 742}
         {
             ListConstructOp* op = new ListConstructOp();
-            forward_result[796] = op;
+            forward_result[742] = op;
             
-            op->set_inputs( forward_result[792] );
-            op->set_inputs( forward_result[793] );
+            op->set_inputs( forward_result[738] );
+            op->set_inputs( forward_result[739] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3604', 'op': 'aten::expand', 'in': [426, 796, 15], 'output_id': 0, 'shape': [400, 784], 'out': [798], 'sorted_id': 797}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3441', 'op': 'aten::expand', 'in': [384, 742, 15], 'output_id': 0, 'shape': [400, 784], 'out': [744], 'sorted_id': 743}
         {
             Tensor::shape_type shape = {400,784};
             ExpandOp* op = new ExpandOp();
-            forward_result[797] = op;
+            forward_result[743] = op;
             
-            op->set_inputs( forward_result[426] );
-            op->set_inputs( forward_result[796] );
+            op->set_inputs( forward_result[384] );
+            op->set_inputs( forward_result[742] );
             op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3605', 'op': 'aten::normal', 'in': [795, 797, 20], 'output_id': 0, 'shape': [400, 784], 'out': [799], 'sorted_id': 798}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3442', 'op': 'aten::normal', 'in': [741, 743, 20], 'output_id': 0, 'shape': [400, 784], 'out': [745], 'sorted_id': 744}
         {
             Tensor::shape_type shape = {400,784};
             NormalOp* op = new NormalOp();
-            forward_result[798] = op;
+            forward_result[744] = op;
             
-            op->set_inputs( forward_result[795] );
-            op->set_inputs( forward_result[797] );
+            op->set_inputs( forward_result[741] );
+            op->set_inputs( forward_result[743] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/epsilon.25', 'op': 'aten::to', 'in': [798, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400, 784], 'out': [800], 'sorted_id': 799}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/epsilon.25', 'op': 'aten::to', 'in': [744, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400, 784], 'out': [746], 'sorted_id': 745}
         {
             Tensor::shape_type shape = {400,784};
             ToOp* op = new ToOp();
-            forward_result[799] = op;
+            forward_result[745] = op;
             
-            op->set_inputs( forward_result[798] );
+            op->set_inputs( forward_result[744] );
             op->set_inputs( forward_result[22] );
             op->set_inputs( forward_result[10] );
             op->set_inputs( forward_result[23] );
@@ -8338,1367 +7248,1801 @@
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[15] );
             op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3609', 'op': 'aten::mul', 'in': [791, 799], 'output_id': 0, 'shape': [400, 784], 'out': [801], 'sorted_id': 800}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3446', 'op': 'aten::mul', 'in': [737, 745], 'output_id': 0, 'shape': [400, 784], 'out': [747], 'sorted_id': 746}
         {
             Tensor::shape_type shape = {400,784};
             MulOp* op = new MulOp();
-            forward_result[800] = op;
+            forward_result[746] = op;
             
-            op->set_inputs( forward_result[791] );
-            op->set_inputs( forward_result[799] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[737] );
+            op->set_inputs( forward_result[745] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/value.25', 'op': 'aten::add', 'in': [788, 800, 12], 'output_id': 0, 'shape': [400, 784], 'out': [815, 827, 871, 816], 'sorted_id': 801}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/value.25', 'op': 'aten::add', 'in': [734, 746, 12], 'output_id': 0, 'shape': [400, 784], 'out': [762, 773, 761, 817], 'sorted_id': 747}
         {
             Tensor::shape_type shape = {400,784};
             AddOp* op = new AddOp();
-            forward_result[801] = op;
+            forward_result[747] = op;
             
-            op->set_inputs( forward_result[788] );
-            op->set_inputs( forward_result[800] );
+            op->set_inputs( forward_result[734] );
+            op->set_inputs( forward_result[746] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l1]/bias_mu/bias_mu.13', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [814, 884], 'sorted_id': 802}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/bias_mu/bias_mu.13', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [760, 830], 'sorted_id': 748}
         {
             Tensor::shape_type shape = {400};
             l1_bias_mu.reshape( shape );
-            forward_result[802] = new VariableTensor( l1_bias_mu, 2 );
+            forward_result[748] = new VariableTensor( l1_bias_mu, 2 );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l1]/bias_rho/bias_rho.13', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [880, 804, 806, 886], 'sorted_id': 803}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/bias_rho/bias_rho.13', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [826, 750, 752, 832], 'sorted_id': 749}
         {
             Tensor::shape_type shape = {400};
             l1_bias_rho.reshape( shape );
-            forward_result[803] = new VariableTensor( l1_bias_rho, 2 );
+            forward_result[749] = new VariableTensor( l1_bias_rho, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3618', 'op': 'aten::exp', 'in': [803], 'output_id': 0, 'shape': [400], 'out': [805], 'sorted_id': 804}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3455', 'op': 'aten::exp', 'in': [749], 'output_id': 0, 'shape': [400], 'out': [751], 'sorted_id': 750}
         {
             Tensor::shape_type shape = {400};
             ExpOp* op = new ExpOp();
-            forward_result[804] = op;
+            forward_result[750] = op;
             
-            op->set_inputs( forward_result[803] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[749] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3619', 'op': 'aten::log1p', 'in': [804], 'output_id': 0, 'shape': [400], 'out': [813], 'sorted_id': 805}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3456', 'op': 'aten::log1p', 'in': [750], 'output_id': 0, 'shape': [400], 'out': [759], 'sorted_id': 751}
         {
             Tensor::shape_type shape = {400};
             Log1pOp* op = new Log1pOp();
-            forward_result[805] = op;
+            forward_result[751] = op;
             
-            op->set_inputs( forward_result[804] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[750] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3611', 'op': 'aten::size', 'in': [803, 10], 'output_id': 0, 'shape': [], 'out': [809, 807], 'sorted_id': 806}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3448', 'op': 'aten::size', 'in': [749, 10], 'output_id': 0, 'shape': [], 'out': [755, 753], 'sorted_id': 752}
         {
             SizeOp* op = new SizeOp();
-            forward_result[806] = op;
+            forward_result[752] = op;
             
-            op->set_inputs( forward_result[803] );
+            op->set_inputs( forward_result[749] );
             op->set_inputs( forward_result[10] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3612', 'op': 'prim::ListConstruct', 'in': [806], 'output_id': 0, 'shape': [], 'out': [808], 'sorted_id': 807}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3449', 'op': 'prim::ListConstruct', 'in': [752], 'output_id': 0, 'shape': [], 'out': [754], 'sorted_id': 753}
         {
             ListConstructOp* op = new ListConstructOp();
+            forward_result[753] = op;
+            
+            op->set_inputs( forward_result[752] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3450', 'op': 'aten::expand', 'in': [395, 753, 15], 'output_id': 0, 'shape': [400], 'out': [757], 'sorted_id': 754}
+        {
+            Tensor::shape_type shape = {400};
+            ExpandOp* op = new ExpandOp();
+            forward_result[754] = op;
+            
+            op->set_inputs( forward_result[395] );
+            op->set_inputs( forward_result[753] );
+            op->set_inputs( forward_result[15] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3451', 'op': 'prim::ListConstruct', 'in': [752], 'output_id': 0, 'shape': [], 'out': [756], 'sorted_id': 755}
+        {
+            ListConstructOp* op = new ListConstructOp();
+            forward_result[755] = op;
+            
+            op->set_inputs( forward_result[752] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3452', 'op': 'aten::expand', 'in': [399, 755, 15], 'output_id': 0, 'shape': [400], 'out': [757], 'sorted_id': 756}
+        {
+            Tensor::shape_type shape = {400};
+            ExpandOp* op = new ExpandOp();
+            forward_result[756] = op;
+            
+            op->set_inputs( forward_result[399] );
+            op->set_inputs( forward_result[755] );
+            op->set_inputs( forward_result[15] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3453', 'op': 'aten::normal', 'in': [754, 756, 20], 'output_id': 0, 'shape': [400], 'out': [758], 'sorted_id': 757}
+        {
+            Tensor::shape_type shape = {400};
+            NormalOp* op = new NormalOp();
+            forward_result[757] = op;
+            
+            op->set_inputs( forward_result[754] );
+            op->set_inputs( forward_result[756] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/epsilon.27', 'op': 'aten::to', 'in': [757, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400], 'out': [759], 'sorted_id': 758}
+        {
+            Tensor::shape_type shape = {400};
+            ToOp* op = new ToOp();
+            forward_result[758] = op;
+            
+            op->set_inputs( forward_result[757] );
+            op->set_inputs( forward_result[22] );
+            op->set_inputs( forward_result[10] );
+            op->set_inputs( forward_result[23] );
+            op->set_inputs( forward_result[20] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3457', 'op': 'aten::mul', 'in': [751, 758], 'output_id': 0, 'shape': [400], 'out': [760], 'sorted_id': 759}
+        {
+            Tensor::shape_type shape = {400};
+            MulOp* op = new MulOp();
+            forward_result[759] = op;
+            
+            op->set_inputs( forward_result[751] );
+            op->set_inputs( forward_result[758] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/value.27', 'op': 'aten::add', 'in': [748, 759, 12], 'output_id': 0, 'shape': [400], 'out': [798, 761, 830, 787], 'sorted_id': 760}
+        {
+            Tensor::shape_type shape = {400};
+            AddOp* op = new AddOp();
+            forward_result[760] = op;
+            
+            op->set_inputs( forward_result[748] );
+            op->set_inputs( forward_result[759] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/input.27', 'op': 'aten::linear', 'in': [733, 747, 760], 'output_id': 0, 'shape': [4, 400], 'out': [840], 'sorted_id': 761}
+        {
+            Tensor::shape_type shape = {4,400};
+            LinearOp* op = new LinearOp();
+            forward_result[761] = op;
+            
+            op->set_inputs( forward_result[733] );
+            op->set_inputs( forward_result[747] );
+            op->set_inputs( forward_result[760] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3461', 'op': 'aten::sub', 'in': [747, 407, 12], 'output_id': 0, 'shape': [400, 784], 'out': [763], 'sorted_id': 762}
+        {
+            Tensor::shape_type shape = {400,784};
+            SubOp* op = new SubOp();
+            forward_result[762] = op;
+            
+            op->set_inputs( forward_result[747] );
+            op->set_inputs( forward_result[407] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3462', 'op': 'aten::pow', 'in': [762, 45], 'output_id': 0, 'shape': [400, 784], 'out': [764], 'sorted_id': 763}
+        {
+            Tensor::shape_type shape = {400,784};
+            PowOp* op = new PowOp();
+            forward_result[763] = op;
+            
+            op->set_inputs( forward_result[762] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3463', 'op': 'aten::neg', 'in': [763], 'output_id': 0, 'shape': [400, 784], 'out': [767], 'sorted_id': 764}
+        {
+            Tensor::shape_type shape = {400,784};
+            NegOp* op = new NegOp();
+            forward_result[764] = op;
+            
+            op->set_inputs( forward_result[763] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/var.49', 'op': 'aten::pow', 'in': [411, 45], 'output_id': 0, 'shape': [1], 'out': [766], 'sorted_id': 765}
+        {
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[765] = op;
+            
+            op->set_inputs( forward_result[411] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3464', 'op': 'aten::mul', 'in': [765, 50], 'output_id': 0, 'shape': [1], 'out': [767], 'sorted_id': 766}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[766] = op;
+            
+            op->set_inputs( forward_result[765] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3465', 'op': 'aten::div', 'in': [764, 766], 'output_id': 0, 'shape': [400, 784], 'out': [769], 'sorted_id': 767}
+        {
+            Tensor::shape_type shape = {400,784};
+            DivOp* op = new DivOp();
+            forward_result[767] = op;
+            
+            op->set_inputs( forward_result[764] );
+            op->set_inputs( forward_result[766] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/log_scale.49', 'op': 'aten::log', 'in': [411], 'output_id': 0, 'shape': [1], 'out': [769], 'sorted_id': 768}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[768] = op;
+            
+            op->set_inputs( forward_result[411] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3466', 'op': 'aten::sub', 'in': [767, 768, 12], 'output_id': 0, 'shape': [400, 784], 'out': [770], 'sorted_id': 769}
+        {
+            Tensor::shape_type shape = {400,784};
+            SubOp* op = new SubOp();
+            forward_result[769] = op;
+            
+            op->set_inputs( forward_result[767] );
+            op->set_inputs( forward_result[768] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3467', 'op': 'aten::sub', 'in': [769, 55, 12], 'output_id': 0, 'shape': [400, 784], 'out': [771], 'sorted_id': 770}
+        {
+            Tensor::shape_type shape = {400,784};
+            SubOp* op = new SubOp();
+            forward_result[770] = op;
+            
+            op->set_inputs( forward_result[769] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/prob1.25', 'op': 'aten::exp', 'in': [770], 'output_id': 0, 'shape': [400, 784], 'out': [772], 'sorted_id': 771}
+        {
+            Tensor::shape_type shape = {400,784};
+            ExpOp* op = new ExpOp();
+            forward_result[771] = op;
+            
+            op->set_inputs( forward_result[770] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3479', 'op': 'aten::mul', 'in': [771, 58], 'output_id': 0, 'shape': [400, 784], 'out': [784], 'sorted_id': 772}
+        {
+            Tensor::shape_type shape = {400,784};
+            MulOp* op = new MulOp();
+            forward_result[772] = op;
+            
+            op->set_inputs( forward_result[771] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3471', 'op': 'aten::sub', 'in': [747, 420, 12], 'output_id': 0, 'shape': [400, 784], 'out': [774], 'sorted_id': 773}
+        {
+            Tensor::shape_type shape = {400,784};
+            SubOp* op = new SubOp();
+            forward_result[773] = op;
+            
+            op->set_inputs( forward_result[747] );
+            op->set_inputs( forward_result[420] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3472', 'op': 'aten::pow', 'in': [773, 45], 'output_id': 0, 'shape': [400, 784], 'out': [775], 'sorted_id': 774}
+        {
+            Tensor::shape_type shape = {400,784};
+            PowOp* op = new PowOp();
+            forward_result[774] = op;
+            
+            op->set_inputs( forward_result[773] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3473', 'op': 'aten::neg', 'in': [774], 'output_id': 0, 'shape': [400, 784], 'out': [778], 'sorted_id': 775}
+        {
+            Tensor::shape_type shape = {400,784};
+            NegOp* op = new NegOp();
+            forward_result[775] = op;
+            
+            op->set_inputs( forward_result[774] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/var.51', 'op': 'aten::pow', 'in': [424, 45], 'output_id': 0, 'shape': [1], 'out': [777], 'sorted_id': 776}
+        {
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[776] = op;
+            
+            op->set_inputs( forward_result[424] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3474', 'op': 'aten::mul', 'in': [776, 50], 'output_id': 0, 'shape': [1], 'out': [778], 'sorted_id': 777}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[777] = op;
+            
+            op->set_inputs( forward_result[776] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3475', 'op': 'aten::div', 'in': [775, 777], 'output_id': 0, 'shape': [400, 784], 'out': [780], 'sorted_id': 778}
+        {
+            Tensor::shape_type shape = {400,784};
+            DivOp* op = new DivOp();
+            forward_result[778] = op;
+            
+            op->set_inputs( forward_result[775] );
+            op->set_inputs( forward_result[777] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/log_scale.51', 'op': 'aten::log', 'in': [424], 'output_id': 0, 'shape': [1], 'out': [780], 'sorted_id': 779}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[779] = op;
+            
+            op->set_inputs( forward_result[424] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3476', 'op': 'aten::sub', 'in': [778, 779, 12], 'output_id': 0, 'shape': [400, 784], 'out': [781], 'sorted_id': 780}
+        {
+            Tensor::shape_type shape = {400,784};
+            SubOp* op = new SubOp();
+            forward_result[780] = op;
+            
+            op->set_inputs( forward_result[778] );
+            op->set_inputs( forward_result[779] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3477', 'op': 'aten::sub', 'in': [780, 55, 12], 'output_id': 0, 'shape': [400, 784], 'out': [782], 'sorted_id': 781}
+        {
+            Tensor::shape_type shape = {400,784};
+            SubOp* op = new SubOp();
+            forward_result[781] = op;
+            
+            op->set_inputs( forward_result[780] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/prob2.25', 'op': 'aten::exp', 'in': [781], 'output_id': 0, 'shape': [400, 784], 'out': [783], 'sorted_id': 782}
+        {
+            Tensor::shape_type shape = {400,784};
+            ExpOp* op = new ExpOp();
+            forward_result[782] = op;
+            
+            op->set_inputs( forward_result[781] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3480', 'op': 'aten::mul', 'in': [782, 58], 'output_id': 0, 'shape': [400, 784], 'out': [784], 'sorted_id': 783}
+        {
+            Tensor::shape_type shape = {400,784};
+            MulOp* op = new MulOp();
+            forward_result[783] = op;
+            
+            op->set_inputs( forward_result[782] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3481', 'op': 'aten::add', 'in': [772, 783, 12], 'output_id': 0, 'shape': [400, 784], 'out': [785], 'sorted_id': 784}
+        {
+            Tensor::shape_type shape = {400,784};
+            AddOp* op = new AddOp();
+            forward_result[784] = op;
+            
+            op->set_inputs( forward_result[772] );
+            op->set_inputs( forward_result[783] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3482', 'op': 'aten::log', 'in': [784], 'output_id': 0, 'shape': [400, 784], 'out': [786], 'sorted_id': 785}
+        {
+            Tensor::shape_type shape = {400,784};
+            LogOp* op = new LogOp();
+            forward_result[785] = op;
+            
+            op->set_inputs( forward_result[784] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3483', 'op': 'aten::sum', 'in': [785, 20], 'output_id': 0, 'shape': [], 'out': [812], 'sorted_id': 786}
+        {
+            SumOp* op = new SumOp();
+            forward_result[786] = op;
+            
+            op->set_inputs( forward_result[785] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3486', 'op': 'aten::sub', 'in': [760, 436, 12], 'output_id': 0, 'shape': [400], 'out': [788], 'sorted_id': 787}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[787] = op;
+            
+            op->set_inputs( forward_result[760] );
+            op->set_inputs( forward_result[436] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3487', 'op': 'aten::pow', 'in': [787, 45], 'output_id': 0, 'shape': [400], 'out': [789], 'sorted_id': 788}
+        {
+            Tensor::shape_type shape = {400};
+            PowOp* op = new PowOp();
+            forward_result[788] = op;
+            
+            op->set_inputs( forward_result[787] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3488', 'op': 'aten::neg', 'in': [788], 'output_id': 0, 'shape': [400], 'out': [792], 'sorted_id': 789}
+        {
+            Tensor::shape_type shape = {400};
+            NegOp* op = new NegOp();
+            forward_result[789] = op;
+            
+            op->set_inputs( forward_result[788] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/var.53', 'op': 'aten::pow', 'in': [411, 45], 'output_id': 0, 'shape': [1], 'out': [791], 'sorted_id': 790}
+        {
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[790] = op;
+            
+            op->set_inputs( forward_result[411] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3489', 'op': 'aten::mul', 'in': [790, 50], 'output_id': 0, 'shape': [1], 'out': [792], 'sorted_id': 791}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[791] = op;
+            
+            op->set_inputs( forward_result[790] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3490', 'op': 'aten::div', 'in': [789, 791], 'output_id': 0, 'shape': [400], 'out': [794], 'sorted_id': 792}
+        {
+            Tensor::shape_type shape = {400};
+            DivOp* op = new DivOp();
+            forward_result[792] = op;
+            
+            op->set_inputs( forward_result[789] );
+            op->set_inputs( forward_result[791] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/log_scale.53', 'op': 'aten::log', 'in': [411], 'output_id': 0, 'shape': [1], 'out': [794], 'sorted_id': 793}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[793] = op;
+            
+            op->set_inputs( forward_result[411] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3491', 'op': 'aten::sub', 'in': [792, 793, 12], 'output_id': 0, 'shape': [400], 'out': [795], 'sorted_id': 794}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[794] = op;
+            
+            op->set_inputs( forward_result[792] );
+            op->set_inputs( forward_result[793] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3492', 'op': 'aten::sub', 'in': [794, 55, 12], 'output_id': 0, 'shape': [400], 'out': [796], 'sorted_id': 795}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[795] = op;
+            
+            op->set_inputs( forward_result[794] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/prob1.27', 'op': 'aten::exp', 'in': [795], 'output_id': 0, 'shape': [400], 'out': [797], 'sorted_id': 796}
+        {
+            Tensor::shape_type shape = {400};
+            ExpOp* op = new ExpOp();
+            forward_result[796] = op;
+            
+            op->set_inputs( forward_result[795] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3504', 'op': 'aten::mul', 'in': [796, 58], 'output_id': 0, 'shape': [400], 'out': [809], 'sorted_id': 797}
+        {
+            Tensor::shape_type shape = {400};
+            MulOp* op = new MulOp();
+            forward_result[797] = op;
+            
+            op->set_inputs( forward_result[796] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3496', 'op': 'aten::sub', 'in': [760, 448, 12], 'output_id': 0, 'shape': [400], 'out': [799], 'sorted_id': 798}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[798] = op;
+            
+            op->set_inputs( forward_result[760] );
+            op->set_inputs( forward_result[448] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3497', 'op': 'aten::pow', 'in': [798, 45], 'output_id': 0, 'shape': [400], 'out': [800], 'sorted_id': 799}
+        {
+            Tensor::shape_type shape = {400};
+            PowOp* op = new PowOp();
+            forward_result[799] = op;
+            
+            op->set_inputs( forward_result[798] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3498', 'op': 'aten::neg', 'in': [799], 'output_id': 0, 'shape': [400], 'out': [803], 'sorted_id': 800}
+        {
+            Tensor::shape_type shape = {400};
+            NegOp* op = new NegOp();
+            forward_result[800] = op;
+            
+            op->set_inputs( forward_result[799] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/var.55', 'op': 'aten::pow', 'in': [424, 45], 'output_id': 0, 'shape': [1], 'out': [802], 'sorted_id': 801}
+        {
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[801] = op;
+            
+            op->set_inputs( forward_result[424] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3499', 'op': 'aten::mul', 'in': [801, 50], 'output_id': 0, 'shape': [1], 'out': [803], 'sorted_id': 802}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[802] = op;
+            
+            op->set_inputs( forward_result[801] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3500', 'op': 'aten::div', 'in': [800, 802], 'output_id': 0, 'shape': [400], 'out': [805], 'sorted_id': 803}
+        {
+            Tensor::shape_type shape = {400};
+            DivOp* op = new DivOp();
+            forward_result[803] = op;
+            
+            op->set_inputs( forward_result[800] );
+            op->set_inputs( forward_result[802] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/log_scale.55', 'op': 'aten::log', 'in': [424], 'output_id': 0, 'shape': [1], 'out': [805], 'sorted_id': 804}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[804] = op;
+            
+            op->set_inputs( forward_result[424] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3501', 'op': 'aten::sub', 'in': [803, 804, 12], 'output_id': 0, 'shape': [400], 'out': [806], 'sorted_id': 805}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[805] = op;
+            
+            op->set_inputs( forward_result[803] );
+            op->set_inputs( forward_result[804] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3502', 'op': 'aten::sub', 'in': [805, 55, 12], 'output_id': 0, 'shape': [400], 'out': [807], 'sorted_id': 806}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[806] = op;
+            
+            op->set_inputs( forward_result[805] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/prob2.27', 'op': 'aten::exp', 'in': [806], 'output_id': 0, 'shape': [400], 'out': [808], 'sorted_id': 807}
+        {
+            Tensor::shape_type shape = {400};
+            ExpOp* op = new ExpOp();
             forward_result[807] = op;
             
             op->set_inputs( forward_result[806] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3613', 'op': 'aten::expand', 'in': [437, 807, 15], 'output_id': 0, 'shape': [400], 'out': [811], 'sorted_id': 808}
-        {
-            Tensor::shape_type shape = {400};
-            ExpandOp* op = new ExpandOp();
-            forward_result[808] = op;
-            
-            op->set_inputs( forward_result[437] );
-            op->set_inputs( forward_result[807] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3614', 'op': 'prim::ListConstruct', 'in': [806], 'output_id': 0, 'shape': [], 'out': [810], 'sorted_id': 809}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[809] = op;
-            
-            op->set_inputs( forward_result[806] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3615', 'op': 'aten::expand', 'in': [441, 809, 15], 'output_id': 0, 'shape': [400], 'out': [811], 'sorted_id': 810}
-        {
-            Tensor::shape_type shape = {400};
-            ExpandOp* op = new ExpandOp();
-            forward_result[810] = op;
-            
-            op->set_inputs( forward_result[441] );
-            op->set_inputs( forward_result[809] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3616', 'op': 'aten::normal', 'in': [808, 810, 20], 'output_id': 0, 'shape': [400], 'out': [812], 'sorted_id': 811}
-        {
-            Tensor::shape_type shape = {400};
-            NormalOp* op = new NormalOp();
-            forward_result[811] = op;
-            
-            op->set_inputs( forward_result[808] );
-            op->set_inputs( forward_result[810] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/epsilon.27', 'op': 'aten::to', 'in': [811, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400], 'out': [813], 'sorted_id': 812}
-        {
-            Tensor::shape_type shape = {400};
-            ToOp* op = new ToOp();
-            forward_result[812] = op;
-            
-            op->set_inputs( forward_result[811] );
-            op->set_inputs( forward_result[22] );
-            op->set_inputs( forward_result[10] );
-            op->set_inputs( forward_result[23] );
-            op->set_inputs( forward_result[20] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3620', 'op': 'aten::mul', 'in': [805, 812], 'output_id': 0, 'shape': [400], 'out': [814], 'sorted_id': 813}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3505', 'op': 'aten::mul', 'in': [807, 58], 'output_id': 0, 'shape': [400], 'out': [809], 'sorted_id': 808}
         {
             Tensor::shape_type shape = {400};
             MulOp* op = new MulOp();
-            forward_result[813] = op;
+            forward_result[808] = op;
             
-            op->set_inputs( forward_result[805] );
-            op->set_inputs( forward_result[812] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[807] );
+            op->set_inputs( forward_result[58] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/value.27', 'op': 'aten::add', 'in': [802, 813, 12], 'output_id': 0, 'shape': [400], 'out': [815, 841, 852, 884], 'sorted_id': 814}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3506', 'op': 'aten::add', 'in': [797, 808, 12], 'output_id': 0, 'shape': [400], 'out': [810], 'sorted_id': 809}
         {
             Tensor::shape_type shape = {400};
             AddOp* op = new AddOp();
+            forward_result[809] = op;
+            
+            op->set_inputs( forward_result[797] );
+            op->set_inputs( forward_result[808] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3507', 'op': 'aten::log', 'in': [809], 'output_id': 0, 'shape': [400], 'out': [811], 'sorted_id': 810}
+        {
+            Tensor::shape_type shape = {400};
+            LogOp* op = new LogOp();
+            forward_result[810] = op;
+            
+            op->set_inputs( forward_result[809] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3508', 'op': 'aten::sum', 'in': [810, 20], 'output_id': 0, 'shape': [], 'out': [812], 'sorted_id': 811}
+        {
+            SumOp* op = new SumOp();
+            forward_result[811] = op;
+            
+            op->set_inputs( forward_result[810] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3509', 'op': 'aten::add', 'in': [786, 811, 12], 'output_id': 0, 'shape': [], 'out': [840], 'sorted_id': 812}
+        {
+            AddOp* op = new AddOp();
+            forward_result[812] = op;
+            
+            op->set_inputs( forward_result[786] );
+            op->set_inputs( forward_result[811] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3510', 'op': 'aten::exp', 'in': [735], 'output_id': 0, 'shape': [400, 784], 'out': [814], 'sorted_id': 813}
+        {
+            Tensor::shape_type shape = {400,784};
+            ExpOp* op = new ExpOp();
+            forward_result[813] = op;
+            
+            op->set_inputs( forward_result[735] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3511', 'op': 'aten::log1p', 'in': [813], 'output_id': 0, 'shape': [400, 784], 'out': [815], 'sorted_id': 814}
+        {
+            Tensor::shape_type shape = {400,784};
+            Log1pOp* op = new Log1pOp();
             forward_result[814] = op;
             
-            op->set_inputs( forward_result[802] );
             op->set_inputs( forward_result[813] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/input.27', 'op': 'aten::linear', 'in': [787, 801, 814], 'output_id': 0, 'shape': [4, 400], 'out': [894], 'sorted_id': 815}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3512', 'op': 'aten::log', 'in': [814], 'output_id': 0, 'shape': [400, 784], 'out': [816], 'sorted_id': 815}
         {
-            Tensor::shape_type shape = {4,400};
-            LinearOp* op = new LinearOp();
+            Tensor::shape_type shape = {400,784};
+            LogOp* op = new LogOp();
             forward_result[815] = op;
             
-            op->set_inputs( forward_result[787] );
-            op->set_inputs( forward_result[801] );
             op->set_inputs( forward_result[814] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3624', 'op': 'aten::sub', 'in': [801, 449, 12], 'output_id': 0, 'shape': [400, 784], 'out': [817], 'sorted_id': 816}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3513', 'op': 'aten::rsub', 'in': [815, 107, 12], 'output_id': 0, 'shape': [400, 784], 'out': [824], 'sorted_id': 816}
+        {
+            Tensor::shape_type shape = {400,784};
+            RsubOp* op = new RsubOp();
+            forward_result[816] = op;
+            
+            op->set_inputs( forward_result[815] );
+            op->set_inputs( forward_result[107] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3514', 'op': 'aten::sub', 'in': [747, 734, 12], 'output_id': 0, 'shape': [400, 784], 'out': [818], 'sorted_id': 817}
         {
             Tensor::shape_type shape = {400,784};
             SubOp* op = new SubOp();
-            forward_result[816] = op;
+            forward_result[817] = op;
             
-            op->set_inputs( forward_result[801] );
-            op->set_inputs( forward_result[449] );
+            op->set_inputs( forward_result[747] );
+            op->set_inputs( forward_result[734] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3625', 'op': 'aten::pow', 'in': [816, 45], 'output_id': 0, 'shape': [400, 784], 'out': [818], 'sorted_id': 817}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3515', 'op': 'aten::pow', 'in': [817, 45], 'output_id': 0, 'shape': [400, 784], 'out': [823], 'sorted_id': 818}
         {
             Tensor::shape_type shape = {400,784};
             PowOp* op = new PowOp();
-            forward_result[817] = op;
-            
-            op->set_inputs( forward_result[816] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3626', 'op': 'aten::neg', 'in': [817], 'output_id': 0, 'shape': [400, 784], 'out': [821], 'sorted_id': 818}
-        {
-            Tensor::shape_type shape = {400,784};
-            NegOp* op = new NegOp();
             forward_result[818] = op;
             
             op->set_inputs( forward_result[817] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/var.49', 'op': 'aten::pow', 'in': [453, 45], 'output_id': 0, 'shape': [1], 'out': [820], 'sorted_id': 819}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3516', 'op': 'aten::exp', 'in': [735], 'output_id': 0, 'shape': [400, 784], 'out': [820], 'sorted_id': 819}
         {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
+            Tensor::shape_type shape = {400,784};
+            ExpOp* op = new ExpOp();
             forward_result[819] = op;
             
-            op->set_inputs( forward_result[453] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[735] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3627', 'op': 'aten::mul', 'in': [819, 50], 'output_id': 0, 'shape': [1], 'out': [821], 'sorted_id': 820}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3517', 'op': 'aten::log1p', 'in': [819], 'output_id': 0, 'shape': [400, 784], 'out': [821], 'sorted_id': 820}
         {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
+            Tensor::shape_type shape = {400,784};
+            Log1pOp* op = new Log1pOp();
             forward_result[820] = op;
             
             op->set_inputs( forward_result[819] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3628', 'op': 'aten::div', 'in': [818, 820], 'output_id': 0, 'shape': [400, 784], 'out': [823], 'sorted_id': 821}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3518', 'op': 'aten::pow', 'in': [820, 45], 'output_id': 0, 'shape': [400, 784], 'out': [822], 'sorted_id': 821}
+        {
+            Tensor::shape_type shape = {400,784};
+            PowOp* op = new PowOp();
+            forward_result[821] = op;
+            
+            op->set_inputs( forward_result[820] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3519', 'op': 'aten::mul', 'in': [821, 50], 'output_id': 0, 'shape': [400, 784], 'out': [823], 'sorted_id': 822}
+        {
+            Tensor::shape_type shape = {400,784};
+            MulOp* op = new MulOp();
+            forward_result[822] = op;
+            
+            op->set_inputs( forward_result[821] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3520', 'op': 'aten::div', 'in': [818, 822], 'output_id': 0, 'shape': [400, 784], 'out': [824], 'sorted_id': 823}
         {
             Tensor::shape_type shape = {400,784};
             DivOp* op = new DivOp();
-            forward_result[821] = op;
-            
-            op->set_inputs( forward_result[818] );
-            op->set_inputs( forward_result[820] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/log_scale.49', 'op': 'aten::log', 'in': [453], 'output_id': 0, 'shape': [1], 'out': [823], 'sorted_id': 822}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[822] = op;
-            
-            op->set_inputs( forward_result[453] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3629', 'op': 'aten::sub', 'in': [821, 822, 12], 'output_id': 0, 'shape': [400, 784], 'out': [824], 'sorted_id': 823}
-        {
-            Tensor::shape_type shape = {400,784};
-            SubOp* op = new SubOp();
             forward_result[823] = op;
             
-            op->set_inputs( forward_result[821] );
+            op->set_inputs( forward_result[818] );
             op->set_inputs( forward_result[822] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3630', 'op': 'aten::sub', 'in': [823, 55, 12], 'output_id': 0, 'shape': [400, 784], 'out': [825], 'sorted_id': 824}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3521', 'op': 'aten::sub', 'in': [816, 823, 12], 'output_id': 0, 'shape': [400, 784], 'out': [825], 'sorted_id': 824}
         {
             Tensor::shape_type shape = {400,784};
             SubOp* op = new SubOp();
             forward_result[824] = op;
             
+            op->set_inputs( forward_result[816] );
             op->set_inputs( forward_result[823] );
-            op->set_inputs( forward_result[55] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/prob1.25', 'op': 'aten::exp', 'in': [824], 'output_id': 0, 'shape': [400, 784], 'out': [826], 'sorted_id': 825}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3522', 'op': 'aten::sum', 'in': [824, 20], 'output_id': 0, 'shape': [], 'out': [839], 'sorted_id': 825}
         {
-            Tensor::shape_type shape = {400,784};
-            ExpOp* op = new ExpOp();
+            SumOp* op = new SumOp();
             forward_result[825] = op;
             
             op->set_inputs( forward_result[824] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3642', 'op': 'aten::mul', 'in': [825, 58], 'output_id': 0, 'shape': [400, 784], 'out': [838], 'sorted_id': 826}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3523', 'op': 'aten::exp', 'in': [749], 'output_id': 0, 'shape': [400], 'out': [827], 'sorted_id': 826}
         {
-            Tensor::shape_type shape = {400,784};
-            MulOp* op = new MulOp();
+            Tensor::shape_type shape = {400};
+            ExpOp* op = new ExpOp();
             forward_result[826] = op;
             
-            op->set_inputs( forward_result[825] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[749] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3634', 'op': 'aten::sub', 'in': [801, 462, 12], 'output_id': 0, 'shape': [400, 784], 'out': [828], 'sorted_id': 827}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3524', 'op': 'aten::log1p', 'in': [826], 'output_id': 0, 'shape': [400], 'out': [828], 'sorted_id': 827}
         {
-            Tensor::shape_type shape = {400,784};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {400};
+            Log1pOp* op = new Log1pOp();
             forward_result[827] = op;
             
-            op->set_inputs( forward_result[801] );
-            op->set_inputs( forward_result[462] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[826] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3635', 'op': 'aten::pow', 'in': [827, 45], 'output_id': 0, 'shape': [400, 784], 'out': [829], 'sorted_id': 828}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3525', 'op': 'aten::log', 'in': [827], 'output_id': 0, 'shape': [400], 'out': [829], 'sorted_id': 828}
         {
-            Tensor::shape_type shape = {400,784};
-            PowOp* op = new PowOp();
+            Tensor::shape_type shape = {400};
+            LogOp* op = new LogOp();
             forward_result[828] = op;
             
             op->set_inputs( forward_result[827] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3636', 'op': 'aten::neg', 'in': [828], 'output_id': 0, 'shape': [400, 784], 'out': [832], 'sorted_id': 829}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3526', 'op': 'aten::rsub', 'in': [828, 107, 12], 'output_id': 0, 'shape': [400], 'out': [837], 'sorted_id': 829}
         {
-            Tensor::shape_type shape = {400,784};
-            NegOp* op = new NegOp();
+            Tensor::shape_type shape = {400};
+            RsubOp* op = new RsubOp();
             forward_result[829] = op;
             
             op->set_inputs( forward_result[828] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[107] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/var.51', 'op': 'aten::pow', 'in': [466, 45], 'output_id': 0, 'shape': [1], 'out': [831], 'sorted_id': 830}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3527', 'op': 'aten::sub', 'in': [760, 748, 12], 'output_id': 0, 'shape': [400], 'out': [831], 'sorted_id': 830}
         {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
             forward_result[830] = op;
             
-            op->set_inputs( forward_result[466] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[760] );
+            op->set_inputs( forward_result[748] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3637', 'op': 'aten::mul', 'in': [830, 50], 'output_id': 0, 'shape': [1], 'out': [832], 'sorted_id': 831}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3528', 'op': 'aten::pow', 'in': [830, 45], 'output_id': 0, 'shape': [400], 'out': [836], 'sorted_id': 831}
         {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
+            Tensor::shape_type shape = {400};
+            PowOp* op = new PowOp();
             forward_result[831] = op;
             
             op->set_inputs( forward_result[830] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3638', 'op': 'aten::div', 'in': [829, 831], 'output_id': 0, 'shape': [400, 784], 'out': [834], 'sorted_id': 832}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3529', 'op': 'aten::exp', 'in': [749], 'output_id': 0, 'shape': [400], 'out': [833], 'sorted_id': 832}
         {
-            Tensor::shape_type shape = {400,784};
-            DivOp* op = new DivOp();
+            Tensor::shape_type shape = {400};
+            ExpOp* op = new ExpOp();
             forward_result[832] = op;
             
-            op->set_inputs( forward_result[829] );
-            op->set_inputs( forward_result[831] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[749] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/log_scale.51', 'op': 'aten::log', 'in': [466], 'output_id': 0, 'shape': [1], 'out': [834], 'sorted_id': 833}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3530', 'op': 'aten::log1p', 'in': [832], 'output_id': 0, 'shape': [400], 'out': [834], 'sorted_id': 833}
         {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
+            Tensor::shape_type shape = {400};
+            Log1pOp* op = new Log1pOp();
             forward_result[833] = op;
             
-            op->set_inputs( forward_result[466] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[832] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3639', 'op': 'aten::sub', 'in': [832, 833, 12], 'output_id': 0, 'shape': [400, 784], 'out': [835], 'sorted_id': 834}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3531', 'op': 'aten::pow', 'in': [833, 45], 'output_id': 0, 'shape': [400], 'out': [835], 'sorted_id': 834}
         {
-            Tensor::shape_type shape = {400,784};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {400};
+            PowOp* op = new PowOp();
             forward_result[834] = op;
             
-            op->set_inputs( forward_result[832] );
             op->set_inputs( forward_result[833] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3640', 'op': 'aten::sub', 'in': [834, 55, 12], 'output_id': 0, 'shape': [400, 784], 'out': [836], 'sorted_id': 835}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3532', 'op': 'aten::mul', 'in': [834, 50], 'output_id': 0, 'shape': [400], 'out': [836], 'sorted_id': 835}
         {
-            Tensor::shape_type shape = {400,784};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {400};
+            MulOp* op = new MulOp();
             forward_result[835] = op;
             
             op->set_inputs( forward_result[834] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[50] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/prob2.25', 'op': 'aten::exp', 'in': [835], 'output_id': 0, 'shape': [400, 784], 'out': [837], 'sorted_id': 836}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3533', 'op': 'aten::div', 'in': [831, 835], 'output_id': 0, 'shape': [400], 'out': [837], 'sorted_id': 836}
         {
-            Tensor::shape_type shape = {400,784};
-            ExpOp* op = new ExpOp();
+            Tensor::shape_type shape = {400};
+            DivOp* op = new DivOp();
             forward_result[836] = op;
             
+            op->set_inputs( forward_result[831] );
             op->set_inputs( forward_result[835] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3643', 'op': 'aten::mul', 'in': [836, 58], 'output_id': 0, 'shape': [400, 784], 'out': [838], 'sorted_id': 837}
-        {
-            Tensor::shape_type shape = {400,784};
-            MulOp* op = new MulOp();
-            forward_result[837] = op;
-            
-            op->set_inputs( forward_result[836] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3644', 'op': 'aten::add', 'in': [826, 837, 12], 'output_id': 0, 'shape': [400, 784], 'out': [839], 'sorted_id': 838}
-        {
-            Tensor::shape_type shape = {400,784};
-            AddOp* op = new AddOp();
-            forward_result[838] = op;
-            
-            op->set_inputs( forward_result[826] );
-            op->set_inputs( forward_result[837] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3645', 'op': 'aten::log', 'in': [838], 'output_id': 0, 'shape': [400, 784], 'out': [840], 'sorted_id': 839}
-        {
-            Tensor::shape_type shape = {400,784};
-            LogOp* op = new LogOp();
-            forward_result[839] = op;
-            
-            op->set_inputs( forward_result[838] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3646', 'op': 'aten::sum', 'in': [839, 20], 'output_id': 0, 'shape': [], 'out': [866], 'sorted_id': 840}
-        {
-            SumOp* op = new SumOp();
-            forward_result[840] = op;
-            
-            op->set_inputs( forward_result[839] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3649', 'op': 'aten::sub', 'in': [814, 478, 12], 'output_id': 0, 'shape': [400], 'out': [842], 'sorted_id': 841}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3534', 'op': 'aten::sub', 'in': [829, 836, 12], 'output_id': 0, 'shape': [400], 'out': [838], 'sorted_id': 837}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
-            forward_result[841] = op;
+            forward_result[837] = op;
             
-            op->set_inputs( forward_result[814] );
-            op->set_inputs( forward_result[478] );
+            op->set_inputs( forward_result[829] );
+            op->set_inputs( forward_result[836] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3650', 'op': 'aten::pow', 'in': [841, 45], 'output_id': 0, 'shape': [400], 'out': [843], 'sorted_id': 842}
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3535', 'op': 'aten::sum', 'in': [837, 20], 'output_id': 0, 'shape': [], 'out': [839], 'sorted_id': 838}
         {
-            Tensor::shape_type shape = {400};
-            PowOp* op = new PowOp();
+            SumOp* op = new SumOp();
+            forward_result[838] = op;
+            
+            op->set_inputs( forward_result[837] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l1]/3536', 'op': 'aten::add', 'in': [825, 838, 12], 'output_id': 0, 'shape': [], 'out': [840], 'sorted_id': 839}
+        {
+            AddOp* op = new AddOp();
+            forward_result[839] = op;
+            
+            op->set_inputs( forward_result[825] );
+            op->set_inputs( forward_result[838] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/3538', 'op': 'prim::TupleConstruct', 'in': [761, 812, 839], 'output_id': 0, 'shape': [], 'out': [841, 1075, 1093], 'sorted_id': 840}
+        {
+            TupleConstructOp* op = new TupleConstructOp();
+            forward_result[840] = op;
+            
+            op->set_inputs( forward_result[761] );
+            op->set_inputs( forward_result[812] );
+            op->set_inputs( forward_result[839] );
+        }
+        
+        // {'name': 'Model/3539', 'op': 'prim::TupleUnpack', 'in': [840], 'output_id': 0, 'shape': [4, 400], 'out': [842], 'sorted_id': 841}
+        {
+            Tensor::shape_type shape = {4,400};
+            TupleUnpackOp* op = new TupleUnpackOp( 0 );
+            forward_result[841] = op;
+            
+            op->set_inputs( forward_result[840] );
+        }
+        
+        // {'name': 'Model/Net[net]/input.29', 'op': 'aten::relu', 'in': [841], 'output_id': 0, 'shape': [4, 400], 'out': [870], 'sorted_id': 842}
+        {
+            Tensor::shape_type shape = {4,400};
+            ReluOp* op = new ReluOp();
             forward_result[842] = op;
             
             op->set_inputs( forward_result[841] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3651', 'op': 'aten::neg', 'in': [842], 'output_id': 0, 'shape': [400], 'out': [846], 'sorted_id': 843}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/weight_mu/weight_mu.15', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [926, 856], 'sorted_id': 843}
         {
-            Tensor::shape_type shape = {400};
-            NegOp* op = new NegOp();
-            forward_result[843] = op;
-            
-            op->set_inputs( forward_result[842] );
-            op->set_shape( shape );
+            Tensor::shape_type shape = {400,400};
+            l2_weight_mu.reshape( shape );
+            forward_result[843] = new VariableTensor( l2_weight_mu, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/var.53', 'op': 'aten::pow', 'in': [453, 45], 'output_id': 0, 'shape': [1], 'out': [845], 'sorted_id': 844}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/weight_rho/weight_rho.15', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [928, 848, 845, 847, 922], 'sorted_id': 844}
         {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[844] = op;
-            
-            op->set_inputs( forward_result[453] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            Tensor::shape_type shape = {400,400};
+            l2_weight_rho.reshape( shape );
+            forward_result[844] = new VariableTensor( l2_weight_rho, 2 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3652', 'op': 'aten::mul', 'in': [844, 50], 'output_id': 0, 'shape': [1], 'out': [846], 'sorted_id': 845}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3555', 'op': 'aten::exp', 'in': [844], 'output_id': 0, 'shape': [400, 400], 'out': [846], 'sorted_id': 845}
         {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
+            Tensor::shape_type shape = {400,400};
+            ExpOp* op = new ExpOp();
             forward_result[845] = op;
             
             op->set_inputs( forward_result[844] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3653', 'op': 'aten::div', 'in': [843, 845], 'output_id': 0, 'shape': [400], 'out': [848], 'sorted_id': 846}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3556', 'op': 'aten::log1p', 'in': [845], 'output_id': 0, 'shape': [400, 400], 'out': [855], 'sorted_id': 846}
         {
-            Tensor::shape_type shape = {400};
-            DivOp* op = new DivOp();
+            Tensor::shape_type shape = {400,400};
+            Log1pOp* op = new Log1pOp();
             forward_result[846] = op;
             
-            op->set_inputs( forward_result[843] );
             op->set_inputs( forward_result[845] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/log_scale.53', 'op': 'aten::log', 'in': [453], 'output_id': 0, 'shape': [1], 'out': [848], 'sorted_id': 847}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3547', 'op': 'aten::size', 'in': [844, 10], 'output_id': 0, 'shape': [], 'out': [851, 849], 'sorted_id': 847}
         {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
+            SizeOp* op = new SizeOp();
             forward_result[847] = op;
             
-            op->set_inputs( forward_result[453] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[844] );
+            op->set_inputs( forward_result[10] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3654', 'op': 'aten::sub', 'in': [846, 847, 12], 'output_id': 0, 'shape': [400], 'out': [849], 'sorted_id': 848}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3548', 'op': 'aten::size', 'in': [844, 12], 'output_id': 0, 'shape': [], 'out': [851, 849], 'sorted_id': 848}
         {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            SizeOp* op = new SizeOp();
             forward_result[848] = op;
             
-            op->set_inputs( forward_result[846] );
-            op->set_inputs( forward_result[847] );
+            op->set_inputs( forward_result[844] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3655', 'op': 'aten::sub', 'in': [848, 55, 12], 'output_id': 0, 'shape': [400], 'out': [850], 'sorted_id': 849}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3549', 'op': 'prim::ListConstruct', 'in': [847, 848], 'output_id': 0, 'shape': [], 'out': [850], 'sorted_id': 849}
         {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            ListConstructOp* op = new ListConstructOp();
             forward_result[849] = op;
             
+            op->set_inputs( forward_result[847] );
             op->set_inputs( forward_result[848] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/prob1.27', 'op': 'aten::exp', 'in': [849], 'output_id': 0, 'shape': [400], 'out': [851], 'sorted_id': 850}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3550', 'op': 'aten::expand', 'in': [498, 849, 15], 'output_id': 0, 'shape': [400, 400], 'out': [853], 'sorted_id': 850}
         {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
+            Tensor::shape_type shape = {400,400};
+            ExpandOp* op = new ExpandOp();
             forward_result[850] = op;
             
+            op->set_inputs( forward_result[498] );
             op->set_inputs( forward_result[849] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[15] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3667', 'op': 'aten::mul', 'in': [850, 58], 'output_id': 0, 'shape': [400], 'out': [863], 'sorted_id': 851}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3551', 'op': 'prim::ListConstruct', 'in': [847, 848], 'output_id': 0, 'shape': [], 'out': [852], 'sorted_id': 851}
         {
-            Tensor::shape_type shape = {400};
-            MulOp* op = new MulOp();
+            ListConstructOp* op = new ListConstructOp();
             forward_result[851] = op;
             
-            op->set_inputs( forward_result[850] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[847] );
+            op->set_inputs( forward_result[848] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3659', 'op': 'aten::sub', 'in': [814, 490, 12], 'output_id': 0, 'shape': [400], 'out': [853], 'sorted_id': 852}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3552', 'op': 'aten::expand', 'in': [503, 851, 15], 'output_id': 0, 'shape': [400, 400], 'out': [853], 'sorted_id': 852}
         {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {400,400};
+            ExpandOp* op = new ExpandOp();
             forward_result[852] = op;
             
-            op->set_inputs( forward_result[814] );
-            op->set_inputs( forward_result[490] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[503] );
+            op->set_inputs( forward_result[851] );
+            op->set_inputs( forward_result[15] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3660', 'op': 'aten::pow', 'in': [852, 45], 'output_id': 0, 'shape': [400], 'out': [854], 'sorted_id': 853}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3553', 'op': 'aten::normal', 'in': [850, 852, 20], 'output_id': 0, 'shape': [400, 400], 'out': [854], 'sorted_id': 853}
         {
-            Tensor::shape_type shape = {400};
-            PowOp* op = new PowOp();
+            Tensor::shape_type shape = {400,400};
+            NormalOp* op = new NormalOp();
             forward_result[853] = op;
             
+            op->set_inputs( forward_result[850] );
             op->set_inputs( forward_result[852] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3661', 'op': 'aten::neg', 'in': [853], 'output_id': 0, 'shape': [400], 'out': [857], 'sorted_id': 854}
-        {
-            Tensor::shape_type shape = {400};
-            NegOp* op = new NegOp();
-            forward_result[854] = op;
-            
-            op->set_inputs( forward_result[853] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/var.55', 'op': 'aten::pow', 'in': [466, 45], 'output_id': 0, 'shape': [1], 'out': [856], 'sorted_id': 855}
-        {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[855] = op;
-            
-            op->set_inputs( forward_result[466] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3662', 'op': 'aten::mul', 'in': [855, 50], 'output_id': 0, 'shape': [1], 'out': [857], 'sorted_id': 856}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[856] = op;
-            
-            op->set_inputs( forward_result[855] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3663', 'op': 'aten::div', 'in': [854, 856], 'output_id': 0, 'shape': [400], 'out': [859], 'sorted_id': 857}
-        {
-            Tensor::shape_type shape = {400};
-            DivOp* op = new DivOp();
-            forward_result[857] = op;
-            
-            op->set_inputs( forward_result[854] );
-            op->set_inputs( forward_result[856] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/log_scale.55', 'op': 'aten::log', 'in': [466], 'output_id': 0, 'shape': [1], 'out': [859], 'sorted_id': 858}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[858] = op;
-            
-            op->set_inputs( forward_result[466] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3664', 'op': 'aten::sub', 'in': [857, 858, 12], 'output_id': 0, 'shape': [400], 'out': [860], 'sorted_id': 859}
-        {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
-            forward_result[859] = op;
-            
-            op->set_inputs( forward_result[857] );
-            op->set_inputs( forward_result[858] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3665', 'op': 'aten::sub', 'in': [859, 55, 12], 'output_id': 0, 'shape': [400], 'out': [861], 'sorted_id': 860}
-        {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
-            forward_result[860] = op;
-            
-            op->set_inputs( forward_result[859] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/prob2.27', 'op': 'aten::exp', 'in': [860], 'output_id': 0, 'shape': [400], 'out': [862], 'sorted_id': 861}
-        {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
-            forward_result[861] = op;
-            
-            op->set_inputs( forward_result[860] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3668', 'op': 'aten::mul', 'in': [861, 58], 'output_id': 0, 'shape': [400], 'out': [863], 'sorted_id': 862}
-        {
-            Tensor::shape_type shape = {400};
-            MulOp* op = new MulOp();
-            forward_result[862] = op;
-            
-            op->set_inputs( forward_result[861] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3669', 'op': 'aten::add', 'in': [851, 862, 12], 'output_id': 0, 'shape': [400], 'out': [864], 'sorted_id': 863}
-        {
-            Tensor::shape_type shape = {400};
-            AddOp* op = new AddOp();
-            forward_result[863] = op;
-            
-            op->set_inputs( forward_result[851] );
-            op->set_inputs( forward_result[862] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3670', 'op': 'aten::log', 'in': [863], 'output_id': 0, 'shape': [400], 'out': [865], 'sorted_id': 864}
-        {
-            Tensor::shape_type shape = {400};
-            LogOp* op = new LogOp();
-            forward_result[864] = op;
-            
-            op->set_inputs( forward_result[863] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3671', 'op': 'aten::sum', 'in': [864, 20], 'output_id': 0, 'shape': [], 'out': [866], 'sorted_id': 865}
-        {
-            SumOp* op = new SumOp();
-            forward_result[865] = op;
-            
-            op->set_inputs( forward_result[864] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3672', 'op': 'aten::add', 'in': [840, 865, 12], 'output_id': 0, 'shape': [], 'out': [894], 'sorted_id': 866}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/epsilon.29', 'op': 'aten::to', 'in': [853, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400, 400], 'out': [855], 'sorted_id': 854}
         {
+            Tensor::shape_type shape = {400,400};
+            ToOp* op = new ToOp();
+            forward_result[854] = op;
+            
+            op->set_inputs( forward_result[853] );
+            op->set_inputs( forward_result[22] );
+            op->set_inputs( forward_result[10] );
+            op->set_inputs( forward_result[23] );
+            op->set_inputs( forward_result[20] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3557', 'op': 'aten::mul', 'in': [846, 854], 'output_id': 0, 'shape': [400, 400], 'out': [856], 'sorted_id': 855}
+        {
+            Tensor::shape_type shape = {400,400};
+            MulOp* op = new MulOp();
+            forward_result[855] = op;
+            
+            op->set_inputs( forward_result[846] );
+            op->set_inputs( forward_result[854] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/value.29', 'op': 'aten::add', 'in': [843, 855, 12], 'output_id': 0, 'shape': [400, 400], 'out': [926, 870, 871, 882], 'sorted_id': 856}
+        {
+            Tensor::shape_type shape = {400,400};
             AddOp* op = new AddOp();
+            forward_result[856] = op;
+            
+            op->set_inputs( forward_result[843] );
+            op->set_inputs( forward_result[855] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/bias_mu/bias_mu.15', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [939, 869], 'sorted_id': 857}
+        {
+            Tensor::shape_type shape = {400};
+            l2_bias_mu.reshape( shape );
+            forward_result[857] = new VariableTensor( l2_bias_mu, 2 );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/bias_rho/bias_rho.15', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [859, 941, 861, 935], 'sorted_id': 858}
+        {
+            Tensor::shape_type shape = {400};
+            l2_bias_rho.reshape( shape );
+            forward_result[858] = new VariableTensor( l2_bias_rho, 2 );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3566', 'op': 'aten::exp', 'in': [858], 'output_id': 0, 'shape': [400], 'out': [860], 'sorted_id': 859}
+        {
+            Tensor::shape_type shape = {400};
+            ExpOp* op = new ExpOp();
+            forward_result[859] = op;
+            
+            op->set_inputs( forward_result[858] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3567', 'op': 'aten::log1p', 'in': [859], 'output_id': 0, 'shape': [400], 'out': [868], 'sorted_id': 860}
+        {
+            Tensor::shape_type shape = {400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[860] = op;
+            
+            op->set_inputs( forward_result[859] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3559', 'op': 'aten::size', 'in': [858, 10], 'output_id': 0, 'shape': [], 'out': [864, 862], 'sorted_id': 861}
+        {
+            SizeOp* op = new SizeOp();
+            forward_result[861] = op;
+            
+            op->set_inputs( forward_result[858] );
+            op->set_inputs( forward_result[10] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3560', 'op': 'prim::ListConstruct', 'in': [861], 'output_id': 0, 'shape': [], 'out': [863], 'sorted_id': 862}
+        {
+            ListConstructOp* op = new ListConstructOp();
+            forward_result[862] = op;
+            
+            op->set_inputs( forward_result[861] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3561', 'op': 'aten::expand', 'in': [514, 862, 15], 'output_id': 0, 'shape': [400], 'out': [866], 'sorted_id': 863}
+        {
+            Tensor::shape_type shape = {400};
+            ExpandOp* op = new ExpandOp();
+            forward_result[863] = op;
+            
+            op->set_inputs( forward_result[514] );
+            op->set_inputs( forward_result[862] );
+            op->set_inputs( forward_result[15] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3562', 'op': 'prim::ListConstruct', 'in': [861], 'output_id': 0, 'shape': [], 'out': [865], 'sorted_id': 864}
+        {
+            ListConstructOp* op = new ListConstructOp();
+            forward_result[864] = op;
+            
+            op->set_inputs( forward_result[861] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3563', 'op': 'aten::expand', 'in': [518, 864, 15], 'output_id': 0, 'shape': [400], 'out': [866], 'sorted_id': 865}
+        {
+            Tensor::shape_type shape = {400};
+            ExpandOp* op = new ExpandOp();
+            forward_result[865] = op;
+            
+            op->set_inputs( forward_result[518] );
+            op->set_inputs( forward_result[864] );
+            op->set_inputs( forward_result[15] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3564', 'op': 'aten::normal', 'in': [863, 865, 20], 'output_id': 0, 'shape': [400], 'out': [867], 'sorted_id': 866}
+        {
+            Tensor::shape_type shape = {400};
+            NormalOp* op = new NormalOp();
             forward_result[866] = op;
             
-            op->set_inputs( forward_result[840] );
+            op->set_inputs( forward_result[863] );
             op->set_inputs( forward_result[865] );
-            op->set_inputs( forward_result[12] );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3673', 'op': 'aten::exp', 'in': [789], 'output_id': 0, 'shape': [400, 784], 'out': [868], 'sorted_id': 867}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/epsilon.31', 'op': 'aten::to', 'in': [866, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400], 'out': [868], 'sorted_id': 867}
         {
-            Tensor::shape_type shape = {400,784};
-            ExpOp* op = new ExpOp();
+            Tensor::shape_type shape = {400};
+            ToOp* op = new ToOp();
             forward_result[867] = op;
             
-            op->set_inputs( forward_result[789] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[866] );
+            op->set_inputs( forward_result[22] );
+            op->set_inputs( forward_result[10] );
+            op->set_inputs( forward_result[23] );
+            op->set_inputs( forward_result[20] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3674', 'op': 'aten::log1p', 'in': [867], 'output_id': 0, 'shape': [400, 784], 'out': [869], 'sorted_id': 868}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3568', 'op': 'aten::mul', 'in': [860, 867], 'output_id': 0, 'shape': [400], 'out': [869], 'sorted_id': 868}
         {
-            Tensor::shape_type shape = {400,784};
-            Log1pOp* op = new Log1pOp();
+            Tensor::shape_type shape = {400};
+            MulOp* op = new MulOp();
             forward_result[868] = op;
             
+            op->set_inputs( forward_result[860] );
             op->set_inputs( forward_result[867] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3675', 'op': 'aten::log', 'in': [868], 'output_id': 0, 'shape': [400, 784], 'out': [870], 'sorted_id': 869}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/value.31', 'op': 'aten::add', 'in': [857, 868, 12], 'output_id': 0, 'shape': [400], 'out': [907, 939, 870, 896], 'sorted_id': 869}
         {
-            Tensor::shape_type shape = {400,784};
-            LogOp* op = new LogOp();
+            Tensor::shape_type shape = {400};
+            AddOp* op = new AddOp();
             forward_result[869] = op;
             
+            op->set_inputs( forward_result[857] );
             op->set_inputs( forward_result[868] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3676', 'op': 'aten::rsub', 'in': [869, 107, 12], 'output_id': 0, 'shape': [400, 784], 'out': [878], 'sorted_id': 870}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/input.31', 'op': 'aten::linear', 'in': [842, 856, 869], 'output_id': 0, 'shape': [4, 400], 'out': [949], 'sorted_id': 870}
         {
-            Tensor::shape_type shape = {400,784};
-            RsubOp* op = new RsubOp();
+            Tensor::shape_type shape = {4,400};
+            LinearOp* op = new LinearOp();
             forward_result[870] = op;
             
+            op->set_inputs( forward_result[842] );
+            op->set_inputs( forward_result[856] );
             op->set_inputs( forward_result[869] );
-            op->set_inputs( forward_result[107] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3677', 'op': 'aten::sub', 'in': [801, 788, 12], 'output_id': 0, 'shape': [400, 784], 'out': [872], 'sorted_id': 871}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3572', 'op': 'aten::sub', 'in': [856, 526, 12], 'output_id': 0, 'shape': [400, 400], 'out': [872], 'sorted_id': 871}
         {
-            Tensor::shape_type shape = {400,784};
+            Tensor::shape_type shape = {400,400};
             SubOp* op = new SubOp();
             forward_result[871] = op;
             
-            op->set_inputs( forward_result[801] );
-            op->set_inputs( forward_result[788] );
+            op->set_inputs( forward_result[856] );
+            op->set_inputs( forward_result[526] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3678', 'op': 'aten::pow', 'in': [871, 45], 'output_id': 0, 'shape': [400, 784], 'out': [877], 'sorted_id': 872}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3573', 'op': 'aten::pow', 'in': [871, 45], 'output_id': 0, 'shape': [400, 400], 'out': [873], 'sorted_id': 872}
         {
-            Tensor::shape_type shape = {400,784};
+            Tensor::shape_type shape = {400,400};
             PowOp* op = new PowOp();
             forward_result[872] = op;
             
             op->set_inputs( forward_result[871] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3679', 'op': 'aten::exp', 'in': [789], 'output_id': 0, 'shape': [400, 784], 'out': [874], 'sorted_id': 873}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3574', 'op': 'aten::neg', 'in': [872], 'output_id': 0, 'shape': [400, 400], 'out': [876], 'sorted_id': 873}
         {
-            Tensor::shape_type shape = {400,784};
-            ExpOp* op = new ExpOp();
+            Tensor::shape_type shape = {400,400};
+            NegOp* op = new NegOp();
             forward_result[873] = op;
             
-            op->set_inputs( forward_result[789] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[872] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3680', 'op': 'aten::log1p', 'in': [873], 'output_id': 0, 'shape': [400, 784], 'out': [875], 'sorted_id': 874}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/var.57', 'op': 'aten::pow', 'in': [530, 45], 'output_id': 0, 'shape': [1], 'out': [875], 'sorted_id': 874}
         {
-            Tensor::shape_type shape = {400,784};
-            Log1pOp* op = new Log1pOp();
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
             forward_result[874] = op;
             
-            op->set_inputs( forward_result[873] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[530] );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3681', 'op': 'aten::pow', 'in': [874, 45], 'output_id': 0, 'shape': [400, 784], 'out': [876], 'sorted_id': 875}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3575', 'op': 'aten::mul', 'in': [874, 50], 'output_id': 0, 'shape': [1], 'out': [876], 'sorted_id': 875}
         {
-            Tensor::shape_type shape = {400,784};
-            PowOp* op = new PowOp();
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
             forward_result[875] = op;
             
             op->set_inputs( forward_result[874] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[50] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3682', 'op': 'aten::mul', 'in': [875, 50], 'output_id': 0, 'shape': [400, 784], 'out': [877], 'sorted_id': 876}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3576', 'op': 'aten::div', 'in': [873, 875], 'output_id': 0, 'shape': [400, 400], 'out': [878], 'sorted_id': 876}
         {
-            Tensor::shape_type shape = {400,784};
-            MulOp* op = new MulOp();
+            Tensor::shape_type shape = {400,400};
+            DivOp* op = new DivOp();
             forward_result[876] = op;
             
+            op->set_inputs( forward_result[873] );
             op->set_inputs( forward_result[875] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3683', 'op': 'aten::div', 'in': [872, 876], 'output_id': 0, 'shape': [400, 784], 'out': [878], 'sorted_id': 877}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/log_scale.57', 'op': 'aten::log', 'in': [530], 'output_id': 0, 'shape': [1], 'out': [878], 'sorted_id': 877}
         {
-            Tensor::shape_type shape = {400,784};
-            DivOp* op = new DivOp();
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
             forward_result[877] = op;
             
-            op->set_inputs( forward_result[872] );
-            op->set_inputs( forward_result[876] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[530] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3684', 'op': 'aten::sub', 'in': [870, 877, 12], 'output_id': 0, 'shape': [400, 784], 'out': [879], 'sorted_id': 878}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3577', 'op': 'aten::sub', 'in': [876, 877, 12], 'output_id': 0, 'shape': [400, 400], 'out': [879], 'sorted_id': 878}
         {
-            Tensor::shape_type shape = {400,784};
+            Tensor::shape_type shape = {400,400};
             SubOp* op = new SubOp();
             forward_result[878] = op;
             
-            op->set_inputs( forward_result[870] );
+            op->set_inputs( forward_result[876] );
             op->set_inputs( forward_result[877] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3685', 'op': 'aten::sum', 'in': [878, 20], 'output_id': 0, 'shape': [], 'out': [893], 'sorted_id': 879}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3578', 'op': 'aten::sub', 'in': [878, 55, 12], 'output_id': 0, 'shape': [400, 400], 'out': [880], 'sorted_id': 879}
         {
-            SumOp* op = new SumOp();
+            Tensor::shape_type shape = {400,400};
+            SubOp* op = new SubOp();
             forward_result[879] = op;
             
             op->set_inputs( forward_result[878] );
-            op->set_inputs( forward_result[20] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3686', 'op': 'aten::exp', 'in': [803], 'output_id': 0, 'shape': [400], 'out': [881], 'sorted_id': 880}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/prob1.29', 'op': 'aten::exp', 'in': [879], 'output_id': 0, 'shape': [400, 400], 'out': [881], 'sorted_id': 880}
         {
-            Tensor::shape_type shape = {400};
+            Tensor::shape_type shape = {400,400};
             ExpOp* op = new ExpOp();
             forward_result[880] = op;
             
-            op->set_inputs( forward_result[803] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[879] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3687', 'op': 'aten::log1p', 'in': [880], 'output_id': 0, 'shape': [400], 'out': [882], 'sorted_id': 881}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3590', 'op': 'aten::mul', 'in': [880, 58], 'output_id': 0, 'shape': [400, 400], 'out': [893], 'sorted_id': 881}
         {
-            Tensor::shape_type shape = {400};
-            Log1pOp* op = new Log1pOp();
+            Tensor::shape_type shape = {400,400};
+            MulOp* op = new MulOp();
             forward_result[881] = op;
             
             op->set_inputs( forward_result[880] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[58] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3688', 'op': 'aten::log', 'in': [881], 'output_id': 0, 'shape': [400], 'out': [883], 'sorted_id': 882}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3582', 'op': 'aten::sub', 'in': [856, 539, 12], 'output_id': 0, 'shape': [400, 400], 'out': [883], 'sorted_id': 882}
         {
-            Tensor::shape_type shape = {400};
-            LogOp* op = new LogOp();
+            Tensor::shape_type shape = {400,400};
+            SubOp* op = new SubOp();
             forward_result[882] = op;
             
-            op->set_inputs( forward_result[881] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[856] );
+            op->set_inputs( forward_result[539] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3689', 'op': 'aten::rsub', 'in': [882, 107, 12], 'output_id': 0, 'shape': [400], 'out': [891], 'sorted_id': 883}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3583', 'op': 'aten::pow', 'in': [882, 45], 'output_id': 0, 'shape': [400, 400], 'out': [884], 'sorted_id': 883}
         {
-            Tensor::shape_type shape = {400};
-            RsubOp* op = new RsubOp();
+            Tensor::shape_type shape = {400,400};
+            PowOp* op = new PowOp();
             forward_result[883] = op;
             
             op->set_inputs( forward_result[882] );
-            op->set_inputs( forward_result[107] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3690', 'op': 'aten::sub', 'in': [814, 802, 12], 'output_id': 0, 'shape': [400], 'out': [885], 'sorted_id': 884}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3584', 'op': 'aten::neg', 'in': [883], 'output_id': 0, 'shape': [400, 400], 'out': [887], 'sorted_id': 884}
         {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {400,400};
+            NegOp* op = new NegOp();
             forward_result[884] = op;
             
-            op->set_inputs( forward_result[814] );
-            op->set_inputs( forward_result[802] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[883] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3691', 'op': 'aten::pow', 'in': [884, 45], 'output_id': 0, 'shape': [400], 'out': [890], 'sorted_id': 885}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/var.59', 'op': 'aten::pow', 'in': [543, 45], 'output_id': 0, 'shape': [1], 'out': [886], 'sorted_id': 885}
         {
-            Tensor::shape_type shape = {400};
+            Tensor::shape_type shape = {1};
             PowOp* op = new PowOp();
             forward_result[885] = op;
             
-            op->set_inputs( forward_result[884] );
+            op->set_inputs( forward_result[543] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3692', 'op': 'aten::exp', 'in': [803], 'output_id': 0, 'shape': [400], 'out': [887], 'sorted_id': 886}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3585', 'op': 'aten::mul', 'in': [885, 50], 'output_id': 0, 'shape': [1], 'out': [887], 'sorted_id': 886}
         {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
             forward_result[886] = op;
             
-            op->set_inputs( forward_result[803] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[885] );
+            op->set_inputs( forward_result[50] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3693', 'op': 'aten::log1p', 'in': [886], 'output_id': 0, 'shape': [400], 'out': [888], 'sorted_id': 887}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3586', 'op': 'aten::div', 'in': [884, 886], 'output_id': 0, 'shape': [400, 400], 'out': [889], 'sorted_id': 887}
         {
-            Tensor::shape_type shape = {400};
-            Log1pOp* op = new Log1pOp();
+            Tensor::shape_type shape = {400,400};
+            DivOp* op = new DivOp();
             forward_result[887] = op;
             
+            op->set_inputs( forward_result[884] );
             op->set_inputs( forward_result[886] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3694', 'op': 'aten::pow', 'in': [887, 45], 'output_id': 0, 'shape': [400], 'out': [889], 'sorted_id': 888}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/log_scale.59', 'op': 'aten::log', 'in': [543], 'output_id': 0, 'shape': [1], 'out': [889], 'sorted_id': 888}
         {
-            Tensor::shape_type shape = {400};
-            PowOp* op = new PowOp();
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
             forward_result[888] = op;
             
-            op->set_inputs( forward_result[887] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[543] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3695', 'op': 'aten::mul', 'in': [888, 50], 'output_id': 0, 'shape': [400], 'out': [890], 'sorted_id': 889}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3587', 'op': 'aten::sub', 'in': [887, 888, 12], 'output_id': 0, 'shape': [400, 400], 'out': [890], 'sorted_id': 889}
         {
-            Tensor::shape_type shape = {400};
-            MulOp* op = new MulOp();
+            Tensor::shape_type shape = {400,400};
+            SubOp* op = new SubOp();
             forward_result[889] = op;
             
+            op->set_inputs( forward_result[887] );
             op->set_inputs( forward_result[888] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3696', 'op': 'aten::div', 'in': [885, 889], 'output_id': 0, 'shape': [400], 'out': [891], 'sorted_id': 890}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3588', 'op': 'aten::sub', 'in': [889, 55, 12], 'output_id': 0, 'shape': [400, 400], 'out': [891], 'sorted_id': 890}
         {
-            Tensor::shape_type shape = {400};
-            DivOp* op = new DivOp();
+            Tensor::shape_type shape = {400,400};
+            SubOp* op = new SubOp();
             forward_result[890] = op;
             
-            op->set_inputs( forward_result[885] );
             op->set_inputs( forward_result[889] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3697', 'op': 'aten::sub', 'in': [883, 890, 12], 'output_id': 0, 'shape': [400], 'out': [892], 'sorted_id': 891}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/prob2.29', 'op': 'aten::exp', 'in': [890], 'output_id': 0, 'shape': [400, 400], 'out': [892], 'sorted_id': 891}
         {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {400,400};
+            ExpOp* op = new ExpOp();
             forward_result[891] = op;
             
-            op->set_inputs( forward_result[883] );
             op->set_inputs( forward_result[890] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3698', 'op': 'aten::sum', 'in': [891, 20], 'output_id': 0, 'shape': [], 'out': [893], 'sorted_id': 892}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3591', 'op': 'aten::mul', 'in': [891, 58], 'output_id': 0, 'shape': [400, 400], 'out': [893], 'sorted_id': 892}
         {
-            SumOp* op = new SumOp();
+            Tensor::shape_type shape = {400,400};
+            MulOp* op = new MulOp();
             forward_result[892] = op;
             
             op->set_inputs( forward_result[891] );
-            op->set_inputs( forward_result[20] );
+            op->set_inputs( forward_result[58] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l1]/3699', 'op': 'aten::add', 'in': [879, 892, 12], 'output_id': 0, 'shape': [], 'out': [894], 'sorted_id': 893}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3592', 'op': 'aten::add', 'in': [881, 892, 12], 'output_id': 0, 'shape': [400, 400], 'out': [894], 'sorted_id': 893}
         {
+            Tensor::shape_type shape = {400,400};
             AddOp* op = new AddOp();
             forward_result[893] = op;
             
-            op->set_inputs( forward_result[879] );
+            op->set_inputs( forward_result[881] );
             op->set_inputs( forward_result[892] );
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/3701', 'op': 'prim::TupleConstruct', 'in': [815, 866, 893], 'output_id': 0, 'shape': [], 'out': [895, 1116, 896], 'sorted_id': 894}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3593', 'op': 'aten::log', 'in': [893], 'output_id': 0, 'shape': [400, 400], 'out': [895], 'sorted_id': 894}
         {
-            TupleConstructOp* op = new TupleConstructOp();
+            Tensor::shape_type shape = {400,400};
+            LogOp* op = new LogOp();
             forward_result[894] = op;
             
-            op->set_inputs( forward_result[815] );
-            op->set_inputs( forward_result[866] );
             op->set_inputs( forward_result[893] );
         }
         
-        // {'name': 'Net/3703', 'op': 'prim::TupleUnpack', 'in': [894], 'output_id': 1, 'shape': [], 'out': [1121], 'sorted_id': 895}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3594', 'op': 'aten::sum', 'in': [894, 20], 'output_id': 0, 'shape': [], 'out': [921], 'sorted_id': 895}
         {
-            TupleUnpackOp* op = new TupleUnpackOp( 1 );
+            SumOp* op = new SumOp();
             forward_result[895] = op;
             
             op->set_inputs( forward_result[894] );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/3702', 'op': 'prim::TupleUnpack', 'in': [894], 'output_id': 0, 'shape': [4, 400], 'out': [897], 'sorted_id': 896}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3597', 'op': 'aten::sub', 'in': [869, 555, 12], 'output_id': 0, 'shape': [400], 'out': [897], 'sorted_id': 896}
         {
-            Tensor::shape_type shape = {4,400};
-            TupleUnpackOp* op = new TupleUnpackOp( 0 );
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
             forward_result[896] = op;
             
-            op->set_inputs( forward_result[894] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[869] );
+            op->set_inputs( forward_result[555] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/input.29', 'op': 'aten::relu', 'in': [896], 'output_id': 0, 'shape': [4, 400], 'out': [925], 'sorted_id': 897}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3598', 'op': 'aten::pow', 'in': [896, 45], 'output_id': 0, 'shape': [400], 'out': [898], 'sorted_id': 897}
         {
-            Tensor::shape_type shape = {4,400};
-            ReluOp* op = new ReluOp();
+            Tensor::shape_type shape = {400};
+            PowOp* op = new PowOp();
             forward_result[897] = op;
             
             op->set_inputs( forward_result[896] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l2]/weight_mu/weight_mu.15', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [911, 981], 'sorted_id': 898}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3599', 'op': 'aten::neg', 'in': [897], 'output_id': 0, 'shape': [400], 'out': [901], 'sorted_id': 898}
         {
-            Tensor::shape_type shape = {400,400};
-            l2_weight_mu.reshape( shape );
-            forward_result[898] = new VariableTensor( l2_weight_mu, 2 );
+            Tensor::shape_type shape = {400};
+            NegOp* op = new NegOp();
+            forward_result[898] = op;
+            
+            op->set_inputs( forward_result[897] );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l2]/weight_rho/weight_rho.15', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [983, 900, 903, 902, 977], 'sorted_id': 899}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/var.61', 'op': 'aten::pow', 'in': [530, 45], 'output_id': 0, 'shape': [1], 'out': [900], 'sorted_id': 899}
         {
-            Tensor::shape_type shape = {400,400};
-            l2_weight_rho.reshape( shape );
-            forward_result[899] = new VariableTensor( l2_weight_rho, 2 );
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[899] = op;
+            
+            op->set_inputs( forward_result[530] );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3718', 'op': 'aten::exp', 'in': [899], 'output_id': 0, 'shape': [400, 400], 'out': [901], 'sorted_id': 900}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3600', 'op': 'aten::mul', 'in': [899, 50], 'output_id': 0, 'shape': [1], 'out': [901], 'sorted_id': 900}
         {
-            Tensor::shape_type shape = {400,400};
-            ExpOp* op = new ExpOp();
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
             forward_result[900] = op;
             
             op->set_inputs( forward_result[899] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[50] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3719', 'op': 'aten::log1p', 'in': [900], 'output_id': 0, 'shape': [400, 400], 'out': [910], 'sorted_id': 901}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3601', 'op': 'aten::div', 'in': [898, 900], 'output_id': 0, 'shape': [400], 'out': [903], 'sorted_id': 901}
         {
-            Tensor::shape_type shape = {400,400};
-            Log1pOp* op = new Log1pOp();
+            Tensor::shape_type shape = {400};
+            DivOp* op = new DivOp();
             forward_result[901] = op;
             
+            op->set_inputs( forward_result[898] );
             op->set_inputs( forward_result[900] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3710', 'op': 'aten::size', 'in': [899, 10], 'output_id': 0, 'shape': [], 'out': [906, 904], 'sorted_id': 902}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/log_scale.61', 'op': 'aten::log', 'in': [530], 'output_id': 0, 'shape': [1], 'out': [903], 'sorted_id': 902}
         {
-            SizeOp* op = new SizeOp();
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
             forward_result[902] = op;
             
-            op->set_inputs( forward_result[899] );
-            op->set_inputs( forward_result[10] );
+            op->set_inputs( forward_result[530] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3711', 'op': 'aten::size', 'in': [899, 12], 'output_id': 0, 'shape': [], 'out': [906, 904], 'sorted_id': 903}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3602', 'op': 'aten::sub', 'in': [901, 902, 12], 'output_id': 0, 'shape': [400], 'out': [904], 'sorted_id': 903}
         {
-            SizeOp* op = new SizeOp();
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
             forward_result[903] = op;
             
-            op->set_inputs( forward_result[899] );
+            op->set_inputs( forward_result[901] );
+            op->set_inputs( forward_result[902] );
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3712', 'op': 'prim::ListConstruct', 'in': [902, 903], 'output_id': 0, 'shape': [], 'out': [905], 'sorted_id': 904}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3603', 'op': 'aten::sub', 'in': [903, 55, 12], 'output_id': 0, 'shape': [400], 'out': [905], 'sorted_id': 904}
         {
-            ListConstructOp* op = new ListConstructOp();
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
             forward_result[904] = op;
             
-            op->set_inputs( forward_result[902] );
             op->set_inputs( forward_result[903] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3713', 'op': 'aten::expand', 'in': [541, 904, 15], 'output_id': 0, 'shape': [400, 400], 'out': [908], 'sorted_id': 905}
-        {
-            Tensor::shape_type shape = {400,400};
-            ExpandOp* op = new ExpandOp();
-            forward_result[905] = op;
-            
-            op->set_inputs( forward_result[541] );
-            op->set_inputs( forward_result[904] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3714', 'op': 'prim::ListConstruct', 'in': [902, 903], 'output_id': 0, 'shape': [], 'out': [907], 'sorted_id': 906}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[906] = op;
-            
-            op->set_inputs( forward_result[902] );
-            op->set_inputs( forward_result[903] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3715', 'op': 'aten::expand', 'in': [546, 906, 15], 'output_id': 0, 'shape': [400, 400], 'out': [908], 'sorted_id': 907}
-        {
-            Tensor::shape_type shape = {400,400};
-            ExpandOp* op = new ExpandOp();
-            forward_result[907] = op;
-            
-            op->set_inputs( forward_result[546] );
-            op->set_inputs( forward_result[906] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3716', 'op': 'aten::normal', 'in': [905, 907, 20], 'output_id': 0, 'shape': [400, 400], 'out': [909], 'sorted_id': 908}
-        {
-            Tensor::shape_type shape = {400,400};
-            NormalOp* op = new NormalOp();
-            forward_result[908] = op;
-            
-            op->set_inputs( forward_result[905] );
-            op->set_inputs( forward_result[907] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/epsilon.29', 'op': 'aten::to', 'in': [908, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400, 400], 'out': [910], 'sorted_id': 909}
-        {
-            Tensor::shape_type shape = {400,400};
-            ToOp* op = new ToOp();
-            forward_result[909] = op;
-            
-            op->set_inputs( forward_result[908] );
-            op->set_inputs( forward_result[22] );
-            op->set_inputs( forward_result[10] );
-            op->set_inputs( forward_result[23] );
-            op->set_inputs( forward_result[20] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3720', 'op': 'aten::mul', 'in': [901, 909], 'output_id': 0, 'shape': [400, 400], 'out': [911], 'sorted_id': 910}
-        {
-            Tensor::shape_type shape = {400,400};
-            MulOp* op = new MulOp();
-            forward_result[910] = op;
-            
-            op->set_inputs( forward_result[901] );
-            op->set_inputs( forward_result[909] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/value.29', 'op': 'aten::add', 'in': [898, 910, 12], 'output_id': 0, 'shape': [400, 400], 'out': [925, 926, 937, 981], 'sorted_id': 911}
-        {
-            Tensor::shape_type shape = {400,400};
-            AddOp* op = new AddOp();
-            forward_result[911] = op;
-            
-            op->set_inputs( forward_result[898] );
-            op->set_inputs( forward_result[910] );
+            op->set_inputs( forward_result[55] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l2]/bias_mu/bias_mu.15', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [924, 994], 'sorted_id': 912}
-        {
-            Tensor::shape_type shape = {400};
-            l2_bias_mu.reshape( shape );
-            forward_result[912] = new VariableTensor( l2_bias_mu, 2 );
-        }
-        
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l2]/bias_rho/bias_rho.15', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [990, 996, 916, 914], 'sorted_id': 913}
-        {
-            Tensor::shape_type shape = {400};
-            l2_bias_rho.reshape( shape );
-            forward_result[913] = new VariableTensor( l2_bias_rho, 2 );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3729', 'op': 'aten::exp', 'in': [913], 'output_id': 0, 'shape': [400], 'out': [915], 'sorted_id': 914}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/prob1.31', 'op': 'aten::exp', 'in': [904], 'output_id': 0, 'shape': [400], 'out': [906], 'sorted_id': 905}
         {
             Tensor::shape_type shape = {400};
             ExpOp* op = new ExpOp();
-            forward_result[914] = op;
+            forward_result[905] = op;
             
-            op->set_inputs( forward_result[913] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[904] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3730', 'op': 'aten::log1p', 'in': [914], 'output_id': 0, 'shape': [400], 'out': [923], 'sorted_id': 915}
-        {
-            Tensor::shape_type shape = {400};
-            Log1pOp* op = new Log1pOp();
-            forward_result[915] = op;
-            
-            op->set_inputs( forward_result[914] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3722', 'op': 'aten::size', 'in': [913, 10], 'output_id': 0, 'shape': [], 'out': [919, 917], 'sorted_id': 916}
-        {
-            SizeOp* op = new SizeOp();
-            forward_result[916] = op;
-            
-            op->set_inputs( forward_result[913] );
-            op->set_inputs( forward_result[10] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3723', 'op': 'prim::ListConstruct', 'in': [916], 'output_id': 0, 'shape': [], 'out': [918], 'sorted_id': 917}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[917] = op;
-            
-            op->set_inputs( forward_result[916] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3724', 'op': 'aten::expand', 'in': [557, 917, 15], 'output_id': 0, 'shape': [400], 'out': [921], 'sorted_id': 918}
-        {
-            Tensor::shape_type shape = {400};
-            ExpandOp* op = new ExpandOp();
-            forward_result[918] = op;
-            
-            op->set_inputs( forward_result[557] );
-            op->set_inputs( forward_result[917] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3725', 'op': 'prim::ListConstruct', 'in': [916], 'output_id': 0, 'shape': [], 'out': [920], 'sorted_id': 919}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[919] = op;
-            
-            op->set_inputs( forward_result[916] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3726', 'op': 'aten::expand', 'in': [561, 919, 15], 'output_id': 0, 'shape': [400], 'out': [921], 'sorted_id': 920}
-        {
-            Tensor::shape_type shape = {400};
-            ExpandOp* op = new ExpandOp();
-            forward_result[920] = op;
-            
-            op->set_inputs( forward_result[561] );
-            op->set_inputs( forward_result[919] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3727', 'op': 'aten::normal', 'in': [918, 920, 20], 'output_id': 0, 'shape': [400], 'out': [922], 'sorted_id': 921}
-        {
-            Tensor::shape_type shape = {400};
-            NormalOp* op = new NormalOp();
-            forward_result[921] = op;
-            
-            op->set_inputs( forward_result[918] );
-            op->set_inputs( forward_result[920] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/epsilon.31', 'op': 'aten::to', 'in': [921, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [400], 'out': [923], 'sorted_id': 922}
-        {
-            Tensor::shape_type shape = {400};
-            ToOp* op = new ToOp();
-            forward_result[922] = op;
-            
-            op->set_inputs( forward_result[921] );
-            op->set_inputs( forward_result[22] );
-            op->set_inputs( forward_result[10] );
-            op->set_inputs( forward_result[23] );
-            op->set_inputs( forward_result[20] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3731', 'op': 'aten::mul', 'in': [915, 922], 'output_id': 0, 'shape': [400], 'out': [924], 'sorted_id': 923}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3615', 'op': 'aten::mul', 'in': [905, 58], 'output_id': 0, 'shape': [400], 'out': [918], 'sorted_id': 906}
         {
             Tensor::shape_type shape = {400};
             MulOp* op = new MulOp();
-            forward_result[923] = op;
+            forward_result[906] = op;
             
-            op->set_inputs( forward_result[915] );
-            op->set_inputs( forward_result[922] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[905] );
+            op->set_inputs( forward_result[58] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/value.31', 'op': 'aten::add', 'in': [912, 923, 12], 'output_id': 0, 'shape': [400], 'out': [994, 951, 962, 925], 'sorted_id': 924}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3607', 'op': 'aten::sub', 'in': [869, 567, 12], 'output_id': 0, 'shape': [400], 'out': [908], 'sorted_id': 907}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[907] = op;
+            
+            op->set_inputs( forward_result[869] );
+            op->set_inputs( forward_result[567] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3608', 'op': 'aten::pow', 'in': [907, 45], 'output_id': 0, 'shape': [400], 'out': [909], 'sorted_id': 908}
+        {
+            Tensor::shape_type shape = {400};
+            PowOp* op = new PowOp();
+            forward_result[908] = op;
+            
+            op->set_inputs( forward_result[907] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3609', 'op': 'aten::neg', 'in': [908], 'output_id': 0, 'shape': [400], 'out': [912], 'sorted_id': 909}
+        {
+            Tensor::shape_type shape = {400};
+            NegOp* op = new NegOp();
+            forward_result[909] = op;
+            
+            op->set_inputs( forward_result[908] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/var.63', 'op': 'aten::pow', 'in': [543, 45], 'output_id': 0, 'shape': [1], 'out': [911], 'sorted_id': 910}
+        {
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[910] = op;
+            
+            op->set_inputs( forward_result[543] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3610', 'op': 'aten::mul', 'in': [910, 50], 'output_id': 0, 'shape': [1], 'out': [912], 'sorted_id': 911}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[911] = op;
+            
+            op->set_inputs( forward_result[910] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3611', 'op': 'aten::div', 'in': [909, 911], 'output_id': 0, 'shape': [400], 'out': [914], 'sorted_id': 912}
+        {
+            Tensor::shape_type shape = {400};
+            DivOp* op = new DivOp();
+            forward_result[912] = op;
+            
+            op->set_inputs( forward_result[909] );
+            op->set_inputs( forward_result[911] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/log_scale.63', 'op': 'aten::log', 'in': [543], 'output_id': 0, 'shape': [1], 'out': [914], 'sorted_id': 913}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[913] = op;
+            
+            op->set_inputs( forward_result[543] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3612', 'op': 'aten::sub', 'in': [912, 913, 12], 'output_id': 0, 'shape': [400], 'out': [915], 'sorted_id': 914}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[914] = op;
+            
+            op->set_inputs( forward_result[912] );
+            op->set_inputs( forward_result[913] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3613', 'op': 'aten::sub', 'in': [914, 55, 12], 'output_id': 0, 'shape': [400], 'out': [916], 'sorted_id': 915}
+        {
+            Tensor::shape_type shape = {400};
+            SubOp* op = new SubOp();
+            forward_result[915] = op;
+            
+            op->set_inputs( forward_result[914] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/prob2.31', 'op': 'aten::exp', 'in': [915], 'output_id': 0, 'shape': [400], 'out': [917], 'sorted_id': 916}
+        {
+            Tensor::shape_type shape = {400};
+            ExpOp* op = new ExpOp();
+            forward_result[916] = op;
+            
+            op->set_inputs( forward_result[915] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3616', 'op': 'aten::mul', 'in': [916, 58], 'output_id': 0, 'shape': [400], 'out': [918], 'sorted_id': 917}
+        {
+            Tensor::shape_type shape = {400};
+            MulOp* op = new MulOp();
+            forward_result[917] = op;
+            
+            op->set_inputs( forward_result[916] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3617', 'op': 'aten::add', 'in': [906, 917, 12], 'output_id': 0, 'shape': [400], 'out': [919], 'sorted_id': 918}
         {
             Tensor::shape_type shape = {400};
             AddOp* op = new AddOp();
+            forward_result[918] = op;
+            
+            op->set_inputs( forward_result[906] );
+            op->set_inputs( forward_result[917] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3618', 'op': 'aten::log', 'in': [918], 'output_id': 0, 'shape': [400], 'out': [920], 'sorted_id': 919}
+        {
+            Tensor::shape_type shape = {400};
+            LogOp* op = new LogOp();
+            forward_result[919] = op;
+            
+            op->set_inputs( forward_result[918] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3619', 'op': 'aten::sum', 'in': [919, 20], 'output_id': 0, 'shape': [], 'out': [921], 'sorted_id': 920}
+        {
+            SumOp* op = new SumOp();
+            forward_result[920] = op;
+            
+            op->set_inputs( forward_result[919] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3620', 'op': 'aten::add', 'in': [895, 920, 12], 'output_id': 0, 'shape': [], 'out': [949], 'sorted_id': 921}
+        {
+            AddOp* op = new AddOp();
+            forward_result[921] = op;
+            
+            op->set_inputs( forward_result[895] );
+            op->set_inputs( forward_result[920] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3621', 'op': 'aten::exp', 'in': [844], 'output_id': 0, 'shape': [400, 400], 'out': [923], 'sorted_id': 922}
+        {
+            Tensor::shape_type shape = {400,400};
+            ExpOp* op = new ExpOp();
+            forward_result[922] = op;
+            
+            op->set_inputs( forward_result[844] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3622', 'op': 'aten::log1p', 'in': [922], 'output_id': 0, 'shape': [400, 400], 'out': [924], 'sorted_id': 923}
+        {
+            Tensor::shape_type shape = {400,400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[923] = op;
+            
+            op->set_inputs( forward_result[922] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3623', 'op': 'aten::log', 'in': [923], 'output_id': 0, 'shape': [400, 400], 'out': [925], 'sorted_id': 924}
+        {
+            Tensor::shape_type shape = {400,400};
+            LogOp* op = new LogOp();
             forward_result[924] = op;
             
-            op->set_inputs( forward_result[912] );
             op->set_inputs( forward_result[923] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/input.31', 'op': 'aten::linear', 'in': [897, 911, 924], 'output_id': 0, 'shape': [4, 400], 'out': [1004], 'sorted_id': 925}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3624', 'op': 'aten::rsub', 'in': [924, 107, 12], 'output_id': 0, 'shape': [400, 400], 'out': [933], 'sorted_id': 925}
         {
-            Tensor::shape_type shape = {4,400};
-            LinearOp* op = new LinearOp();
+            Tensor::shape_type shape = {400,400};
+            RsubOp* op = new RsubOp();
             forward_result[925] = op;
             
-            op->set_inputs( forward_result[897] );
-            op->set_inputs( forward_result[911] );
             op->set_inputs( forward_result[924] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[107] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3735', 'op': 'aten::sub', 'in': [911, 569, 12], 'output_id': 0, 'shape': [400, 400], 'out': [927], 'sorted_id': 926}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3625', 'op': 'aten::sub', 'in': [856, 843, 12], 'output_id': 0, 'shape': [400, 400], 'out': [927], 'sorted_id': 926}
         {
             Tensor::shape_type shape = {400,400};
             SubOp* op = new SubOp();
             forward_result[926] = op;
             
-            op->set_inputs( forward_result[911] );
-            op->set_inputs( forward_result[569] );
+            op->set_inputs( forward_result[856] );
+            op->set_inputs( forward_result[843] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3736', 'op': 'aten::pow', 'in': [926, 45], 'output_id': 0, 'shape': [400, 400], 'out': [928], 'sorted_id': 927}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3626', 'op': 'aten::pow', 'in': [926, 45], 'output_id': 0, 'shape': [400, 400], 'out': [932], 'sorted_id': 927}
         {
             Tensor::shape_type shape = {400,400};
             PowOp* op = new PowOp();
@@ -9706,2452 +9050,1794 @@
             
             op->set_inputs( forward_result[926] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3737', 'op': 'aten::neg', 'in': [927], 'output_id': 0, 'shape': [400, 400], 'out': [931], 'sorted_id': 928}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3627', 'op': 'aten::exp', 'in': [844], 'output_id': 0, 'shape': [400, 400], 'out': [929], 'sorted_id': 928}
         {
             Tensor::shape_type shape = {400,400};
-            NegOp* op = new NegOp();
+            ExpOp* op = new ExpOp();
             forward_result[928] = op;
             
-            op->set_inputs( forward_result[927] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[844] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/var.57', 'op': 'aten::pow', 'in': [573, 45], 'output_id': 0, 'shape': [1], 'out': [930], 'sorted_id': 929}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3628', 'op': 'aten::log1p', 'in': [928], 'output_id': 0, 'shape': [400, 400], 'out': [930], 'sorted_id': 929}
         {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
+            Tensor::shape_type shape = {400,400};
+            Log1pOp* op = new Log1pOp();
             forward_result[929] = op;
             
-            op->set_inputs( forward_result[573] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[928] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3738', 'op': 'aten::mul', 'in': [929, 50], 'output_id': 0, 'shape': [1], 'out': [931], 'sorted_id': 930}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3629', 'op': 'aten::pow', 'in': [929, 45], 'output_id': 0, 'shape': [400, 400], 'out': [931], 'sorted_id': 930}
         {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
+            Tensor::shape_type shape = {400,400};
+            PowOp* op = new PowOp();
             forward_result[930] = op;
             
             op->set_inputs( forward_result[929] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[45] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3739', 'op': 'aten::div', 'in': [928, 930], 'output_id': 0, 'shape': [400, 400], 'out': [933], 'sorted_id': 931}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3630', 'op': 'aten::mul', 'in': [930, 50], 'output_id': 0, 'shape': [400, 400], 'out': [932], 'sorted_id': 931}
+        {
+            Tensor::shape_type shape = {400,400};
+            MulOp* op = new MulOp();
+            forward_result[931] = op;
+            
+            op->set_inputs( forward_result[930] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3631', 'op': 'aten::div', 'in': [927, 931], 'output_id': 0, 'shape': [400, 400], 'out': [933], 'sorted_id': 932}
         {
             Tensor::shape_type shape = {400,400};
             DivOp* op = new DivOp();
-            forward_result[931] = op;
-            
-            op->set_inputs( forward_result[928] );
-            op->set_inputs( forward_result[930] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/log_scale.57', 'op': 'aten::log', 'in': [573], 'output_id': 0, 'shape': [1], 'out': [933], 'sorted_id': 932}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
             forward_result[932] = op;
             
-            op->set_inputs( forward_result[573] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[927] );
+            op->set_inputs( forward_result[931] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3740', 'op': 'aten::sub', 'in': [931, 932, 12], 'output_id': 0, 'shape': [400, 400], 'out': [934], 'sorted_id': 933}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3632', 'op': 'aten::sub', 'in': [925, 932, 12], 'output_id': 0, 'shape': [400, 400], 'out': [934], 'sorted_id': 933}
         {
             Tensor::shape_type shape = {400,400};
             SubOp* op = new SubOp();
             forward_result[933] = op;
             
-            op->set_inputs( forward_result[931] );
+            op->set_inputs( forward_result[925] );
             op->set_inputs( forward_result[932] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3741', 'op': 'aten::sub', 'in': [933, 55, 12], 'output_id': 0, 'shape': [400, 400], 'out': [935], 'sorted_id': 934}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3633', 'op': 'aten::sum', 'in': [933, 20], 'output_id': 0, 'shape': [], 'out': [948], 'sorted_id': 934}
         {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
+            SumOp* op = new SumOp();
             forward_result[934] = op;
             
             op->set_inputs( forward_result[933] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/prob1.29', 'op': 'aten::exp', 'in': [934], 'output_id': 0, 'shape': [400, 400], 'out': [936], 'sorted_id': 935}
-        {
-            Tensor::shape_type shape = {400,400};
-            ExpOp* op = new ExpOp();
-            forward_result[935] = op;
-            
-            op->set_inputs( forward_result[934] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3753', 'op': 'aten::mul', 'in': [935, 58], 'output_id': 0, 'shape': [400, 400], 'out': [948], 'sorted_id': 936}
-        {
-            Tensor::shape_type shape = {400,400};
-            MulOp* op = new MulOp();
-            forward_result[936] = op;
-            
-            op->set_inputs( forward_result[935] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3745', 'op': 'aten::sub', 'in': [911, 582, 12], 'output_id': 0, 'shape': [400, 400], 'out': [938], 'sorted_id': 937}
-        {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
-            forward_result[937] = op;
-            
-            op->set_inputs( forward_result[911] );
-            op->set_inputs( forward_result[582] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3746', 'op': 'aten::pow', 'in': [937, 45], 'output_id': 0, 'shape': [400, 400], 'out': [939], 'sorted_id': 938}
-        {
-            Tensor::shape_type shape = {400,400};
-            PowOp* op = new PowOp();
-            forward_result[938] = op;
-            
-            op->set_inputs( forward_result[937] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3747', 'op': 'aten::neg', 'in': [938], 'output_id': 0, 'shape': [400, 400], 'out': [942], 'sorted_id': 939}
-        {
-            Tensor::shape_type shape = {400,400};
-            NegOp* op = new NegOp();
-            forward_result[939] = op;
-            
-            op->set_inputs( forward_result[938] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/var.59', 'op': 'aten::pow', 'in': [586, 45], 'output_id': 0, 'shape': [1], 'out': [941], 'sorted_id': 940}
-        {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[940] = op;
-            
-            op->set_inputs( forward_result[586] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3748', 'op': 'aten::mul', 'in': [940, 50], 'output_id': 0, 'shape': [1], 'out': [942], 'sorted_id': 941}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[941] = op;
-            
-            op->set_inputs( forward_result[940] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3749', 'op': 'aten::div', 'in': [939, 941], 'output_id': 0, 'shape': [400, 400], 'out': [944], 'sorted_id': 942}
-        {
-            Tensor::shape_type shape = {400,400};
-            DivOp* op = new DivOp();
-            forward_result[942] = op;
-            
-            op->set_inputs( forward_result[939] );
-            op->set_inputs( forward_result[941] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/log_scale.59', 'op': 'aten::log', 'in': [586], 'output_id': 0, 'shape': [1], 'out': [944], 'sorted_id': 943}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[943] = op;
-            
-            op->set_inputs( forward_result[586] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3750', 'op': 'aten::sub', 'in': [942, 943, 12], 'output_id': 0, 'shape': [400, 400], 'out': [945], 'sorted_id': 944}
-        {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
-            forward_result[944] = op;
-            
-            op->set_inputs( forward_result[942] );
-            op->set_inputs( forward_result[943] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3751', 'op': 'aten::sub', 'in': [944, 55, 12], 'output_id': 0, 'shape': [400, 400], 'out': [946], 'sorted_id': 945}
-        {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
-            forward_result[945] = op;
-            
-            op->set_inputs( forward_result[944] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/prob2.29', 'op': 'aten::exp', 'in': [945], 'output_id': 0, 'shape': [400, 400], 'out': [947], 'sorted_id': 946}
-        {
-            Tensor::shape_type shape = {400,400};
-            ExpOp* op = new ExpOp();
-            forward_result[946] = op;
-            
-            op->set_inputs( forward_result[945] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3754', 'op': 'aten::mul', 'in': [946, 58], 'output_id': 0, 'shape': [400, 400], 'out': [948], 'sorted_id': 947}
-        {
-            Tensor::shape_type shape = {400,400};
-            MulOp* op = new MulOp();
-            forward_result[947] = op;
-            
-            op->set_inputs( forward_result[946] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3755', 'op': 'aten::add', 'in': [936, 947, 12], 'output_id': 0, 'shape': [400, 400], 'out': [949], 'sorted_id': 948}
-        {
-            Tensor::shape_type shape = {400,400};
-            AddOp* op = new AddOp();
-            forward_result[948] = op;
-            
-            op->set_inputs( forward_result[936] );
-            op->set_inputs( forward_result[947] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3756', 'op': 'aten::log', 'in': [948], 'output_id': 0, 'shape': [400, 400], 'out': [950], 'sorted_id': 949}
-        {
-            Tensor::shape_type shape = {400,400};
-            LogOp* op = new LogOp();
-            forward_result[949] = op;
-            
-            op->set_inputs( forward_result[948] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3757', 'op': 'aten::sum', 'in': [949, 20], 'output_id': 0, 'shape': [], 'out': [976], 'sorted_id': 950}
-        {
-            SumOp* op = new SumOp();
-            forward_result[950] = op;
-            
-            op->set_inputs( forward_result[949] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3760', 'op': 'aten::sub', 'in': [924, 598, 12], 'output_id': 0, 'shape': [400], 'out': [952], 'sorted_id': 951}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3634', 'op': 'aten::exp', 'in': [858], 'output_id': 0, 'shape': [400], 'out': [936], 'sorted_id': 935}
+        {
+            Tensor::shape_type shape = {400};
+            ExpOp* op = new ExpOp();
+            forward_result[935] = op;
+            
+            op->set_inputs( forward_result[858] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3635', 'op': 'aten::log1p', 'in': [935], 'output_id': 0, 'shape': [400], 'out': [937], 'sorted_id': 936}
+        {
+            Tensor::shape_type shape = {400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[936] = op;
+            
+            op->set_inputs( forward_result[935] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3636', 'op': 'aten::log', 'in': [936], 'output_id': 0, 'shape': [400], 'out': [938], 'sorted_id': 937}
+        {
+            Tensor::shape_type shape = {400};
+            LogOp* op = new LogOp();
+            forward_result[937] = op;
+            
+            op->set_inputs( forward_result[936] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3637', 'op': 'aten::rsub', 'in': [937, 107, 12], 'output_id': 0, 'shape': [400], 'out': [946], 'sorted_id': 938}
+        {
+            Tensor::shape_type shape = {400};
+            RsubOp* op = new RsubOp();
+            forward_result[938] = op;
+            
+            op->set_inputs( forward_result[937] );
+            op->set_inputs( forward_result[107] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3638', 'op': 'aten::sub', 'in': [869, 857, 12], 'output_id': 0, 'shape': [400], 'out': [940], 'sorted_id': 939}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
-            forward_result[951] = op;
+            forward_result[939] = op;
             
-            op->set_inputs( forward_result[924] );
-            op->set_inputs( forward_result[598] );
+            op->set_inputs( forward_result[869] );
+            op->set_inputs( forward_result[857] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3761', 'op': 'aten::pow', 'in': [951, 45], 'output_id': 0, 'shape': [400], 'out': [953], 'sorted_id': 952}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3639', 'op': 'aten::pow', 'in': [939, 45], 'output_id': 0, 'shape': [400], 'out': [945], 'sorted_id': 940}
         {
             Tensor::shape_type shape = {400};
             PowOp* op = new PowOp();
-            forward_result[952] = op;
+            forward_result[940] = op;
             
-            op->set_inputs( forward_result[951] );
+            op->set_inputs( forward_result[939] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3762', 'op': 'aten::neg', 'in': [952], 'output_id': 0, 'shape': [400], 'out': [956], 'sorted_id': 953}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3640', 'op': 'aten::exp', 'in': [858], 'output_id': 0, 'shape': [400], 'out': [942], 'sorted_id': 941}
         {
             Tensor::shape_type shape = {400};
-            NegOp* op = new NegOp();
-            forward_result[953] = op;
+            ExpOp* op = new ExpOp();
+            forward_result[941] = op;
             
-            op->set_inputs( forward_result[952] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[858] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/var.61', 'op': 'aten::pow', 'in': [573, 45], 'output_id': 0, 'shape': [1], 'out': [955], 'sorted_id': 954}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3641', 'op': 'aten::log1p', 'in': [941], 'output_id': 0, 'shape': [400], 'out': [943], 'sorted_id': 942}
         {
-            Tensor::shape_type shape = {1};
+            Tensor::shape_type shape = {400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[942] = op;
+            
+            op->set_inputs( forward_result[941] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3642', 'op': 'aten::pow', 'in': [942, 45], 'output_id': 0, 'shape': [400], 'out': [944], 'sorted_id': 943}
+        {
+            Tensor::shape_type shape = {400};
             PowOp* op = new PowOp();
-            forward_result[954] = op;
+            forward_result[943] = op;
             
-            op->set_inputs( forward_result[573] );
+            op->set_inputs( forward_result[942] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3763', 'op': 'aten::mul', 'in': [954, 50], 'output_id': 0, 'shape': [1], 'out': [956], 'sorted_id': 955}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3643', 'op': 'aten::mul', 'in': [943, 50], 'output_id': 0, 'shape': [400], 'out': [945], 'sorted_id': 944}
         {
-            Tensor::shape_type shape = {1};
+            Tensor::shape_type shape = {400};
             MulOp* op = new MulOp();
-            forward_result[955] = op;
+            forward_result[944] = op;
             
-            op->set_inputs( forward_result[954] );
+            op->set_inputs( forward_result[943] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3764', 'op': 'aten::div', 'in': [953, 955], 'output_id': 0, 'shape': [400], 'out': [958], 'sorted_id': 956}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3644', 'op': 'aten::div', 'in': [940, 944], 'output_id': 0, 'shape': [400], 'out': [946], 'sorted_id': 945}
         {
             Tensor::shape_type shape = {400};
             DivOp* op = new DivOp();
-            forward_result[956] = op;
+            forward_result[945] = op;
             
-            op->set_inputs( forward_result[953] );
-            op->set_inputs( forward_result[955] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[940] );
+            op->set_inputs( forward_result[944] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/log_scale.61', 'op': 'aten::log', 'in': [573], 'output_id': 0, 'shape': [1], 'out': [958], 'sorted_id': 957}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[957] = op;
-            
-            op->set_inputs( forward_result[573] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3765', 'op': 'aten::sub', 'in': [956, 957, 12], 'output_id': 0, 'shape': [400], 'out': [959], 'sorted_id': 958}
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3645', 'op': 'aten::sub', 'in': [938, 945, 12], 'output_id': 0, 'shape': [400], 'out': [947], 'sorted_id': 946}
         {
             Tensor::shape_type shape = {400};
             SubOp* op = new SubOp();
+            forward_result[946] = op;
+            
+            op->set_inputs( forward_result[938] );
+            op->set_inputs( forward_result[945] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3646', 'op': 'aten::sum', 'in': [946, 20], 'output_id': 0, 'shape': [], 'out': [948], 'sorted_id': 947}
+        {
+            SumOp* op = new SumOp();
+            forward_result[947] = op;
+            
+            op->set_inputs( forward_result[946] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l2]/3647', 'op': 'aten::add', 'in': [934, 947, 12], 'output_id': 0, 'shape': [], 'out': [949], 'sorted_id': 948}
+        {
+            AddOp* op = new AddOp();
+            forward_result[948] = op;
+            
+            op->set_inputs( forward_result[934] );
+            op->set_inputs( forward_result[947] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/3649', 'op': 'prim::TupleConstruct', 'in': [870, 921, 948], 'output_id': 0, 'shape': [], 'out': [950, 1076, 1094], 'sorted_id': 949}
+        {
+            TupleConstructOp* op = new TupleConstructOp();
+            forward_result[949] = op;
+            
+            op->set_inputs( forward_result[870] );
+            op->set_inputs( forward_result[921] );
+            op->set_inputs( forward_result[948] );
+        }
+        
+        // {'name': 'Model/3650', 'op': 'prim::TupleUnpack', 'in': [949], 'output_id': 0, 'shape': [4, 400], 'out': [951], 'sorted_id': 950}
+        {
+            Tensor::shape_type shape = {4,400};
+            TupleUnpackOp* op = new TupleUnpackOp( 0 );
+            forward_result[950] = op;
+            
+            op->set_inputs( forward_result[949] );
+        }
+        
+        // {'name': 'Model/Net[net]/input.33', 'op': 'aten::relu', 'in': [950], 'output_id': 0, 'shape': [4, 400], 'out': [979], 'sorted_id': 951}
+        {
+            Tensor::shape_type shape = {4,400};
+            ReluOp* op = new ReluOp();
+            forward_result[951] = op;
+            
+            op->set_inputs( forward_result[950] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/weight_mu/weight_mu', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [965, 1035], 'sorted_id': 952}
+        {
+            Tensor::shape_type shape = {10,400};
+            l3_weight_mu.reshape( shape );
+            forward_result[952] = new VariableTensor( l3_weight_mu, 2 );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/weight_rho/weight_rho', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [957, 954, 1031, 1037, 956], 'sorted_id': 953}
+        {
+            Tensor::shape_type shape = {10,400};
+            l3_weight_rho.reshape( shape );
+            forward_result[953] = new VariableTensor( l3_weight_rho, 2 );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3666', 'op': 'aten::exp', 'in': [953], 'output_id': 0, 'shape': [10, 400], 'out': [955], 'sorted_id': 954}
+        {
+            Tensor::shape_type shape = {10,400};
+            ExpOp* op = new ExpOp();
+            forward_result[954] = op;
+            
+            op->set_inputs( forward_result[953] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3667', 'op': 'aten::log1p', 'in': [954], 'output_id': 0, 'shape': [10, 400], 'out': [964], 'sorted_id': 955}
+        {
+            Tensor::shape_type shape = {10,400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[955] = op;
+            
+            op->set_inputs( forward_result[954] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3658', 'op': 'aten::size', 'in': [953, 10], 'output_id': 0, 'shape': [], 'out': [960, 958], 'sorted_id': 956}
+        {
+            SizeOp* op = new SizeOp();
+            forward_result[956] = op;
+            
+            op->set_inputs( forward_result[953] );
+            op->set_inputs( forward_result[10] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3659', 'op': 'aten::size', 'in': [953, 12], 'output_id': 0, 'shape': [], 'out': [960, 958], 'sorted_id': 957}
+        {
+            SizeOp* op = new SizeOp();
+            forward_result[957] = op;
+            
+            op->set_inputs( forward_result[953] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3660', 'op': 'prim::ListConstruct', 'in': [956, 957], 'output_id': 0, 'shape': [], 'out': [959], 'sorted_id': 958}
+        {
+            ListConstructOp* op = new ListConstructOp();
             forward_result[958] = op;
             
             op->set_inputs( forward_result[956] );
             op->set_inputs( forward_result[957] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3766', 'op': 'aten::sub', 'in': [958, 55, 12], 'output_id': 0, 'shape': [400], 'out': [960], 'sorted_id': 959}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3661', 'op': 'aten::expand', 'in': [617, 958, 15], 'output_id': 0, 'shape': [10, 400], 'out': [962], 'sorted_id': 959}
         {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {10,400};
+            ExpandOp* op = new ExpandOp();
             forward_result[959] = op;
             
+            op->set_inputs( forward_result[617] );
             op->set_inputs( forward_result[958] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[15] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/prob1.31', 'op': 'aten::exp', 'in': [959], 'output_id': 0, 'shape': [400], 'out': [961], 'sorted_id': 960}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3662', 'op': 'prim::ListConstruct', 'in': [956, 957], 'output_id': 0, 'shape': [], 'out': [961], 'sorted_id': 960}
         {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
+            ListConstructOp* op = new ListConstructOp();
             forward_result[960] = op;
             
-            op->set_inputs( forward_result[959] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[956] );
+            op->set_inputs( forward_result[957] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3778', 'op': 'aten::mul', 'in': [960, 58], 'output_id': 0, 'shape': [400], 'out': [973], 'sorted_id': 961}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3663', 'op': 'aten::expand', 'in': [622, 960, 15], 'output_id': 0, 'shape': [10, 400], 'out': [962], 'sorted_id': 961}
         {
-            Tensor::shape_type shape = {400};
-            MulOp* op = new MulOp();
+            Tensor::shape_type shape = {10,400};
+            ExpandOp* op = new ExpandOp();
             forward_result[961] = op;
             
+            op->set_inputs( forward_result[622] );
             op->set_inputs( forward_result[960] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[15] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3770', 'op': 'aten::sub', 'in': [924, 610, 12], 'output_id': 0, 'shape': [400], 'out': [963], 'sorted_id': 962}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3664', 'op': 'aten::normal', 'in': [959, 961, 20], 'output_id': 0, 'shape': [10, 400], 'out': [963], 'sorted_id': 962}
         {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {10,400};
+            NormalOp* op = new NormalOp();
             forward_result[962] = op;
             
-            op->set_inputs( forward_result[924] );
-            op->set_inputs( forward_result[610] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[959] );
+            op->set_inputs( forward_result[961] );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3771', 'op': 'aten::pow', 'in': [962, 45], 'output_id': 0, 'shape': [400], 'out': [964], 'sorted_id': 963}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/epsilon.33', 'op': 'aten::to', 'in': [962, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [10, 400], 'out': [964], 'sorted_id': 963}
         {
-            Tensor::shape_type shape = {400};
-            PowOp* op = new PowOp();
+            Tensor::shape_type shape = {10,400};
+            ToOp* op = new ToOp();
             forward_result[963] = op;
             
             op->set_inputs( forward_result[962] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[22] );
+            op->set_inputs( forward_result[10] );
+            op->set_inputs( forward_result[23] );
+            op->set_inputs( forward_result[20] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3772', 'op': 'aten::neg', 'in': [963], 'output_id': 0, 'shape': [400], 'out': [967], 'sorted_id': 964}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3668', 'op': 'aten::mul', 'in': [955, 963], 'output_id': 0, 'shape': [10, 400], 'out': [965], 'sorted_id': 964}
         {
-            Tensor::shape_type shape = {400};
-            NegOp* op = new NegOp();
+            Tensor::shape_type shape = {10,400};
+            MulOp* op = new MulOp();
             forward_result[964] = op;
             
+            op->set_inputs( forward_result[955] );
             op->set_inputs( forward_result[963] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/var.63', 'op': 'aten::pow', 'in': [586, 45], 'output_id': 0, 'shape': [1], 'out': [966], 'sorted_id': 965}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/value.33', 'op': 'aten::add', 'in': [952, 964, 12], 'output_id': 0, 'shape': [10, 400], 'out': [991, 980, 1035, 979], 'sorted_id': 965}
         {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
+            Tensor::shape_type shape = {10,400};
+            AddOp* op = new AddOp();
             forward_result[965] = op;
             
-            op->set_inputs( forward_result[586] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3773', 'op': 'aten::mul', 'in': [965, 50], 'output_id': 0, 'shape': [1], 'out': [967], 'sorted_id': 966}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[966] = op;
-            
-            op->set_inputs( forward_result[965] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3774', 'op': 'aten::div', 'in': [964, 966], 'output_id': 0, 'shape': [400], 'out': [969], 'sorted_id': 967}
-        {
-            Tensor::shape_type shape = {400};
-            DivOp* op = new DivOp();
-            forward_result[967] = op;
-            
+            op->set_inputs( forward_result[952] );
             op->set_inputs( forward_result[964] );
-            op->set_inputs( forward_result[966] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/log_scale.63', 'op': 'aten::log', 'in': [586], 'output_id': 0, 'shape': [1], 'out': [969], 'sorted_id': 968}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/bias_mu/bias_mu', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [978, 1048], 'sorted_id': 966}
         {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
+            Tensor::shape_type shape = {10};
+            l3_bias_mu.reshape( shape );
+            forward_result[966] = new VariableTensor( l3_bias_mu, 2 );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/bias_rho/bias_rho', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [970, 1050, 1044, 968], 'sorted_id': 967}
+        {
+            Tensor::shape_type shape = {10};
+            l3_bias_rho.reshape( shape );
+            forward_result[967] = new VariableTensor( l3_bias_rho, 2 );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3677', 'op': 'aten::exp', 'in': [967], 'output_id': 0, 'shape': [10], 'out': [969], 'sorted_id': 968}
+        {
+            Tensor::shape_type shape = {10};
+            ExpOp* op = new ExpOp();
             forward_result[968] = op;
             
-            op->set_inputs( forward_result[586] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[967] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3775', 'op': 'aten::sub', 'in': [967, 968, 12], 'output_id': 0, 'shape': [400], 'out': [970], 'sorted_id': 969}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3678', 'op': 'aten::log1p', 'in': [968], 'output_id': 0, 'shape': [10], 'out': [977], 'sorted_id': 969}
         {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            Tensor::shape_type shape = {10};
+            Log1pOp* op = new Log1pOp();
             forward_result[969] = op;
             
-            op->set_inputs( forward_result[967] );
             op->set_inputs( forward_result[968] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3776', 'op': 'aten::sub', 'in': [969, 55, 12], 'output_id': 0, 'shape': [400], 'out': [971], 'sorted_id': 970}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3670', 'op': 'aten::size', 'in': [967, 10], 'output_id': 0, 'shape': [], 'out': [973, 971], 'sorted_id': 970}
         {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
+            SizeOp* op = new SizeOp();
             forward_result[970] = op;
             
-            op->set_inputs( forward_result[969] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[967] );
+            op->set_inputs( forward_result[10] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/prob2.31', 'op': 'aten::exp', 'in': [970], 'output_id': 0, 'shape': [400], 'out': [972], 'sorted_id': 971}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3671', 'op': 'prim::ListConstruct', 'in': [970], 'output_id': 0, 'shape': [], 'out': [972], 'sorted_id': 971}
         {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
+            ListConstructOp* op = new ListConstructOp();
             forward_result[971] = op;
             
             op->set_inputs( forward_result[970] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3779', 'op': 'aten::mul', 'in': [971, 58], 'output_id': 0, 'shape': [400], 'out': [973], 'sorted_id': 972}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3672', 'op': 'aten::expand', 'in': [633, 971, 15], 'output_id': 0, 'shape': [10], 'out': [975], 'sorted_id': 972}
         {
-            Tensor::shape_type shape = {400};
-            MulOp* op = new MulOp();
+            Tensor::shape_type shape = {10};
+            ExpandOp* op = new ExpandOp();
             forward_result[972] = op;
             
+            op->set_inputs( forward_result[633] );
             op->set_inputs( forward_result[971] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[15] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3780', 'op': 'aten::add', 'in': [961, 972, 12], 'output_id': 0, 'shape': [400], 'out': [974], 'sorted_id': 973}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3673', 'op': 'prim::ListConstruct', 'in': [970], 'output_id': 0, 'shape': [], 'out': [974], 'sorted_id': 973}
         {
-            Tensor::shape_type shape = {400};
-            AddOp* op = new AddOp();
+            ListConstructOp* op = new ListConstructOp();
             forward_result[973] = op;
             
-            op->set_inputs( forward_result[961] );
-            op->set_inputs( forward_result[972] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[970] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3781', 'op': 'aten::log', 'in': [973], 'output_id': 0, 'shape': [400], 'out': [975], 'sorted_id': 974}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3674', 'op': 'aten::expand', 'in': [637, 973, 15], 'output_id': 0, 'shape': [10], 'out': [975], 'sorted_id': 974}
         {
-            Tensor::shape_type shape = {400};
-            LogOp* op = new LogOp();
+            Tensor::shape_type shape = {10};
+            ExpandOp* op = new ExpandOp();
             forward_result[974] = op;
             
+            op->set_inputs( forward_result[637] );
             op->set_inputs( forward_result[973] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[15] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3782', 'op': 'aten::sum', 'in': [974, 20], 'output_id': 0, 'shape': [], 'out': [976], 'sorted_id': 975}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3675', 'op': 'aten::normal', 'in': [972, 974, 20], 'output_id': 0, 'shape': [10], 'out': [976], 'sorted_id': 975}
         {
-            SumOp* op = new SumOp();
+            Tensor::shape_type shape = {10};
+            NormalOp* op = new NormalOp();
             forward_result[975] = op;
             
+            op->set_inputs( forward_result[972] );
             op->set_inputs( forward_result[974] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3783', 'op': 'aten::add', 'in': [950, 975, 12], 'output_id': 0, 'shape': [], 'out': [1004], 'sorted_id': 976}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/epsilon', 'op': 'aten::to', 'in': [975, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [10], 'out': [977], 'sorted_id': 976}
         {
-            AddOp* op = new AddOp();
+            Tensor::shape_type shape = {10};
+            ToOp* op = new ToOp();
             forward_result[976] = op;
             
-            op->set_inputs( forward_result[950] );
             op->set_inputs( forward_result[975] );
-            op->set_inputs( forward_result[12] );
+            op->set_inputs( forward_result[22] );
+            op->set_inputs( forward_result[10] );
+            op->set_inputs( forward_result[23] );
+            op->set_inputs( forward_result[20] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3784', 'op': 'aten::exp', 'in': [899], 'output_id': 0, 'shape': [400, 400], 'out': [978], 'sorted_id': 977}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3679', 'op': 'aten::mul', 'in': [969, 976], 'output_id': 0, 'shape': [10], 'out': [978], 'sorted_id': 977}
         {
-            Tensor::shape_type shape = {400,400};
-            ExpOp* op = new ExpOp();
+            Tensor::shape_type shape = {10};
+            MulOp* op = new MulOp();
             forward_result[977] = op;
             
-            op->set_inputs( forward_result[899] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[969] );
+            op->set_inputs( forward_result[976] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3785', 'op': 'aten::log1p', 'in': [977], 'output_id': 0, 'shape': [400, 400], 'out': [979], 'sorted_id': 978}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/value', 'op': 'aten::add', 'in': [966, 977, 12], 'output_id': 0, 'shape': [10], 'out': [1016, 1048, 1005, 979], 'sorted_id': 978}
         {
-            Tensor::shape_type shape = {400,400};
-            Log1pOp* op = new Log1pOp();
+            Tensor::shape_type shape = {10};
+            AddOp* op = new AddOp();
             forward_result[978] = op;
             
+            op->set_inputs( forward_result[966] );
             op->set_inputs( forward_result[977] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3786', 'op': 'aten::log', 'in': [978], 'output_id': 0, 'shape': [400, 400], 'out': [980], 'sorted_id': 979}
-        {
-            Tensor::shape_type shape = {400,400};
-            LogOp* op = new LogOp();
-            forward_result[979] = op;
-            
-            op->set_inputs( forward_result[978] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3787', 'op': 'aten::rsub', 'in': [979, 107, 12], 'output_id': 0, 'shape': [400, 400], 'out': [988], 'sorted_id': 980}
-        {
-            Tensor::shape_type shape = {400,400};
-            RsubOp* op = new RsubOp();
-            forward_result[980] = op;
-            
-            op->set_inputs( forward_result[979] );
-            op->set_inputs( forward_result[107] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3788', 'op': 'aten::sub', 'in': [911, 898, 12], 'output_id': 0, 'shape': [400, 400], 'out': [982], 'sorted_id': 981}
-        {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
-            forward_result[981] = op;
-            
-            op->set_inputs( forward_result[911] );
-            op->set_inputs( forward_result[898] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3789', 'op': 'aten::pow', 'in': [981, 45], 'output_id': 0, 'shape': [400, 400], 'out': [987], 'sorted_id': 982}
-        {
-            Tensor::shape_type shape = {400,400};
-            PowOp* op = new PowOp();
-            forward_result[982] = op;
-            
-            op->set_inputs( forward_result[981] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3790', 'op': 'aten::exp', 'in': [899], 'output_id': 0, 'shape': [400, 400], 'out': [984], 'sorted_id': 983}
-        {
-            Tensor::shape_type shape = {400,400};
-            ExpOp* op = new ExpOp();
-            forward_result[983] = op;
-            
-            op->set_inputs( forward_result[899] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3791', 'op': 'aten::log1p', 'in': [983], 'output_id': 0, 'shape': [400, 400], 'out': [985], 'sorted_id': 984}
-        {
-            Tensor::shape_type shape = {400,400};
-            Log1pOp* op = new Log1pOp();
-            forward_result[984] = op;
-            
-            op->set_inputs( forward_result[983] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3792', 'op': 'aten::pow', 'in': [984, 45], 'output_id': 0, 'shape': [400, 400], 'out': [986], 'sorted_id': 985}
-        {
-            Tensor::shape_type shape = {400,400};
-            PowOp* op = new PowOp();
-            forward_result[985] = op;
-            
-            op->set_inputs( forward_result[984] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3793', 'op': 'aten::mul', 'in': [985, 50], 'output_id': 0, 'shape': [400, 400], 'out': [987], 'sorted_id': 986}
-        {
-            Tensor::shape_type shape = {400,400};
-            MulOp* op = new MulOp();
-            forward_result[986] = op;
-            
-            op->set_inputs( forward_result[985] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3794', 'op': 'aten::div', 'in': [982, 986], 'output_id': 0, 'shape': [400, 400], 'out': [988], 'sorted_id': 987}
-        {
-            Tensor::shape_type shape = {400,400};
-            DivOp* op = new DivOp();
-            forward_result[987] = op;
-            
-            op->set_inputs( forward_result[982] );
-            op->set_inputs( forward_result[986] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3795', 'op': 'aten::sub', 'in': [980, 987, 12], 'output_id': 0, 'shape': [400, 400], 'out': [989], 'sorted_id': 988}
-        {
-            Tensor::shape_type shape = {400,400};
-            SubOp* op = new SubOp();
-            forward_result[988] = op;
-            
-            op->set_inputs( forward_result[980] );
-            op->set_inputs( forward_result[987] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3796', 'op': 'aten::sum', 'in': [988, 20], 'output_id': 0, 'shape': [], 'out': [1003], 'sorted_id': 989}
-        {
-            SumOp* op = new SumOp();
-            forward_result[989] = op;
-            
-            op->set_inputs( forward_result[988] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3797', 'op': 'aten::exp', 'in': [913], 'output_id': 0, 'shape': [400], 'out': [991], 'sorted_id': 990}
-        {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
-            forward_result[990] = op;
-            
-            op->set_inputs( forward_result[913] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3798', 'op': 'aten::log1p', 'in': [990], 'output_id': 0, 'shape': [400], 'out': [992], 'sorted_id': 991}
-        {
-            Tensor::shape_type shape = {400};
-            Log1pOp* op = new Log1pOp();
-            forward_result[991] = op;
-            
-            op->set_inputs( forward_result[990] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3799', 'op': 'aten::log', 'in': [991], 'output_id': 0, 'shape': [400], 'out': [993], 'sorted_id': 992}
-        {
-            Tensor::shape_type shape = {400};
-            LogOp* op = new LogOp();
-            forward_result[992] = op;
-            
-            op->set_inputs( forward_result[991] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3800', 'op': 'aten::rsub', 'in': [992, 107, 12], 'output_id': 0, 'shape': [400], 'out': [1001], 'sorted_id': 993}
-        {
-            Tensor::shape_type shape = {400};
-            RsubOp* op = new RsubOp();
-            forward_result[993] = op;
-            
-            op->set_inputs( forward_result[992] );
-            op->set_inputs( forward_result[107] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3801', 'op': 'aten::sub', 'in': [924, 912, 12], 'output_id': 0, 'shape': [400], 'out': [995], 'sorted_id': 994}
-        {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
-            forward_result[994] = op;
-            
-            op->set_inputs( forward_result[924] );
-            op->set_inputs( forward_result[912] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3802', 'op': 'aten::pow', 'in': [994, 45], 'output_id': 0, 'shape': [400], 'out': [1000], 'sorted_id': 995}
-        {
-            Tensor::shape_type shape = {400};
-            PowOp* op = new PowOp();
-            forward_result[995] = op;
-            
-            op->set_inputs( forward_result[994] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3803', 'op': 'aten::exp', 'in': [913], 'output_id': 0, 'shape': [400], 'out': [997], 'sorted_id': 996}
-        {
-            Tensor::shape_type shape = {400};
-            ExpOp* op = new ExpOp();
-            forward_result[996] = op;
-            
-            op->set_inputs( forward_result[913] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3804', 'op': 'aten::log1p', 'in': [996], 'output_id': 0, 'shape': [400], 'out': [998], 'sorted_id': 997}
-        {
-            Tensor::shape_type shape = {400};
-            Log1pOp* op = new Log1pOp();
-            forward_result[997] = op;
-            
-            op->set_inputs( forward_result[996] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3805', 'op': 'aten::pow', 'in': [997, 45], 'output_id': 0, 'shape': [400], 'out': [999], 'sorted_id': 998}
-        {
-            Tensor::shape_type shape = {400};
-            PowOp* op = new PowOp();
-            forward_result[998] = op;
-            
-            op->set_inputs( forward_result[997] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3806', 'op': 'aten::mul', 'in': [998, 50], 'output_id': 0, 'shape': [400], 'out': [1000], 'sorted_id': 999}
-        {
-            Tensor::shape_type shape = {400};
-            MulOp* op = new MulOp();
-            forward_result[999] = op;
-            
-            op->set_inputs( forward_result[998] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3807', 'op': 'aten::div', 'in': [995, 999], 'output_id': 0, 'shape': [400], 'out': [1001], 'sorted_id': 1000}
-        {
-            Tensor::shape_type shape = {400};
-            DivOp* op = new DivOp();
-            forward_result[1000] = op;
-            
-            op->set_inputs( forward_result[995] );
-            op->set_inputs( forward_result[999] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3808', 'op': 'aten::sub', 'in': [993, 1000, 12], 'output_id': 0, 'shape': [400], 'out': [1002], 'sorted_id': 1001}
-        {
-            Tensor::shape_type shape = {400};
-            SubOp* op = new SubOp();
-            forward_result[1001] = op;
-            
-            op->set_inputs( forward_result[993] );
-            op->set_inputs( forward_result[1000] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3809', 'op': 'aten::sum', 'in': [1001, 20], 'output_id': 0, 'shape': [], 'out': [1003], 'sorted_id': 1002}
-        {
-            SumOp* op = new SumOp();
-            forward_result[1002] = op;
-            
-            op->set_inputs( forward_result[1001] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l2]/3810', 'op': 'aten::add', 'in': [989, 1002, 12], 'output_id': 0, 'shape': [], 'out': [1004], 'sorted_id': 1003}
-        {
-            AddOp* op = new AddOp();
-            forward_result[1003] = op;
-            
-            op->set_inputs( forward_result[989] );
-            op->set_inputs( forward_result[1002] );
             op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/3812', 'op': 'prim::TupleConstruct', 'in': [925, 976, 1003], 'output_id': 0, 'shape': [], 'out': [1006, 1117, 1005], 'sorted_id': 1004}
-        {
-            TupleConstructOp* op = new TupleConstructOp();
-            forward_result[1004] = op;
-            
-            op->set_inputs( forward_result[925] );
-            op->set_inputs( forward_result[976] );
-            op->set_inputs( forward_result[1003] );
-        }
-        
-        // {'name': 'Net/3814', 'op': 'prim::TupleUnpack', 'in': [1004], 'output_id': 1, 'shape': [], 'out': [1121], 'sorted_id': 1005}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 1 );
-            forward_result[1005] = op;
-            
-            op->set_inputs( forward_result[1004] );
-        }
-        
-        // {'name': 'Net/3813', 'op': 'prim::TupleUnpack', 'in': [1004], 'output_id': 0, 'shape': [4, 400], 'out': [1007], 'sorted_id': 1006}
-        {
-            Tensor::shape_type shape = {4,400};
-            TupleUnpackOp* op = new TupleUnpackOp( 0 );
-            forward_result[1006] = op;
-            
-            op->set_inputs( forward_result[1004] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/input.33', 'op': 'aten::relu', 'in': [1006], 'output_id': 0, 'shape': [4, 400], 'out': [1035], 'sorted_id': 1007}
-        {
-            Tensor::shape_type shape = {4,400};
-            ReluOp* op = new ReluOp();
-            forward_result[1007] = op;
-            
-            op->set_inputs( forward_result[1006] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l3]/weight_mu/weight_mu', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [1021, 1091], 'sorted_id': 1008}
-        {
-            Tensor::shape_type shape = {10,400};
-            l3_weight_mu.reshape( shape );
-            forward_result[1008] = new VariableTensor( l3_weight_mu, 2 );
-        }
-        
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l3]/weight_rho/weight_rho', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [1013, 1012, 1010, 1087, 1093], 'sorted_id': 1009}
-        {
-            Tensor::shape_type shape = {10,400};
-            l3_weight_rho.reshape( shape );
-            forward_result[1009] = new VariableTensor( l3_weight_rho, 2 );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3829', 'op': 'aten::exp', 'in': [1009], 'output_id': 0, 'shape': [10, 400], 'out': [1011], 'sorted_id': 1010}
-        {
-            Tensor::shape_type shape = {10,400};
-            ExpOp* op = new ExpOp();
-            forward_result[1010] = op;
-            
-            op->set_inputs( forward_result[1009] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3830', 'op': 'aten::log1p', 'in': [1010], 'output_id': 0, 'shape': [10, 400], 'out': [1020], 'sorted_id': 1011}
-        {
-            Tensor::shape_type shape = {10,400};
-            Log1pOp* op = new Log1pOp();
-            forward_result[1011] = op;
-            
-            op->set_inputs( forward_result[1010] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3821', 'op': 'aten::size', 'in': [1009, 10], 'output_id': 0, 'shape': [], 'out': [1016, 1014], 'sorted_id': 1012}
-        {
-            SizeOp* op = new SizeOp();
-            forward_result[1012] = op;
-            
-            op->set_inputs( forward_result[1009] );
-            op->set_inputs( forward_result[10] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3822', 'op': 'aten::size', 'in': [1009, 12], 'output_id': 0, 'shape': [], 'out': [1016, 1014], 'sorted_id': 1013}
-        {
-            SizeOp* op = new SizeOp();
-            forward_result[1013] = op;
-            
-            op->set_inputs( forward_result[1009] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3823', 'op': 'prim::ListConstruct', 'in': [1012, 1013], 'output_id': 0, 'shape': [], 'out': [1015], 'sorted_id': 1014}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[1014] = op;
-            
-            op->set_inputs( forward_result[1012] );
-            op->set_inputs( forward_result[1013] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3824', 'op': 'aten::expand', 'in': [661, 1014, 15], 'output_id': 0, 'shape': [10, 400], 'out': [1018], 'sorted_id': 1015}
-        {
-            Tensor::shape_type shape = {10,400};
-            ExpandOp* op = new ExpandOp();
-            forward_result[1015] = op;
-            
-            op->set_inputs( forward_result[661] );
-            op->set_inputs( forward_result[1014] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3825', 'op': 'prim::ListConstruct', 'in': [1012, 1013], 'output_id': 0, 'shape': [], 'out': [1017], 'sorted_id': 1016}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[1016] = op;
-            
-            op->set_inputs( forward_result[1012] );
-            op->set_inputs( forward_result[1013] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3826', 'op': 'aten::expand', 'in': [666, 1016, 15], 'output_id': 0, 'shape': [10, 400], 'out': [1018], 'sorted_id': 1017}
-        {
-            Tensor::shape_type shape = {10,400};
-            ExpandOp* op = new ExpandOp();
-            forward_result[1017] = op;
-            
-            op->set_inputs( forward_result[666] );
-            op->set_inputs( forward_result[1016] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3827', 'op': 'aten::normal', 'in': [1015, 1017, 20], 'output_id': 0, 'shape': [10, 400], 'out': [1019], 'sorted_id': 1018}
-        {
-            Tensor::shape_type shape = {10,400};
-            NormalOp* op = new NormalOp();
-            forward_result[1018] = op;
-            
-            op->set_inputs( forward_result[1015] );
-            op->set_inputs( forward_result[1017] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/epsilon.33', 'op': 'aten::to', 'in': [1018, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [10, 400], 'out': [1020], 'sorted_id': 1019}
-        {
-            Tensor::shape_type shape = {10,400};
-            ToOp* op = new ToOp();
-            forward_result[1019] = op;
-            
-            op->set_inputs( forward_result[1018] );
-            op->set_inputs( forward_result[22] );
-            op->set_inputs( forward_result[10] );
-            op->set_inputs( forward_result[23] );
-            op->set_inputs( forward_result[20] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3831', 'op': 'aten::mul', 'in': [1011, 1019], 'output_id': 0, 'shape': [10, 400], 'out': [1021], 'sorted_id': 1020}
-        {
-            Tensor::shape_type shape = {10,400};
-            MulOp* op = new MulOp();
-            forward_result[1020] = op;
-            
-            op->set_inputs( forward_result[1011] );
-            op->set_inputs( forward_result[1019] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/value.33', 'op': 'aten::add', 'in': [1008, 1020, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1035, 1091, 1036, 1047], 'sorted_id': 1021}
-        {
-            Tensor::shape_type shape = {10,400};
-            AddOp* op = new AddOp();
-            forward_result[1021] = op;
-            
-            op->set_inputs( forward_result[1008] );
-            op->set_inputs( forward_result[1020] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l3]/bias_mu/bias_mu', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [1104, 1034], 'sorted_id': 1022}
-        {
-            Tensor::shape_type shape = {10};
-            l3_bias_mu.reshape( shape );
-            forward_result[1022] = new VariableTensor( l3_bias_mu, 2 );
-        }
-        
-        // {'name': 'Net/BayesianNetwork[net]/BayesianLinear[l3]/bias_rho/bias_rho', 'op': 'prim::GetAttr', 'in': [], 'output_id': 0, 'shape': [], 'out': [1026, 1100, 1106, 1024], 'sorted_id': 1023}
-        {
-            Tensor::shape_type shape = {10};
-            l3_bias_rho.reshape( shape );
-            forward_result[1023] = new VariableTensor( l3_bias_rho, 2 );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3840', 'op': 'aten::exp', 'in': [1023], 'output_id': 0, 'shape': [10], 'out': [1025], 'sorted_id': 1024}
-        {
-            Tensor::shape_type shape = {10};
-            ExpOp* op = new ExpOp();
-            forward_result[1024] = op;
-            
-            op->set_inputs( forward_result[1023] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3841', 'op': 'aten::log1p', 'in': [1024], 'output_id': 0, 'shape': [10], 'out': [1033], 'sorted_id': 1025}
-        {
-            Tensor::shape_type shape = {10};
-            Log1pOp* op = new Log1pOp();
-            forward_result[1025] = op;
-            
-            op->set_inputs( forward_result[1024] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3833', 'op': 'aten::size', 'in': [1023, 10], 'output_id': 0, 'shape': [], 'out': [1029, 1027], 'sorted_id': 1026}
-        {
-            SizeOp* op = new SizeOp();
-            forward_result[1026] = op;
-            
-            op->set_inputs( forward_result[1023] );
-            op->set_inputs( forward_result[10] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3834', 'op': 'prim::ListConstruct', 'in': [1026], 'output_id': 0, 'shape': [], 'out': [1028], 'sorted_id': 1027}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[1027] = op;
-            
-            op->set_inputs( forward_result[1026] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3835', 'op': 'aten::expand', 'in': [677, 1027, 15], 'output_id': 0, 'shape': [10], 'out': [1031], 'sorted_id': 1028}
-        {
-            Tensor::shape_type shape = {10};
-            ExpandOp* op = new ExpandOp();
-            forward_result[1028] = op;
-            
-            op->set_inputs( forward_result[677] );
-            op->set_inputs( forward_result[1027] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3836', 'op': 'prim::ListConstruct', 'in': [1026], 'output_id': 0, 'shape': [], 'out': [1030], 'sorted_id': 1029}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[1029] = op;
-            
-            op->set_inputs( forward_result[1026] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3837', 'op': 'aten::expand', 'in': [681, 1029, 15], 'output_id': 0, 'shape': [10], 'out': [1031], 'sorted_id': 1030}
-        {
-            Tensor::shape_type shape = {10};
-            ExpandOp* op = new ExpandOp();
-            forward_result[1030] = op;
-            
-            op->set_inputs( forward_result[681] );
-            op->set_inputs( forward_result[1029] );
-            op->set_inputs( forward_result[15] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3838', 'op': 'aten::normal', 'in': [1028, 1030, 20], 'output_id': 0, 'shape': [10], 'out': [1032], 'sorted_id': 1031}
-        {
-            Tensor::shape_type shape = {10};
-            NormalOp* op = new NormalOp();
-            forward_result[1031] = op;
-            
-            op->set_inputs( forward_result[1028] );
-            op->set_inputs( forward_result[1030] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/epsilon', 'op': 'aten::to', 'in': [1031, 22, 10, 23, 20, 15, 15, 20], 'output_id': 0, 'shape': [10], 'out': [1033], 'sorted_id': 1032}
-        {
-            Tensor::shape_type shape = {10};
-            ToOp* op = new ToOp();
-            forward_result[1032] = op;
-            
-            op->set_inputs( forward_result[1031] );
-            op->set_inputs( forward_result[22] );
-            op->set_inputs( forward_result[10] );
-            op->set_inputs( forward_result[23] );
-            op->set_inputs( forward_result[20] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3842', 'op': 'aten::mul', 'in': [1025, 1032], 'output_id': 0, 'shape': [10], 'out': [1034], 'sorted_id': 1033}
-        {
-            Tensor::shape_type shape = {10};
-            MulOp* op = new MulOp();
-            forward_result[1033] = op;
-            
-            op->set_inputs( forward_result[1025] );
-            op->set_inputs( forward_result[1032] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/value', 'op': 'aten::add', 'in': [1022, 1033, 12], 'output_id': 0, 'shape': [10], 'out': [1104, 1035, 1072, 1061], 'sorted_id': 1034}
-        {
-            Tensor::shape_type shape = {10};
-            AddOp* op = new AddOp();
-            forward_result[1034] = op;
-            
-            op->set_inputs( forward_result[1022] );
-            op->set_inputs( forward_result[1033] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/input.35', 'op': 'aten::linear', 'in': [1007, 1021, 1034], 'output_id': 0, 'shape': [4, 10], 'out': [1114], 'sorted_id': 1035}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/input.35', 'op': 'aten::linear', 'in': [951, 965, 978], 'output_id': 0, 'shape': [4, 10], 'out': [1058], 'sorted_id': 979}
         {
             Tensor::shape_type shape = {4,10};
             LinearOp* op = new LinearOp();
-            forward_result[1035] = op;
+            forward_result[979] = op;
             
-            op->set_inputs( forward_result[1007] );
-            op->set_inputs( forward_result[1021] );
-            op->set_inputs( forward_result[1034] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[951] );
+            op->set_inputs( forward_result[965] );
+            op->set_inputs( forward_result[978] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3846', 'op': 'aten::sub', 'in': [1021, 689, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1037], 'sorted_id': 1036}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3683', 'op': 'aten::sub', 'in': [965, 645, 12], 'output_id': 0, 'shape': [10, 400], 'out': [981], 'sorted_id': 980}
         {
             Tensor::shape_type shape = {10,400};
             SubOp* op = new SubOp();
-            forward_result[1036] = op;
+            forward_result[980] = op;
             
-            op->set_inputs( forward_result[1021] );
-            op->set_inputs( forward_result[689] );
+            op->set_inputs( forward_result[965] );
+            op->set_inputs( forward_result[645] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3847', 'op': 'aten::pow', 'in': [1036, 45], 'output_id': 0, 'shape': [10, 400], 'out': [1038], 'sorted_id': 1037}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3684', 'op': 'aten::pow', 'in': [980, 45], 'output_id': 0, 'shape': [10, 400], 'out': [982], 'sorted_id': 981}
         {
             Tensor::shape_type shape = {10,400};
             PowOp* op = new PowOp();
-            forward_result[1037] = op;
+            forward_result[981] = op;
             
-            op->set_inputs( forward_result[1036] );
+            op->set_inputs( forward_result[980] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3848', 'op': 'aten::neg', 'in': [1037], 'output_id': 0, 'shape': [10, 400], 'out': [1041], 'sorted_id': 1038}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3685', 'op': 'aten::neg', 'in': [981], 'output_id': 0, 'shape': [10, 400], 'out': [985], 'sorted_id': 982}
         {
             Tensor::shape_type shape = {10,400};
             NegOp* op = new NegOp();
-            forward_result[1038] = op;
+            forward_result[982] = op;
             
-            op->set_inputs( forward_result[1037] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[981] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/var.65', 'op': 'aten::pow', 'in': [693, 45], 'output_id': 0, 'shape': [1], 'out': [1040], 'sorted_id': 1039}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/var.65', 'op': 'aten::pow', 'in': [649, 45], 'output_id': 0, 'shape': [1], 'out': [984], 'sorted_id': 983}
         {
             Tensor::shape_type shape = {1};
             PowOp* op = new PowOp();
-            forward_result[1039] = op;
+            forward_result[983] = op;
             
-            op->set_inputs( forward_result[693] );
+            op->set_inputs( forward_result[649] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3849', 'op': 'aten::mul', 'in': [1039, 50], 'output_id': 0, 'shape': [1], 'out': [1041], 'sorted_id': 1040}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3686', 'op': 'aten::mul', 'in': [983, 50], 'output_id': 0, 'shape': [1], 'out': [985], 'sorted_id': 984}
         {
             Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[984] = op;
+            
+            op->set_inputs( forward_result[983] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3687', 'op': 'aten::div', 'in': [982, 984], 'output_id': 0, 'shape': [10, 400], 'out': [987], 'sorted_id': 985}
+        {
+            Tensor::shape_type shape = {10,400};
+            DivOp* op = new DivOp();
+            forward_result[985] = op;
+            
+            op->set_inputs( forward_result[982] );
+            op->set_inputs( forward_result[984] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/log_scale.65', 'op': 'aten::log', 'in': [649], 'output_id': 0, 'shape': [1], 'out': [987], 'sorted_id': 986}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[986] = op;
+            
+            op->set_inputs( forward_result[649] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3688', 'op': 'aten::sub', 'in': [985, 986, 12], 'output_id': 0, 'shape': [10, 400], 'out': [988], 'sorted_id': 987}
+        {
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
+            forward_result[987] = op;
+            
+            op->set_inputs( forward_result[985] );
+            op->set_inputs( forward_result[986] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3689', 'op': 'aten::sub', 'in': [987, 55, 12], 'output_id': 0, 'shape': [10, 400], 'out': [989], 'sorted_id': 988}
+        {
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
+            forward_result[988] = op;
+            
+            op->set_inputs( forward_result[987] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/prob1.33', 'op': 'aten::exp', 'in': [988], 'output_id': 0, 'shape': [10, 400], 'out': [990], 'sorted_id': 989}
+        {
+            Tensor::shape_type shape = {10,400};
+            ExpOp* op = new ExpOp();
+            forward_result[989] = op;
+            
+            op->set_inputs( forward_result[988] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3701', 'op': 'aten::mul', 'in': [989, 58], 'output_id': 0, 'shape': [10, 400], 'out': [1002], 'sorted_id': 990}
+        {
+            Tensor::shape_type shape = {10,400};
+            MulOp* op = new MulOp();
+            forward_result[990] = op;
+            
+            op->set_inputs( forward_result[989] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3693', 'op': 'aten::sub', 'in': [965, 658, 12], 'output_id': 0, 'shape': [10, 400], 'out': [992], 'sorted_id': 991}
+        {
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
+            forward_result[991] = op;
+            
+            op->set_inputs( forward_result[965] );
+            op->set_inputs( forward_result[658] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3694', 'op': 'aten::pow', 'in': [991, 45], 'output_id': 0, 'shape': [10, 400], 'out': [993], 'sorted_id': 992}
+        {
+            Tensor::shape_type shape = {10,400};
+            PowOp* op = new PowOp();
+            forward_result[992] = op;
+            
+            op->set_inputs( forward_result[991] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3695', 'op': 'aten::neg', 'in': [992], 'output_id': 0, 'shape': [10, 400], 'out': [996], 'sorted_id': 993}
+        {
+            Tensor::shape_type shape = {10,400};
+            NegOp* op = new NegOp();
+            forward_result[993] = op;
+            
+            op->set_inputs( forward_result[992] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/var.67', 'op': 'aten::pow', 'in': [662, 45], 'output_id': 0, 'shape': [1], 'out': [995], 'sorted_id': 994}
+        {
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[994] = op;
+            
+            op->set_inputs( forward_result[662] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3696', 'op': 'aten::mul', 'in': [994, 50], 'output_id': 0, 'shape': [1], 'out': [996], 'sorted_id': 995}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[995] = op;
+            
+            op->set_inputs( forward_result[994] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3697', 'op': 'aten::div', 'in': [993, 995], 'output_id': 0, 'shape': [10, 400], 'out': [998], 'sorted_id': 996}
+        {
+            Tensor::shape_type shape = {10,400};
+            DivOp* op = new DivOp();
+            forward_result[996] = op;
+            
+            op->set_inputs( forward_result[993] );
+            op->set_inputs( forward_result[995] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/log_scale.67', 'op': 'aten::log', 'in': [662], 'output_id': 0, 'shape': [1], 'out': [998], 'sorted_id': 997}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[997] = op;
+            
+            op->set_inputs( forward_result[662] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3698', 'op': 'aten::sub', 'in': [996, 997, 12], 'output_id': 0, 'shape': [10, 400], 'out': [999], 'sorted_id': 998}
+        {
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
+            forward_result[998] = op;
+            
+            op->set_inputs( forward_result[996] );
+            op->set_inputs( forward_result[997] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3699', 'op': 'aten::sub', 'in': [998, 55, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1000], 'sorted_id': 999}
+        {
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
+            forward_result[999] = op;
+            
+            op->set_inputs( forward_result[998] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/prob2.33', 'op': 'aten::exp', 'in': [999], 'output_id': 0, 'shape': [10, 400], 'out': [1001], 'sorted_id': 1000}
+        {
+            Tensor::shape_type shape = {10,400};
+            ExpOp* op = new ExpOp();
+            forward_result[1000] = op;
+            
+            op->set_inputs( forward_result[999] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3702', 'op': 'aten::mul', 'in': [1000, 58], 'output_id': 0, 'shape': [10, 400], 'out': [1002], 'sorted_id': 1001}
+        {
+            Tensor::shape_type shape = {10,400};
+            MulOp* op = new MulOp();
+            forward_result[1001] = op;
+            
+            op->set_inputs( forward_result[1000] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3703', 'op': 'aten::add', 'in': [990, 1001, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1003], 'sorted_id': 1002}
+        {
+            Tensor::shape_type shape = {10,400};
+            AddOp* op = new AddOp();
+            forward_result[1002] = op;
+            
+            op->set_inputs( forward_result[990] );
+            op->set_inputs( forward_result[1001] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3704', 'op': 'aten::log', 'in': [1002], 'output_id': 0, 'shape': [10, 400], 'out': [1004], 'sorted_id': 1003}
+        {
+            Tensor::shape_type shape = {10,400};
+            LogOp* op = new LogOp();
+            forward_result[1003] = op;
+            
+            op->set_inputs( forward_result[1002] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3705', 'op': 'aten::sum', 'in': [1003, 20], 'output_id': 0, 'shape': [], 'out': [1030], 'sorted_id': 1004}
+        {
+            SumOp* op = new SumOp();
+            forward_result[1004] = op;
+            
+            op->set_inputs( forward_result[1003] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3708', 'op': 'aten::sub', 'in': [978, 674, 12], 'output_id': 0, 'shape': [10], 'out': [1006], 'sorted_id': 1005}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[1005] = op;
+            
+            op->set_inputs( forward_result[978] );
+            op->set_inputs( forward_result[674] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3709', 'op': 'aten::pow', 'in': [1005, 45], 'output_id': 0, 'shape': [10], 'out': [1007], 'sorted_id': 1006}
+        {
+            Tensor::shape_type shape = {10};
+            PowOp* op = new PowOp();
+            forward_result[1006] = op;
+            
+            op->set_inputs( forward_result[1005] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3710', 'op': 'aten::neg', 'in': [1006], 'output_id': 0, 'shape': [10], 'out': [1010], 'sorted_id': 1007}
+        {
+            Tensor::shape_type shape = {10};
+            NegOp* op = new NegOp();
+            forward_result[1007] = op;
+            
+            op->set_inputs( forward_result[1006] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/var.69', 'op': 'aten::pow', 'in': [649, 45], 'output_id': 0, 'shape': [1], 'out': [1009], 'sorted_id': 1008}
+        {
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[1008] = op;
+            
+            op->set_inputs( forward_result[649] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3711', 'op': 'aten::mul', 'in': [1008, 50], 'output_id': 0, 'shape': [1], 'out': [1010], 'sorted_id': 1009}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[1009] = op;
+            
+            op->set_inputs( forward_result[1008] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3712', 'op': 'aten::div', 'in': [1007, 1009], 'output_id': 0, 'shape': [10], 'out': [1012], 'sorted_id': 1010}
+        {
+            Tensor::shape_type shape = {10};
+            DivOp* op = new DivOp();
+            forward_result[1010] = op;
+            
+            op->set_inputs( forward_result[1007] );
+            op->set_inputs( forward_result[1009] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/log_scale.69', 'op': 'aten::log', 'in': [649], 'output_id': 0, 'shape': [1], 'out': [1012], 'sorted_id': 1011}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[1011] = op;
+            
+            op->set_inputs( forward_result[649] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3713', 'op': 'aten::sub', 'in': [1010, 1011, 12], 'output_id': 0, 'shape': [10], 'out': [1013], 'sorted_id': 1012}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[1012] = op;
+            
+            op->set_inputs( forward_result[1010] );
+            op->set_inputs( forward_result[1011] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3714', 'op': 'aten::sub', 'in': [1012, 55, 12], 'output_id': 0, 'shape': [10], 'out': [1014], 'sorted_id': 1013}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[1013] = op;
+            
+            op->set_inputs( forward_result[1012] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/prob1', 'op': 'aten::exp', 'in': [1013], 'output_id': 0, 'shape': [10], 'out': [1015], 'sorted_id': 1014}
+        {
+            Tensor::shape_type shape = {10};
+            ExpOp* op = new ExpOp();
+            forward_result[1014] = op;
+            
+            op->set_inputs( forward_result[1013] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3726', 'op': 'aten::mul', 'in': [1014, 58], 'output_id': 0, 'shape': [10], 'out': [1027], 'sorted_id': 1015}
+        {
+            Tensor::shape_type shape = {10};
+            MulOp* op = new MulOp();
+            forward_result[1015] = op;
+            
+            op->set_inputs( forward_result[1014] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3718', 'op': 'aten::sub', 'in': [978, 686, 12], 'output_id': 0, 'shape': [10], 'out': [1017], 'sorted_id': 1016}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[1016] = op;
+            
+            op->set_inputs( forward_result[978] );
+            op->set_inputs( forward_result[686] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3719', 'op': 'aten::pow', 'in': [1016, 45], 'output_id': 0, 'shape': [10], 'out': [1018], 'sorted_id': 1017}
+        {
+            Tensor::shape_type shape = {10};
+            PowOp* op = new PowOp();
+            forward_result[1017] = op;
+            
+            op->set_inputs( forward_result[1016] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3720', 'op': 'aten::neg', 'in': [1017], 'output_id': 0, 'shape': [10], 'out': [1021], 'sorted_id': 1018}
+        {
+            Tensor::shape_type shape = {10};
+            NegOp* op = new NegOp();
+            forward_result[1018] = op;
+            
+            op->set_inputs( forward_result[1017] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/var', 'op': 'aten::pow', 'in': [662, 45], 'output_id': 0, 'shape': [1], 'out': [1020], 'sorted_id': 1019}
+        {
+            Tensor::shape_type shape = {1};
+            PowOp* op = new PowOp();
+            forward_result[1019] = op;
+            
+            op->set_inputs( forward_result[662] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3721', 'op': 'aten::mul', 'in': [1019, 50], 'output_id': 0, 'shape': [1], 'out': [1021], 'sorted_id': 1020}
+        {
+            Tensor::shape_type shape = {1};
+            MulOp* op = new MulOp();
+            forward_result[1020] = op;
+            
+            op->set_inputs( forward_result[1019] );
+            op->set_inputs( forward_result[50] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3722', 'op': 'aten::div', 'in': [1018, 1020], 'output_id': 0, 'shape': [10], 'out': [1023], 'sorted_id': 1021}
+        {
+            Tensor::shape_type shape = {10};
+            DivOp* op = new DivOp();
+            forward_result[1021] = op;
+            
+            op->set_inputs( forward_result[1018] );
+            op->set_inputs( forward_result[1020] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/log_scale', 'op': 'aten::log', 'in': [662], 'output_id': 0, 'shape': [1], 'out': [1023], 'sorted_id': 1022}
+        {
+            Tensor::shape_type shape = {1};
+            LogOp* op = new LogOp();
+            forward_result[1022] = op;
+            
+            op->set_inputs( forward_result[662] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3723', 'op': 'aten::sub', 'in': [1021, 1022, 12], 'output_id': 0, 'shape': [10], 'out': [1024], 'sorted_id': 1023}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[1023] = op;
+            
+            op->set_inputs( forward_result[1021] );
+            op->set_inputs( forward_result[1022] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3724', 'op': 'aten::sub', 'in': [1023, 55, 12], 'output_id': 0, 'shape': [10], 'out': [1025], 'sorted_id': 1024}
+        {
+            Tensor::shape_type shape = {10};
+            SubOp* op = new SubOp();
+            forward_result[1024] = op;
+            
+            op->set_inputs( forward_result[1023] );
+            op->set_inputs( forward_result[55] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/prob2', 'op': 'aten::exp', 'in': [1024], 'output_id': 0, 'shape': [10], 'out': [1026], 'sorted_id': 1025}
+        {
+            Tensor::shape_type shape = {10};
+            ExpOp* op = new ExpOp();
+            forward_result[1025] = op;
+            
+            op->set_inputs( forward_result[1024] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3727', 'op': 'aten::mul', 'in': [1025, 58], 'output_id': 0, 'shape': [10], 'out': [1027], 'sorted_id': 1026}
+        {
+            Tensor::shape_type shape = {10};
+            MulOp* op = new MulOp();
+            forward_result[1026] = op;
+            
+            op->set_inputs( forward_result[1025] );
+            op->set_inputs( forward_result[58] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3728', 'op': 'aten::add', 'in': [1015, 1026, 12], 'output_id': 0, 'shape': [10], 'out': [1028], 'sorted_id': 1027}
+        {
+            Tensor::shape_type shape = {10};
+            AddOp* op = new AddOp();
+            forward_result[1027] = op;
+            
+            op->set_inputs( forward_result[1015] );
+            op->set_inputs( forward_result[1026] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3729', 'op': 'aten::log', 'in': [1027], 'output_id': 0, 'shape': [10], 'out': [1029], 'sorted_id': 1028}
+        {
+            Tensor::shape_type shape = {10};
+            LogOp* op = new LogOp();
+            forward_result[1028] = op;
+            
+            op->set_inputs( forward_result[1027] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3730', 'op': 'aten::sum', 'in': [1028, 20], 'output_id': 0, 'shape': [], 'out': [1030], 'sorted_id': 1029}
+        {
+            SumOp* op = new SumOp();
+            forward_result[1029] = op;
+            
+            op->set_inputs( forward_result[1028] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3731', 'op': 'aten::add', 'in': [1004, 1029, 12], 'output_id': 0, 'shape': [], 'out': [1058], 'sorted_id': 1030}
+        {
+            AddOp* op = new AddOp();
+            forward_result[1030] = op;
+            
+            op->set_inputs( forward_result[1004] );
+            op->set_inputs( forward_result[1029] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3732', 'op': 'aten::exp', 'in': [953], 'output_id': 0, 'shape': [10, 400], 'out': [1032], 'sorted_id': 1031}
+        {
+            Tensor::shape_type shape = {10,400};
+            ExpOp* op = new ExpOp();
+            forward_result[1031] = op;
+            
+            op->set_inputs( forward_result[953] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3733', 'op': 'aten::log1p', 'in': [1031], 'output_id': 0, 'shape': [10, 400], 'out': [1033], 'sorted_id': 1032}
+        {
+            Tensor::shape_type shape = {10,400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[1032] = op;
+            
+            op->set_inputs( forward_result[1031] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3734', 'op': 'aten::log', 'in': [1032], 'output_id': 0, 'shape': [10, 400], 'out': [1034], 'sorted_id': 1033}
+        {
+            Tensor::shape_type shape = {10,400};
+            LogOp* op = new LogOp();
+            forward_result[1033] = op;
+            
+            op->set_inputs( forward_result[1032] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3735', 'op': 'aten::rsub', 'in': [1033, 107, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1042], 'sorted_id': 1034}
+        {
+            Tensor::shape_type shape = {10,400};
+            RsubOp* op = new RsubOp();
+            forward_result[1034] = op;
+            
+            op->set_inputs( forward_result[1033] );
+            op->set_inputs( forward_result[107] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3736', 'op': 'aten::sub', 'in': [965, 952, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1036], 'sorted_id': 1035}
+        {
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
+            forward_result[1035] = op;
+            
+            op->set_inputs( forward_result[965] );
+            op->set_inputs( forward_result[952] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3737', 'op': 'aten::pow', 'in': [1035, 45], 'output_id': 0, 'shape': [10, 400], 'out': [1041], 'sorted_id': 1036}
+        {
+            Tensor::shape_type shape = {10,400};
+            PowOp* op = new PowOp();
+            forward_result[1036] = op;
+            
+            op->set_inputs( forward_result[1035] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3738', 'op': 'aten::exp', 'in': [953], 'output_id': 0, 'shape': [10, 400], 'out': [1038], 'sorted_id': 1037}
+        {
+            Tensor::shape_type shape = {10,400};
+            ExpOp* op = new ExpOp();
+            forward_result[1037] = op;
+            
+            op->set_inputs( forward_result[953] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3739', 'op': 'aten::log1p', 'in': [1037], 'output_id': 0, 'shape': [10, 400], 'out': [1039], 'sorted_id': 1038}
+        {
+            Tensor::shape_type shape = {10,400};
+            Log1pOp* op = new Log1pOp();
+            forward_result[1038] = op;
+            
+            op->set_inputs( forward_result[1037] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3740', 'op': 'aten::pow', 'in': [1038, 45], 'output_id': 0, 'shape': [10, 400], 'out': [1040], 'sorted_id': 1039}
+        {
+            Tensor::shape_type shape = {10,400};
+            PowOp* op = new PowOp();
+            forward_result[1039] = op;
+            
+            op->set_inputs( forward_result[1038] );
+            op->set_inputs( forward_result[45] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3741', 'op': 'aten::mul', 'in': [1039, 50], 'output_id': 0, 'shape': [10, 400], 'out': [1041], 'sorted_id': 1040}
+        {
+            Tensor::shape_type shape = {10,400};
             MulOp* op = new MulOp();
             forward_result[1040] = op;
             
             op->set_inputs( forward_result[1039] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3850', 'op': 'aten::div', 'in': [1038, 1040], 'output_id': 0, 'shape': [10, 400], 'out': [1043], 'sorted_id': 1041}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3742', 'op': 'aten::div', 'in': [1036, 1040], 'output_id': 0, 'shape': [10, 400], 'out': [1042], 'sorted_id': 1041}
         {
             Tensor::shape_type shape = {10,400};
             DivOp* op = new DivOp();
             forward_result[1041] = op;
             
-            op->set_inputs( forward_result[1038] );
+            op->set_inputs( forward_result[1036] );
             op->set_inputs( forward_result[1040] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/log_scale.65', 'op': 'aten::log', 'in': [693], 'output_id': 0, 'shape': [1], 'out': [1043], 'sorted_id': 1042}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3743', 'op': 'aten::sub', 'in': [1034, 1041, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1043], 'sorted_id': 1042}
         {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
+            Tensor::shape_type shape = {10,400};
+            SubOp* op = new SubOp();
             forward_result[1042] = op;
             
-            op->set_inputs( forward_result[693] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3851', 'op': 'aten::sub', 'in': [1041, 1042, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1044], 'sorted_id': 1043}
-        {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
-            forward_result[1043] = op;
-            
+            op->set_inputs( forward_result[1034] );
             op->set_inputs( forward_result[1041] );
-            op->set_inputs( forward_result[1042] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3852', 'op': 'aten::sub', 'in': [1043, 55, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1045], 'sorted_id': 1044}
-        {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
-            forward_result[1044] = op;
-            
-            op->set_inputs( forward_result[1043] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/prob1.33', 'op': 'aten::exp', 'in': [1044], 'output_id': 0, 'shape': [10, 400], 'out': [1046], 'sorted_id': 1045}
-        {
-            Tensor::shape_type shape = {10,400};
-            ExpOp* op = new ExpOp();
-            forward_result[1045] = op;
-            
-            op->set_inputs( forward_result[1044] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3864', 'op': 'aten::mul', 'in': [1045, 58], 'output_id': 0, 'shape': [10, 400], 'out': [1058], 'sorted_id': 1046}
-        {
-            Tensor::shape_type shape = {10,400};
-            MulOp* op = new MulOp();
-            forward_result[1046] = op;
-            
-            op->set_inputs( forward_result[1045] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3856', 'op': 'aten::sub', 'in': [1021, 702, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1048], 'sorted_id': 1047}
-        {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
-            forward_result[1047] = op;
-            
-            op->set_inputs( forward_result[1021] );
-            op->set_inputs( forward_result[702] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3857', 'op': 'aten::pow', 'in': [1047, 45], 'output_id': 0, 'shape': [10, 400], 'out': [1049], 'sorted_id': 1048}
-        {
-            Tensor::shape_type shape = {10,400};
-            PowOp* op = new PowOp();
-            forward_result[1048] = op;
-            
-            op->set_inputs( forward_result[1047] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3858', 'op': 'aten::neg', 'in': [1048], 'output_id': 0, 'shape': [10, 400], 'out': [1052], 'sorted_id': 1049}
-        {
-            Tensor::shape_type shape = {10,400};
-            NegOp* op = new NegOp();
-            forward_result[1049] = op;
-            
-            op->set_inputs( forward_result[1048] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/var.67', 'op': 'aten::pow', 'in': [706, 45], 'output_id': 0, 'shape': [1], 'out': [1051], 'sorted_id': 1050}
-        {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[1050] = op;
-            
-            op->set_inputs( forward_result[706] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3859', 'op': 'aten::mul', 'in': [1050, 50], 'output_id': 0, 'shape': [1], 'out': [1052], 'sorted_id': 1051}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[1051] = op;
-            
-            op->set_inputs( forward_result[1050] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3860', 'op': 'aten::div', 'in': [1049, 1051], 'output_id': 0, 'shape': [10, 400], 'out': [1054], 'sorted_id': 1052}
-        {
-            Tensor::shape_type shape = {10,400};
-            DivOp* op = new DivOp();
-            forward_result[1052] = op;
-            
-            op->set_inputs( forward_result[1049] );
-            op->set_inputs( forward_result[1051] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/log_scale.67', 'op': 'aten::log', 'in': [706], 'output_id': 0, 'shape': [1], 'out': [1054], 'sorted_id': 1053}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[1053] = op;
-            
-            op->set_inputs( forward_result[706] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3861', 'op': 'aten::sub', 'in': [1052, 1053, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1055], 'sorted_id': 1054}
-        {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
-            forward_result[1054] = op;
-            
-            op->set_inputs( forward_result[1052] );
-            op->set_inputs( forward_result[1053] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3862', 'op': 'aten::sub', 'in': [1054, 55, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1056], 'sorted_id': 1055}
-        {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
-            forward_result[1055] = op;
-            
-            op->set_inputs( forward_result[1054] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/prob2.33', 'op': 'aten::exp', 'in': [1055], 'output_id': 0, 'shape': [10, 400], 'out': [1057], 'sorted_id': 1056}
-        {
-            Tensor::shape_type shape = {10,400};
-            ExpOp* op = new ExpOp();
-            forward_result[1056] = op;
-            
-            op->set_inputs( forward_result[1055] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3865', 'op': 'aten::mul', 'in': [1056, 58], 'output_id': 0, 'shape': [10, 400], 'out': [1058], 'sorted_id': 1057}
-        {
-            Tensor::shape_type shape = {10,400};
-            MulOp* op = new MulOp();
-            forward_result[1057] = op;
-            
-            op->set_inputs( forward_result[1056] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3866', 'op': 'aten::add', 'in': [1046, 1057, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1059], 'sorted_id': 1058}
-        {
-            Tensor::shape_type shape = {10,400};
-            AddOp* op = new AddOp();
-            forward_result[1058] = op;
-            
-            op->set_inputs( forward_result[1046] );
-            op->set_inputs( forward_result[1057] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3867', 'op': 'aten::log', 'in': [1058], 'output_id': 0, 'shape': [10, 400], 'out': [1060], 'sorted_id': 1059}
-        {
-            Tensor::shape_type shape = {10,400};
-            LogOp* op = new LogOp();
-            forward_result[1059] = op;
-            
-            op->set_inputs( forward_result[1058] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3868', 'op': 'aten::sum', 'in': [1059, 20], 'output_id': 0, 'shape': [], 'out': [1086], 'sorted_id': 1060}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3744', 'op': 'aten::sum', 'in': [1042, 20], 'output_id': 0, 'shape': [], 'out': [1057], 'sorted_id': 1043}
         {
             SumOp* op = new SumOp();
-            forward_result[1060] = op;
+            forward_result[1043] = op;
             
-            op->set_inputs( forward_result[1059] );
+            op->set_inputs( forward_result[1042] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3871', 'op': 'aten::sub', 'in': [1034, 718, 12], 'output_id': 0, 'shape': [10], 'out': [1062], 'sorted_id': 1061}
-        {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
-            forward_result[1061] = op;
-            
-            op->set_inputs( forward_result[1034] );
-            op->set_inputs( forward_result[718] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3872', 'op': 'aten::pow', 'in': [1061, 45], 'output_id': 0, 'shape': [10], 'out': [1063], 'sorted_id': 1062}
-        {
-            Tensor::shape_type shape = {10};
-            PowOp* op = new PowOp();
-            forward_result[1062] = op;
-            
-            op->set_inputs( forward_result[1061] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3873', 'op': 'aten::neg', 'in': [1062], 'output_id': 0, 'shape': [10], 'out': [1066], 'sorted_id': 1063}
-        {
-            Tensor::shape_type shape = {10};
-            NegOp* op = new NegOp();
-            forward_result[1063] = op;
-            
-            op->set_inputs( forward_result[1062] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/var.69', 'op': 'aten::pow', 'in': [693, 45], 'output_id': 0, 'shape': [1], 'out': [1065], 'sorted_id': 1064}
-        {
-            Tensor::shape_type shape = {1};
-            PowOp* op = new PowOp();
-            forward_result[1064] = op;
-            
-            op->set_inputs( forward_result[693] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3874', 'op': 'aten::mul', 'in': [1064, 50], 'output_id': 0, 'shape': [1], 'out': [1066], 'sorted_id': 1065}
-        {
-            Tensor::shape_type shape = {1};
-            MulOp* op = new MulOp();
-            forward_result[1065] = op;
-            
-            op->set_inputs( forward_result[1064] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3875', 'op': 'aten::div', 'in': [1063, 1065], 'output_id': 0, 'shape': [10], 'out': [1068], 'sorted_id': 1066}
-        {
-            Tensor::shape_type shape = {10};
-            DivOp* op = new DivOp();
-            forward_result[1066] = op;
-            
-            op->set_inputs( forward_result[1063] );
-            op->set_inputs( forward_result[1065] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/log_scale.69', 'op': 'aten::log', 'in': [693], 'output_id': 0, 'shape': [1], 'out': [1068], 'sorted_id': 1067}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[1067] = op;
-            
-            op->set_inputs( forward_result[693] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3876', 'op': 'aten::sub', 'in': [1066, 1067, 12], 'output_id': 0, 'shape': [10], 'out': [1069], 'sorted_id': 1068}
-        {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
-            forward_result[1068] = op;
-            
-            op->set_inputs( forward_result[1066] );
-            op->set_inputs( forward_result[1067] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3877', 'op': 'aten::sub', 'in': [1068, 55, 12], 'output_id': 0, 'shape': [10], 'out': [1070], 'sorted_id': 1069}
-        {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
-            forward_result[1069] = op;
-            
-            op->set_inputs( forward_result[1068] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/prob1', 'op': 'aten::exp', 'in': [1069], 'output_id': 0, 'shape': [10], 'out': [1071], 'sorted_id': 1070}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3745', 'op': 'aten::exp', 'in': [967], 'output_id': 0, 'shape': [10], 'out': [1045], 'sorted_id': 1044}
         {
             Tensor::shape_type shape = {10};
             ExpOp* op = new ExpOp();
-            forward_result[1070] = op;
+            forward_result[1044] = op;
             
-            op->set_inputs( forward_result[1069] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[967] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3889', 'op': 'aten::mul', 'in': [1070, 58], 'output_id': 0, 'shape': [10], 'out': [1083], 'sorted_id': 1071}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3746', 'op': 'aten::log1p', 'in': [1044], 'output_id': 0, 'shape': [10], 'out': [1046], 'sorted_id': 1045}
         {
             Tensor::shape_type shape = {10};
-            MulOp* op = new MulOp();
-            forward_result[1071] = op;
+            Log1pOp* op = new Log1pOp();
+            forward_result[1045] = op;
             
-            op->set_inputs( forward_result[1070] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[1044] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3881', 'op': 'aten::sub', 'in': [1034, 730, 12], 'output_id': 0, 'shape': [10], 'out': [1073], 'sorted_id': 1072}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3747', 'op': 'aten::log', 'in': [1045], 'output_id': 0, 'shape': [10], 'out': [1047], 'sorted_id': 1046}
+        {
+            Tensor::shape_type shape = {10};
+            LogOp* op = new LogOp();
+            forward_result[1046] = op;
+            
+            op->set_inputs( forward_result[1045] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3748', 'op': 'aten::rsub', 'in': [1046, 107, 12], 'output_id': 0, 'shape': [10], 'out': [1055], 'sorted_id': 1047}
+        {
+            Tensor::shape_type shape = {10};
+            RsubOp* op = new RsubOp();
+            forward_result[1047] = op;
+            
+            op->set_inputs( forward_result[1046] );
+            op->set_inputs( forward_result[107] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3749', 'op': 'aten::sub', 'in': [978, 966, 12], 'output_id': 0, 'shape': [10], 'out': [1049], 'sorted_id': 1048}
         {
             Tensor::shape_type shape = {10};
             SubOp* op = new SubOp();
-            forward_result[1072] = op;
+            forward_result[1048] = op;
             
-            op->set_inputs( forward_result[1034] );
-            op->set_inputs( forward_result[730] );
+            op->set_inputs( forward_result[978] );
+            op->set_inputs( forward_result[966] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3882', 'op': 'aten::pow', 'in': [1072, 45], 'output_id': 0, 'shape': [10], 'out': [1074], 'sorted_id': 1073}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3750', 'op': 'aten::pow', 'in': [1048, 45], 'output_id': 0, 'shape': [10], 'out': [1054], 'sorted_id': 1049}
         {
             Tensor::shape_type shape = {10};
             PowOp* op = new PowOp();
-            forward_result[1073] = op;
+            forward_result[1049] = op;
             
-            op->set_inputs( forward_result[1072] );
+            op->set_inputs( forward_result[1048] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3883', 'op': 'aten::neg', 'in': [1073], 'output_id': 0, 'shape': [10], 'out': [1077], 'sorted_id': 1074}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3751', 'op': 'aten::exp', 'in': [967], 'output_id': 0, 'shape': [10], 'out': [1051], 'sorted_id': 1050}
         {
             Tensor::shape_type shape = {10};
-            NegOp* op = new NegOp();
-            forward_result[1074] = op;
+            ExpOp* op = new ExpOp();
+            forward_result[1050] = op;
             
-            op->set_inputs( forward_result[1073] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[967] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/var', 'op': 'aten::pow', 'in': [706, 45], 'output_id': 0, 'shape': [1], 'out': [1076], 'sorted_id': 1075}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3752', 'op': 'aten::log1p', 'in': [1050], 'output_id': 0, 'shape': [10], 'out': [1052], 'sorted_id': 1051}
         {
-            Tensor::shape_type shape = {1};
+            Tensor::shape_type shape = {10};
+            Log1pOp* op = new Log1pOp();
+            forward_result[1051] = op;
+            
+            op->set_inputs( forward_result[1050] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3753', 'op': 'aten::pow', 'in': [1051, 45], 'output_id': 0, 'shape': [10], 'out': [1053], 'sorted_id': 1052}
+        {
+            Tensor::shape_type shape = {10};
             PowOp* op = new PowOp();
-            forward_result[1075] = op;
+            forward_result[1052] = op;
             
-            op->set_inputs( forward_result[706] );
+            op->set_inputs( forward_result[1051] );
             op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3884', 'op': 'aten::mul', 'in': [1075, 50], 'output_id': 0, 'shape': [1], 'out': [1077], 'sorted_id': 1076}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3754', 'op': 'aten::mul', 'in': [1052, 50], 'output_id': 0, 'shape': [10], 'out': [1054], 'sorted_id': 1053}
         {
-            Tensor::shape_type shape = {1};
+            Tensor::shape_type shape = {10};
             MulOp* op = new MulOp();
-            forward_result[1076] = op;
+            forward_result[1053] = op;
             
-            op->set_inputs( forward_result[1075] );
+            op->set_inputs( forward_result[1052] );
             op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3885', 'op': 'aten::div', 'in': [1074, 1076], 'output_id': 0, 'shape': [10], 'out': [1079], 'sorted_id': 1077}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3755', 'op': 'aten::div', 'in': [1049, 1053], 'output_id': 0, 'shape': [10], 'out': [1055], 'sorted_id': 1054}
         {
             Tensor::shape_type shape = {10};
             DivOp* op = new DivOp();
-            forward_result[1077] = op;
+            forward_result[1054] = op;
             
-            op->set_inputs( forward_result[1074] );
-            op->set_inputs( forward_result[1076] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[1049] );
+            op->set_inputs( forward_result[1053] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/log_scale', 'op': 'aten::log', 'in': [706], 'output_id': 0, 'shape': [1], 'out': [1079], 'sorted_id': 1078}
-        {
-            Tensor::shape_type shape = {1};
-            LogOp* op = new LogOp();
-            forward_result[1078] = op;
-            
-            op->set_inputs( forward_result[706] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3886', 'op': 'aten::sub', 'in': [1077, 1078, 12], 'output_id': 0, 'shape': [10], 'out': [1080], 'sorted_id': 1079}
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3756', 'op': 'aten::sub', 'in': [1047, 1054, 12], 'output_id': 0, 'shape': [10], 'out': [1056], 'sorted_id': 1055}
         {
             Tensor::shape_type shape = {10};
             SubOp* op = new SubOp();
+            forward_result[1055] = op;
+            
+            op->set_inputs( forward_result[1047] );
+            op->set_inputs( forward_result[1054] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3757', 'op': 'aten::sum', 'in': [1055, 20], 'output_id': 0, 'shape': [], 'out': [1057], 'sorted_id': 1056}
+        {
+            SumOp* op = new SumOp();
+            forward_result[1056] = op;
+            
+            op->set_inputs( forward_result[1055] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/BayesianLinear[l3]/3758', 'op': 'aten::add', 'in': [1043, 1056, 12], 'output_id': 0, 'shape': [], 'out': [1058], 'sorted_id': 1057}
+        {
+            AddOp* op = new AddOp();
+            forward_result[1057] = op;
+            
+            op->set_inputs( forward_result[1043] );
+            op->set_inputs( forward_result[1056] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/3760', 'op': 'prim::TupleConstruct', 'in': [979, 1030, 1057], 'output_id': 0, 'shape': [], 'out': [1078, 1059, 1096], 'sorted_id': 1058}
+        {
+            TupleConstructOp* op = new TupleConstructOp();
+            forward_result[1058] = op;
+            
+            op->set_inputs( forward_result[979] );
+            op->set_inputs( forward_result[1030] );
+            op->set_inputs( forward_result[1057] );
+        }
+        
+        // {'name': 'Model/3761', 'op': 'prim::TupleUnpack', 'in': [1058], 'output_id': 0, 'shape': [4, 10], 'out': [1060], 'sorted_id': 1059}
+        {
+            Tensor::shape_type shape = {4,10};
+            TupleUnpackOp* op = new TupleUnpackOp( 0 );
+            forward_result[1059] = op;
+            
+            op->set_inputs( forward_result[1058] );
+        }
+        
+        // {'name': 'Model/Net[net]/3764', 'op': 'aten::log_softmax', 'in': [1059, 12, 20], 'output_id': 0, 'shape': [4, 10], 'out': [1061], 'sorted_id': 1060}
+        {
+            Tensor::shape_type shape = {4,10};
+            LogSoftmaxOp* op = new LogSoftmaxOp();
+            forward_result[1060] = op;
+            
+            op->set_inputs( forward_result[1059] );
+            op->set_inputs( forward_result[12] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/Net[net]/3769', 'op': 'prim::ListConstruct', 'in': [372, 731, 1060], 'output_id': 0, 'shape': [], 'out': [1062], 'sorted_id': 1061}
+        {
+            ListConstructOp* op = new ListConstructOp();
+            forward_result[1061] = op;
+            
+            op->set_inputs( forward_result[372] );
+            op->set_inputs( forward_result[731] );
+            op->set_inputs( forward_result[1060] );
+        }
+        
+        // {'name': 'Model/Net[net]/outputs', 'op': 'aten::stack', 'in': [1061, 10], 'output_id': 0, 'shape': [3, 4, 10], 'out': [1064], 'sorted_id': 1062}
+        {
+            Tensor::shape_type shape = {3,4,10};
+            StackOp* op = new StackOp();
+            forward_result[1062] = op;
+            
+            op->set_inputs( forward_result[1061] );
+            op->set_inputs( forward_result[10] );
+        }
+        
+        // {'name': 'Model/Net[net]/3775', 'op': 'prim::ListConstruct', 'in': [10], 'output_id': 0, 'shape': [], 'out': [1064], 'sorted_id': 1063}
+        {
+            ListConstructOp* op = new ListConstructOp();
+            forward_result[1063] = op;
+            
+            op->set_inputs( forward_result[10] );
+        }
+        
+        // {'name': 'Model/Net[net]/input', 'op': 'aten::mean', 'in': [1062, 1063, 15, 20], 'output_id': 0, 'shape': [4, 10], 'out': [1101], 'sorted_id': 1064}
+        {
+            Tensor::shape_type shape = {4,10};
+            MeanOp* op = new MeanOp();
+            forward_result[1064] = op;
+            
+            op->set_inputs( forward_result[1062] );
+            op->set_inputs( forward_result[1063] );
+            op->set_inputs( forward_result[15] );
+            op->set_inputs( forward_result[20] );
+        }
+        
+        // {'name': 'Model/2813', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 2, 'shape': [], 'out': [1067], 'sorted_id': 1065}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 2 );
+            forward_result[1065] = op;
+            
+            op->set_inputs( forward_result[132] );
+        }
+        
+        // {'name': 'Model/2944', 'op': 'prim::TupleUnpack', 'in': [251], 'output_id': 2, 'shape': [], 'out': [1067], 'sorted_id': 1066}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 2 );
+            forward_result[1066] = op;
+            
+            op->set_inputs( forward_result[251] );
+        }
+        
+        // {'name': 'Model/Net[net]/3089', 'op': 'aten::add', 'in': [1065, 1066, 12], 'output_id': 0, 'shape': [], 'out': [1069], 'sorted_id': 1067}
+        {
+            AddOp* op = new AddOp();
+            forward_result[1067] = op;
+            
+            op->set_inputs( forward_result[1065] );
+            op->set_inputs( forward_result[1066] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/3075', 'op': 'prim::TupleUnpack', 'in': [370], 'output_id': 2, 'shape': [], 'out': [1069], 'sorted_id': 1068}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 2 );
+            forward_result[1068] = op;
+            
+            op->set_inputs( forward_result[370] );
+        }
+        
+        // {'name': 'Model/Net[net]/3090', 'op': 'aten::add', 'in': [1067, 1068, 12], 'output_id': 0, 'shape': [], 'out': [1080], 'sorted_id': 1069}
+        {
+            AddOp* op = new AddOp();
+            forward_result[1069] = op;
+            
+            op->set_inputs( forward_result[1067] );
+            op->set_inputs( forward_result[1068] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/3202', 'op': 'prim::TupleUnpack', 'in': [491], 'output_id': 2, 'shape': [], 'out': [1072], 'sorted_id': 1070}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 2 );
+            forward_result[1070] = op;
+            
+            op->set_inputs( forward_result[491] );
+        }
+        
+        // {'name': 'Model/3313', 'op': 'prim::TupleUnpack', 'in': [610], 'output_id': 2, 'shape': [], 'out': [1072], 'sorted_id': 1071}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 2 );
+            forward_result[1071] = op;
+            
+            op->set_inputs( forward_result[610] );
+        }
+        
+        // {'name': 'Model/Net[net]/3428', 'op': 'aten::add', 'in': [1070, 1071, 12], 'output_id': 0, 'shape': [], 'out': [1074], 'sorted_id': 1072}
+        {
+            AddOp* op = new AddOp();
+            forward_result[1072] = op;
+            
+            op->set_inputs( forward_result[1070] );
+            op->set_inputs( forward_result[1071] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/3424', 'op': 'prim::TupleUnpack', 'in': [729], 'output_id': 2, 'shape': [], 'out': [1074], 'sorted_id': 1073}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 2 );
+            forward_result[1073] = op;
+            
+            op->set_inputs( forward_result[729] );
+        }
+        
+        // {'name': 'Model/Net[net]/3429', 'op': 'aten::add', 'in': [1072, 1073, 12], 'output_id': 0, 'shape': [], 'out': [1080], 'sorted_id': 1074}
+        {
+            AddOp* op = new AddOp();
+            forward_result[1074] = op;
+            
+            op->set_inputs( forward_result[1072] );
+            op->set_inputs( forward_result[1073] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/3541', 'op': 'prim::TupleUnpack', 'in': [840], 'output_id': 2, 'shape': [], 'out': [1077], 'sorted_id': 1075}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 2 );
+            forward_result[1075] = op;
+            
+            op->set_inputs( forward_result[840] );
+        }
+        
+        // {'name': 'Model/3652', 'op': 'prim::TupleUnpack', 'in': [949], 'output_id': 2, 'shape': [], 'out': [1077], 'sorted_id': 1076}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 2 );
+            forward_result[1076] = op;
+            
+            op->set_inputs( forward_result[949] );
+        }
+        
+        // {'name': 'Model/Net[net]/3767', 'op': 'aten::add', 'in': [1075, 1076, 12], 'output_id': 0, 'shape': [], 'out': [1079], 'sorted_id': 1077}
+        {
+            AddOp* op = new AddOp();
+            forward_result[1077] = op;
+            
+            op->set_inputs( forward_result[1075] );
+            op->set_inputs( forward_result[1076] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/3763', 'op': 'prim::TupleUnpack', 'in': [1058], 'output_id': 2, 'shape': [], 'out': [1079], 'sorted_id': 1078}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 2 );
+            forward_result[1078] = op;
+            
+            op->set_inputs( forward_result[1058] );
+        }
+        
+        // {'name': 'Model/Net[net]/3768', 'op': 'aten::add', 'in': [1077, 1078, 12], 'output_id': 0, 'shape': [], 'out': [1080], 'sorted_id': 1079}
+        {
+            AddOp* op = new AddOp();
             forward_result[1079] = op;
             
             op->set_inputs( forward_result[1077] );
             op->set_inputs( forward_result[1078] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3887', 'op': 'aten::sub', 'in': [1079, 55, 12], 'output_id': 0, 'shape': [10], 'out': [1081], 'sorted_id': 1080}
+        // {'name': 'Model/Net[net]/3773', 'op': 'prim::ListConstruct', 'in': [1069, 1074, 1079], 'output_id': 0, 'shape': [], 'out': [1081], 'sorted_id': 1080}
         {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
+            ListConstructOp* op = new ListConstructOp();
             forward_result[1080] = op;
             
+            op->set_inputs( forward_result[1069] );
+            op->set_inputs( forward_result[1074] );
             op->set_inputs( forward_result[1079] );
-            op->set_inputs( forward_result[55] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/prob2', 'op': 'aten::exp', 'in': [1080], 'output_id': 0, 'shape': [10], 'out': [1082], 'sorted_id': 1081}
+        // {'name': 'Model/Net[net]/log_qs', 'op': 'aten::stack', 'in': [1080, 10], 'output_id': 0, 'shape': [3], 'out': [1082], 'sorted_id': 1081}
         {
-            Tensor::shape_type shape = {10};
-            ExpOp* op = new ExpOp();
+            Tensor::shape_type shape = {3};
+            StackOp* op = new StackOp();
             forward_result[1081] = op;
             
             op->set_inputs( forward_result[1080] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[10] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3890', 'op': 'aten::mul', 'in': [1081, 58], 'output_id': 0, 'shape': [10], 'out': [1083], 'sorted_id': 1082}
+        // {'name': 'Model/Net[net]/log_q', 'op': 'aten::mean', 'in': [1081, 20], 'output_id': 0, 'shape': [], 'out': [1101], 'sorted_id': 1082}
         {
-            Tensor::shape_type shape = {10};
-            MulOp* op = new MulOp();
+            MeanOp* op = new MeanOp();
             forward_result[1082] = op;
             
             op->set_inputs( forward_result[1081] );
-            op->set_inputs( forward_result[58] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3891', 'op': 'aten::add', 'in': [1071, 1082, 12], 'output_id': 0, 'shape': [10], 'out': [1084], 'sorted_id': 1083}
-        {
-            Tensor::shape_type shape = {10};
-            AddOp* op = new AddOp();
-            forward_result[1083] = op;
-            
-            op->set_inputs( forward_result[1071] );
-            op->set_inputs( forward_result[1082] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3892', 'op': 'aten::log', 'in': [1083], 'output_id': 0, 'shape': [10], 'out': [1085], 'sorted_id': 1084}
-        {
-            Tensor::shape_type shape = {10};
-            LogOp* op = new LogOp();
-            forward_result[1084] = op;
-            
-            op->set_inputs( forward_result[1083] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3893', 'op': 'aten::sum', 'in': [1084, 20], 'output_id': 0, 'shape': [], 'out': [1086], 'sorted_id': 1085}
-        {
-            SumOp* op = new SumOp();
-            forward_result[1085] = op;
-            
-            op->set_inputs( forward_result[1084] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3894', 'op': 'aten::add', 'in': [1060, 1085, 12], 'output_id': 0, 'shape': [], 'out': [1114], 'sorted_id': 1086}
+        // {'name': 'Model/2812', 'op': 'prim::TupleUnpack', 'in': [132], 'output_id': 1, 'shape': [], 'out': [1085], 'sorted_id': 1083}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 1 );
+            forward_result[1083] = op;
+            
+            op->set_inputs( forward_result[132] );
+        }
+        
+        // {'name': 'Model/2943', 'op': 'prim::TupleUnpack', 'in': [251], 'output_id': 1, 'shape': [], 'out': [1085], 'sorted_id': 1084}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 1 );
+            forward_result[1084] = op;
+            
+            op->set_inputs( forward_result[251] );
+        }
+        
+        // {'name': 'Model/Net[net]/3087', 'op': 'aten::add', 'in': [1083, 1084, 12], 'output_id': 0, 'shape': [], 'out': [1087], 'sorted_id': 1085}
         {
             AddOp* op = new AddOp();
+            forward_result[1085] = op;
+            
+            op->set_inputs( forward_result[1083] );
+            op->set_inputs( forward_result[1084] );
+            op->set_inputs( forward_result[12] );
+        }
+        
+        // {'name': 'Model/3074', 'op': 'prim::TupleUnpack', 'in': [370], 'output_id': 1, 'shape': [], 'out': [1087], 'sorted_id': 1086}
+        {
+            TupleUnpackOp* op = new TupleUnpackOp( 1 );
             forward_result[1086] = op;
             
-            op->set_inputs( forward_result[1060] );
-            op->set_inputs( forward_result[1085] );
-            op->set_inputs( forward_result[12] );
+            op->set_inputs( forward_result[370] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3895', 'op': 'aten::exp', 'in': [1009], 'output_id': 0, 'shape': [10, 400], 'out': [1088], 'sorted_id': 1087}
+        // {'name': 'Model/Net[net]/3088', 'op': 'aten::add', 'in': [1085, 1086, 12], 'output_id': 0, 'shape': [], 'out': [1098], 'sorted_id': 1087}
         {
-            Tensor::shape_type shape = {10,400};
-            ExpOp* op = new ExpOp();
+            AddOp* op = new AddOp();
             forward_result[1087] = op;
             
-            op->set_inputs( forward_result[1009] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[1085] );
+            op->set_inputs( forward_result[1086] );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3896', 'op': 'aten::log1p', 'in': [1087], 'output_id': 0, 'shape': [10, 400], 'out': [1089], 'sorted_id': 1088}
+        // {'name': 'Model/3201', 'op': 'prim::TupleUnpack', 'in': [491], 'output_id': 1, 'shape': [], 'out': [1090], 'sorted_id': 1088}
         {
-            Tensor::shape_type shape = {10,400};
-            Log1pOp* op = new Log1pOp();
+            TupleUnpackOp* op = new TupleUnpackOp( 1 );
             forward_result[1088] = op;
             
-            op->set_inputs( forward_result[1087] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[491] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3897', 'op': 'aten::log', 'in': [1088], 'output_id': 0, 'shape': [10, 400], 'out': [1090], 'sorted_id': 1089}
+        // {'name': 'Model/3312', 'op': 'prim::TupleUnpack', 'in': [610], 'output_id': 1, 'shape': [], 'out': [1090], 'sorted_id': 1089}
         {
-            Tensor::shape_type shape = {10,400};
-            LogOp* op = new LogOp();
+            TupleUnpackOp* op = new TupleUnpackOp( 1 );
             forward_result[1089] = op;
             
-            op->set_inputs( forward_result[1088] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[610] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3898', 'op': 'aten::rsub', 'in': [1089, 107, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1098], 'sorted_id': 1090}
+        // {'name': 'Model/Net[net]/3426', 'op': 'aten::add', 'in': [1088, 1089, 12], 'output_id': 0, 'shape': [], 'out': [1092], 'sorted_id': 1090}
         {
-            Tensor::shape_type shape = {10,400};
-            RsubOp* op = new RsubOp();
+            AddOp* op = new AddOp();
             forward_result[1090] = op;
             
+            op->set_inputs( forward_result[1088] );
             op->set_inputs( forward_result[1089] );
-            op->set_inputs( forward_result[107] );
             op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3899', 'op': 'aten::sub', 'in': [1021, 1008, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1092], 'sorted_id': 1091}
+        // {'name': 'Model/3423', 'op': 'prim::TupleUnpack', 'in': [729], 'output_id': 1, 'shape': [], 'out': [1092], 'sorted_id': 1091}
         {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
+            TupleUnpackOp* op = new TupleUnpackOp( 1 );
             forward_result[1091] = op;
             
-            op->set_inputs( forward_result[1021] );
-            op->set_inputs( forward_result[1008] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[729] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3900', 'op': 'aten::pow', 'in': [1091, 45], 'output_id': 0, 'shape': [10, 400], 'out': [1097], 'sorted_id': 1092}
+        // {'name': 'Model/Net[net]/3427', 'op': 'aten::add', 'in': [1090, 1091, 12], 'output_id': 0, 'shape': [], 'out': [1098], 'sorted_id': 1092}
         {
-            Tensor::shape_type shape = {10,400};
-            PowOp* op = new PowOp();
+            AddOp* op = new AddOp();
             forward_result[1092] = op;
             
+            op->set_inputs( forward_result[1090] );
             op->set_inputs( forward_result[1091] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3901', 'op': 'aten::exp', 'in': [1009], 'output_id': 0, 'shape': [10, 400], 'out': [1094], 'sorted_id': 1093}
+        // {'name': 'Model/3540', 'op': 'prim::TupleUnpack', 'in': [840], 'output_id': 1, 'shape': [], 'out': [1095], 'sorted_id': 1093}
         {
-            Tensor::shape_type shape = {10,400};
-            ExpOp* op = new ExpOp();
+            TupleUnpackOp* op = new TupleUnpackOp( 1 );
             forward_result[1093] = op;
             
-            op->set_inputs( forward_result[1009] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[840] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3902', 'op': 'aten::log1p', 'in': [1093], 'output_id': 0, 'shape': [10, 400], 'out': [1095], 'sorted_id': 1094}
+        // {'name': 'Model/3651', 'op': 'prim::TupleUnpack', 'in': [949], 'output_id': 1, 'shape': [], 'out': [1095], 'sorted_id': 1094}
         {
-            Tensor::shape_type shape = {10,400};
-            Log1pOp* op = new Log1pOp();
+            TupleUnpackOp* op = new TupleUnpackOp( 1 );
             forward_result[1094] = op;
             
-            op->set_inputs( forward_result[1093] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[949] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3903', 'op': 'aten::pow', 'in': [1094, 45], 'output_id': 0, 'shape': [10, 400], 'out': [1096], 'sorted_id': 1095}
+        // {'name': 'Model/Net[net]/3765', 'op': 'aten::add', 'in': [1093, 1094, 12], 'output_id': 0, 'shape': [], 'out': [1097], 'sorted_id': 1095}
         {
-            Tensor::shape_type shape = {10,400};
-            PowOp* op = new PowOp();
+            AddOp* op = new AddOp();
             forward_result[1095] = op;
             
+            op->set_inputs( forward_result[1093] );
             op->set_inputs( forward_result[1094] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3904', 'op': 'aten::mul', 'in': [1095, 50], 'output_id': 0, 'shape': [10, 400], 'out': [1097], 'sorted_id': 1096}
+        // {'name': 'Model/3762', 'op': 'prim::TupleUnpack', 'in': [1058], 'output_id': 1, 'shape': [], 'out': [1097], 'sorted_id': 1096}
         {
-            Tensor::shape_type shape = {10,400};
-            MulOp* op = new MulOp();
+            TupleUnpackOp* op = new TupleUnpackOp( 1 );
             forward_result[1096] = op;
             
-            op->set_inputs( forward_result[1095] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[1058] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3905', 'op': 'aten::div', 'in': [1092, 1096], 'output_id': 0, 'shape': [10, 400], 'out': [1098], 'sorted_id': 1097}
+        // {'name': 'Model/Net[net]/3766', 'op': 'aten::add', 'in': [1095, 1096, 12], 'output_id': 0, 'shape': [], 'out': [1098], 'sorted_id': 1097}
         {
-            Tensor::shape_type shape = {10,400};
-            DivOp* op = new DivOp();
+            AddOp* op = new AddOp();
             forward_result[1097] = op;
             
-            op->set_inputs( forward_result[1092] );
+            op->set_inputs( forward_result[1095] );
             op->set_inputs( forward_result[1096] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[12] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3906', 'op': 'aten::sub', 'in': [1090, 1097, 12], 'output_id': 0, 'shape': [10, 400], 'out': [1099], 'sorted_id': 1098}
+        // {'name': 'Model/Net[net]/3771', 'op': 'prim::ListConstruct', 'in': [1087, 1092, 1097], 'output_id': 0, 'shape': [], 'out': [1099], 'sorted_id': 1098}
         {
-            Tensor::shape_type shape = {10,400};
-            SubOp* op = new SubOp();
+            ListConstructOp* op = new ListConstructOp();
             forward_result[1098] = op;
             
-            op->set_inputs( forward_result[1090] );
+            op->set_inputs( forward_result[1087] );
+            op->set_inputs( forward_result[1092] );
             op->set_inputs( forward_result[1097] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3907', 'op': 'aten::sum', 'in': [1098, 20], 'output_id': 0, 'shape': [], 'out': [1113], 'sorted_id': 1099}
+        // {'name': 'Model/Net[net]/log_ps', 'op': 'aten::stack', 'in': [1098, 10], 'output_id': 0, 'shape': [3], 'out': [1100], 'sorted_id': 1099}
         {
-            SumOp* op = new SumOp();
+            Tensor::shape_type shape = {3};
+            StackOp* op = new StackOp();
             forward_result[1099] = op;
             
             op->set_inputs( forward_result[1098] );
+            op->set_inputs( forward_result[10] );
+        }
+        
+        // {'name': 'Model/Net[net]/log_p', 'op': 'aten::mean', 'in': [1099, 20], 'output_id': 0, 'shape': [], 'out': [1101], 'sorted_id': 1100}
+        {
+            MeanOp* op = new MeanOp();
+            forward_result[1100] = op;
+            
+            op->set_inputs( forward_result[1099] );
             op->set_inputs( forward_result[20] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3908', 'op': 'aten::exp', 'in': [1023], 'output_id': 0, 'shape': [10], 'out': [1101], 'sorted_id': 1100}
+        // {'name': 'Model/3779', 'op': 'prim::TupleConstruct', 'in': [1064, 1082, 1100], 'output_id': 0, 'shape': [], 'out': [1102, 1108, 1103], 'sorted_id': 1101}
         {
-            Tensor::shape_type shape = {10};
-            ExpOp* op = new ExpOp();
-            forward_result[1100] = op;
-            
-            op->set_inputs( forward_result[1023] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3909', 'op': 'aten::log1p', 'in': [1100], 'output_id': 0, 'shape': [10], 'out': [1102], 'sorted_id': 1101}
-        {
-            Tensor::shape_type shape = {10};
-            Log1pOp* op = new Log1pOp();
+            TupleConstructOp* op = new TupleConstructOp();
             forward_result[1101] = op;
             
+            op->set_inputs( forward_result[1064] );
+            op->set_inputs( forward_result[1082] );
             op->set_inputs( forward_result[1100] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3910', 'op': 'aten::log', 'in': [1101], 'output_id': 0, 'shape': [10], 'out': [1103], 'sorted_id': 1102}
+        // {'name': 'Model/2672', 'op': 'prim::TupleUnpack', 'in': [1101], 'output_id': 1, 'shape': [], 'out': [1105], 'sorted_id': 1102}
         {
-            Tensor::shape_type shape = {10};
-            LogOp* op = new LogOp();
+            TupleUnpackOp* op = new TupleUnpackOp( 1 );
             forward_result[1102] = op;
             
             op->set_inputs( forward_result[1101] );
-            op->set_shape( shape );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3911', 'op': 'aten::rsub', 'in': [1102, 107, 12], 'output_id': 0, 'shape': [10], 'out': [1111], 'sorted_id': 1103}
+        // {'name': 'Model/2673', 'op': 'prim::TupleUnpack', 'in': [1101], 'output_id': 2, 'shape': [], 'out': [1105], 'sorted_id': 1103}
         {
-            Tensor::shape_type shape = {10};
-            RsubOp* op = new RsubOp();
+            TupleUnpackOp* op = new TupleUnpackOp( 2 );
             forward_result[1103] = op;
             
-            op->set_inputs( forward_result[1102] );
-            op->set_inputs( forward_result[107] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[1101] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3912', 'op': 'aten::sub', 'in': [1034, 1022, 12], 'output_id': 0, 'shape': [10], 'out': [1105], 'sorted_id': 1104}
+        // {'name': 'Model/Loss[loss]/3781', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 1.0, 'out': [1114, 1105], 'sorted_id': 1104}
         {
-            Tensor::shape_type shape = {10};
+            Tensor c = (fprec)1.0;
+            forward_result[1104] = new VariableTensor( c, 1 );
+        }
+        
+        // {'name': 'Model/Loss[loss]/3787', 'op': 'aten::sub', 'in': [1102, 1103, 1104], 'output_id': 0, 'shape': [], 'out': [1107], 'sorted_id': 1105}
+        {
             SubOp* op = new SubOp();
-            forward_result[1104] = op;
-            
-            op->set_inputs( forward_result[1034] );
-            op->set_inputs( forward_result[1022] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3913', 'op': 'aten::pow', 'in': [1104, 45], 'output_id': 0, 'shape': [10], 'out': [1110], 'sorted_id': 1105}
-        {
-            Tensor::shape_type shape = {10};
-            PowOp* op = new PowOp();
             forward_result[1105] = op;
             
-            op->set_inputs( forward_result[1104] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3914', 'op': 'aten::exp', 'in': [1023], 'output_id': 0, 'shape': [10], 'out': [1107], 'sorted_id': 1106}
-        {
-            Tensor::shape_type shape = {10};
-            ExpOp* op = new ExpOp();
-            forward_result[1106] = op;
-            
-            op->set_inputs( forward_result[1023] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3915', 'op': 'aten::log1p', 'in': [1106], 'output_id': 0, 'shape': [10], 'out': [1108], 'sorted_id': 1107}
-        {
-            Tensor::shape_type shape = {10};
-            Log1pOp* op = new Log1pOp();
-            forward_result[1107] = op;
-            
-            op->set_inputs( forward_result[1106] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3916', 'op': 'aten::pow', 'in': [1107, 45], 'output_id': 0, 'shape': [10], 'out': [1109], 'sorted_id': 1108}
-        {
-            Tensor::shape_type shape = {10};
-            PowOp* op = new PowOp();
-            forward_result[1108] = op;
-            
-            op->set_inputs( forward_result[1107] );
-            op->set_inputs( forward_result[45] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3917', 'op': 'aten::mul', 'in': [1108, 50], 'output_id': 0, 'shape': [10], 'out': [1110], 'sorted_id': 1109}
-        {
-            Tensor::shape_type shape = {10};
-            MulOp* op = new MulOp();
-            forward_result[1109] = op;
-            
-            op->set_inputs( forward_result[1108] );
-            op->set_inputs( forward_result[50] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3918', 'op': 'aten::div', 'in': [1105, 1109], 'output_id': 0, 'shape': [10], 'out': [1111], 'sorted_id': 1110}
-        {
-            Tensor::shape_type shape = {10};
-            DivOp* op = new DivOp();
-            forward_result[1110] = op;
-            
-            op->set_inputs( forward_result[1105] );
-            op->set_inputs( forward_result[1109] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3919', 'op': 'aten::sub', 'in': [1103, 1110, 12], 'output_id': 0, 'shape': [10], 'out': [1112], 'sorted_id': 1111}
-        {
-            Tensor::shape_type shape = {10};
-            SubOp* op = new SubOp();
-            forward_result[1111] = op;
-            
+            op->set_inputs( forward_result[1102] );
             op->set_inputs( forward_result[1103] );
-            op->set_inputs( forward_result[1110] );
-            op->set_inputs( forward_result[12] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[1104] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3920', 'op': 'aten::sum', 'in': [1111, 20], 'output_id': 0, 'shape': [], 'out': [1113], 'sorted_id': 1112}
-        {
-            SumOp* op = new SumOp();
-            forward_result[1112] = op;
-            
-            op->set_inputs( forward_result[1111] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/BayesianLinear[l3]/3921', 'op': 'aten::add', 'in': [1099, 1112, 12], 'output_id': 0, 'shape': [], 'out': [1114], 'sorted_id': 1113}
-        {
-            AddOp* op = new AddOp();
-            forward_result[1113] = op;
-            
-            op->set_inputs( forward_result[1099] );
-            op->set_inputs( forward_result[1112] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/3923', 'op': 'prim::TupleConstruct', 'in': [1035, 1086, 1113], 'output_id': 0, 'shape': [], 'out': [1118, 1115, 1119], 'sorted_id': 1114}
-        {
-            TupleConstructOp* op = new TupleConstructOp();
-            forward_result[1114] = op;
-            
-            op->set_inputs( forward_result[1035] );
-            op->set_inputs( forward_result[1086] );
-            op->set_inputs( forward_result[1113] );
-        }
-        
-        // {'name': 'Net/3925', 'op': 'prim::TupleUnpack', 'in': [1114], 'output_id': 1, 'shape': [], 'out': [1121], 'sorted_id': 1115}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 1 );
-            forward_result[1115] = op;
-            
-            op->set_inputs( forward_result[1114] );
-        }
-        
-        // {'name': 'Net/3704', 'op': 'prim::TupleUnpack', 'in': [894], 'output_id': 2, 'shape': [], 'out': [1121], 'sorted_id': 1116}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 2 );
-            forward_result[1116] = op;
-            
-            op->set_inputs( forward_result[894] );
-        }
-        
-        // {'name': 'Net/3815', 'op': 'prim::TupleUnpack', 'in': [1004], 'output_id': 2, 'shape': [], 'out': [1121], 'sorted_id': 1117}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 2 );
-            forward_result[1117] = op;
-            
-            op->set_inputs( forward_result[1004] );
-        }
-        
-        // {'name': 'Net/3926', 'op': 'prim::TupleUnpack', 'in': [1114], 'output_id': 2, 'shape': [], 'out': [1121], 'sorted_id': 1118}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 2 );
-            forward_result[1118] = op;
-            
-            op->set_inputs( forward_result[1114] );
-        }
-        
-        // {'name': 'Net/3924', 'op': 'prim::TupleUnpack', 'in': [1114], 'output_id': 0, 'shape': [4, 10], 'out': [1120], 'sorted_id': 1119}
-        {
-            Tensor::shape_type shape = {4,10};
-            TupleUnpackOp* op = new TupleUnpackOp( 0 );
-            forward_result[1119] = op;
-            
-            op->set_inputs( forward_result[1114] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/BayesianNetwork[net]/3927', 'op': 'aten::log_softmax', 'in': [1119, 12, 20], 'output_id': 0, 'shape': [4, 10], 'out': [1121], 'sorted_id': 1120}
-        {
-            Tensor::shape_type shape = {4,10};
-            LogSoftmaxOp* op = new LogSoftmaxOp();
-            forward_result[1120] = op;
-            
-            op->set_inputs( forward_result[1119] );
-            op->set_inputs( forward_result[12] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/3928', 'op': 'prim::TupleConstruct', 'in': [895, 1005, 1115, 1116, 1117, 1118, 1120], 'output_id': 0, 'shape': [], 'out': [1125, 1153, 1143, 1140, 1122, 1141, 1123], 'sorted_id': 1121}
-        {
-            TupleConstructOp* op = new TupleConstructOp();
-            forward_result[1121] = op;
-            
-            op->set_inputs( forward_result[895] );
-            op->set_inputs( forward_result[1005] );
-            op->set_inputs( forward_result[1115] );
-            op->set_inputs( forward_result[1116] );
-            op->set_inputs( forward_result[1117] );
-            op->set_inputs( forward_result[1118] );
-            op->set_inputs( forward_result[1120] );
-        }
-        
-        // {'name': 'Net/3932', 'op': 'prim::TupleUnpack', 'in': [1121], 'output_id': 3, 'shape': [], 'out': [1124], 'sorted_id': 1122}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 3 );
-            forward_result[1122] = op;
-            
-            op->set_inputs( forward_result[1121] );
-        }
-        
-        // {'name': 'Net/3933', 'op': 'prim::TupleUnpack', 'in': [1121], 'output_id': 4, 'shape': [], 'out': [1124], 'sorted_id': 1123}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 4 );
-            forward_result[1123] = op;
-            
-            op->set_inputs( forward_result[1121] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3938', 'op': 'aten::add', 'in': [1122, 1123, 12], 'output_id': 0, 'shape': [], 'out': [1126], 'sorted_id': 1124}
-        {
-            AddOp* op = new AddOp();
-            forward_result[1124] = op;
-            
-            op->set_inputs( forward_result[1122] );
-            op->set_inputs( forward_result[1123] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/3934', 'op': 'prim::TupleUnpack', 'in': [1121], 'output_id': 5, 'shape': [], 'out': [1126], 'sorted_id': 1125}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 5 );
-            forward_result[1125] = op;
-            
-            op->set_inputs( forward_result[1121] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3939', 'op': 'aten::add', 'in': [1124, 1125, 12], 'output_id': 0, 'shape': [], 'out': [1127], 'sorted_id': 1126}
-        {
-            AddOp* op = new AddOp();
-            forward_result[1126] = op;
-            
-            op->set_inputs( forward_result[1124] );
-            op->set_inputs( forward_result[1125] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3944', 'op': 'prim::ListConstruct', 'in': [414, 785, 1126], 'output_id': 0, 'shape': [], 'out': [1128], 'sorted_id': 1127}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[1127] = op;
-            
-            op->set_inputs( forward_result[414] );
-            op->set_inputs( forward_result[785] );
-            op->set_inputs( forward_result[1126] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/log_qs', 'op': 'aten::stack', 'in': [1127, 10], 'output_id': 0, 'shape': [3], 'out': [1129], 'sorted_id': 1128}
-        {
-            Tensor::shape_type shape = {3};
-            StackOp* op = new StackOp();
-            forward_result[1128] = op;
-            
-            op->set_inputs( forward_result[1127] );
-            op->set_inputs( forward_result[10] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/log_q', 'op': 'aten::mean', 'in': [1128, 20], 'output_id': 0, 'shape': [], 'out': [1148], 'sorted_id': 1129}
-        {
-            MeanOp* op = new MeanOp();
-            forward_result[1129] = op;
-            
-            op->set_inputs( forward_result[1128] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/3199', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 0, 'shape': [], 'out': [1132], 'sorted_id': 1130}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 0 );
-            forward_result[1130] = op;
-            
-            op->set_inputs( forward_result[409] );
-        }
-        
-        // {'name': 'Net/3200', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 1, 'shape': [], 'out': [1132], 'sorted_id': 1131}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 1 );
-            forward_result[1131] = op;
-            
-            op->set_inputs( forward_result[409] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3236', 'op': 'aten::add', 'in': [1130, 1131, 12], 'output_id': 0, 'shape': [], 'out': [1134], 'sorted_id': 1132}
-        {
-            AddOp* op = new AddOp();
-            forward_result[1132] = op;
-            
-            op->set_inputs( forward_result[1130] );
-            op->set_inputs( forward_result[1131] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/3201', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 2, 'shape': [], 'out': [1134], 'sorted_id': 1133}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 2 );
-            forward_result[1133] = op;
-            
-            op->set_inputs( forward_result[409] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3237', 'op': 'aten::add', 'in': [1132, 1133, 12], 'output_id': 0, 'shape': [], 'out': [1145], 'sorted_id': 1134}
-        {
-            AddOp* op = new AddOp();
-            forward_result[1134] = op;
-            
-            op->set_inputs( forward_result[1132] );
-            op->set_inputs( forward_result[1133] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/3579', 'op': 'prim::TupleUnpack', 'in': [780], 'output_id': 0, 'shape': [], 'out': [1137], 'sorted_id': 1135}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 0 );
-            forward_result[1135] = op;
-            
-            op->set_inputs( forward_result[780] );
-        }
-        
-        // {'name': 'Net/3580', 'op': 'prim::TupleUnpack', 'in': [780], 'output_id': 1, 'shape': [], 'out': [1137], 'sorted_id': 1136}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 1 );
-            forward_result[1136] = op;
-            
-            op->set_inputs( forward_result[780] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3586', 'op': 'aten::add', 'in': [1135, 1136, 12], 'output_id': 0, 'shape': [], 'out': [1139], 'sorted_id': 1137}
-        {
-            AddOp* op = new AddOp();
-            forward_result[1137] = op;
-            
-            op->set_inputs( forward_result[1135] );
-            op->set_inputs( forward_result[1136] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/3581', 'op': 'prim::TupleUnpack', 'in': [780], 'output_id': 2, 'shape': [], 'out': [1139], 'sorted_id': 1138}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 2 );
-            forward_result[1138] = op;
-            
-            op->set_inputs( forward_result[780] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3587', 'op': 'aten::add', 'in': [1137, 1138, 12], 'output_id': 0, 'shape': [], 'out': [1145], 'sorted_id': 1139}
-        {
-            AddOp* op = new AddOp();
-            forward_result[1139] = op;
-            
-            op->set_inputs( forward_result[1137] );
-            op->set_inputs( forward_result[1138] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/3929', 'op': 'prim::TupleUnpack', 'in': [1121], 'output_id': 0, 'shape': [], 'out': [1142], 'sorted_id': 1140}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 0 );
-            forward_result[1140] = op;
-            
-            op->set_inputs( forward_result[1121] );
-        }
-        
-        // {'name': 'Net/3930', 'op': 'prim::TupleUnpack', 'in': [1121], 'output_id': 1, 'shape': [], 'out': [1142], 'sorted_id': 1141}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 1 );
-            forward_result[1141] = op;
-            
-            op->set_inputs( forward_result[1121] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3936', 'op': 'aten::add', 'in': [1140, 1141, 12], 'output_id': 0, 'shape': [], 'out': [1144], 'sorted_id': 1142}
-        {
-            AddOp* op = new AddOp();
-            forward_result[1142] = op;
-            
-            op->set_inputs( forward_result[1140] );
-            op->set_inputs( forward_result[1141] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/3931', 'op': 'prim::TupleUnpack', 'in': [1121], 'output_id': 2, 'shape': [], 'out': [1144], 'sorted_id': 1143}
-        {
-            TupleUnpackOp* op = new TupleUnpackOp( 2 );
-            forward_result[1143] = op;
-            
-            op->set_inputs( forward_result[1121] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3937', 'op': 'aten::add', 'in': [1142, 1143, 12], 'output_id': 0, 'shape': [], 'out': [1145], 'sorted_id': 1144}
-        {
-            AddOp* op = new AddOp();
-            forward_result[1144] = op;
-            
-            op->set_inputs( forward_result[1142] );
-            op->set_inputs( forward_result[1143] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3942', 'op': 'prim::ListConstruct', 'in': [1134, 1139, 1144], 'output_id': 0, 'shape': [], 'out': [1146], 'sorted_id': 1145}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[1145] = op;
-            
-            op->set_inputs( forward_result[1134] );
-            op->set_inputs( forward_result[1139] );
-            op->set_inputs( forward_result[1144] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/log_ps', 'op': 'aten::stack', 'in': [1145, 10], 'output_id': 0, 'shape': [3], 'out': [1147], 'sorted_id': 1146}
-        {
-            Tensor::shape_type shape = {3};
-            StackOp* op = new StackOp();
-            forward_result[1146] = op;
-            
-            op->set_inputs( forward_result[1145] );
-            op->set_inputs( forward_result[10] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/log_p', 'op': 'aten::mean', 'in': [1146, 20], 'output_id': 0, 'shape': [], 'out': [1148], 'sorted_id': 1147}
-        {
-            MeanOp* op = new MeanOp();
-            forward_result[1147] = op;
-            
-            op->set_inputs( forward_result[1146] );
-            op->set_inputs( forward_result[20] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3951', 'op': 'aten::sub', 'in': [1129, 1147, 12], 'output_id': 0, 'shape': [], 'out': [1150], 'sorted_id': 1148}
-        {
-            SubOp* op = new SubOp();
-            forward_result[1148] = op;
-            
-            op->set_inputs( forward_result[1129] );
-            op->set_inputs( forward_result[1147] );
-            op->set_inputs( forward_result[12] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/2784', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 15000.0, 'out': [1150], 'sorted_id': 1149}
+        // {'name': 'Model/Loss[loss]/3780', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 15000.0, 'out': [1107], 'sorted_id': 1106}
         {
             Tensor c = (fprec)15000.0;
-            forward_result[1149] = new VariableTensor( c, 1 );
+            forward_result[1106] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/3952', 'op': 'aten::div', 'in': [1148, 1149], 'output_id': 0, 'shape': [], 'out': [1161], 'sorted_id': 1150}
+        // {'name': 'Model/Loss[loss]/3788', 'op': 'aten::div', 'in': [1105, 1106], 'output_id': 0, 'shape': [], 'out': [1114], 'sorted_id': 1107}
         {
             DivOp* op = new DivOp();
-            forward_result[1150] = op;
+            forward_result[1107] = op;
             
-            op->set_inputs( forward_result[1148] );
-            op->set_inputs( forward_result[1149] );
+            op->set_inputs( forward_result[1105] );
+            op->set_inputs( forward_result[1106] );
         }
         
-        // {'name': 'Net/3235', 'op': 'prim::TupleUnpack', 'in': [409], 'output_id': 36, 'shape': [4, 10], 'out': [1154], 'sorted_id': 1151}
+        // {'name': 'Model/2671', 'op': 'prim::TupleUnpack', 'in': [1101], 'output_id': 0, 'shape': [4, 10], 'out': [1113], 'sorted_id': 1108}
         {
             Tensor::shape_type shape = {4,10};
-            TupleUnpackOp* op = new TupleUnpackOp( 36 );
-            forward_result[1151] = op;
+            TupleUnpackOp* op = new TupleUnpackOp( 0 );
+            forward_result[1108] = op;
             
-            op->set_inputs( forward_result[409] );
-            op->set_shape( shape );
+            op->set_inputs( forward_result[1101] );
         }
         
-        // {'name': 'Net/3585', 'op': 'prim::TupleUnpack', 'in': [780], 'output_id': 6, 'shape': [4, 10], 'out': [1154], 'sorted_id': 1152}
-        {
-            Tensor::shape_type shape = {4,10};
-            TupleUnpackOp* op = new TupleUnpackOp( 6 );
-            forward_result[1152] = op;
-            
-            op->set_inputs( forward_result[780] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/3935', 'op': 'prim::TupleUnpack', 'in': [1121], 'output_id': 6, 'shape': [4, 10], 'out': [1154], 'sorted_id': 1153}
-        {
-            Tensor::shape_type shape = {4,10};
-            TupleUnpackOp* op = new TupleUnpackOp( 6 );
-            forward_result[1153] = op;
-            
-            op->set_inputs( forward_result[1121] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3940', 'op': 'prim::ListConstruct', 'in': [1151, 1152, 1153], 'output_id': 0, 'shape': [], 'out': [1155], 'sorted_id': 1154}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[1154] = op;
-            
-            op->set_inputs( forward_result[1151] );
-            op->set_inputs( forward_result[1152] );
-            op->set_inputs( forward_result[1153] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/outputs', 'op': 'aten::stack', 'in': [1154, 10], 'output_id': 0, 'shape': [3, 4, 10], 'out': [1157], 'sorted_id': 1155}
-        {
-            Tensor::shape_type shape = {3,4,10};
-            StackOp* op = new StackOp();
-            forward_result[1155] = op;
-            
-            op->set_inputs( forward_result[1154] );
-            op->set_inputs( forward_result[10] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/3948', 'op': 'prim::ListConstruct', 'in': [10], 'output_id': 0, 'shape': [], 'out': [1157], 'sorted_id': 1156}
-        {
-            ListConstructOp* op = new ListConstructOp();
-            forward_result[1156] = op;
-            
-            op->set_inputs( forward_result[10] );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/input', 'op': 'aten::mean', 'in': [1155, 1156, 15, 20], 'output_id': 0, 'shape': [4, 10], 'out': [1160], 'sorted_id': 1157}
-        {
-            Tensor::shape_type shape = {4,10};
-            MeanOp* op = new MeanOp();
-            forward_result[1157] = op;
-            
-            op->set_inputs( forward_result[1155] );
-            op->set_inputs( forward_result[1156] );
-            op->set_inputs( forward_result[15] );
-            op->set_inputs( forward_result[20] );
-            op->set_shape( shape );
-        }
-        
-        // {'name': 'Net/BBBLoss[loss_func]/2786', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [4], 'constant_value': [5.0, 4.0, 9.0, 4.0], 'out': [1160], 'sorted_id': 1158}
+        // {'name': 'Model/Loss[loss]/3785', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [4], 'constant_value': [5.0, 4.0, 9.0, 4.0], 'out': [1113], 'sorted_id': 1109}
         {
             Tensor::shape_type shape = {4};
             Constant19.reshape( shape );
-            forward_result[1158] = new VariableTensor( Constant19, 1 );
+            forward_result[1109] = new VariableTensor( Constant19, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/2785', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': -100.0, 'out': [1160], 'sorted_id': 1159}
+        // {'name': 'Model/Loss[loss]/3784', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'out': [1113], 'sorted_id': 1110}
+        {
+            forward_result[1110] = NULL;
+        }
+        
+        // {'name': 'Model/Loss[loss]/3783', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': 2.0, 'out': [1113], 'sorted_id': 1111}
+        {
+            Tensor c = (fprec)2.0;
+            forward_result[1111] = new VariableTensor( c, 1 );
+        }
+        
+        // {'name': 'Model/Loss[loss]/3782', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [], 'constant_value': -100.0, 'out': [1113], 'sorted_id': 1112}
         {
             Tensor c = (fprec)-100.0;
-            forward_result[1159] = new VariableTensor( c, 1 );
+            forward_result[1112] = new VariableTensor( c, 1 );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/nll', 'op': 'aten::nll_loss_nd', 'in': [1157, 1158, 20, 45, 1159], 'output_id': 0, 'shape': [], 'out': [1161], 'sorted_id': 1160}
+        // {'name': 'Model/Loss[loss]/nll', 'op': 'aten::nll_loss_nd', 'in': [1108, 1109, 1110, 1111, 1112], 'output_id': 0, 'shape': [], 'out': [1114], 'sorted_id': 1113}
         {
             NLLLossOp* op = new NLLLossOp();
-            forward_result[1160] = op;
+            forward_result[1113] = op;
             
-            op->set_inputs( forward_result[1157] );
-            op->set_inputs( forward_result[1158] );
-            op->set_inputs( forward_result[20] );
-            op->set_inputs( forward_result[45] );
-            op->set_inputs( forward_result[1159] );
+            op->set_inputs( forward_result[1108] );
+            op->set_inputs( forward_result[1109] );
+            op->set_inputs( forward_result[1110] );
+            op->set_inputs( forward_result[1111] );
+            op->set_inputs( forward_result[1112] );
         }
         
-        // {'name': 'Net/BBBLoss[loss_func]/3953', 'op': 'aten::add', 'in': [1150, 1160, 12], 'output_id': 0, 'shape': [], 'out': [1162], 'sorted_id': 1161}
+        // {'name': 'Model/Loss[loss]/3789', 'op': 'aten::add', 'in': [1107, 1113, 1104], 'output_id': 0, 'shape': [], 'out': [1115], 'sorted_id': 1114}
         {
             AddOp* op = new AddOp();
-            forward_result[1161] = op;
+            forward_result[1114] = op;
             
-            op->set_inputs( forward_result[1150] );
-            op->set_inputs( forward_result[1160] );
-            op->set_inputs( forward_result[12] );
+            op->set_inputs( forward_result[1107] );
+            op->set_inputs( forward_result[1113] );
+            op->set_inputs( forward_result[1104] );
         }
         
-        // {'name': 'output/output.1', 'op': 'IO Node', 'in': [1161], 'output_id': 0, 'shape': [], 'out': [], 'sorted_id': 1162}
+        // {'name': 'output/output.1', 'op': 'IO Node', 'in': [1114], 'output_id': 0, 'shape': [], 'out': [], 'sorted_id': 1115}
         {
         }
         
@@ -12163,9 +10849,8 @@
         for(int k=0;k<=N;k++) {
             if( forward_result[k] )  
             {
-                forward_result[k]->set_id( k );
+                //forward_result[k]->set_id( k );
                 forward_result[k]->forward();
-                forward_result[k]->check_shape();
                 forward_result[k]->zerograd();
             }
         }
@@ -12175,7 +10860,7 @@
         cout<<"### backward computation ..."<<endl;
         forward_result[N]->grad = xt::ones_like( forward_result[N]->output );
         for(int k=N;k>=0;k--) {
-           if( forward_result[k] )  forward_result[k]->backward();
+            if( forward_result[k] )  forward_result[k]->backward();
         }
         cout<<"input_grad"<<input_var.grad<<endl;
     }
@@ -12187,7 +10872,7 @@
     
     int main()
     {
-        vector<MCTNode*> forward_result(1163);
+        vector<MCTNode*> forward_result(1116);
     
         // input data
         Tensor::shape_type shape = {4,1,28,28};
@@ -12198,9 +10883,9 @@
     
         defineOp( forward_result, input_var );
     #ifdef _TRAIN
-        do_train_loop( forward_result, input_var, 1161 );
+        do_train_loop( forward_result, input_var, 1114 );
     #else
-        do_train1( forward_result, input_var, 1161 );
+        do_train1( forward_result, input_var, 1114 );
     #endif
         
         return 0;

@@ -83,7 +83,7 @@
         cout<<"### backward computation ..."<<endl;
         forward_result[N]->grad = xt::ones_like( forward_result[N]->output );
         for(int k=N;k>=0;k--) {
-           if( forward_result[k] )  forward_result[k]->backward();
+            if( forward_result[k] )  forward_result[k]->backward();
         }
         cout<<"input_grad"<<input_var.grad<<endl;
     }

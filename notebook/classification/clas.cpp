@@ -87,7 +87,7 @@
             op->set_inputs( forward_result[6] );
         }
         
-        // {'name': 'Model/Loss[loss]/60', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [16], 'constant_value': [0.0, 0.0, 0.0, 2.0, 1.0, 2.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0, 2.0, 2.0, 0.0, 2.0], 'out': [13], 'sorted_id': 8}
+        // {'name': 'Model/Loss[loss]/60', 'op': 'prim::Constant', 'in': [], 'output_id': 0, 'shape': [16], 'constant_value': [1.0, 0.0, 1.0, 0.0, 2.0, 2.0, 2.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 2.0], 'out': [13], 'sorted_id': 8}
         {
             Tensor::shape_type shape = {16};
             Constant1.reshape( shape );
@@ -153,7 +153,7 @@
         cout<<"### backward computation ..."<<endl;
         forward_result[N]->grad = xt::ones_like( forward_result[N]->output );
         for(int k=N;k>=0;k--) {
-           if( forward_result[k] )  forward_result[k]->backward();
+            if( forward_result[k] )  forward_result[k]->backward();
         }
         cout<<"input_grad"<<input_var.grad<<endl;
     }

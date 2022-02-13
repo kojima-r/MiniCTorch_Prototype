@@ -69,6 +69,7 @@ TEST(MyTestCase, TestAddGrad)
     op1.set_inputs( &va );
     op1.set_inputs( &vb );
     op1.set_inputs( NULL );
+    op1.forward();
     
     op1.grad = xt::ones_like( a );
     op1.backward();
@@ -78,11 +79,162 @@ TEST(MyTestCase, TestAddGrad)
     //cout<<"ga"<<ga<<endl;
     //cout<<"gb"<<gb<<endl;
     
-    auto itr11 = ga.begin();
-    auto itr12 = gb.begin();
-    while( itr11 != ga.end() ){ 
-        EXPECT_EQ( *itr11++, 1.0 );
-        EXPECT_EQ( *itr12++, 1.0 );
+    auto itr21 = ga.begin();
+    auto itr22 = gb.begin();
+    while( itr21 != ga.end() ){ 
+        EXPECT_EQ( *itr21++, 1.0 );
+        EXPECT_EQ( *itr22++, 1.0 );
+    }
+}
+
+TEST(MyTestCase, TestBroadcastAdd1) 
+{
+    Tensor a = xt::ones<fprec>({3,3});
+    Tensor b = { 2. };
+    Tensor q  = xt::full_like( a, 3.);
+    Tensor qa = xt::ones<fprec>({3,3});
+    Tensor qb = 9.0;
+    
+    VariableTensor va(a);
+    VariableTensor vb(b);
+    
+    AddOp  op1;
+    op1.set_inputs( &va );
+    op1.set_inputs( &vb );
+    op1.set_inputs( NULL );
+    op1.forward();
+    
+    auto z = op1.output;
+    //cout<<"z"<<z<<endl;
+    
+    auto itr11 = z.begin();
+    auto itr12 = q.begin();
+    while( itr11 != z.end() ){ 
+        //cout<<"add grad "<<*itr11<<","<<*itr12<<endl;
+        EXPECT_EQ( *itr11++, *itr12++);
+    }
+    
+    op1.grad = xt::ones_like( a );
+    op1.backward();
+    
+    auto& ga = va.grad;
+    auto& gb = vb.grad;
+    //cout<<"ga"<<ga<<endl;
+    //cout<<"gb"<<gb<<endl;
+    
+    auto itr21 = ga.begin();
+    auto itr22 = qa.begin();
+    while( itr21 != ga.end() ){ 
+        //cout<<"add grad1 "<<*itr21<<","<<*itr22<<endl;
+        EXPECT_EQ( *itr21++, *itr22++ );
+    }
+    auto itr31 = gb.begin();
+    auto itr32 = qb.begin();
+    while( itr31 != gb.end() ){ 
+        //cout<<"add grad2 "<<*itr31<<","<<*itr32<<endl;
+        EXPECT_EQ( *itr31++, *itr32++ );
+    }
+}
+
+TEST(MyTestCase, TestBroadcastAdd2) 
+{
+    Tensor a = xt::ones<fprec>({3}) * 2.0;
+    Tensor b = a;
+    b.reshape({-1,1});
+    Tensor q  = xt::ones<fprec>({3,3}) * 4.0;
+    Tensor qa = xt::full_like(a, 3.0);
+    Tensor qb = xt::full_like(b, 3.0);
+    
+    VariableTensor va(a);
+    VariableTensor vb(b);
+    
+    AddOp  op1;
+    op1.set_inputs( &va );
+    op1.set_inputs( &vb );
+    op1.set_inputs( NULL );
+    op1.forward();
+    
+    auto z = op1.output;
+    //cout<<"z"<<z<<endl;
+    
+    auto itr11 = z.begin();
+    auto itr12 = q.begin();
+    while( itr11 != z.end() ){ 
+        //cout<<"add grad "<<*itr11<<","<<*itr12<<endl;
+        EXPECT_EQ( *itr11++, *itr12++);
+    }
+    
+    op1.grad = xt::ones_like( z );
+    op1.backward();
+    
+    auto& ga = va.grad;
+    auto& gb = vb.grad;
+    //cout<<"ga"<<ga<<endl;
+    //cout<<"gb"<<gb<<endl;
+    
+    auto itr21 = ga.begin();
+    auto itr22 = qa.begin();
+    while( itr21 != ga.end() ){ 
+        //cout<<"add grad1 "<<*itr21<<","<<*itr22<<endl;
+        EXPECT_EQ( *itr21++, *itr22++ );
+    }
+    auto itr31 = gb.begin();
+    auto itr32 = qb.begin();
+    while( itr31 != gb.end() ){ 
+        //cout<<"add grad2 "<<*itr31<<","<<*itr32<<endl;
+        EXPECT_EQ( *itr31++, *itr32++ );
+    }
+}
+
+TEST(MyTestCase, TestBroadcastAdd3) 
+{
+    Tensor a = xt::arange(24).reshape({2,4,3});
+    Tensor b = xt::arange(4).reshape({-1,1});
+    Tensor q = {{{  0.,   1.,   2.}, {  4.,   5.,   6.},
+                 {  8.,   9.,  10.}, { 12.,  13.,  14.}},
+                {{ 12.,  13.,  14.}, { 16.,  17.,  18.},
+                 { 20.,  21.,  22.}, { 24.,  25.,  26.}}};
+    Tensor qa = xt::full_like( a, 1.0 );
+    Tensor qb = xt::full_like( b, 1.0 ) * 6.0;
+    
+    VariableTensor va(a);
+    VariableTensor vb(b);
+    
+    AddOp  op1;
+    op1.set_inputs( &va );
+    op1.set_inputs( &vb );
+    op1.set_inputs( NULL );
+    op1.forward();
+    
+    auto z = op1.output;
+    //cout<<"z"<<z<<endl;
+    
+    auto itr11 = z.begin();
+    auto itr12 = q.begin();
+    while( itr11 != z.end() ){ 
+        //cout<<"add grad "<<*itr11<<","<<*itr12<<endl;
+        EXPECT_EQ( *itr11++, *itr12++);
+    }
+    
+    op1.grad = xt::ones_like( z );
+    op1.backward();
+    
+    auto& ga = va.grad;
+    auto& gb = vb.grad;
+    //cout<<"ga"<<ga<<endl;
+    //cout<<"gb"<<gb<<endl;
+    
+    auto itr21 = ga.begin();
+    auto itr22 = qa.begin();
+    while( itr21 != ga.end() ){ 
+        //cout<<"add grad1 "<<*itr21<<","<<*itr22<<endl;
+        EXPECT_EQ( *itr21++, *itr22++ );
+    }
+    auto itr31 = gb.begin();
+    auto itr32 = qb.begin();
+    while( itr31 != gb.end() ){ 
+        //cout<<"add grad2 "<<*itr31<<","<<*itr32<<endl;
+        EXPECT_EQ( *itr31++, *itr32++ );
     }
 }
 

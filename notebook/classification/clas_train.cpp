@@ -106,7 +106,7 @@
                 do_zerograd( forward_result, NL );
             }
             fprec total_acc = (fprec)total_corrects / (fprec)input_shape[0];
-            cout<<"total_loss : epoch "<<epoch<<" : loss "<<total_loss<<" : Acc "<<total_acc<<" "<<total_corrects<<endl;
+            cout<<"total_loss (batch): epoch "<<epoch<<" : loss "<<total_loss<<" : Acc "<<total_acc<<" "<<total_corrects<<endl;
             
             train_mode = false;
             
@@ -117,7 +117,7 @@
             auto o = forward_result[NL]->output;
             int corrects = eval_labels( forward_result[7]->output, target_data );
             fprec acc = (fprec)corrects / (fprec)input_shape[0];
-            cout<<"total_loss : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<corrects<<endl;
+            cout<<"total_loss (all)  : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<corrects<<endl;
             outputfile<<to_string(o[0])<<","<<to_string(acc)<<","<<total_loss<<endl;
         }
         outputfile.close();

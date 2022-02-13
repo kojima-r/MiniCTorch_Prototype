@@ -128,12 +128,6 @@ sklearnのirisモデルの分類問題のコード　(ミニバッチによる�
 ## test03
 各種活性化関数のコード
   
-## test_batch
-バッチタイプの行列演算のコード
-  
-## test_broadcast
-ブロードキャストのコード
-  
 ## draw_network_dot
 JSONファイルの計算グラフのgraphic_vizによる描画コード
 
