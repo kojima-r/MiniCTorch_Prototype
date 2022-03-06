@@ -2,6 +2,28 @@
 #include "minictorch.hpp"
 
 
+inline void expect_eq1( string s, Tensor& z, Tensor& q )
+{
+    //cout<<"z"<<z<<endl;
+    
+    auto itr1 = z.begin();
+    auto itr2 = q.begin();
+    while( itr1 != z.end() ){
+        //cout<<s<<*itr1<<","<<*itr2<<endl;
+        EXPECT_EQ( *itr1++, *itr2++ );
+    }
+}
+
+inline void expect_eqc( string s, Tensor& z, fprec c )
+{
+    //cout<<s<<z<<endl;
+    
+    auto itr1 = z.begin();
+    while( itr1 != z.end() ){
+        EXPECT_EQ( *itr1++, c );
+    }
+}
+
 // ----- add -----
 
 Tensor calc_add( Tensor& a, Tensor b )
@@ -46,15 +68,9 @@ TEST(MyTestCase, TestAdd)
     op1.set_inputs( &va );
     op1.set_inputs( &vb );
     op1.set_inputs( NULL );
-    
     op1.forward();
-    auto z = op1.output;
     
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
-    }
+    expect_eq1( "add ", op1.output, q );
 }
 
 TEST(MyTestCase, TestAddGrad) 
@@ -74,168 +90,8 @@ TEST(MyTestCase, TestAddGrad)
     op1.grad = xt::ones_like( a );
     op1.backward();
     
-    auto& ga = va.grad;
-    auto& gb = vb.grad;
-    //cout<<"ga"<<ga<<endl;
-    //cout<<"gb"<<gb<<endl;
-    
-    auto itr21 = ga.begin();
-    auto itr22 = gb.begin();
-    while( itr21 != ga.end() ){ 
-        EXPECT_EQ( *itr21++, 1.0 );
-        EXPECT_EQ( *itr22++, 1.0 );
-    }
-}
-
-TEST(MyTestCase, TestBroadcastAdd1) 
-{
-    Tensor a = xt::ones<fprec>({3,3});
-    Tensor b = { 2. };
-    Tensor q  = xt::full_like( a, 3.);
-    Tensor qa = xt::ones<fprec>({3,3});
-    Tensor qb = 9.0;
-    
-    VariableTensor va(a);
-    VariableTensor vb(b);
-    
-    AddOp  op1;
-    op1.set_inputs( &va );
-    op1.set_inputs( &vb );
-    op1.set_inputs( NULL );
-    op1.forward();
-    
-    auto z = op1.output;
-    //cout<<"z"<<z<<endl;
-    
-    auto itr11 = z.begin();
-    auto itr12 = q.begin();
-    while( itr11 != z.end() ){ 
-        //cout<<"add grad "<<*itr11<<","<<*itr12<<endl;
-        EXPECT_EQ( *itr11++, *itr12++);
-    }
-    
-    op1.grad = xt::ones_like( a );
-    op1.backward();
-    
-    auto& ga = va.grad;
-    auto& gb = vb.grad;
-    //cout<<"ga"<<ga<<endl;
-    //cout<<"gb"<<gb<<endl;
-    
-    auto itr21 = ga.begin();
-    auto itr22 = qa.begin();
-    while( itr21 != ga.end() ){ 
-        //cout<<"add grad1 "<<*itr21<<","<<*itr22<<endl;
-        EXPECT_EQ( *itr21++, *itr22++ );
-    }
-    auto itr31 = gb.begin();
-    auto itr32 = qb.begin();
-    while( itr31 != gb.end() ){ 
-        //cout<<"add grad2 "<<*itr31<<","<<*itr32<<endl;
-        EXPECT_EQ( *itr31++, *itr32++ );
-    }
-}
-
-TEST(MyTestCase, TestBroadcastAdd2) 
-{
-    Tensor a = xt::ones<fprec>({3}) * 2.0;
-    Tensor b = a;
-    b.reshape({-1,1});
-    Tensor q  = xt::ones<fprec>({3,3}) * 4.0;
-    Tensor qa = xt::full_like(a, 3.0);
-    Tensor qb = xt::full_like(b, 3.0);
-    
-    VariableTensor va(a);
-    VariableTensor vb(b);
-    
-    AddOp  op1;
-    op1.set_inputs( &va );
-    op1.set_inputs( &vb );
-    op1.set_inputs( NULL );
-    op1.forward();
-    
-    auto z = op1.output;
-    //cout<<"z"<<z<<endl;
-    
-    auto itr11 = z.begin();
-    auto itr12 = q.begin();
-    while( itr11 != z.end() ){ 
-        //cout<<"add grad "<<*itr11<<","<<*itr12<<endl;
-        EXPECT_EQ( *itr11++, *itr12++);
-    }
-    
-    op1.grad = xt::ones_like( z );
-    op1.backward();
-    
-    auto& ga = va.grad;
-    auto& gb = vb.grad;
-    //cout<<"ga"<<ga<<endl;
-    //cout<<"gb"<<gb<<endl;
-    
-    auto itr21 = ga.begin();
-    auto itr22 = qa.begin();
-    while( itr21 != ga.end() ){ 
-        //cout<<"add grad1 "<<*itr21<<","<<*itr22<<endl;
-        EXPECT_EQ( *itr21++, *itr22++ );
-    }
-    auto itr31 = gb.begin();
-    auto itr32 = qb.begin();
-    while( itr31 != gb.end() ){ 
-        //cout<<"add grad2 "<<*itr31<<","<<*itr32<<endl;
-        EXPECT_EQ( *itr31++, *itr32++ );
-    }
-}
-
-TEST(MyTestCase, TestBroadcastAdd3) 
-{
-    Tensor a = xt::arange(24).reshape({2,4,3});
-    Tensor b = xt::arange(4).reshape({-1,1});
-    Tensor q = {{{  0.,   1.,   2.}, {  4.,   5.,   6.},
-                 {  8.,   9.,  10.}, { 12.,  13.,  14.}},
-                {{ 12.,  13.,  14.}, { 16.,  17.,  18.},
-                 { 20.,  21.,  22.}, { 24.,  25.,  26.}}};
-    Tensor qa = xt::full_like( a, 1.0 );
-    Tensor qb = xt::full_like( b, 1.0 ) * 6.0;
-    
-    VariableTensor va(a);
-    VariableTensor vb(b);
-    
-    AddOp  op1;
-    op1.set_inputs( &va );
-    op1.set_inputs( &vb );
-    op1.set_inputs( NULL );
-    op1.forward();
-    
-    auto z = op1.output;
-    //cout<<"z"<<z<<endl;
-    
-    auto itr11 = z.begin();
-    auto itr12 = q.begin();
-    while( itr11 != z.end() ){ 
-        //cout<<"add grad "<<*itr11<<","<<*itr12<<endl;
-        EXPECT_EQ( *itr11++, *itr12++);
-    }
-    
-    op1.grad = xt::ones_like( z );
-    op1.backward();
-    
-    auto& ga = va.grad;
-    auto& gb = vb.grad;
-    //cout<<"ga"<<ga<<endl;
-    //cout<<"gb"<<gb<<endl;
-    
-    auto itr21 = ga.begin();
-    auto itr22 = qa.begin();
-    while( itr21 != ga.end() ){ 
-        //cout<<"add grad1 "<<*itr21<<","<<*itr22<<endl;
-        EXPECT_EQ( *itr21++, *itr22++ );
-    }
-    auto itr31 = gb.begin();
-    auto itr32 = qb.begin();
-    while( itr31 != gb.end() ){ 
-        //cout<<"add grad2 "<<*itr31<<","<<*itr32<<endl;
-        EXPECT_EQ( *itr31++, *itr32++ );
-    }
+    expect_eqc( "add grad_a ", va.grad, 1.0 );
+    expect_eqc( "add grad_b ", vb.grad, 1.0 );
 }
 
 // ----- sub -----
@@ -253,15 +109,9 @@ TEST(MyTestCase, TestSub)
     op1.set_inputs( &va );
     op1.set_inputs( &vb );
     op1.set_inputs( NULL );
-    
     op1.forward();
-    auto z = op1.output;
     
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
-    }
+    expect_eq1( "sub ", op1.output, q );
 }
 
 TEST(MyTestCase, TestSubGrad) 
@@ -280,14 +130,8 @@ TEST(MyTestCase, TestSubGrad)
     op1.grad = xt::ones_like( a );
     op1.backward();
     
-    auto& ga = va.grad;
-    auto& gb = vb.grad;
-    auto itr11 = ga.begin();
-    auto itr12 = gb.begin();
-    while( itr11 != ga.end() ){ 
-        EXPECT_EQ( *itr11++,  1.0 );
-        EXPECT_EQ( *itr12++, -1.0 );
-    }
+    expect_eqc( "sub grad_a ", va.grad,  1.0 );
+    expect_eqc( "sub grad_a ", vb.grad, -1.0 );
 }
 
 // ----- Mul -----
@@ -305,15 +149,9 @@ TEST(MyTestCase, TestMul)
     op1.set_inputs( &va );
     op1.set_inputs( &vb );
     op1.set_inputs( NULL );
-    
     op1.forward();
-    auto z = op1.output;
-    
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
-    }
+   
+    expect_eq1( "mul ", op1.output, q );
 }
 
 TEST(MyTestCase, TestMulGrad) 
@@ -334,14 +172,8 @@ TEST(MyTestCase, TestMulGrad)
     
     auto& ga = va.grad;
     auto& gb = vb.grad;
-    auto itr1 = a.begin();
-    auto itr2 = b.begin();
-    auto itr11 = ga.begin();
-    auto itr12 = gb.begin();
-    while( itr11 != ga.end() ){ 
-        EXPECT_EQ( *itr11++, *itr2++ );
-        EXPECT_EQ( *itr12++, *itr1++ );
-    }
+    expect_eq1( "mul grad ", ga, b );
+    expect_eq1( "mul grad ", gb, a );
 }
 
 // ----- Div -----
@@ -359,15 +191,9 @@ TEST(MyTestCase, TestDiv)
     op1.set_inputs( &va );
     op1.set_inputs( &vb );
     op1.set_inputs( NULL );
-    
     op1.forward();
-    auto z = op1.output;
     
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
-    }
+    expect_eq1( "div ", op1.output, q );
 }
 
 TEST(MyTestCase, TestDivGrad) 
@@ -378,8 +204,8 @@ TEST(MyTestCase, TestDivGrad)
     Tensor qa = xt::zeros_like( a );
     Tensor qb = xt::zeros_like( b );
     
-    auto itr1 = a.begin();
-    auto itr2 = b.begin();
+    auto itr1  = a.begin();
+    auto itr2  = b.begin();
     auto itr11 = qa.begin();
     auto itr12 = qb.begin();
     while( itr1 != a.end() )
@@ -387,7 +213,7 @@ TEST(MyTestCase, TestDivGrad)
         *itr11 = 1.0 / (*itr2);
         *itr12 = -(*itr1) / ( (*itr2) * (*itr2) );
         //cout<<*itr1<<","<<*itr2<<"-"<<*itr11<<","<<*itr12<<endl;
-        itr1++; itr2++; 
+        itr1++;  itr2++; 
         itr11++; itr12++;
     }
     
@@ -401,19 +227,9 @@ TEST(MyTestCase, TestDivGrad)
     
     op1.grad = xt::ones_like( a );
     op1.backward();
-    auto& ga = va.grad;
-    auto& gb = vb.grad;
     
-    auto itr21 = qa.begin();
-    auto itr22 = qb.begin();
-    auto itr31 = ga.begin();
-    auto itr32 = gb.begin();
-    while( itr21 != qa.end() ){
-        //cout<< *itr21<<","<<*itr31<<endl;
-        //cout<< *itr22<<","<<*itr32<<endl;
-        EXPECT_EQ( *itr21++, *itr31++ );
-        EXPECT_EQ( *itr22++, *itr32++ );
-    }
+    expect_eq1( "div grad ", va.grad, qa );
+    expect_eq1( "div grad ", vb.grad, qb );
 }
 
 // ----- Rsub -----
@@ -433,15 +249,9 @@ TEST(MyTestCase, TestRsub)
     op1.set_inputs( &va );
     op1.set_inputs( &vb );
     op1.set_inputs( &vc );
-    
     op1.forward();
-    auto z = op1.output;
-    
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
-    }
+   
+    expect_eq1( "rsub ", op1.output, q );
 }
 
 TEST(MyTestCase, TestRsubGrad) 
@@ -461,13 +271,8 @@ TEST(MyTestCase, TestRsubGrad)
     
     op1.grad = xt::ones_like( a );
     op1.backward();
-    auto& g = va.grad;
     
-    auto itr11 = g.begin();
-    while( itr11 != g.end() ){
-        //cout<<"Rsub "<<*itr11<<","<<-c<<endl;
-        EXPECT_EQ( *itr11++, -c );
-    }
+    expect_eqc( "rsub grad ", va.grad, -c );
 }
 
 // ----- Neg -----
@@ -481,15 +286,9 @@ TEST(MyTestCase, TestNeg )
     
     NegOp  op1;
     op1.set_inputs( &va );
-    
     op1.forward();
-    auto z = op1.output;
-    
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
-    }
+  
+    expect_eq1( "neg ", op1.output, q );
 }
 
 TEST(MyTestCase, TestNegGrad) 
@@ -503,13 +302,8 @@ TEST(MyTestCase, TestNegGrad)
     
     op1.grad = xt::ones_like( a );
     op1.backward();
-    auto& g = va.grad;
     
-    auto itr11 = g.begin();
-    while( itr11 != g.end() ){
-        //cout<<"Neg "<<*itr11<<endl;
-        EXPECT_EQ( *itr11++, -1.0 );
-    }
+    expect_eqc( "neg grad ", va.grad, -1.0 );
 }
 
 // ----- Pow -----
@@ -526,15 +320,9 @@ TEST(MyTestCase, TestPow)
     PowOp  op1;
     op1.set_inputs( &va );
     op1.set_inputs( &vb );
-    
     op1.forward();
-    auto z = op1.output;
-    
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
-    }
+   
+    expect_eq1( "pow ", op1.output, q );
 }
 
 TEST(MyTestCase, TestPowGrad) 
@@ -562,14 +350,8 @@ TEST(MyTestCase, TestPowGrad)
     
     op1.grad = xt::ones_like( a );
     op1.backward();
-    auto& g = va.grad;
     
-    auto itr11 = q.begin();
-    auto itr12 = g.begin();
-    while( itr11 != q.end() ){
-        //cout<<"pow"<<*itr11<<","<<*itr12<<endl;
-        EXPECT_EQ( *itr11++, *itr12++ );
-    }
+    expect_eq1( "mul ", va.grad, q );
 }
 
 // ----- Exp -----
@@ -592,15 +374,9 @@ TEST(MyTestCase, TestExp)
     
     ExpOp  op1;
     op1.set_inputs( &va );
-    
     op1.forward();
-    auto z = op1.output;
     
-    auto itr11 = z.begin();
-    auto itr12 = q.begin();
-    while( itr11 != z.end() ){ 
-        EXPECT_EQ( *itr11++, *itr12++);
-    }
+    expect_eq1( "exp", op1.output, q );
 }
 
 TEST(MyTestCase, TestExpGrad) 
@@ -621,18 +397,12 @@ TEST(MyTestCase, TestExpGrad)
     
     ExpOp  op1;
     op1.set_inputs( &va );
-    
     op1.forward();
+    
     op1.grad = xt::ones_like( a );
     op1.backward();
-    auto& g = va.grad;
-    
-    auto itr11 = q.begin();
-    auto itr12 = g.begin();
-    while( itr11 != q.end() ){
-        //cout<<"exp"<<*itr11<<","<<*itr12<<endl;
-        EXPECT_EQ( *itr11++, *itr12++ );
-    }
+  
+    expect_eq1( "exp grad", va.grad, q );
 }
 
 // ----- Log -----
@@ -655,15 +425,9 @@ TEST(MyTestCase, TestLog)
     
     LogOp  op1;
     op1.set_inputs( &va );
-    
     op1.forward();
-    auto z = op1.output;
     
-    auto itr11 = z.begin();
-    auto itr12 = q.begin();
-    while( itr11 != z.end() ){ 
-        EXPECT_EQ( *itr11++, *itr12++);
-    }
+    expect_eq1( "log", op1.output, q );
 }
 
 TEST(MyTestCase, TestLogGrad) 
@@ -675,7 +439,7 @@ TEST(MyTestCase, TestLogGrad)
     auto itr2 = q.begin();
     while( itr1 != a.end() )
     {
-        *itr2 = 1.0/ *itr1;
+        *itr2 = 1.0 / *itr1;
         //cout<<"log"<<*itr1<<","<<*itr2<<endl;
         itr1++; itr2++; 
     }
@@ -688,14 +452,8 @@ TEST(MyTestCase, TestLogGrad)
     op1.forward();
     op1.grad = xt::ones_like( a );
     op1.backward();
-    auto& g = va.grad;
     
-    auto itr11 = q.begin();
-    auto itr12 = g.begin();
-    while( itr11 != q.end() ){
-        //cout<<"log"<<*itr11<<","<<*itr12<<endl;
-        EXPECT_EQ( *itr11++, *itr12++ );
-    }
+    expect_eq1( "log grad ", va.grad, q );
 }
 
 // ----- Log1p -----
@@ -718,15 +476,9 @@ TEST(MyTestCase, TestLog1p)
     
     Log1pOp  op1;
     op1.set_inputs( &va );
-    
     op1.forward();
-    auto z = op1.output;
     
-    auto itr11 = z.begin();
-    auto itr12 = q.begin();
-    while( itr11 != z.end() ){ 
-        EXPECT_EQ( *itr11++, *itr12++);
-    }
+    expect_eq1( "log1p ", op1.output, q );
 }
 
 TEST(MyTestCase, TestLog1pGrad) 
@@ -747,18 +499,12 @@ TEST(MyTestCase, TestLog1pGrad)
     
     Log1pOp  op1;
     op1.set_inputs( &va );
-    
     op1.forward();
+    
     op1.grad = xt::ones_like( a );
     op1.backward();
-    auto& g = va.grad;
     
-    auto itr11 = q.begin();
-    auto itr12 = g.begin();
-    while( itr11 != q.end() ){
-        //cout<<"log"<<*itr11<<","<<*itr12<<endl;
-        EXPECT_EQ( *itr11++, *itr12++ );
-    }
+    expect_eq1( "log1p grad", va.grad, q );
 }
 
 // ----- Sum -----
@@ -773,16 +519,9 @@ TEST(MyTestCase, TestSum)
     SumOp  op1;
     op1.set_inputs( &va );
     op1.set_inputs( NULL );
-    
     op1.forward();
-    auto z = op1.output;
-    //cout<<"sum"<<z<<endl;
     
-    auto itr11 = z.begin();
-    auto itr12 = q.begin();
-    while( itr11 != z.end() ){ 
-        EXPECT_EQ( *itr11++, *itr12++);
-    }
+    expect_eq1( "sum ", op1.output, q );
 }
 
 TEST(MyTestCase, TestSum0) 
@@ -796,16 +535,9 @@ TEST(MyTestCase, TestSum0)
     SumOp  op1;
     op1.set_inputs( &va );
     op1.set_inputs( &vb );
-    
     op1.forward();
-    auto z = op1.output;
-    //cout<<"sum0"<<z<<endl;
     
-    auto itr11 = z.begin();
-    auto itr12 = q.begin();
-    while( itr11 != z.end() ){ 
-        EXPECT_EQ( *itr11++, *itr12++);
-    }
+    expect_eq1( "sum0 ", op1.output, q );
 }
 
 TEST(MyTestCase, TestSum1) 
@@ -820,16 +552,9 @@ TEST(MyTestCase, TestSum1)
     SumOp  op1;
     op1.set_inputs( &va );
     op1.set_inputs( &vb );
-    
     op1.forward();
-    auto z = op1.output;
-    //cout<<"sum1"<<z<<endl;
     
-    auto itr11 = z.begin();
-    auto itr12 = q.begin();
-    while( itr11 != z.end() ){ 
-        EXPECT_EQ( *itr11++, *itr12++);
-    }
+    expect_eq1( "sum1 ", op1.output, q );
 }
 
 TEST(MyTestCase, TestSumGrad) 
@@ -843,19 +568,12 @@ TEST(MyTestCase, TestSumGrad)
     SumOp  op1;
     op1.set_inputs( &va );
     op1.set_inputs( NULL );
-    
     op1.forward();
+    
     op1.grad = xt::ones_like( q );
     op1.backward();
-    auto& g = va.grad;
-    //cout<<"sum"<<g<<endl;
     
-    auto itr11 = qa.begin();
-    auto itr12 = g.begin();
-    while( itr11 != qa.end() ){
-        //cout<<"sum"<<*itr11<<","<<*itr12<<endl;
-        EXPECT_EQ( *itr11++, *itr12++ );
-    }
+    expect_eq1( "sum grad ", va.grad, qa );
 }
 
 TEST(MyTestCase, TestSum0Grad) 
@@ -870,19 +588,12 @@ TEST(MyTestCase, TestSum0Grad)
     SumOp  op1;
     op1.set_inputs( &va );
     op1.set_inputs( &vb );
-    
     op1.forward();
+    
     op1.grad = xt::ones_like( q );
     op1.backward();
-    auto& g = va.grad;
-    //cout<<"sum0 "<<g<<endl;
     
-    auto itr11 = qa.begin();
-    auto itr12 = g.begin();
-    while( itr11 != qa.end() ){
-        //cout<<"sum0 "<<*itr11<<","<<*itr12<<endl;
-        EXPECT_EQ( *itr11++, *itr12++ );
-    }
+    expect_eq1( "sum0 grad", va.grad, qa );
 }
 
 TEST(MyTestCase, TestSum1Grad) 
@@ -897,19 +608,12 @@ TEST(MyTestCase, TestSum1Grad)
     SumOp  op1;
     op1.set_inputs( &va );
     op1.set_inputs( &vb );
-    
     op1.forward();
+    
     op1.grad = xt::ones_like( q );
     op1.backward();
-    auto& g = va.grad;
-    //cout<<"sum1 "<<g<<endl;
     
-    auto itr11 = qa.begin();
-    auto itr12 = g.begin();
-    while( itr11 != qa.end() ){
-        //cout<<"sum1 "<<*itr11<<","<<*itr12<<endl;
-        EXPECT_EQ( *itr11++, *itr12++ );
-    }
+    expect_eq1( "sum1 grad ", va.grad, qa );
 }
 
 // ----- mean -----
@@ -925,16 +629,9 @@ TEST(MyTestCase, TestMean)
     MeanOp  op1;
     op1.set_inputs( &va );
     op1.set_inputs( &vb );
-    
     op1.forward();
-    auto z = op1.output;
-    //cout<<"mean"<<z<<endl;
     
-    auto itr11 = z.begin();
-    auto itr12 = q.begin();
-    while( itr11 != z.end() ){ 
-        EXPECT_EQ( *itr11++, *itr12++);
-    }
+    expect_eq1( "mean ", op1.output, q );
 }
 
 TEST(MyTestCase, TestMeanGrad) 
@@ -949,17 +646,126 @@ TEST(MyTestCase, TestMeanGrad)
     MeanOp  op1;
     op1.set_inputs( &va );
     op1.set_inputs( &vb );
-    
     //op1.forward();
+    
     op1.grad = xt::ones_like( q );
     op1.backward();
-    auto& g = va.grad;
-    //cout<<"mean"<<g<<endl;
     
-    auto itr11 = qa.begin();
-    auto itr12 = g.begin();
-    while( itr11 != qa.end() ){
-        //cout<<"mean "<<*itr11<<","<<*itr12<<endl;
-        EXPECT_EQ( *itr11++, *itr12++ );
+    expect_eq1( "mean grad", va.grad, qa );
+}
+
+// ----- randn, normal, zeros, ones, size -----
+
+inline void expect_rand( string s, Tensor& z, fprec c )
+{
+    fprec sm = 0;
+    auto itr1 = z.begin();
+    while( itr1 != z.end() ){
+        //cout<<s<<*itr1<<endl;
+        EXPECT_GE( *itr1, -c );
+        EXPECT_LE( *itr1,  c );
+        sm += *itr1;
+        itr1++;
     }
 }
+
+Tensor do_randn( int n1, int n2 )
+{
+    VariableTensor va( (fprec)n1 );
+    VariableTensor vb( (fprec)n2 );
+    
+    ListConstructOp  list1;
+    list1.set_inputs( &va );
+    list1.set_inputs( &vb );
+    list1.forward();
+    
+    VariableTensor vc( 6.0 );
+    VariableTensor vd( 0.0 );
+    
+    RandnOp  randn1;
+    randn1.set_inputs( &list1 );
+    randn1.set_inputs( &vc );
+    randn1.set_inputs( NULL );
+    randn1.set_inputs( NULL );
+    randn1.set_inputs( &vd );
+    randn1.forward();
+    
+    return randn1.output;
+}
+
+TEST(MyTestCase, TestRandn) 
+{
+    auto z = do_randn( 2, 4 );
+    //cout<<"randn"<<z<<endl;
+
+    expect_rand( "randn : ", z, 3.0 );
+    
+    auto mean = xt::mean( z );
+    auto std  = xt::stddev( z );
+    cout<<"mean"<<mean<<endl;
+    cout<<"std "<<std<<endl;
+}
+
+Tensor do_normal( Tensor& e )
+{
+    VariableTensor ve( e );
+    VariableTensor v0( 0.0 );
+    VariableTensor v1( 1.0 );
+    
+    SizeOp size1;
+    size1.set_inputs( &ve );
+    size1.set_inputs( &v0 );
+    size1.forward();
+    
+    SizeOp size2;
+    size2.set_inputs( &ve );
+    size2.set_inputs( &v1 );
+    size2.forward();
+    
+    ListConstructOp  list1;
+    list1.set_inputs( &size1 );
+    list1.set_inputs( &size2 );
+    list1.forward();
+    
+    VariableTensor vc( 6.0 );
+    VariableTensor vd( 0.0 );
+    
+    ZerosOp  zeros1;
+    zeros1.set_inputs( &list1 );
+    zeros1.set_inputs( &vc );
+    zeros1.set_inputs( NULL );
+    zeros1.set_inputs( NULL );
+    zeros1.set_inputs( &vd );
+    zeros1.forward();
+    
+    OnesOp  ones1;
+    ones1.set_inputs( &list1 );
+    ones1.set_inputs( &vc );
+    ones1.set_inputs( NULL );
+    ones1.set_inputs( NULL );
+    ones1.set_inputs( &vd );
+    ones1.forward();
+    
+    NormalOp  normal1;
+    normal1.set_inputs( &zeros1 );
+    normal1.set_inputs( &ones1 );
+    normal1.set_inputs( NULL );
+    normal1.forward();
+    
+    return normal1.output;
+}
+
+TEST(MyTestCase, TestNormal) 
+{
+    Tensor a = xt::zeros<fprec>({2, 4});
+    auto   z = do_normal( a );
+    //cout<<"normal "<<z<<endl;
+    
+    expect_rand( "normal : ", z, 3.0 );
+    
+    auto mean = xt::mean( z );
+    auto std  = xt::stddev( z );
+    cout<<"mean"<<mean<<endl;
+    cout<<"std "<<std<<endl;
+}
+

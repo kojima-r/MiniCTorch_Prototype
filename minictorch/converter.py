@@ -440,6 +440,9 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
             elif el["op"]=="aten::log1p":
                 text+="""
             Log1pOp* op = new Log1pOp();"""
+            elif el["op"]=="aten::dot":
+                text+="""
+            DotOp* op = new DotOp();"""
             elif el["op"]=="aten::matmul":
                 text+="""
             MatMulOp* op = new MatMulOp();"""

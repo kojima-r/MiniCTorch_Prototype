@@ -1,6 +1,18 @@
 #include <gtest/gtest.h>
 #include "minictorch.hpp"
 
+inline void expect_eq1( string s, Tensor& z, Tensor& q )
+{
+    //cout<<s<<" z"<<z<<endl;
+    //cout<<s<<" q"<<q<<endl;
+    
+    auto itr1 = z.begin();
+    auto itr2 = q.begin();
+    while( itr1 != z.end() ){
+        //cout<<s<<*itr1<<","<<*itr2<<endl;
+        EXPECT_EQ( *itr1++, *itr2++ );
+    }
+}
 
 // ----- mse_loss -----
 
@@ -42,18 +54,12 @@ TEST(MyTestCase, TestMseLoss)
     Tensor b = {4.,5.,6.};
    
     auto z = calc_mseloss( a, b );
-    //cout<<"z"<<z<<endl;
     
     auto as = a.shape();
     Tensor diff = a - b;
     Tensor q = xt::sum(diff*diff)/as[0];
-    //cout<<"q"<<q<<endl;
     
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
-    }
+    expect_eq1( "mse_loss", z, q );
 }
 
 TEST(MyTestCase, TestMseLossGrad) 
@@ -62,17 +68,25 @@ TEST(MyTestCase, TestMseLossGrad)
     Tensor b = {4.,5.,6.};
     
     auto g = diff_mseloss( a, b );
-    //cout<<"mse g"<<g<<endl;
-    
+   
     auto as = a.shape();
     Tensor diff = a - b;
     Tensor q = diff * 2.0 / as[0];
-    //cout<<"mse q"<<q<<endl;
     
-    auto itr1 = g.begin();
+    expect_eq1( "mse_loss grad", g, q );
+}
+
+inline void expect_tol( string s, Tensor &z, Tensor &q, fprec tol=1.0e-3 )
+{
+    //fprec tol = 1.0e-3;
+    
+    auto itr1 = z.begin();
     auto itr2 = q.begin();
-    while( itr1 != g.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
+    while( itr1 != z.end() ){ 
+        //EXPECT_EQ( *itr1++, *itr2++);
+        fprec e = fabs( *itr1 - *itr2 );
+        EXPECT_LE( e, tol );
+        itr1++; itr2++;
     }
 }
 
@@ -180,20 +194,9 @@ TEST(MyTestCase, TestCrossEntropyLoss)
     Tensor b = { 3., 0. };
    
     Tensor z = calc_cross_entropy( a, b );
-    //cout<<"z "<<z<<endl;
-    
     Tensor q = calc_cross_entropy1( a, b );
-    //cout<<"q "<<q<<endl;
     
-    fprec tol = 1.0e-3;
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        //EXPECT_EQ( *itr1++, *itr2++);
-        fprec e = fabs( *itr1 - *itr2 );
-        EXPECT_LE( e, tol );
-        itr1++; itr2++;
-    }
+    expect_tol( "cross_entropy", z, q );
 }
 
 TEST(MyTestCase, TestCrossEntropyLossGrad) 
@@ -203,19 +206,9 @@ TEST(MyTestCase, TestCrossEntropyLossGrad)
     Tensor b = { 3., 0. };
    
     Tensor g = diff_cross_entropy( a, b );
-    //cout<<"g "<<g<<endl;
-    
     Tensor q = diff_cross_entropy1( a, b );
-    //cout<<"q "<<q<<endl;
     
-    fprec tol = 1.0e-3;
-    auto itr1 = g.begin();
-    auto itr2 = q.begin();
-    while( itr1 != g.end() ){ 
-        fprec e = fabs( *itr1 - *itr2 );
-        EXPECT_LE( e, tol );
-        itr1++; itr2++;
-    }
+    expect_tol( "cross_entropy grad", g, q );
 }
 
 // ----- binary_cross_entropy -----
@@ -274,19 +267,9 @@ TEST(MyTestCase, TestBinaryCrossEntropyLoss)
     Tensor b = { {0.,0.,0.,1.},{1.,0.,0.,0.} };
    
     Tensor z = calc_binary_cross_entropy( a, b );
-    //cout<<"z "<<z<<endl;
-    
     Tensor q = calc_binary_cross_entropy1( a, b );
-    //cout<<"q "<<q<<endl;
     
-    fprec tol = 1.0e-3;
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        fprec e = fabs( *itr1 - *itr2 );
-        EXPECT_LE( e, tol );
-        itr1++; itr2++;
-    }
+    expect_tol( "binary_cross_entropy", z, q );
 }
 
 TEST(MyTestCase, TestBinaryCrossEntropyLossGrad) 
@@ -296,19 +279,9 @@ TEST(MyTestCase, TestBinaryCrossEntropyLossGrad)
     Tensor b = { {0.,0.,0.,1.},{1.,0.,0.,0.} };
    
     Tensor g = diff_binary_cross_entropy( a, b );
-    //cout<<"g "<<g<<endl;
-    
     Tensor q = diff_binary_cross_entropy1( a, b );
-    //cout<<"q "<<q<<endl;
-    
-    fprec tol = 1.0e-3;
-    auto itr1 = g.begin();
-    auto itr2 = q.begin();
-    while( itr1 != g.end() ){ 
-        fprec e = fabs( *itr1 - *itr2 );
-        EXPECT_LE( e, tol );
-        itr1++; itr2++;
-    }
+ 
+    expect_tol( "binary_cross_entropy grad", g, q );
 }
 
 // ----- nll_loss -----
@@ -365,20 +338,9 @@ TEST(MyTestCase, TestNLLLoss)
     Tensor b = { 3., 0. };
     Tensor x = calc_log_softmax1( a );
     Tensor z = calc_nll_loss( x, b );
-    //cout<<"z "<<z<<endl;
-    
     Tensor q = calc_cross_entropy1( a, b );
-    //cout<<"q "<<q<<endl;
     
-    fprec tol = 1.0e-3;
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        //EXPECT_EQ( *itr1++, *itr2++);
-        fprec e = fabs( *itr1 - *itr2 );
-        EXPECT_LE( e, tol );
-        itr1++; itr2++;
-    }
+    expect_tol( "nll_loss", z, q );
 }
 
 TEST(MyTestCase, TestNLLLossGrad) 
@@ -388,19 +350,9 @@ TEST(MyTestCase, TestNLLLossGrad)
     Tensor b = { 3., 0. };
     Tensor x = calc_log_softmax1( a );
     Tensor g = diff_nll_loss( x, b );
-    //cout<<"g "<<g<<endl;
-    
     Tensor q = diff_nll_loss1( a, b );
-    //cout<<"q "<<q<<endl;
-    
-    fprec tol = 1.0e-3;
-    auto itr1 = g.begin();
-    auto itr2 = q.begin();
-    while( itr1 != g.end() ){ 
-        fprec e = fabs( *itr1 - *itr2 );
-        EXPECT_LE( e, tol );
-        itr1++; itr2++;
-    }
+ 
+    expect_tol( "nll_loss grad", g, q );
 }
 
 // ----- softmax -----
@@ -412,22 +364,12 @@ TEST(MyTestCase, TestSoftmax) {
     
     SoftmaxOp  op1;
     op1.set_inputs( &va );
-    
     op1.forward();
+    
     auto z = op1.output;
-    //cout<<"z"<<z<<endl;
-    
     auto q = calc_softmax1( a );
-    //cout<<"q"<<q<<endl;
-    
-    fprec tol = 1.0e-4;
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        fprec delta = fabs( *itr1 - *itr2 );
-        EXPECT_LE( delta, tol );
-        itr1++;  itr2++;
-    }
+   
+    expect_tol( "softmax", z, q, 1.0e-4 );
 }
 
 TEST(MyTestCase, TestLogSoftmax) {
@@ -437,22 +379,12 @@ TEST(MyTestCase, TestLogSoftmax) {
     
     LogSoftmaxOp  op1;
     op1.set_inputs( &va );
-    
     op1.forward();
+    
     auto z = op1.output;
-    //cout<<"z"<<z<<endl;
-    
     auto q = calc_log_softmax1( a );
-    //cout<<"q"<<q<<endl;
-    
-    fprec tol = 1.0e-4;
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        fprec delta = fabs( *itr1 - *itr2 );
-        EXPECT_LE( delta, tol );
-        itr1++;  itr2++;
-    }
+  
+    expect_tol( "log_softmax", z, q, 1.0e-4 );
 }
 
 TEST(MyTestCase, TestLogSoftmaxGrad) 
@@ -462,23 +394,12 @@ TEST(MyTestCase, TestLogSoftmaxGrad)
     
     LogSoftmaxOp  op1;
     op1.set_inputs( &va );
-    
     op1.forward();
+    
     op1.grad = xt::ones<fprec>( {2,3} );
     op1.backward();
     
-    auto& g = va.grad;
-    //cout<<"g"<<g<<endl;
-    
     Tensor q = diff_log_softmax1( a );
-    //cout<<"q"<<q<<endl;
-    
-    fprec tol = 1.0e-4;
-    auto itr1 = g.begin();
-    auto itr2 = q.begin();
-    while( itr1 != g.end() ){ 
-        fprec delta = fabs( *itr1 - *itr2 );
-        EXPECT_LE( delta, tol );
-        itr1++;  itr2++;
-    }
+   
+    expect_tol( "log_softmax gtad", va.grad, q, 1.0e-4 );
 }

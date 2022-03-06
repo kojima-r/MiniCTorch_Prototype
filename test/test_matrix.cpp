@@ -1,25 +1,9 @@
 #include <gtest/gtest.h>
 #include "minictorch.hpp"
 
-// ----- matmul -----
 
-TEST(MyTestCase, TestMatMul) 
+void expect_eq1( Tensor &z, Tensor &q )
 {
-    Tensor a = {{1.,2.,3.}, {4.,5.,6.}};
-    Tensor b = xt::transpose(a);
-    
-    VariableTensor va(a);
-    VariableTensor vb(b);
-    
-    MatMulOp  op1;
-    op1.set_inputs( &va );
-    op1.set_inputs( &vb );
-    
-    op1.forward();
-    auto z = op1.output;
-    
-    Tensor q = {{14.,32.}, {32.,77.}};
-    
     auto itr1 = z.begin();
     auto itr2 = q.begin();
     while( itr1 != z.end() ){ 
@@ -27,55 +11,56 @@ TEST(MyTestCase, TestMatMul)
     }
 }
 
-TEST(MyTestCase, TestMatMulGrad)
+void expect_eq4( string s, Tensor& z, Tensor &ga, Tensor& gb, Tensor &gd, Tensor& q, Tensor& qa, Tensor& qb, Tensor &qd )
 {
-    Tensor a = {{1.,2.,3.}, {4.,5.,6.}};
-    Tensor b = xt::transpose(a);
-  
-    VariableTensor va(a);
-    VariableTensor vb(b);
+    //cout<<"z"<<z<<endl;
+    //cout<<"ga"<<ga<<endl;
+    //cout<<"gb"<<gb<<endl;
+    //cout<<"gd"<<gd<<endl;
     
-    MatMulOp  op1;
-    op1.set_inputs( &va );
-    op1.set_inputs( &vb );
-    
-    op1.grad = xt::ones<fprec>( {2,2} );
-    op1.backward();
-    
-    auto& ga = va.grad;
-    auto& gb = vb.grad;
-    
-    Tensor qa = {{5.,7.,9.},{5.,7.,9.}};
-    Tensor qb = {{5.,5.},{7.,7.},{9.,9.}};
-    
-    /*
-    cout<<"ga"<<ga<<endl;
-    cout<<"gb"<<gb<<endl;
-    cout<<"qa"<<qa<<endl;
-    cout<<"qb"<<qb<<endl;*/
-    
-    auto itr1 = ga.begin();
-    auto itr2 = qa.begin();
-    while( itr1 != ga.end() ){ 
+    auto itr1 = z.begin();
+    auto itr2 = q.begin();
+    while( itr1 != z.end() ){
+        //cout<<s<<*itr1<<","<<*itr2<<endl;
         EXPECT_EQ( *itr1++, *itr2++ );
     }
+        
+    auto itr11 = ga.begin();
+    auto itr12 = qa.begin();
+    while( itr11 != ga.end() ){
+        //cout<<s<<*itr11<<","<<*itr12<<endl;
+        EXPECT_EQ( *itr11++, *itr12++ );
+    }
+        
+    auto itr21 = gb.begin();
+    auto itr22 = qb.begin();
+    while( itr21 != gb.end() ){
+        //cout<<s<<*itr21<<","<<*itr22<<endl;
+        EXPECT_EQ( *itr21++, *itr22++ );
+    }
     
-    auto itr3 = gb.begin();
-    auto itr4 = qb.begin();
-    while( itr3 != gb.end() ){ 
-        EXPECT_EQ( *itr3++, *itr4++ );
+    auto itr31 = gd.begin();
+    auto itr32 = qd.begin();
+    while( itr31 != gd.end() ){
+        //cout<<s<<*itr31<<","<<*itr32<<endl;
+        EXPECT_EQ( *itr31++, *itr32++ );
     }
 }
 
 // ----- linear -----
 
-TEST(MyTestCase, TestLinear) 
+// linear
+//  a * b_t + d : vector x matrix + vector
+TEST(MyTestCase, TestLinear1) 
 {
-    Tensor a = {{1.,2.,3.}, {4.,5.,6.}};
-    Tensor b = a; //xt::transpose(a);
-    Tensor d = {1.,2.};
+    Tensor a = {1.,2.,3.};
+    Tensor b = {{1.,2.,3.}, {4.,5.,6.}};  //xt::transpose(a);
+    Tensor d =  {1.,2.};
     
-    Tensor q = {{15.,34.}, {33.,79.}};
+    Tensor q  = {{15.,34.}};
+    Tensor qa =  {5.,7.,9.};
+    Tensor qb = {{1.,2.,3.},{1.,2.,3.}};
+    Tensor qd =  {1.,1.};
     
     VariableTensor va(a);
     VariableTensor vb(b);
@@ -88,19 +73,25 @@ TEST(MyTestCase, TestLinear)
     
     op1.forward();
     auto z = op1.output;
-
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
-    }
+    
+    op1.grad = xt::ones_like( z );
+    op1.backward();
+ 
+    expect_eq4( "linear1", z, va.grad, vb.grad, vd.grad, q, qa, qb, qd );
 }
 
-TEST(MyTestCase, TestLinearGrad) 
+// linear
+//  a * b_t + d : matrix x matrix + vector
+TEST(MyTestCase, TestLinear2) 
 {
     Tensor a = {{1.,2.,3.}, {4.,5.,6.}};
     Tensor b = a; //xt::transpose(a);
-    Tensor d = {1.,2.};
+    Tensor d =  {1.,2.};
+    
+    Tensor q  = {{15.,34.}, {33.,79.}};
+    Tensor qa = {{5.,7.,9.},{5.,7.,9.}};
+    Tensor qb = {{5.,7.,9.},{5.,7.,9.}};
+    Tensor qd = {2.,2.};
     
     VariableTensor va(a);
     VariableTensor vb(b);
@@ -111,38 +102,142 @@ TEST(MyTestCase, TestLinearGrad)
     op1.set_inputs( &vb );
     op1.set_inputs( &vd );
     
-    op1.grad = xt::ones<fprec>( {2,2} );
+    op1.forward();
+    auto z = op1.output;
+    
+    op1.grad = xt::ones_like( z );
     op1.backward();
     
-    auto& ga = va.grad;
-    auto& gb = vb.grad;
-    auto& gd = vd.grad;
-    //cout<<"ga"<<ga<<endl;
-    //cout<<"gb"<<gb<<endl;
-    //cout<<"gd"<<gd<<endl;
-    
-    Tensor qa = {{5.,7.,9.},{5.,7.,9.}};
-    Tensor qb = {{5.,7.,9.},{5.,7.,9.}};
-    Tensor qd = {2.,2.};
-
-    auto itr1 = ga.begin();
-    auto itr2 = qa.begin();
-    while( itr1 != ga.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
-    }
-    
-    auto itr3 = gb.begin();
-    auto itr4 = qb.begin();
-    while( itr3 != gb.end() ){ 
-        EXPECT_EQ( *itr3++, *itr4++);
-    }
-    
-    auto itr5 = gd.begin();
-    auto itr6 = qd.begin();
-    while( itr5 != gd.end() ){ 
-        EXPECT_EQ( *itr5++, *itr6++);
-    }
+    expect_eq4( "linear2", z, va.grad, vb.grad, vd.grad, q, qa, qb, qd );
 }
+
+// linear
+//  a * b_t + d : batched matrix x matrix + vector
+TEST(MyTestCase, TestLinear3) 
+{
+    Tensor a = {{1.,2.,3.}, {4.,5.,6.}, {7.,8.,9.}};
+    Tensor b = {{1.,2.,3.}, {4.,5.,6.}};  //xt::transpose(a);
+    Tensor d =  {1.,2.};
+    
+    Tensor q  = {{  15.,   34.},
+                 {  33.,   79.},
+                 {  51.,  124.}};
+    Tensor qa = {{ 5.,  7.,  9.},
+                 { 5.,  7.,  9.},
+                 { 5.,  7.,  9.}};
+    Tensor qb = {{ 12.,  15.,  18.},
+                 { 12.,  15.,  18.}};
+    Tensor qd =  { 3.,  3.};
+    
+    VariableTensor va(a);
+    VariableTensor vb(b);
+    VariableTensor vd(d);
+    
+    LinearOp  op1;
+    op1.set_inputs( &va );
+    op1.set_inputs( &vb );
+    op1.set_inputs( &vd );
+    
+    op1.forward();
+    auto z = op1.output;
+    
+    op1.grad = xt::ones_like( z );
+    op1.backward();
+    
+    expect_eq4( "linear3", z, va.grad, vb.grad, vd.grad, q, qa, qb, qd );
+}
+
+// ----- addmm
+
+std::tuple<Tensor,Tensor,Tensor,Tensor> do_addmm( Tensor &m1, Tensor& m2, Tensor& inp, fprec alpha=1.0, fprec beta=1.0 )
+{
+    VariableTensor v1(m1);
+    VariableTensor v2(m2);
+    VariableTensor v3(inp);
+    VariableTensor v4(alpha);  
+    VariableTensor v5(beta);  
+    
+    AddMmOp  op1;
+    op1.set_inputs( &v3 );
+    op1.set_inputs( &v1 );
+    op1.set_inputs( &v2 );
+    op1.set_inputs( &v5 );
+    op1.set_inputs( &v4 );
+    op1.forward();
+    
+    op1.grad = xt::ones_like( op1.output );
+    op1.backward();
+    
+    return std::make_tuple( op1.output, v1.grad, v2.grad, v3.grad);
+}
+
+// addmm ( add matrix )
+TEST(MyTestCase, TestAddmm1) 
+{
+    Tensor mat1 = xt::arange<fprec>(1., 7.).reshape({2,3} );
+    Tensor mat2 = xt::arange<fprec>(1.,10.).reshape({3,3});
+    Tensor inp1 = xt::ones<fprec>({2,3});
+    
+    Tensor q =  {{ 31.,  37.,  43.},
+                 { 67.,  82.,  97.}};
+    Tensor qa = {{  6.,  15.,  24.},
+                 {  6.,  15.,  24.}};
+    Tensor qb = {{ 5.,  5.,  5.},
+                 { 7.,  7.,  7.},
+                 { 9.,  9.,  9.}};
+    Tensor qd = {{ 1.,  1.,  1.},
+                 { 1.,  1.,  1.}};
+    
+    Tensor z,ga,gb,gd;
+    std::tie(z,ga,gb,gd) = do_addmm( mat1,mat2, inp1 );
+    
+    expect_eq4( "addmm  ", z, ga, gb, gd, q, qa, qb, qd );
+}
+
+// addmm ( add vector )
+TEST(MyTestCase, TestAddmm2) 
+{
+    Tensor mat1 = xt::arange<fprec>(1., 7.).reshape({2,3} );
+    Tensor mat2 = xt::arange<fprec>(1.,10.).reshape({3,3});
+    Tensor inp1 = xt::arange<fprec>(1.,4.);
+    
+    Tensor q =  {{ 31.,  38.,  45.},
+                 { 67.,  83.,  99.}};
+    Tensor qa = {{  6.,  15.,  24.},
+                 {  6.,  15.,  24.}};
+    Tensor qb = {{ 5.,  5.,  5.},
+                 { 7.,  7.,  7.},
+                 { 9.,  9.,  9.}};
+    Tensor qd =  { 2.,  2.,  2.};
+    
+    Tensor z,ga,gb,gd;
+    std::tie(z,ga,gb,gd) = do_addmm( mat1,mat2, inp1 );
+    
+    expect_eq4( "addmm  ",z, ga, gb, gd, q, qa, qb, qd );
+}
+
+// addmm ( add constant )
+TEST(MyTestCase, TestAddmm3) 
+{
+    Tensor mat1 = xt::arange<fprec>(1., 7.).reshape({2,3} );
+    Tensor mat2 = xt::arange<fprec>(1.,10.).reshape({3,3});
+    Tensor inp1 = xt::ones<fprec>({1});
+    
+    Tensor q =  {{ 31.,  37.,  43.},
+                 { 67.,  82.,  97.}};
+    Tensor qa = {{  6.,  15.,  24.},
+                 {  6.,  15.,  24.}};
+    Tensor qb = {{ 5.,  5.,  5.},
+                 { 7.,  7.,  7.},
+                 { 9.,  9.,  9.}};
+    Tensor qd =  { 6.};
+    
+    Tensor z,ga,gb,gd;
+    std::tie(z,ga,gb,gd) = do_addmm( mat1,mat2, inp1 );
+    
+    expect_eq4( "addmm  ",z, ga, gb, gd, q, qa, qb, qd );
+}
+
 
 // ----- batchnorm -----
 
@@ -275,11 +370,7 @@ TEST(MyTestCase, TestBatchNorm)
     auto q = calc_batch_norm1( true, x, gamma, beta, mean, var );
     //cout<<"q"<<q<<endl;
     
-    auto itr1 = y.begin();
-    auto itr2 = q.begin();
-    while( itr1 != y.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
-    }
+    expect_eq1( y, q );
 }
 
 TEST(MyTestCase, TestBatchNormGrad) 
@@ -295,16 +386,12 @@ TEST(MyTestCase, TestBatchNormGrad)
     Tensor var   = xt::abs( xt::random::randn<fprec>( {n2} ) );
     
     auto y = diff_batch_norm( x, gamma, beta, mean, var );
-    cout<<"y"<<y<<endl;
+    //cout<<"y"<<y<<endl;
     
     auto q = diff_batch_norm1( true, x, gamma, beta, mean, var );
-    cout<<"q"<<q<<endl;
+    //cout<<"q"<<q<<endl;
     
-    auto itr1 = y.begin();
-    auto itr2 = q.begin();
-    while( itr1 != y.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
-    }
+    expect_eq1( y, q );
 }
 
 // ----- droout -----
@@ -369,11 +456,7 @@ TEST(MyTestCase, TestDropout)
     auto q = calc_dropout1( true, a, op1.dropout );
     //cout<<"q"<<q<<endl;
     
-    auto itr1 = y.begin();
-    auto itr2 = q.begin();
-    while( itr1 != y.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
-    }
+    expect_eq1( y, q );
 }
 
 TEST(MyTestCase, TestDropoutGrad) 
@@ -397,9 +480,5 @@ TEST(MyTestCase, TestDropoutGrad)
     auto q = diff_dropout1( true, a, op1.dropout );
     //cout<<"q"<<q<<endl;
     
-    auto itr1 = g.begin();
-    auto itr2 = q.begin();
-    while( itr1 != g.end() ){ 
-        EXPECT_EQ( *itr1++, *itr2++);
-    }
+    expect_eq1( g, q );
 }

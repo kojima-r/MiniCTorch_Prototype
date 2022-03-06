@@ -2,36 +2,7 @@
 #include "minictorch.hpp"
 
 
-/*
-Tensor numerial_diff_relu( Tensor& x, fprec eps=1.0e-4 )
-{
-    auto grad = xt::zeros_like( x );
-    
-    auto itr  = x.begin();
-    auto itr1 = grad.begin();
-    auto itr2 = itr1;
-    int l=0;
-    while( itr != x.end() )
-    {
-        fprec  tmp = *itr;
-        *itr = tmp + eps;
-        
-        Tensor x1 = calc_relu( x );
-        
-        *itr = tmp - eps;
-        Tensor x2 = calc_relu( x );
-        
-        fprec diff = x1[l] - x2[l];
-        *itr2 = diff/(2.0*eps);
-        //cout<<"diff"<<*itr2<<","<<l<<","<<x1[l]<<","<<x2[l]<<endl;
-        
-        *itr = tmp;
-        itr++;  itr2++; l++;
-    }
-    
-    //cout<<"grad"<<grad<<endl;
-    return grad;
-}*/
+// ----- numerical differentiation -------
 
 Tensor numerial_diff( Tensor& x, Tensor(*func)(Tensor &a), fprec eps=1.0e-3 )
 {
@@ -137,6 +108,40 @@ bool allclose( fprec a, fprec b, fprec atol=1.0e-5, fprec rtol=1.0e-8 )
     return ( fabs(a-b) < eps );
 }
 
+// ----- expect check -----
+
+inline void expect_eq1( string s, Tensor& z, Tensor& q )
+{
+    //cout<<"z"<<z<<endl;
+    
+    auto itr1 = z.begin();
+    auto itr2 = q.begin();
+    while( itr1 != z.end() ){
+        //cout<<s<<*itr1<<","<<*itr2<<endl;
+        EXPECT_EQ( *itr1++, *itr2++ );
+    }
+}
+
+inline void expect_diff( string s, Tensor& g1, Tensor& g2, fprec tol=1.0e-3 )
+{
+    //fprec tol = 1.0e-3;
+    bool  res = true;
+    
+    auto itr1 = g1.begin();
+    auto itr2 = g2.begin();
+    while( itr1 != g1.end() ){ 
+        //bool b = allclose( *itr1, *itr2, 1.0e-3, 1.0e-5 );
+        //if( !b ) res = false;
+        //cout<<s<<*itr1<<","<<*itr2<<endl;
+        fprec g = fabs( *itr1 - *itr2 );
+        EXPECT_LE( g, tol );
+        //EXPECT_EQ( *itr1, *itr2 );
+        itr1++; itr2++;
+    }
+    
+    if( !res ) fail_msg( g1, g2 );
+}
+
 // ----- relu -----
 
 Tensor calc_relu( Tensor& a )
@@ -166,13 +171,7 @@ TEST(MyTestCase, TestRelu)
     
     Tensor z = calc_relu( a );
     
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        //cout<<"relu"<<*itr1<<","<<*itr2<<endl;
-        EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
+    expect_eq1( "relu", z, q );
 }
 
 TEST(MyTestCase, TestReluGrad) 
@@ -182,15 +181,7 @@ TEST(MyTestCase, TestReluGrad)
     
     Tensor g1 = diff_relu( a );
     
-    fprec tol = 1.0e-3;
-    auto itr1 = g1.begin();
-    auto itr2 = q.begin();
-    while( itr1 != g1.end() ){ 
-        //fprec g = fabs( *itr1 - *itr2 );
-        //EXPECT_LE( g, tol );
-        EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
+    expect_eq1( "relu", g1, q );
 }
 
 TEST(MyTestCase, TestReluGrad2) 
@@ -200,21 +191,7 @@ TEST(MyTestCase, TestReluGrad2)
     Tensor g1 = diff_relu( a );
     Tensor g2 = numerial_diff( a, calc_relu );
     
-    fprec tol = 1.0e-3;
-    bool res = true;
-    auto itr1 = g1.begin();
-    auto itr2 = g2.begin();
-    while( itr1 != g1.end() ){ 
-        //bool b = allclose( *itr1, *itr2, 1.0e-3, 1.0e-5 );
-        //if( !b ) res = false;
-        //cout<<"relu_diff "<<*itr1<<","<<*itr2<<endl;
-        fprec g = fabs( *itr1 - *itr2 );
-        EXPECT_LE( g, tol );
-        //EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
-    
-    if( !res ) fail_msg( g1, g2 );
+    expect_diff( "relu_diff ", g1, g2 );
 }
 
 // ----- elu -----
@@ -270,13 +247,7 @@ TEST(MyTestCase, TestElu)
     
     Tensor z = calc_elu( a );
     
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        //cout<<"elu"<<*itr1<<","<<*itr2<<endl;
-        EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
+    expect_eq1( "elu", z, q );
 }
 
 TEST(MyTestCase, TestEluGrad) 
@@ -294,12 +265,7 @@ TEST(MyTestCase, TestEluGrad)
     
     Tensor g = diff_elu( a );
     
-    auto itr1 = g.begin();
-    auto itr2 = q.begin();
-    while( itr1 != g.end() ){ 
-        EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
+    expect_eq1( " grad", g, q );
 }
 
 TEST(MyTestCase, TestEluGrad2) 
@@ -309,21 +275,7 @@ TEST(MyTestCase, TestEluGrad2)
     Tensor g1 = diff_elu( a );
     Tensor g2 = numerial_diff1( a, calc_elu, 1.0 );
     
-    fprec tol = 1.0e-3;
-    bool res = true;
-    auto itr1 = g1.begin();
-    auto itr2 = g2.begin();
-    while( itr1 != g1.end() ){ 
-        //bool b = allclose( *itr1, *itr2, 1.0e-3, 1.0e-5 );
-        //if( !b ) res = false;
-        //cout<<"elu_diff "<<*itr1<<","<<*itr2<<endl;
-        fprec g = fabs( *itr1 - *itr2 );
-        EXPECT_LE( g, tol );
-        //EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
-    
-    if( !res ) fail_msg( g1, g2 );
+    expect_diff( "elu_diff ", g1, g2 );
 }
 
 // ----- leaky_relu -----
@@ -379,13 +331,7 @@ TEST(MyTestCase, TestLeakyRelu)
     
     Tensor z = calc_leaky_relu( a );
     
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        //cout<<"leaky_relu"<<*itr1<<","<<*itr2<<endl;
-        EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
+    expect_eq1( "leaky_relu", z, q );
 }
 
 TEST(MyTestCase, TestLeakyReluGrad) 
@@ -403,13 +349,7 @@ TEST(MyTestCase, TestLeakyReluGrad)
     
     Tensor g = diff_leaky_relu( a );
     
-    auto itr1 = g.begin();
-    auto itr2 = q.begin();
-    while( itr1 != g.end() ){ 
-        //cout<<"leaky_relu "<<*itr1<<","<<*itr2<<endl;
-        EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
+    expect_eq1( "leaky_relu grad", g, q );
 }
 
 TEST(MyTestCase, TestLeakyReluGrad2) 
@@ -419,21 +359,7 @@ TEST(MyTestCase, TestLeakyReluGrad2)
     Tensor g1 = diff_leaky_relu( a );
     Tensor g2 = numerial_diff1( a, calc_leaky_relu, 0.01 );
     
-    fprec tol = 1.0e-3;
-    bool res = true;
-    auto itr1 = g1.begin();
-    auto itr2 = g2.begin();
-    while( itr1 != g1.end() ){ 
-        //bool b = allclose( *itr1, *itr2, 1.0e-3, 1.0e-5 );
-        //if( !b ) res = false;
-        //cout<<"leaky_relu_diff "<<*itr1<<","<<*itr2<<endl;
-        fprec g = fabs( *itr1 - *itr2 );
-        EXPECT_LE( g, tol );
-        //EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
-    
-    if( !res ) fail_msg( g1, g2 );
+    expect_diff( "leakyrelu_diff ", g1, g2 );
 }
 
 // ----- hardtanh(relu6) -----
@@ -494,13 +420,7 @@ TEST(MyTestCase, TestHardTanh)
     
     Tensor z = calc_hard_tanh( a );
     
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        //cout<<"hard_tanh "<<*itr1<<","<<*itr2<<endl;
-        EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
+    expect_eq1( "harftanh", z, q );
 }
 
 TEST(MyTestCase, TestHardTanhGrad) 
@@ -517,13 +437,7 @@ TEST(MyTestCase, TestHardTanhGrad)
     
     Tensor g = diff_hard_tanh( a );
     
-    auto itr1 = g.begin();
-    auto itr2 = q.begin();
-    while( itr1 != g.end() ){ 
-        //cout<<"hard_tanh "<<*itr1<<","<<*itr2<<endl;
-        EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
+    expect_eq1( "harftanh gard", g, q );
 }
 
 TEST(MyTestCase, TestHardTanhGrad2) 
@@ -533,21 +447,7 @@ TEST(MyTestCase, TestHardTanhGrad2)
     Tensor g1 = diff_hard_tanh( a );
     Tensor g2 = numerial_diff2( a, calc_hard_tanh, 0.0, 6.0 );
     
-    fprec tol = 1.0e-3;
-    bool res = true;
-    auto itr1 = g1.begin();
-    auto itr2 = g2.begin();
-    while( itr1 != g1.end() ){ 
-        //bool b = allclose( *itr1, *itr2, 1.0e-3, 1.0e-5 );
-        //if( !b ) res = false;
-        //cout<<"hard_tanh_diff "<<*itr1<<","<<*itr2<<endl;
-        fprec g = fabs( *itr1 - *itr2 );
-        EXPECT_LE( g, tol );
-        //EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
-    
-    if( !res ) fail_msg( g1, g2 );
+    expect_diff( "hardtanh_diff ", g1, g2 );
 }
 
 // ----- tanh -----
@@ -586,13 +486,7 @@ TEST(MyTestCase, TestTanh)
     
     Tensor z = calc_tanh( a );
     
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        //cout<<"tanh "<<*itr1<<","<<*itr2<<endl;
-        EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
+    expect_eq1( "tanh", z, q );
 }
 
 TEST(MyTestCase, TestTanhGrad) 
@@ -610,13 +504,7 @@ TEST(MyTestCase, TestTanhGrad)
     
     Tensor g = diff_tanh( a );
     
-    auto itr1 = g.begin();
-    auto itr2 = q.begin();
-    while( itr1 != g.end() ){ 
-        //cout<<"tanh "<<*itr1<<","<<*itr2<<endl;
-        EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
+    expect_eq1( "tanh gard", g, q );
 }
 
 TEST(MyTestCase, TestTanhGrad2) 
@@ -626,21 +514,7 @@ TEST(MyTestCase, TestTanhGrad2)
     Tensor g1 = diff_tanh( a );
     Tensor g2 = numerial_diff( a, calc_tanh );
     
-    fprec tol = 1.0e-3;
-    bool res = true;
-    auto itr1 = g1.begin();
-    auto itr2 = g2.begin();
-    while( itr1 != g1.end() ){ 
-        //bool b = allclose( *itr1, *itr2, 1.0e-3, 1.0e-5 );
-        //if( !b ) res = false;
-        //cout<<"hard_tanh_diff "<<*itr1<<","<<*itr2<<endl;
-        fprec g = fabs( *itr1 - *itr2 );
-        EXPECT_LE( g, tol );
-        //EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
-    
-    if( !res ) fail_msg( g1, g2 );
+    expect_diff( "tanh_diff ", g1, g2 );
 }
 
 // ----- softplus -----
@@ -699,13 +573,7 @@ TEST(MyTestCase, TestSoftPlus)
     
     Tensor z = calc_softplus( a );
     
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        //cout<<"softplus "<<*itr1<<","<<*itr2<<endl;
-        EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
+    expect_eq1( "softplus", z, q );
 }
 
 TEST(MyTestCase, TestSoftPlusGrad) 
@@ -721,15 +589,8 @@ TEST(MyTestCase, TestSoftPlusGrad)
     }
     
     Tensor g = diff_softplus( a );
-    //cout<<"softplus "<<g<<endl;
     
-    auto itr1 = g.begin();
-    auto itr2 = q.begin();
-    while( itr1 != g.end() ){ 
-        //cout<<"softplus "<<*itr1<<","<<*itr2<<endl;
-        EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
+    expect_eq1( "softplus grad", g, q );
 }
 
 TEST(MyTestCase, TestSoftPlusGrad2) 
@@ -739,21 +600,7 @@ TEST(MyTestCase, TestSoftPlusGrad2)
     Tensor g1 = diff_softplus( a );
     Tensor g2 = numerial_diff2( a, calc_softplus,1.0, 20.0 );
     
-    fprec tol = 1.0e-3;
-    bool res = true;
-    auto itr1 = g1.begin();
-    auto itr2 = g2.begin();
-    while( itr1 != g1.end() ){ 
-        //bool b = allclose( *itr1, *itr2, 1.0e-3, 1.0e-5 );
-        //if( !b ) res = false;
-        //cout<<"hard_tanh_diff "<<*itr1<<","<<*itr2<<endl;
-        fprec g = fabs( *itr1 - *itr2 );
-        EXPECT_LE( g, tol );
-        //EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
-    
-    if( !res ) fail_msg( g1, g2 );
+    expect_diff( "softplus_diff ", g1, g2 );
 }
 
 // ----- sigmoid -----
@@ -802,13 +649,7 @@ TEST(MyTestCase, TestSigmoid)
     
     Tensor z = calc_sigmoid( a );
     
-    auto itr1 = z.begin();
-    auto itr2 = q.begin();
-    while( itr1 != z.end() ){ 
-        //cout<<"sigmoid"<<*itr1<<","<<*itr2<<endl;
-        EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
+    expect_eq1( "sigmoid", z, q );
 }
 
 TEST(MyTestCase, TestSigmoidGrad) 
@@ -824,14 +665,7 @@ TEST(MyTestCase, TestSigmoidGrad)
     
     Tensor g = diff_sigmoid( a );
     
-    fprec tol = 1.0e-3;
-    auto itr1 = g.begin();
-    auto itr2 = q.begin();
-    while( itr1 != g.end() ){ 
-        //cout<<"diff_sigmoid"<<*itr1<<","<<*itr2<<endl;
-        EXPECT_EQ( *itr1, *itr2 );
-        itr1++; itr2++;
-    }
+    expect_eq1( "sigmoid grad", g, q );
 }
 
 TEST(MyTestCase, TestSigmoidGrad2) 
@@ -842,16 +676,5 @@ TEST(MyTestCase, TestSigmoidGrad2)
     Tensor g1 = diff_sigmoid( a );
     Tensor g2 = numerial_diff( a, calc_sigmoid );
     
-    fprec tol = 1.0e-3;
-    bool res = true;
-    auto itr1 = g1.begin();
-    auto itr2 = g2.begin();
-    while( itr1 != g1.end() ){ 
-        //cout<<"sigmoid_diff "<<*itr1<<","<<*itr2<<endl;
-        fprec g = fabs( *itr1 - *itr2 );
-        EXPECT_LE( g, tol );
-        itr1++; itr2++;
-    }
-    
-    if( !res ) fail_msg( g1, g2 );
+    expect_diff( "sigmoid_diff ", g1, g2 );
 }
