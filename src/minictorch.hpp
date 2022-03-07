@@ -154,8 +154,9 @@ public:
     {
         if( inputs[k] )
         {
-            check_grad_shape_size( s, id, inputs[k]->output, inputs[k]->grad );
+            return check_grad_shape_size( s, id, inputs[k]->output, inputs[k]->grad );
         }
+        return -1;
     }
     virtual int check_shape() {};
     virtual int check_grad_shape() {};
@@ -501,6 +502,7 @@ public:
                 }
             }
         }
+        return 1;
     }
 };
 
@@ -889,6 +891,7 @@ public:
     {
         check_grad_shape1( "add grad a", 0 );
         check_grad_shape1( "add grad b", 1 );
+        return 1;
     }
 };
 
@@ -943,6 +946,7 @@ public:
     {
         check_grad_shape1( "sub grad a", 0 );
         check_grad_shape1( "sub grad b", 1 );
+        return 1;
     }
 };
 
@@ -998,6 +1002,7 @@ public:
     {
         check_grad_shape1( "mul grad a", 0 );
         check_grad_shape1( "mul grad b", 1 );
+        return 1;
     }
 };
 
@@ -1055,6 +1060,7 @@ public:
     {
         check_grad_shape1( "div grad a", 0 );
         check_grad_shape1( "div grad b", 1 );
+        return 1;
     }
 };
 
@@ -1171,7 +1177,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "pow grad", 0 );
+        return check_grad_shape1( "pow grad", 0 );
     }
 };
 
@@ -1296,8 +1302,8 @@ public:
     bool forward()  { return true; }
     bool backward() { return true; }
     
-    int check_shape() {}
-    int check_grad_shape() {}
+    int check_shape() { return 1; }
+    int check_grad_shape() { return 1; }
 };
 
 class DotOp:public MCTNode{ // 220303 add
@@ -1365,6 +1371,7 @@ class DotOp:public MCTNode{ // 220303 add
     {
         check_grad_shape1( "dot grad a", 0 );
         check_grad_shape1( "dot grad b", 1 );
+        return 1;
     }
 };
 
@@ -1529,6 +1536,7 @@ public:
     {
         check_grad_shape1( "matmul grad a", 0 );
         check_grad_shape1( "matmul grad b", 1 );
+        return 1;
     }
 };
 
@@ -1669,6 +1677,7 @@ public:
         check_grad_shape1( "linear grad x", 0 );
         check_grad_shape1( "linear grad w", 1 );
         check_grad_shape1( "linear grad b", 2 );
+        return 1;
     }
     
     /* 220120 del
@@ -1805,6 +1814,7 @@ public:
         check_grad_shape1( "addmm grad b", 0 );
         check_grad_shape1( "addmm grad x", 1 );
         check_grad_shape1( "addmm grad w", 2 );
+        return 1;
     }
 };
 
@@ -1971,6 +1981,7 @@ class MatMulOp:public MatMulBase{
     {
         check_grad_shape1( "matmul grad a", 0 );
         check_grad_shape1( "matmul grad b", 1 );
+        return 1;
     }
 };
 
@@ -2082,6 +2093,7 @@ class LinearOp:public MatMulBase{
         check_grad_shape1( "linear grad x", 0 );
         check_grad_shape1( "linear grad w", 1 );
         check_grad_shape1( "linear grad b", 2 );
+        return 1;
     }
     
     /* 220120 del
@@ -2189,6 +2201,7 @@ class AddMmOp:public MatMulBase{
         check_grad_shape1( "addmm grad b", 0 );
         check_grad_shape1( "addmm grad x", 1 );
         check_grad_shape1( "addmm grad w", 2 );
+        return 1;
     }
 };
 
@@ -2218,7 +2231,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "transpose grad", 0 );
+        return check_grad_shape1( "transpose grad", 0 );
     }
 };
 
@@ -2263,7 +2276,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "max grad", 0 );
+        return check_grad_shape1( "max grad", 0 );
     }
 };
 
@@ -2306,7 +2319,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "min grad", 0 );
+        return check_grad_shape1( "min grad", 0 );
     }
 };
 
@@ -2334,7 +2347,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "sigmoid grad", 0 );
+        return check_grad_shape1( "sigmoid grad", 0 );
     }
 };
 
@@ -2362,7 +2375,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "relu grad", 0 );
+        return check_grad_shape1( "relu grad", 0 );
     }
 };
 
@@ -2401,7 +2414,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "hardtanh grad", 0 );
+        return check_grad_shape1( "hardtanh grad", 0 );
     }
 };
 
@@ -2441,7 +2454,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "elu grad", 0 );
+        return check_grad_shape1( "elu grad", 0 );
     }
 };
 
@@ -2481,7 +2494,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "leakyrelu grad", 0 );
+        return check_grad_shape1( "leakyrelu grad", 0 );
     }
 };
 
@@ -2526,7 +2539,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "softplus grad", 0 );
+        return check_grad_shape1( "softplus grad", 0 );
     }
 };
 
@@ -2554,7 +2567,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "tanh grad", 0 );
+        return check_grad_shape1( "tanh grad", 0 );
     }
 };
 
@@ -2640,7 +2653,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "softmax grad", 0 );
+        return check_grad_shape1( "softmax grad", 0 );
     }
 };
 
@@ -2674,7 +2687,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "logsoftmax grad", 0 );
+        return check_grad_shape1( "logsoftmax grad", 0 );
     }
 };
 
@@ -3040,6 +3053,7 @@ public:
         check_grad_shape1( "batchnorm grad x", 0 );
         check_grad_shape1( "batchnorm grad gamma", 1 );
         check_grad_shape1( "batchnorm grad beta", 2 );
+        return 1;
     }
     /* 220120 del
     void update( fprec delta )
@@ -3111,7 +3125,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "dropout grad", 0 );
+        return check_grad_shape1( "dropout grad", 0 );
     }
 };
 
@@ -3607,6 +3621,7 @@ public:
                 }
             }
         }
+        return 1;
     }
 };
 
@@ -3733,6 +3748,7 @@ public:
                 check_grad_shape_size( s, id, a1, g1 );
             }
         }
+        return 1;
     }
 };
 
@@ -3954,7 +3970,7 @@ public:
     }
     int check_grad_shape()
     {
-        check_grad_shape1( "view grad", 0 );
+        return check_grad_shape1( "view grad", 0 );
     }
 };
 
