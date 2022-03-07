@@ -158,8 +158,8 @@ public:
         }
         return -1;
     }
-    virtual int check_shape() {};
-    virtual int check_grad_shape() {};
+    virtual int check_shape()      { return 1; }
+    virtual int check_grad_shape() { return 1; }
     
     // for debug
     void print_message( const char* msg ) 
