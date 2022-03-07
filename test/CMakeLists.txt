@@ -33,7 +33,7 @@ add_executable(example-test
 
 target_link_libraries(example-test
     PRIVATE
-    cblas
+    blas
     gtest_main)
 
 target_include_directories(example-test
