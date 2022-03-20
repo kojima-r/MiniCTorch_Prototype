@@ -720,8 +720,7 @@ def get_unpack_origin( obj, no1, inout ):
         el = obj[no]
         if el["op"] == 'prim::ListUnpack' or el["op"] == 'prim::TupleUnpack':
             no = unpack_origin_no( obj, no )
-        elif el["op"] == 'prim::ListConstruct':  # 220203 add
-            #no = unpack_origin_no( obj, no )
+        elif el["op"] == 'prim::ListConstruct':
             for j in range(len(el['in'])):
                 k = get_unpack_origin( obj, el['in'][j], inout )
                 if inout[k] == 1: return k
@@ -873,7 +872,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         pred_pos = pos1
     elif pos2 > 0:
         pred_pos = pos2
-    if pos1 > pos2:  pred_pos = -1  # 220127 add
+    if pos1 > pos2:  pred_pos = -1
     print("pred_pos : ",pred_pos,pos1,pos2,output_id)
     
     # inout option ( 0:input only, 1:input and output both )
@@ -929,7 +928,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         if   el['op'] == 'aten::mse_loss':  type = 1
         elif el['op'] == 'aten::cross_entropy_loss':    type = 2
         elif el['op'] == 'aten::binary_cross_entropy':  type = 2
-        elif el['op'] == 'aten::nll_loss_nd':  type = 3  # 220203 add
+        elif el['op'] == 'aten::nll_loss_nd':  type = 3
         else:  type = 4
         print("loss pred_id : ",pred_id,pred_max)
         if type > 0:
@@ -938,7 +937,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
                 no2 = get_unpack_origin( obj, el['in'][1], inout )
                 if target_opt > 0: target_no = no2
                 if type == 2:      class_no  = no2
-                if type == 3:      class_no  = no2  # 220203 add
+                if type == 3:      class_no  = no2
         if pred_no > 0:  
             print("eval1 no :",i," (type=",type,") : ", pred_no,target_no)
             
@@ -962,14 +961,12 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
                         if type == 2:      class_no  = no2
                         if type == 3:      class_no  = no2
                 if pred_no > 0:  
-                    if type == 3: pred_no = -1  #220127 add
+                    if type == 3: pred_no = -1
                     print("eval2 no :",i,"-> type=",type," : ",pred_no,target_no)
                     break
             
         
     print("last cmd:", last)
-    #if len(set_no) > 0:
-    #    print("set_no :", sorted(set_no,reverse=True))
     print("------")
         
     ###
