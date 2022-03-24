@@ -16,10 +16,10 @@
 #include <xtensor-blas/xlinalg.hpp>
 
 
-//#define fprec float // 220308 mod
 typedef  float  fprec;
 typedef  xt::xarray<fprec>  Tensor;
 typedef  xt::xarray<fprec>::shape_type  Tshape;
+typedef  xt::xarray<bool>   Tbool;
 
 extern bool train_mode;
 
@@ -27,7 +27,17 @@ using namespace std;
 
 #define DOT(a,b)  (xt::linalg::dot(a,b))
 
-enum
+
+enum Evariable  // VariableTensor type
+{
+    VAR_NODE     = 0,  // node
+    VAR_CONST    = 1,  // constant
+    VAR_ATTR     = 2,  // attribute
+    VAR_INPUT    = 3,  // input_var
+    VAR_RUNNING  = 4   // running_*(batchnorm)
+};
+
+enum Eshape  // Broadcast type
 {
     SHAPE_ACCEPT     =  0,  // そのまま継続実行
     SHAPE_BROADCAST  =  1,  // Broadcastして実行 (1:A,2:B,3:A and B)
@@ -39,11 +49,11 @@ class MCTNode {
 public:
     MCTNode()
     {
-        //frontcnt = 0;
-        //backcnt  = 0;
         id = -1;    // for check
         grad = 0;   // 
         ntype = 0;
+        //frontcnt = 0;
+        //backcnt  = 0;
     }
     virtual bool forward()
     {
@@ -55,14 +65,14 @@ public:
         cout<<"not implemented: backward"<<endl;
         return false;
     }
-    vector<MCTNode*> inputs;  // 220308 mod
-    string name;  // 220308 mod
-    Tensor output;
-    Tensor grad;
+    vector<MCTNode*>  inputs;
+    string  name;
+    Tensor  output;
+    Tensor  grad;
     //int    frontcnt;
     //int    backcnt;
-    int    id;    // for check
-    int    ntype; // 0: node, 1:constant, 2: attribute, 3: input_var 4:running_*(batchnorm)
+    int    id;  // for check
+    unsigned int ntype; // Variable tensor type
     
     void set_inputs( MCTNode *node )
     {
@@ -84,13 +94,13 @@ public:
         //this->grad = xt::zeros_like( output );
         this->grad = 0.;
     }
-    Tensor& get_output()    { return output; }
-    void set_ntype( int t ) { ntype=t; };
+    Tensor& get_output() { return output; }
+    void set_ntype( unsigned int t ) { ntype=t; };
     bool is_grad()
     {
         switch( ntype ) {
-        case 1:  // constant
-        case 4:  // running_*
+        case VAR_CONST:   // constant
+        case VAR_RUNNING: // running_*
             return false;
         }
         return true;
@@ -103,14 +113,15 @@ public:
         if( az > 0 ) 
         {
             int inc = n_dim - az;
-            for(int i=0;i<az;i++)  na[inc+i] = as[i];
+            for(unsigned int i=0;i<az;i++)  na[inc+i] = as[i];
         }
     }
     
-    // shape check utility function
+    // shape check utility functions
     Tshape out_shape;
     void set_shape( Tshape s ) { out_shape = s; };
-    int  check_shape_size( string ss, int id, Tshape sh1, Tshape sh2, int size2 )
+    
+    enum Eshape check_shape_size( string ss, int id, Tshape sh1, Tshape sh2, int size2 )
     {
         int sz1 = sh1.size();
         if( sz1 < 1 )  return SHAPE_ACCEPT;
@@ -150,21 +161,21 @@ public:
         }
         return SHAPE_BROADCAST;
     }
-    int check_grad_shape_size( string s, int id, Tensor& ga, Tensor& gb )
+    enum Eshape check_grad_shape_size( string s, int id, Tensor& ga, Tensor& gb )
     {
         return check_shape_size( s, id, ga.shape(), gb.shape(), gb.size() );
     }
-    int check_shape1( string s )
+    enum Eshape check_shape1( string s )
     {
         return check_shape_size( s, id, out_shape, output.shape(), output.size() );
     }
-    int check_grad_shape1( string s, int k=0 )
+    enum Eshape check_grad_shape1( string s, int k=0 )
     {
         if( inputs[k] )
         {
             return check_grad_shape_size( s, id, inputs[k]->output, inputs[k]->grad );
         }
-        return -1;
+        return SHAPE_ERROR;
     }
     virtual void check_shape()      {}
     virtual void check_grad_shape() {}
@@ -196,7 +207,7 @@ public:
     void print_shape1( string s, Tshape &xs )
     {
         cout<<s<<" (";
-        for(int i=0;i<xs.size();i++){
+        for(unsigned int i=0;i<xs.size();i++){
             cout<<xs[i]<<",";
         }
         cout<<")"<<endl;
@@ -256,18 +267,18 @@ class VariableTensor : public MCTNode {
 public:
     VariableTensor(){}
     
-    VariableTensor( Tensor tensor, int t=0 ) 
+    VariableTensor( Tensor tensor, unsigned int t=VAR_NODE ) 
     {
         this->output = tensor;
         this->ntype = t;
         this->grad = xt::zeros_like( output );
     }
-    VariableTensor( string name, Tensor tensor, int t=0 )
+    VariableTensor( string name, Tensor tensor, unsigned int t=VAR_NODE )
     {
         this->output = tensor;
-        this->name = name;
-        this->ntype = t;
-        this->grad = xt::zeros_like( output );
+        this->name   = name;
+        this->ntype  = t;
+        this->grad   = xt::zeros_like( output );
     }
     bool forward()  { return true; }
     bool backward() { return true; }
@@ -276,7 +287,7 @@ public:
     void update( fprec delta ) 
     {
         switch( ntype ) {
-        case 2:  // attribute
+        case VAR_ATTR:  // attribute
             output = output - delta * grad;
             break;
         }
@@ -286,7 +297,7 @@ public:
 class SumOp : public MCTNode {
 public:
     SumOp( int ax=-1 ) { axis = ax; }
-    int axis;  // sum kind  -1:all 0:row 1:column
+    int axis;  // sum kind  -1:all, 0:row, 1:column
     
     bool forward()
     {
@@ -311,15 +322,12 @@ public:
         Tensor a  = inputs[0]->output;
         Tshape as = a.shape();
         
-        //cout<<"sum axis"<<axis<<endl;
         if( axis >=0  ) { 
             Tensor e = xt::expand_dims( this->grad, axis );
             Tensor g = xt::repeat( e, as[axis], axis );
             inputs[0]->grad = g;
         } else {
             inputs[0]->grad = xt::full_like( a, (fprec)this->grad[0] );
-            //cout<<"g"<<inputs[0]->grad<<endl;
-            
         }
         _backward_inputs();
         return true;
@@ -329,7 +337,7 @@ public:
 class MeanOp : public MCTNode {
 public:
     MeanOp( int ax=-1 ) { axis = ax; };
-    int axis;
+    int axis;  // mean kind  -1:all, 0:row, 1:column
     
     bool forward()
     {
@@ -361,7 +369,6 @@ public:
             } else {
                 output = xt::mean( inputs[0]->output, {axis} );
             }
-            //cout<<"mean out"<<axis<<","<<output<<endl;
             return true;
         }
         return false;
@@ -442,11 +449,9 @@ public:
                     xt::strided_view( out, sv ) = tlist->at(k);
                 }
                 output = out;
-                //cout<<"stack o1"<<output<<endl;
                 return true;
-            } else {  // yet check
+            } else {
                 output = inputs[0]->output;
-                //cout<<"stack o2"<<output<<endl;
                 return true;
             }
         }
@@ -477,11 +482,9 @@ public:
                     }
                     Tensor g = xt::strided_view( gc, sv );
                     glist->push_back( g );
-                    //cout<<"stack g1"<<k<<","<<g<<endl;
                 }
             } else {
                 inputs[0]->grad = gc;
-                //cout<<"stack g2"<<gc<<endl;
             }
         }
         _backward_inputs();
@@ -499,7 +502,7 @@ public:
             vector<Tensor>* glist1 = inputs[0]->get_glist();
             if( tlist1 && glist1 )
             {
-                for(int i=0;i<tlist1->size();i++)
+                for(unsigned int i=0;i<tlist1->size();i++)
                 {
                     Tensor& a1 = tlist1->at(i);
                     Tensor& g1 = glist1->at(i);
@@ -533,9 +536,15 @@ public:
 
 struct BroadcastResult
 {
-    int  status;
-    int  ope_type[2];
-    Tshape  shape;
+    int          status;
+    unsigned int ope_type[2];
+    Tshape       shape;
+};
+
+enum EBtype  // broadcast column check type
+{
+    EB_NORMAL = 0,  // all column check
+    EB_MATMUL = 1   // matmul only ( last-2 column check )
 };
 
 class BroadcastBase : public MCTNode {
@@ -546,9 +555,7 @@ public:
     bool forward()  { return true; };
     bool backward() { return true; };
     
-    // type = 0 : all column check
-    //      = 1 : matmul only ( last-2 column check )
-    BroadcastResult broadcast_check( Tensor& a, Tensor &b, int type=0, int chk=0 )
+    BroadcastResult broadcast_check( Tensor& a, Tensor &b, unsigned int eb_type=EB_NORMAL )
     {
         Tshape as = a.shape();
         Tshape bs = b.shape();
@@ -563,15 +570,14 @@ public:
         if( bz == 0 )  ns += 1;
         if( ns > 0 ) 
         {
-            if( chk > 0 )
-            {
-                cout<<"scalar check = "<<ns<<endl;
-                cout<<"broadcast check status="<<2<<endl;
-            }
+#ifdef _DEBUG
+            cout<<"scalar check = "<<ns<<endl;
+            cout<<"broadcast check status="<<2<<endl;
+#endif
             return { SHAPE_ACCEPT, 0, 0, shape };
         }
         
-        if( type == 1 )  // matmul case
+        if( eb_type == EB_MATMUL )  // matmul case
         {
             if( az < 3 && bz < 3 )
             {
@@ -595,17 +601,17 @@ public:
         
         eval_shape( as, na, n_dim );
         eval_shape( bs, nb, n_dim );
-        if( chk > 0 )
-        {
-            cout<<"n_dim "<<n_dim<<" <- "<<az<<","<<bz<<endl;
-            print_ints( "broadcast tensor-a ", na, n_dim );
-            print_ints( "broadcast tensor-b ", nb, n_dim );
-        }
         
-        int num = ( type == 1 ) ? n_dim-2 : n_dim;
+#ifdef _DEBUG
+        cout<<"n_dim "<<n_dim<<" <- "<<az<<","<<bz<<endl;
+        print_ints( "broadcast tensor-a ", na, n_dim );
+        print_ints( "broadcast tensor-b ", nb, n_dim );
+#endif
+        
+        int num = ( eb_type == EB_MATMUL ) ? n_dim-2 : n_dim;
         
         //  matmul check
-        if( type == 1 )
+        if( eb_type == EB_MATMUL )
         {
             if( na[num+1] != nb[num] )
             {
@@ -618,8 +624,8 @@ public:
         
         // check broadcast
         int status = 0;
-        int ope_a=0;
-        int ope_b=0;
+        unsigned int ope_a = 0;
+        unsigned int ope_b = 0;
         {
             int ne = 0;
             int n1 = 0;
@@ -636,7 +642,9 @@ public:
                     n2 += 1;
                 }
             }
-            if( chk > 0 )  cout<<"broadcast check:  equal="<<ne<<" eq1="<<n1<<" other="<<n2<<endl;
+#ifdef _DEBUG
+            cout<<"broadcast check:  equal="<<ne<<" eq1="<<n1<<" other="<<n2<<endl;
+#endif
             
             if( ne == num ) {  
                 status = 0;
@@ -653,18 +661,17 @@ public:
             if( status == 1 )
             {
                 // broadcast shape
-                int q = 1;
                 for(int i=0;i<num;i++)
                 {
+                    unsigned int q = 1 << i;
                     if( nc[i] != na[i] )  ope_a += q;
                     if( nc[i] != nb[i] )  ope_b += q;
-                    q *= 2;
                 }
                 status = 0;
                 if( ope_a > 0 )  status += 1;
                 if( ope_b > 0 )  status += 2;
             }
-            if( type == 1 )  // matmul case
+            if( eb_type == EB_MATMUL )  // matmul case
             {
                 nc[num]   = na[num];
                 nc[num+1] = nb[num+1];
@@ -676,42 +683,38 @@ public:
             for(int i=0;i<n_dim;i++)  sv.push_back( nc[i] );
             shape = sv;
         }
-        if( chk > 0 )  
-        {
-            cout<<"matmul broadcast check"<<endl;
-            cout<<"   status="<<status<<endl;
-            cout<<"   ope_a="<<ope_a<<", ope_b="<<ope_b<<endl;
-            cout<<"   shape (";
-            for(int i=0;i<shape.size();i++) cout<<shape[i]<<",";
-            cout<<")"<<endl;
-        }
+        
+#ifdef _DEBUG
+        cout<<"matmul broadcast check"<<endl;
+        cout<<"   status="<<status<<endl;
+        cout<<"   ope_a="<<ope_a<<", ope_b="<<ope_b<<endl;
+        cout<<"   shape (";
+        for(unsigned int i=0;i<shape.size();i++) cout<<shape[i]<<",";
+        cout<<")"<<endl;
+#endif
         return { status, ope_a, ope_b, shape };
     }
-    Tensor broadcast_sum( Tensor& g, int ope_type, int n_dim, int chk=0 )
+    Tensor broadcast_sum( Tensor& g, unsigned int ope_type, int n_dim )
     {
-        int q = 1;
-        for(int i=0;i<n_dim;i++)  q *= 2;
+        unsigned int q = 1 << n_dim;
         q--;
         
-        //cout<<"s="<<s<<",q="<<q<<endl;
-        if( ope_type <= 0 )  return g;
+        if( ope_type == 0 )  return g;
         if( ope_type == q )  return xt::sum( g );
         
-        q = 1;
         vector<size_t> sv;
         for(int i=0;i<n_dim;i++)
         {
+            q = 1 << i;
             if( ope_type & q )  sv.push_back( i );
-            q *= 2;
         }
         if( sv.size() > 0 )
         {
-            if( chk > 0 )
-            {
-                cout<<"broadcast sum shape (";
-                for(int i=0;i<sv.size();i++) cout<<sv.at(i)<<",";
-                cout<<")"<<endl;
-            }
+#ifdef _DEBUG
+            cout<<"broadcast sum shape (";
+            for(unsigned int i=0;i<sv.size();i++) cout<<sv.at(i)<<",";
+            cout<<")"<<endl;
+#endif
             return xt::sum( g, sv );
         }
         return g;
@@ -737,7 +740,7 @@ public:
         fprec s = ( inputs[2] ) ? (fprec)inputs[2]->output[0] : 1.0;
         if( inputs[0]->is_grad() ) 
         {
-            if( bc.ope_type[0] > 0 ) {
+            if( bc.ope_type[0] != 0 ) {
                 //inputs[0]->grad += xt::sum( this->grad );
                 Tensor ga = broadcast_sum( this->grad, bc.ope_type[0], bc.shape.size() );
                 ga.reshape( inputs[0]->output.shape() );
@@ -748,7 +751,7 @@ public:
         }
         if( inputs[1]->is_grad() )
         {
-            if( bc.ope_type[1] > 0 ) {
+            if( bc.ope_type[1] != 0 ) {
                 //inputs[1]->grad += xt::sum( this->grad *s );
                 Tensor gb = broadcast_sum( this->grad, bc.ope_type[1], bc.shape.size() );
                 gb.reshape( inputs[1]->output.shape() );
@@ -790,7 +793,7 @@ public:
         fprec s = ( inputs[2] ) ? (fprec)inputs[2]->output[0] : 1.0;
         if( inputs[0]->is_grad() )
         {
-            if( bc.ope_type[0] > 0 ) {
+            if( bc.ope_type[0] != 0 ) {
                 //inputs[0]->grad += xt::sum( this->grad );
                 Tensor ga = broadcast_sum( this->grad, bc.ope_type[0], bc.shape.size() );
                 ga.reshape( inputs[0]->output.shape() );
@@ -801,7 +804,7 @@ public:
         }
         if( inputs[1]->is_grad() )
         {
-            if( bc.ope_type[1] > 0 ) {
+            if( bc.ope_type[1] != 0 ) {
                 //Tensor tmp = this->grad * s;
                 //inputs[1]->grad -= xt::sum( tmp );
                 Tensor gb = broadcast_sum( this->grad, bc.ope_type[1], bc.shape.size() );
@@ -842,7 +845,7 @@ public:
         print_message( "mul(backward)" );
         if( inputs[0]->is_grad() ) 
         {
-            if( bc.ope_type[0] > 0 ) {
+            if( bc.ope_type[0] != 0 ) {
                 //Tensor tmp = this->grad * inputs[1]->output;
                 //inputs[0]->grad += xt::sum( tmp );
                 Tensor tmp = this->grad * inputs[1]->output;
@@ -855,7 +858,7 @@ public:
         }
         if( inputs[1]->is_grad() )
         {
-            if( bc.ope_type[1] > 0 ) {
+            if( bc.ope_type[1] != 0 ) {
                 //Tensor tmp = this->grad * inputs[0]->output;
                 //inputs[1]->grad += xt::sum( tmp );
                 Tensor tmp = this->grad * inputs[0]->output;
@@ -899,7 +902,7 @@ public:
         Tensor& x1 = inputs[1]->output;
         if( inputs[0]->is_grad() )
         {
-            if( bc.ope_type[0] > 0 ) {
+            if( bc.ope_type[0] != 0 ) {
                 //Tensor tmp = this->grad / x1;
                 //inputs[0]->grad += xt::sum( tmp );
                 Tensor tmp = this->grad / x1;
@@ -912,7 +915,7 @@ public:
         }
         if( inputs[1]->is_grad() )
         {
-             if( bc.ope_type[1] > 0 ) {
+             if( bc.ope_type[1] != 0 ) {
                 //Tensor tmp = this->grad * ( -x0 / (x1*x1) );
                 //inputs[1]->grad += xt::sum( tmp )
                 Tensor tmp = this->grad * ( -x0 / (x1*x1) );
@@ -1058,14 +1061,14 @@ class MatMulBase : public BroadcastBase {
 public:
     MatMulBase(){}
     
-    unsigned int batch_size( BroadcastResult &bc )  // 220308 add
+    unsigned int batch_size( BroadcastResult &bc )
     {
         int n = bc.shape.size();
         unsigned int num = 1;
         for(int k=0;k<n-2;k++)  num *= bc.shape[k];
         return num;
     }
-    Tshape broadcast_shape( Tensor& a, BroadcastResult& bc ) // 220308 add
+    Tshape broadcast_shape( Tensor& a, BroadcastResult& bc )
     {
         Tshape as = a.shape();
         int    az = as.size();
@@ -1077,7 +1080,7 @@ public:
         sv.push_back( as[az-1] );
         return (Tshape)sv;
     }
-    Tshape batch_shape( Tensor& a, BroadcastResult& bc )  // 220308 add
+    Tshape batch_shape( Tensor& a, BroadcastResult& bc )
     {
         Tshape as = a.shape();
         int    az = as.size();
@@ -1111,7 +1114,7 @@ public:
         
         Tshape sh = { num,as[az-2],bs[bz-1] };
         Tensor tc( sh );
-        for(int k=0;k<num;k++)
+        for(unsigned int k=0;k<num;k++)
         {
             Tensor ta = xt::view( a2, k, xt::all(), xt::all() );
             Tensor tb = xt::view( b2, k, xt::all(), xt::all() );
@@ -1120,7 +1123,7 @@ public:
         }
         return ( tc.reshape( bc.shape ) );
     }
-    std::tuple<Tensor,Tensor> broadcast_dotgrad( Tensor &gc, Tensor &a, Tensor &b, BroadcastResult bc, int chk=0 )
+    std::tuple<Tensor,Tensor> broadcast_dotgrad( Tensor &gc, Tensor &a, Tensor &b, BroadcastResult bc )
     {
         unsigned int num = batch_size( bc );
         
@@ -1146,7 +1149,7 @@ public:
         
         Tshape sha = { num, gs[gz-2], bs[bz-2] };
         Tensor tga( sha );
-        for(int k=0;k<num;k++)
+        for(unsigned int k=0;k<num;k++)
         {
             Tensor ta = xt::view( g2, k, xt::all(), xt::all() );
             Tensor tb = xt::view( b2, k, xt::all(), xt::all() );
@@ -1154,15 +1157,10 @@ public:
             xt::view(tga, k, xt::all(), xt::all() ) = temp;
         }
         tga.reshape( sha1 );
-        if( chk > 0 )
-        {
-            cout<<"tga"<<tga<<endl;
-            print_shape("tga",tga);
-        }
         
         Tshape shb = { num, as[az-1], gs[gz-1] };
         Tensor tgb( shb );
-        for(int k=0;k<num;k++)
+        for(unsigned int k=0;k<num;k++)
         {
             Tensor ta = xt::view( a2, k, xt::all(), xt::all() );
             Tensor tb = xt::view( g2, k, xt::all(), xt::all() );
@@ -1170,24 +1168,12 @@ public:
             xt::view(tgb, k, xt::all(), xt::all() ) = temp;
         }
         tgb.reshape( shb1 );
-        if( chk > 0 )
-        {
-            cout<<"tgb"<<tgb<<endl;
-            print_shape("tgb",tgb);
-        }
         
         Tensor ga = broadcast_sum( tga, bc.ope_type[0], num+2 );
         Tensor gb = broadcast_sum( tgb, bc.ope_type[1], num+2 );
         
         ga.reshape( a.shape() );
         gb.reshape( b.shape() );
-        if( chk > 0 )
-        {
-            cout<<"ga"<<ga<<endl;
-            cout<<"gb"<<gb<<endl;
-            //print_shape("ga=",ga);
-            //print_shape("gb=",gb);
-        }
         return std::make_tuple( ga, gb );
     }
     
@@ -1204,7 +1190,8 @@ public:
     
     bool forward()
     {
-        if( inputs.size() != 2 ){
+        if( inputs.size() != 2 )
+        {
             cout<<"Error:DotOp"<<endl;
             return false;
         }
@@ -1223,7 +1210,7 @@ public:
             cout<<"Error:A:"<<az<<" B:"<< bz<<endl;
             return false;
         }
-        output = DOT(a,b);
+        output = DOT( a, b );
         return true;
     }
     bool backward()
@@ -1272,7 +1259,8 @@ public:
     
     bool forward()
     {
-        if( inputs.size() != 2 ) {
+        if( inputs.size() != 2 ) 
+        {
             cout<<"Error:MatMulOp"<<endl;
             return false;
         }
@@ -1284,7 +1272,6 @@ public:
         Tshape  bs = b.shape();
         int     az = as.size();
         int     bz = bs.size();
-        ///cout<<"matmul for"<<az<<","<<bz<<endl;
         
         if( az < 1 || bz < 1 )
         {
@@ -1294,31 +1281,30 @@ public:
         }
         if( az < 3 && bz < 3 ) {
             
-            //output = DOT(a,b); // 220301 mod
+            //output = DOT(a,b);
             if( az == 1 ){
                 Tensor a1 = a;
                 a1.reshape( { 1, as[0] } );
                 if( bz == 1 ) {
                     Tensor b1 = b;
                     b1.reshape( { bs[0], 1 } );
-                    output = DOT(a1,b1);
+                    output = DOT( a1, b1 );
                 } else {
-                    output = DOT(a1,b);
+                    output = DOT( a1, b );
                 }
             } else {
                 if( bz == 1 ) {
                     Tensor b1 = b;
                     b1.reshape( { bs[0], 1 } );
-                    output = DOT(a,b1);
+                    output = DOT( a, b1 );
                 } else {
-                    output = DOT(a,b);
+                    output = DOT( a, b );
                 }
             }
-            //cout<<"matmul"<<output<<endl;
             
         } else if( az > 2 || bz > 2 ) {
             
-            //output = DOT(a,b);  // 220301 mod
+            //output = DOT(a,b);
             if( az == 1 ) {
                 Tensor a1 = a;
                 a1.reshape( { 1, as[0] } );
@@ -1359,7 +1345,6 @@ public:
         Tshape  bs = b.shape();
         int     az = as.size();
         int     bz = bs.size();
-        //cout<<"matmul back "<<az<<","<<bz<<endl;
         
         if( az < 1 || bz < 1 )
         {
@@ -1373,23 +1358,21 @@ public:
             if( bz == 1 ) {
                 Tensor b1 = b;
                 b1.reshape( { bs[0], 1 } );
-                ga2 = DOT( gc, xt::transpose(b1) );
+                ga2 = DOT( gc, xt::transpose( b1 ) );
             } else {
-                ga2 = DOT( gc, xt::transpose(b) );
+                ga2 = DOT( gc, xt::transpose( b ) );
             }
             if( az == 1 ) {
                 Tensor a1 = a;
                 a1.reshape( { 1, as[0] } );
-                gb2 = DOT( xt::transpose(a1), gc );
+                gb2 = DOT( xt::transpose( a1 ), gc );
             } else {
-                gb2 = DOT( xt::transpose(a), gc );
+                gb2 = DOT( xt::transpose( a ), gc );
             }
             if( az == 1 )  ga2.reshape( as );
             if( bz == 1 )  gb2.reshape( bs );
             ga += ga2;
             gb += gb2;
-            //cout<<"ga"<<ga<<endl;
-            //cout<<"gb"<<gb<<endl;
             
         } else if( az > 2 || bz > 2 ) {
             
@@ -1409,8 +1392,7 @@ public:
             }
             ga += ga2;
             gb += gb2;
-            //cout<<"ga2"<<ga<<endl;
-            //cout<<"gb2"<<gb<<endl;
+            
         } else {
             cout<<"Error:MatMulOp"<<endl;
             cout<<"Error:A:"<<az<<" B:"<< bz<<endl;
@@ -1436,7 +1418,8 @@ public:
     
     bool forward()
     {
-        if( inputs.size() != 3 ){
+        if( inputs.size() != 3 )
+        {
             cout<<"Error:LinearOp"<<endl;
             return false;
         }
@@ -1448,17 +1431,16 @@ public:
         Tshape  bs = b.shape();
         int     az = as.size();
         int     bz = bs.size();
-        ///cout<<"linear "<<az<<","<<bz<<endl;
         
         if( az == 1 && bz == 2 ) 
         {
             Tensor a1 = a;
             a1.reshape( { 1, as[0] } );
-            output = DOT( a1, xt::transpose(b) );
+            output = DOT( a1, xt::transpose( b ) );
         
         } else if( az == 2 && bz == 2 ) {
             
-            output = DOT( a , xt::transpose(b) );
+            output = DOT( a , xt::transpose( b ) );
             
         } else if( az > 2 && bz == 2 ) {
         
@@ -1476,7 +1458,7 @@ public:
             Tensor& d  = inputs[2]->output;  // bias
             Tshape  ds = d.shape();
             int     dz = ds.size();
-            //cout<<"linear dz"<<dz<<","<<ds[0]<<","<<bs[0]<<endl;
+            
             if( dz == 1 && ( ds[0] == bs[0] ) ) {
                 output += inputs[2]->output;
             } else {
@@ -1485,7 +1467,6 @@ public:
                 return false;
             }
         }
-        //cout<<"linear"<<output<<endl;
         return true;
     }
     bool backward()
@@ -1505,7 +1486,6 @@ public:
         Tshape  bs = b.shape();
         int     az = as.size();
         int     bz = bs.size();
-        //cout<<"linear back "<<az<<","<<bz<<endl;
             
         if( az == 1 && bz == 2 )
         {
@@ -1515,24 +1495,20 @@ public:
             
             Tensor a1 = a;
             a1.reshape( { 1, as[0] } );
-            gb += DOT( xt::transpose(gc), a1 );
+            gb += DOT( xt::transpose( gc ), a1 );
                 
         } else if( az == 2 && bz == 2 ) {
                 
             ga += DOT( gc, b );
-            gb += DOT( xt::transpose(gc), a );
-            //cout<<"ga"<<ga<<endl;
-            //cout<<"gb"<<gb<<endl;
+            gb += DOT( xt::transpose( gc ), a );
             
         } else if( az > 2 && bz== 2 ) {
             
-            Tensor bt = xt::transpose(b);
+            Tensor bt = xt::transpose( b );
             Tensor ga2,gb2;
             std::tie(ga2,gb2) = broadcast_dotgrad( gc, a, bt, bc );
             ga += ga2;
             gb += gb2;
-            //cout<<"ga"<<ga<<endl;
-            //cout<<"gb"<<gb<<endl;
             
         } else {
             cout<<"Error:MatMulOp"<<endl;
@@ -1544,7 +1520,7 @@ public:
             Tensor& d  = inputs[2]->output;  // bias
             Tshape  ds = d.shape();
             int     dz = ds.size();
-            //cout<<"dz"<<dz<<","<<ds[0]<<","<<bs[0]<<endl;
+        
             if( dz == 1 && ( ds[0] == bs[0] ) )
             {
                 Tensor& gd = inputs[2]->grad;
@@ -1609,18 +1585,15 @@ public:
             Tensor& d  = inputs[0]->output;  // input
             Tshape  ds = d.shape();
             int     dz = ds.size();
-            //cout<<"addmm dz "<<dz<<endl;
+
             if( dz < 1 ) {
                 dim = 0;
             } else if( dz == 1 ) {
-                //cout<<"addmm ds "<<ds[0]<<","<<bs[1]<<endl;
                 if( ds[0] == 1 )      dim = 0;
                 if( ds[0] == bs[1] )  dim = 1;
             } else if( dz == 2 ) {
-                //cout<<"addmm ds "<<ds[0]<<","<<ds[1]<<endl;
                 if( ds[0] == as[0] && ds[1] == bs[1] )  dim = 2;
             }
-            cout<<"addmm dim "<<dim<<","<<dz<<endl;
             if( dim < 0 )
             {
                 cout<<"Error:AddMmOp"<<endl;
@@ -1637,7 +1610,8 @@ public:
     }
     bool backward()
     {
-        if( inputs.size()!=5 ){
+        if( inputs.size()!=5 )
+        {
             cout<<"Error:AddMmOp"<<endl;
             return false;
         }
@@ -1646,7 +1620,6 @@ public:
         Tensor& b  = inputs[2]->output; // mat2
         Tensor& ga = inputs[1]->grad;
         Tensor& gb = inputs[2]->grad;
-        Tensor& gd = inputs[0]->grad;
         Tensor& gc = this->grad;
         Tshape  as = a.shape();
         Tshape  bs = b.shape();
@@ -1657,8 +1630,8 @@ public:
         
         if( az==2 && bz==2 ) 
         {
-            ga += DOT( gc, xt::transpose(b) ) * alpha;
-            gb += DOT( xt::transpose(a), gc ) * alpha;
+            ga += DOT( gc, xt::transpose( b ) ) * alpha;
+            gb += DOT( xt::transpose( a ), gc ) * alpha;
             
         } else {
             
@@ -1668,8 +1641,6 @@ public:
         }
         if( inputs[0] )
         {
-            //cout<<"gc"<<gc<<endl;
-            Tensor& d  = inputs[0]->output; // input
             Tensor& gd = inputs[0]->grad;
             if( dim == 0 ) {
                 gd += xt::sum( gc ) * beta;
@@ -1725,8 +1696,8 @@ public:
 class MaxOp : public MCTNode {
 public:
     MaxOp( int ax=1 ) { axis = ax; }
-    int axis;
-    xt::xarray<bool> cond;
+    int    axis;
+    Tbool  cond;
     
     bool forward()
     {
@@ -1769,8 +1740,8 @@ public:
 class MinOp : public MCTNode {
 public:
     MinOp( int ax=1 ){ axis = ax; }
-    int axis;
-    xt::xarray<bool> cond;
+    int    axis;
+    Tbool  cond;
     
     bool forward()
     {
@@ -1907,8 +1878,8 @@ public:
 class EluOp : public MCTNode {
 public:
     EluOp(fprec a=1.0) { alpha = a; }
-    fprec alpha;
-    xt::xarray<bool> mask;
+    fprec  alpha;
+    Tbool  mask;
     
     bool forward()
     {
@@ -1947,8 +1918,8 @@ public:
 class LeakyReluOp : public MCTNode {
 public:
     LeakyReluOp( fprec s=0.01 ) { slope=s; }
-    fprec slope;
-    xt::xarray<bool> mask;
+    fprec  slope;
+    Tbool  mask;
     
     bool forward()
     {
@@ -1987,7 +1958,7 @@ public:
 class SoftplusOp : public MCTNode {
 public:
     SoftplusOp(){}
-    xt::xarray<bool> mask;
+    Tbool  mask;
     
     bool forward()
     {
@@ -2016,7 +1987,7 @@ public:
         ga = this->grad;
         mask = ( a * beta < threshold );
         auto m = xt::masked_view( ga, mask );
-        m = 1.0/( 1.0 + 1.0/xt::exp( beta * a ) );
+        m = 1.0 / ( 1.0 + 1.0/xt::exp( beta * a ) );
         _backward_inputs();
         return true;
     }
@@ -2098,7 +2069,6 @@ public:
     {
         //print_message( "_log_softmax" );
         Tshape as = a.shape();
-        int    ar = as.size();
         Tensor sm = xt::amax( a, {ax} );
         sm = _row2col( sm, as );
         Tensor sa = a - sm;
@@ -2224,18 +2194,20 @@ public:
             if( tlist )
             {
                 vector<size_t> sh;
-                for(int k=0;k<tlist->size();k++)
+                for(unsigned int k=0;k<tlist->size();k++)
                 {
                     Tensor t1 = tlist->at(k);
                     sh.push_back( (int)t1[0] );
                 }
                 output = xt::zeros<fprec>( sh );
                 return true;
+                
             } else {
+                
                 Tensor& a  = inputs[0]->output;
                 Tshape  as = a.shape();
                 vector<size_t> sh;
-                for(int k=0;k<as.size();k++)  sh.push_back( as[k]);
+                for(unsigned int k=0;k<as.size();k++)  sh.push_back( as[k]);
                 output = xt::zeros<fprec>( sh );
                 return true;
             }
@@ -2267,18 +2239,20 @@ public:
             if( tlist )
             {
                 vector<size_t> sh;
-                for(int k=0;k<tlist->size();k++)
+                for(unsigned int k=0;k<tlist->size();k++)
                 {
                     Tensor t1 = tlist->at(k);
                     sh.push_back( (int)t1[0] );
                 }
                 output = xt::ones<fprec>( sh );
                 return true;
+                
             } else {
+                
                 Tensor& a  = inputs[0]->output;
                 Tshape  as = a.shape();
                 vector<size_t> sh;
-                for(int k=0;k<as.size();k++)  sh.push_back( as[k] );
+                for(unsigned int k=0;k<as.size();k++)  sh.push_back( as[k] );
                 output = xt::ones<fprec>( sh );
                 return true;
             }
@@ -2310,7 +2284,7 @@ public:
             if( tlist )
             {
                 vector<size_t> sh;
-                for(int k=0;k<tlist->size();k++)
+                for(unsigned int k=0;k<tlist->size();k++)
                 {
                     Tensor t1 = tlist->at(k);
                     sh.push_back( (int)t1[0] );
@@ -2352,7 +2326,6 @@ public:
             
                 Tensor tmp = xt::random::randn<fprec>( ms );
                 output = tmp * std + mean;
-                //print_tensor( "randn1", output );
                 return true;
             }
         } else {
@@ -2366,13 +2339,12 @@ public:
                         fprec mean = (fprec)inputs[0]->output[0];
                         fprec std  = (fprec)inputs[1]->output[0];
                         vector<size_t> sh;
-                        for(int k=0;k<tlist->size();k++)
+                        for(unsigned int k=0;k<tlist->size();k++)
                         {
                             Tensor t1 = tlist->at(k);
                             sh.push_back( (int)t1[0] );
                         }
                         output = xt::random::randn<fprec>( sh, mean, std );
-                        //print_tensor( "randn2", output );
                         return true;
                     }
                 }
@@ -2402,6 +2374,7 @@ public:
         Tensor x  = inputs[0]->output;
         Tshape xs = x.shape();
         int n_dim = xs.size();
+        
         if( n_dim != 2 && n_dim != 4 )
         {
             cout<<"Error:BatchNormOp input dimension(not 2 or 4)"<<endl;
@@ -2426,8 +2399,8 @@ public:
         fprec   eps      = (fprec)inputs[7]->output[0]; 
         
         // set ntype for no backward
-        inputs[3]->set_ntype( 4 );  // running_mean
-        inputs[4]->set_ntype( 4 );  // running_var
+        inputs[3]->set_ntype( VAR_RUNNING );  // running_mean
+        inputs[4]->set_ntype( VAR_RUNNING );  // running_var
         
         Tensor xn;
         if( train_mode )
@@ -2480,7 +2453,7 @@ public:
         }
         
         Tensor& gamma = inputs[1]->output;  // gamma (weight)
-        Tensor& beta  = inputs[2]->output;  // beat  (bias)
+      //Tensor& beta  = inputs[2]->output;  // beat  (bias)
         Tensor& running_mean = inputs[3]->output;
         Tensor& running_var  = inputs[4]->output;
         fprec   eps   = (fprec)inputs[7]->output[0]; 
@@ -2558,8 +2531,7 @@ public:
                 dropout = xt::where( r > ratio, 1, 0 );
                 output  = x * dropout;
             }
-            print_tensor("drop2",output);
-            print_tensor("dropout",dropout);
+            //print_tensor("dropout",dropout);
         } else {
             if( kind == 1 ) { // inverted
                 output = x;
@@ -2649,8 +2621,8 @@ public:
         
         fprec  h = ( inputs[4] ) ? (fprec)inputs[4]->output[0] : -100.0;
         
-        xt::xarray<float> t = xt::zeros<float>( {as[0]} );
-        for(int i=0;i<as[0];i++)
+        Tensor t = xt::zeros<fprec>( {as[0]} );
+        for(unsigned int i=0;i<as[0];i++)
         {
             int j = (int)inputs[1]->output[i];
             t[i] = sz( i, j );
@@ -2670,8 +2642,8 @@ public:
         
         Tensor y = _softmax( a, axis );
         
-        Tensor one = xt::zeros<float>( as );
-        for(int i=0;i<as[0];i++){
+        Tensor one = xt::zeros<fprec>( as );
+        for(unsigned int i=0;i<as[0];i++){
             int j = (int)inputs[1]->output[i];
             one(i,j) = 1.0;
         }
@@ -2687,15 +2659,13 @@ public:
         Tensor sm = _softmax( inputs[0]->output, axis );
         Tshape sh = sm.shape();
         Tshape shape = { sh[0] };
-        //xt::xarray<fprec>::shape_type shape = {sh[0]}; // 220308 mod
         
         Tensor lbs( shape );
-        for(int i=0;i<sh[0];i++)
+        for(unsigned int i=0;i<sh[0];i++)
         {
             fprec smax = sm(i,0);
-            int jl = (int)lbs(i);
             int jm = 0;
-            for(int j=1;j<sh[1];j++)
+            for(unsigned int j=1;j<sh[1];j++)
             {
                 if( smax < sm(i,j) ) {
                     smax = sm(i,j);
@@ -2768,7 +2738,6 @@ public:
         Tensor& a  = inputs[0]->output;
         Tshape  as = a.shape();
         fprec   h  = (fprec)inputs[4]->output[0];
-        Tensor& b  = inputs[1]->output;
         
         fprec d = fprec( as[0] );
         if( inputs[3] )
@@ -2777,8 +2746,8 @@ public:
             if( reduction == 2 )  d = 1.0; // sum
         }
         
-        xt::xarray<float> t = xt::zeros<float>( {as[0]} );
-        for(int i=0;i<as[0];i++)
+        Tensor t = xt::zeros<fprec>( {as[0]} );
+        for(unsigned int i=0;i<as[0];i++)
         {
             int j = (int)inputs[1]->output[i];
             t[i] = a( i, j );
@@ -2805,8 +2774,8 @@ public:
         Tensor& gc = this->grad;
         print_tensor( "gc ", gc );
         
-        xt::xarray<fprec> one = xt::zeros<float>( as );
-        for(int i=0;i<as[0];i++)
+        Tensor one = xt::zeros<fprec>( as );
+        for(unsigned int i=0;i<as[0];i++)
         {
             int j = (int)inputs[1]->output[i];
             one(i,j) = -gc[0];
@@ -2823,7 +2792,7 @@ public:
     BroadcastTensorsOp() 
     {
         broadcast_shape = {0}; 
-        result = 0;
+        result = SHAPE_ACCEPT;
     }
     vector<Tensor>  tlist;  // tensor list
     vector<Tensor>  glist;  // grad tensor list
@@ -2831,12 +2800,12 @@ public:
     vector<Tensor>* get_tlist() { return &tlist; };
     vector<Tensor>* get_glist() { return &glist; };
     Tshape broadcast_shape;
-    int    result;
+    enum Eshape result;
     
     // return value   0: no broadcast
     //               >0; broadcast by shape
     //               <0: broadcast error
-    int check( vector<Tensor> &a, int num, Tshape &shape, int chk=0 )
+    enum Eshape check( vector<Tensor> &a, unsigned int num, Tshape &shape )
     {
         shape = {0};
         if( num <  1 )  return SHAPE_REJECT;
@@ -2849,7 +2818,7 @@ public:
         vector<Tshape> as(num);
         vector<int>    az(num);
         int n_dim = -1;
-        for(int i=0;i<num;i++)  
+        for(unsigned int i=0;i<num;i++)  
         {
             as[i] = a[i].shape();
             az[i] = as[i].size();
@@ -2857,19 +2826,19 @@ public:
         }
         if( n_dim < 1 )  return SHAPE_ACCEPT; // all numbers
         
-        int equal = 1;
-        int err   = 0;
+        unsigned int equal = 1;
+        unsigned int err   = 0;
         vector<unsigned int>  na(n_dim);
         vector<unsigned int>  nb(n_dim);
         eval_shape( as[0], na, n_dim );
-        if( chk > 0 )
-        {
-            cout<<"--------------------------"<<endl;
-            cout<<"broadcast n_dim="<<n_dim<<endl;
-            print_ints( "broadcast tensor-1 ", na, n_dim );
-        }
+
+#ifdef _DEBUG
+        cout<<"--------------------------"<<endl;
+        cout<<"broadcast n_dim="<<n_dim<<endl;
+        print_ints( "broadcast tensor-1 ", na, n_dim );
+#endif
         
-        for(int k=1;k<num;k++)
+        for(unsigned int k=1;k<num;k++)
         {
             eval_shape( as[k], nb, n_dim );
             
@@ -2889,12 +2858,11 @@ public:
                     n2 += 1;
                 }
             }
-            if( chk > 0 )
-            {
-                string ss = "broadcast tensor-" + std::to_string(k+1) + " ";
-                print_ints( ss, nb, n_dim );
-                cout<<"broadcast ("<<k<<")  equal="<<ne<<" eq1="<<n1<<" other="<<n2<<endl;
-            }
+#ifdef _DEBUG
+            string ss = "broadcast tensor-" + std::to_string(k+1) + " ";
+            print_ints( ss, nb, n_dim );
+            cout<<"broadcast ("<<k<<")  equal="<<ne<<" eq1="<<n1<<" other="<<n2<<endl;
+#endif
             
             int status = 0;
             if( ne == n_dim ) {  
@@ -2915,7 +2883,7 @@ public:
             }
         }
         
-        int result = 1;
+        enum Eshape result = SHAPE_BROADCAST;
         if( err == 0 )
         {
             if( equal == num ) {
@@ -2931,17 +2899,16 @@ public:
                 print_ints( "broadcast shape ", na, n_dim );
             }
         } else {
-            for(int i=0;i<num;i++)
+            for(unsigned int i=0;i<num;i++)
             {
                 string ss = "tensor(" + std::to_string(i) + ")  shape=";
                 print_shape( ss.c_str(), a[i] );
             }
             result = SHAPE_REJECT;
         }
-        
         return result;
     }
-    int restore_broadcast( Tensor &ga, Tshape as, Tshape os )
+    enum Eshape restore_broadcast( Tensor &ga, Tshape as, Tshape os )
     {
         int  az = as.size();
         int  oz = os.size();
@@ -2949,7 +2916,7 @@ public:
         if( oz == 0 )
         {
             ga = (fprec)ga[0];
-            return 1;
+            return SHAPE_BROADCAST;
         }
         if( az == oz )
         {
@@ -2998,13 +2965,13 @@ public:
             vector<Tensor>* tlist1 = inputs[0]->get_tlist();
             if( tlist1 )
             {
-                result = check( *tlist1, tlist1->size(), broadcast_shape, 0 );
+                result = check( *tlist1, tlist1->size(), broadcast_shape );
                 if( result != 0 )  cout<<"broadcast check="<<result<<endl;
                 if( result < 0 )   return false;
                 
                 tlist.clear();
                 glist.clear();
-                for(int i=0;i<tlist1->size();i++)
+                for(unsigned int i=0;i<tlist1->size();i++)
                 {
                     if( result == 0 ) {
                         tlist.push_back( tlist1->at(i) );
@@ -3026,7 +2993,7 @@ public:
             vector<Tensor>* glist1 = inputs[0]->get_glist();
             if( tlist1 && glist1 )
             {
-                for(int i=0;i<glist.size();i++)
+                for(unsigned int i=0;i<glist.size();i++)
                 {
                     if( result == 0 ) {
                         glist1->push_back( glist.at(i) );
@@ -3034,7 +3001,7 @@ public:
                         Tensor& a1 = tlist1->at(i);
                         Tensor& g1 = glist.at(i);
                         Tensor  g2 = g1;
-                        int status = restore_broadcast( g2, g1.shape(), a1.shape() );
+                        enum Eshape status = restore_broadcast( g2, g1.shape(), a1.shape() );
                         if( status < 0 )  return false;
                         glist1->push_back( g2 );
                     }
@@ -3058,7 +3025,7 @@ public:
             vector<Tensor>* glist1 = inputs[0]->get_glist();
             if( tlist1 && glist1 )
             {
-                for(int i=0;i<tlist1->size();i++)
+                for(unsigned int i=0;i<tlist1->size();i++)
                 {
                     Tensor& a1 = tlist1->at(i);
                     Tensor& g1 = glist1->at(i);
@@ -3093,7 +3060,7 @@ public:
         
         tlist.clear();
         glist.clear();
-        for(int i=0;i<inputs.size();i++)
+        for(unsigned int i=0;i<inputs.size();i++)
         {
             if( inputs[i] ) {
                 tlist.push_back( inputs[i]->output );
@@ -3109,7 +3076,7 @@ public:
         print_message( "list_contruct(backward)" );
         if( glist.size() > 0 )
         {
-            for(int i=0;i<inputs.size();i++)
+            for(unsigned int i=0;i<inputs.size();i++)
             {
                 if( inputs[i] )
                 {
@@ -3208,7 +3175,7 @@ public:
         print_message( "tuplecontruct(forward)" );
         
         ndlist.clear();  
-        for(int i=0;i<inputs.size();i++)
+        for(unsigned int i=0;i<inputs.size();i++)
         {
             if( inputs[i] ) {
                 ndlist.push_back( inputs[i] );
@@ -3247,7 +3214,6 @@ public:
             {
                 MCTNode *node = ndlist1->at( output_id );
                 if( node )  output = node->output;
-                //cout<<"TupleUnpack "<<output<<endl;
                 return true;
             }
         }
@@ -3278,7 +3244,7 @@ public:
         Tensor& a  = inputs[0]->output;
         Tshape  as = a.shape();
         int     no = (int)inputs[1]->output[0];
-        output = (float)as[no];
+        output = (fprec)as[no];
         return true;
     }
     bool backward()
@@ -3303,7 +3269,7 @@ public:
             if( tlist )
             {
                 vector<size_t> sh;
-                for(int k=0;k<tlist->size();k++)
+                for(unsigned int k=0;k<tlist->size();k++)
                 {
                     Tensor t1 = tlist->at(k);
                     sh.push_back( (int)t1[0] );
@@ -3384,8 +3350,8 @@ public:
             vector<Tensor>* tlist1 = inputs[1]->get_tlist();
             if( tlist1 )
             {
-                std:vector<int> sh;
-                for(int i=0;i<tlist1->size();i++)
+                vector<int> sh;
+                for(unsigned int i=0;i<tlist1->size();i++)
                 {
                     Tensor& t = tlist1->at(i);
                     sh.push_back( (int)t[0] );
@@ -3399,7 +3365,7 @@ public:
     bool backward()
     {
         print_message( "view(backward)" );
-        //Tensor& gc = this->grad;  // 220308 mod
+        //Tensor& gc = this->grad;
         //inputs[0]->grad = gc.reshape( org_shape );
         Tensor &ga = inputs[0]->grad;
         ga = this->grad;
