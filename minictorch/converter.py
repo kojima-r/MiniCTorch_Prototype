@@ -743,7 +743,8 @@ def get_tensor_shape( x ):
         text = "{" + str(x.shape[0]) + "}"
         return 1,text
     return 0,text
-    
+
+
 def c_train_code_generator( project, folder, obj, **kwargs ):
     
     # arguments
@@ -994,6 +995,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     #else
     #include "minictorch.hpp"
     #endif
+    #include <chrono>
     
     extern bool train_mode;
     """.format(proj=project)
@@ -1132,7 +1134,9 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     all_text += """
     
         ofstream outputfile("{fn}");
-        
+        std::chrono::system_clock::time_point  start, end; 
+        start = std::chrono::system_clock::now();
+
         do_zerograd( forward_result, NL );
         for(int epoch=0;epoch<epoch_num;epoch++)
         {{
@@ -1341,6 +1345,10 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         
     all_text +="""
         }
+        end = std::chrono::system_clock::now();
+        double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+        cout<<"Time:"<<elapsed<<endl;
+
         outputfile.close();
         
         train_mode = false;"""

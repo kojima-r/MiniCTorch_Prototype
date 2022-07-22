@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <functional>
 #include <xtensor/xarray.hpp>
 #include <xtensor/xrandom.hpp>
 #include <xtensor/xio.hpp>
@@ -14,6 +15,7 @@
 #include <xtensor/xbroadcast.hpp>
 #include <xtensor/xsort.hpp>
 #include <xtensor-blas/xlinalg.hpp>
+
 
 
 typedef  float  fprec;
@@ -41,19 +43,22 @@ enum Eshape  // Broadcast type
 {
     SHAPE_ACCEPT     =  0,  // そのまま継続実行
     SHAPE_BROADCAST  =  1,  // Broadcastして実行 (1:A,2:B,3:A and B)
+    //SHAPE_BROADCAST_A  =  2,  // Broadcastして実行 (1:A,2:B,3:A and B)
+    //SHAPE_BROADCAST_B  =  3,  // Broadcastして実行 (1:A,2:B,3:A and B)
+    //SHAPE_BROADCAST_AB  = 4,  // Broadcastして実行 (1:A,2:B,3:A and B)
+
     SHAPE_REJECT     = -1,  // Broadcastできないの中断
     SHAPE_ERROR      = -2   // Errorなので中断
 };
+
 
 class MCTNode {
 public:
     MCTNode()
     {
-        id = -1;    // for check
-        grad = 0;   // 
-        ntype = 0;
-        //frontcnt = 0;
-        //backcnt  = 0;
+        id = -1;
+        grad = 0;
+        ntype = VAR_NODE;
     }
     virtual bool forward()
     {
@@ -69,15 +74,11 @@ public:
     string  name;
     Tensor  output;
     Tensor  grad;
-    //int    frontcnt;
-    //int    backcnt;
-    int    id;  // for check
-    unsigned int ntype; // Variable tensor type
+    int    id;
     
     void set_inputs( MCTNode *node )
     {
         inputs.push_back( node );
-        //if( node )  node->backcnt++;
     }
     
     virtual void update( fprec delta )   {};
@@ -91,30 +92,36 @@ public:
     void set_id( int n ) { id = n; };
     void zerograd()
     {
-        //this->grad = xt::zeros_like( output );
         this->grad = 0.;
     }
     Tensor& get_output() { return output; }
-    void set_ntype( unsigned int t ) { ntype=t; };
+    void set_ntype( enum Evariable t ) { ntype=t; };
+    
+    // Whether to calculate the gradient
+    // No further backpropagation for nodes with a gradient of 0
     bool is_grad()
     {
-        switch( ntype ) {
-        case VAR_CONST:   // constant
-        case VAR_RUNNING: // running_*
+        if( ntype == VAR_CONST || ntype == VAR_RUNNING){
             return false;
         }
         return true;
     };
     
-    void eval_shape( Tshape as, vector<unsigned int>&na, int n_dim )
+    // as: (2,3,4,5)
+    // na: (1,1,1,1,1,1,1)
+    // na: (1,1,1,2,3,4,5)
+    vector<size_t> extend_shape(const Tshape as, int n_dim )
     {
         unsigned int  az = as.size();
-        for(int i=0;i<n_dim;i++)  na[i] = 1;
+        vector<size_t> out(n_dim,1);
         if( az > 0 ) 
         {
             int inc = n_dim - az;
-            for(unsigned int i=0;i<az;i++)  na[inc+i] = as[i];
+            for(unsigned int i=0;i<az;i++){
+                out[inc+i] = as[i];
+            }
         }
+        return out;
     }
     
     // shape check utility functions
@@ -218,35 +225,13 @@ public:
         for(int i=0;i<nv;i++)  cout<<v[i]<<",";
         cout<<endl;
     }
+    void print_ints( string s, vector<size_t> &v, int nv )
+    {
+        cout<<s;
+        for(int i=0;i<nv;i++)  cout<<v[i]<<",";
+        cout<<endl;
+    }
 
-    void _forward_inputs()
-    {
-        //cout<<"forward_inputs -- "<<id<<endl;
-        /*for(auto& itr:inputs )
-        {
-            if( itr ){
-                //itr->forward();
-                //cout<<"forward : itr - "<<id<<" = "<<itr->id<<","<<itr->frontcnt<<endl;
-                if( itr->frontcnt == 0 )
-                {
-                    itr->frontcnt++;
-                    itr->forward();
-                }
-            }
-        }*/
-    }
-    void _backward_inputs()
-    {
-        //cout<<"backward_inputs"<<endl;
-        /*for(auto& itr:inputs)
-        {
-            if( itr ){
-                //itr->backward(); 
-                itr->backcnt--;
-                if( itr->backcnt < 1 )  itr->backward();
-            }
-        }*/
-    }
     void get_items( unsigned int *q, int n, int dum=0 )
     {
         vector<Tensor>* ptr = get_tlist(); 
@@ -261,19 +246,21 @@ public:
             for(int i=0;i<n;i++)  q[i] = dum;
         }
     }
+protected:
+    enum Evariable ntype;
 };
 
 class VariableTensor : public MCTNode {
 public:
     VariableTensor(){}
     
-    VariableTensor( Tensor tensor, unsigned int t=VAR_NODE ) 
+    VariableTensor( Tensor tensor, enum Evariable t=VAR_NODE ) 
     {
         this->output = tensor;
         this->ntype = t;
         this->grad = xt::zeros_like( output );
     }
-    VariableTensor( string name, Tensor tensor, unsigned int t=VAR_NODE )
+    VariableTensor( string name, Tensor tensor, enum Evariable t=VAR_NODE )
     {
         this->output = tensor;
         this->name   = name;
@@ -301,7 +288,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "sum(forward)" );
         if( inputs[1] ) { 
             axis = (int)inputs[1]->output[0];
@@ -329,7 +315,6 @@ public:
         } else {
             inputs[0]->grad = xt::full_like( a, (fprec)this->grad[0] );
         }
-        _backward_inputs();
         return true;
     }
 };
@@ -341,7 +326,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "mean(forward)" );
         
         if( inputs[0] )
@@ -408,7 +392,6 @@ public:
                 inputs[0]->grad = xt::full_like( a, gd );
             }
         }
-        _backward_inputs();
         return true;
     }
 };
@@ -419,7 +402,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "stack(forward)" );
         if( inputs[0] )
         {
@@ -487,7 +469,6 @@ public:
                 inputs[0]->grad = gc;
             }
         }
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -520,7 +501,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "neg(forward)" );
         output = -inputs[0]->output;
         return true;
@@ -529,14 +509,13 @@ public:
     {
         print_message( "neg(backward)" );
         inputs[0]->grad -= this->grad;
-        _backward_inputs();
         return true;
     }
 };
 
 struct BroadcastResult
 {
-    int          status;
+    enum Eshape status;
     unsigned int ope_type[2];
     Tshape       shape;
 };
@@ -555,7 +534,10 @@ public:
     bool forward()  { return true; };
     bool backward() { return true; };
     
-    BroadcastResult broadcast_check( Tensor& a, Tensor &b, unsigned int eb_type=EB_NORMAL )
+    //broadcast
+    //B_MATMUL:assign the value after matrix multiplication for the last two dimensions
+    //         If it is regarded as a normal broadcast, an error will occur due to a dimension mismatch.
+    BroadcastResult broadcast_check( Tensor& a, Tensor &b, enum EBtype eb_type=EB_NORMAL )
     {
         Tshape as = a.shape();
         Tshape bs = b.shape();
@@ -577,11 +559,13 @@ public:
             return { SHAPE_ACCEPT, 0, 0, shape };
         }
         
-        if( eb_type == EB_MATMUL )  // matmul case
+        if( eb_type == EB_MATMUL )
         {
             if( az < 3 && bz < 3 )
             {
+#ifdef _DEBUG
                 cout<<"broadcast check (matmul) status="<<0<<endl;
+#endif
                 if( az == 2 && bz == 2 )
                 {
                     vector<size_t> sv;
@@ -593,14 +577,11 @@ public:
             }
         }
         
-        int n_dim = ( az > bz ) ? az : bz;
+        int n_dim = std::max( az, bz );
         if( n_dim < 1 )  return { SHAPE_ACCEPT, 0, 0, shape };
         
-        vector<unsigned int> na(n_dim);
-        vector<unsigned int> nb(n_dim);
-        
-        eval_shape( as, na, n_dim );
-        eval_shape( bs, nb, n_dim );
+        vector<size_t> na=extend_shape( as, n_dim );
+        vector<size_t> nb=extend_shape( bs, n_dim );
         
 #ifdef _DEBUG
         cout<<"n_dim "<<n_dim<<" <- "<<az<<","<<bz<<endl;
@@ -608,6 +589,7 @@ public:
         print_ints( "broadcast tensor-b ", nb, n_dim );
 #endif
         
+        // num = last dimension for broadcast
         int num = ( eb_type == EB_MATMUL ) ? n_dim-2 : n_dim;
         
         //  matmul check
@@ -623,42 +605,41 @@ public:
         vector<unsigned int> nc(n_dim);
         
         // check broadcast
-        int status = 0;
+        enum Eshape status = SHAPE_ACCEPT;
         unsigned int ope_a = 0;
         unsigned int ope_b = 0;
         {
-            int ne = 0;
-            int n1 = 0;
-            int n2 = 0;
+            int n_equal = 0;
+            int n_broadcast = 0;
+            int n_miss = 0;
             for(int i=0;i<num;i++){
                 if( na[i] == nb[i] ){
-                    ne += 1;
+                    n_equal += 1;
                 } else if( na[i] == 1 ){
-                    n1 += 1;
+                    n_broadcast += 1;
                 } else if( nb[i] == 1 ){
-                    n1 += 1;
+                    n_broadcast += 1;
                 } else {
                     cout<<"broadcast mismatch dimension no."<<i<<endl;
-                    n2 += 1;
+                    n_miss += 1;
                 }
             }
 #ifdef _DEBUG
-            cout<<"broadcast check:  equal="<<ne<<" eq1="<<n1<<" other="<<n2<<endl;
+            cout<<"broadcast check:  equal="<<n_equal<<" broadcast="<<n_broadcast<<" miss="<<n_miss<<endl;
 #endif
-            
-            if( ne == num ) {  
-                status = 0;
-            } else if( (ne+n1) == num ) {
-                status = 1;
+            if(n_equal == num){
+                // success without broadcast (na=nb)
+            }else if( (n_equal+n_broadcast) == num ) {
+                status = SHAPE_BROADCAST;
             } else {
                 cout<<"broadcast error. " <<endl; 
-                status = -1;
+                return { SHAPE_REJECT, 0, 0, shape };
             }
             for(int i=0;i<num;i++)
             {
-                nc[i] = ( na[i] > nb[i] ) ? na[i] : nb[i];
+                nc[i] = std::max(na[i],nb[i]);
             }
-            if( status == 1 )
+            if( status ==  SHAPE_BROADCAST )
             {
                 // broadcast shape
                 for(int i=0;i<num;i++)
@@ -667,9 +648,6 @@ public:
                     if( nc[i] != na[i] )  ope_a += q;
                     if( nc[i] != nb[i] )  ope_b += q;
                 }
-                status = 0;
-                if( ope_a > 0 )  status += 1;
-                if( ope_b > 0 )  status += 2;
             }
             if( eb_type == EB_MATMUL )  // matmul case
             {
@@ -677,7 +655,7 @@ public:
                 nc[num+1] = nb[num+1];
             }
         }
-        if( status >= 0 )
+        //if( status >= 0 )
         {
             vector<size_t> sv;
             for(int i=0;i<n_dim;i++)  sv.push_back( nc[i] );
@@ -727,7 +705,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "add(forward)" );
         fprec s = ( inputs[2] ) ? (fprec)inputs[2]->output[0] : 1.0;
         bc = broadcast_check( inputs[0]->output, inputs[1]->output );
@@ -760,7 +737,6 @@ public:
                 inputs[1]->grad += this->grad * s;
             }
         }
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -780,7 +756,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "sub(forward)" );
         fprec s = ( inputs[2] ) ? (fprec)inputs[2]->output[0] : 1.0;
         bc = broadcast_check( inputs[0]->output, inputs[1]->output );
@@ -814,7 +789,6 @@ public:
                 inputs[1]->grad -= this->grad * s;
             }
         }
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -834,7 +808,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "mul(forward)" );
         bc = broadcast_check( inputs[0]->output, inputs[1]->output );
         this->output = inputs[0]->output * inputs[1]->output;
@@ -869,7 +842,6 @@ public:
                 inputs[1]->grad += this->grad * inputs[0]->output;
             }
         }
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -889,7 +861,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "div(forward)" );
         bc = broadcast_check( inputs[0]->output, inputs[1]->output );
         output = inputs[0]->output / inputs[1]->output;
@@ -926,7 +897,6 @@ public:
                 inputs[1]->grad += this->grad * ( -x0 / (x1*x1) );
             }
         }
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -946,7 +916,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "rsub(forward)" );
         fprec s = ( inputs[2] ) ? (fprec)inputs[2]->output[0] : 1.0;
         output = inputs[1]->output - inputs[0]->output * s;
@@ -957,7 +926,6 @@ public:
         print_message( "rsub(backward)" );
         fprec s = ( inputs[2] ) ? (fprec)inputs[2]->output[0] : 1.0;
         inputs[0]->grad -= this->grad * s;
-        _backward_inputs();
         return true;
     }
 };
@@ -969,7 +937,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "exp(forward)" );
         output = xt::exp( inputs[0]->output );
         return true;
@@ -979,7 +946,6 @@ public:
         print_message( "exp(backward)" );
         if( inputs[0]->is_grad() ) 
             inputs[0]->grad += this->grad * output;
-        _backward_inputs();
         return true;
     }
 };
@@ -990,7 +956,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "log(forward)" );
         output = xt::log(inputs[0]->output);
         return true;
@@ -1000,7 +965,6 @@ public:
         print_message( "log(backward)" );
         if( inputs[0]->is_grad() ) 
             inputs[0]->grad += this->grad / inputs[0]->output;
-        _backward_inputs();
         return true;
     }
 };
@@ -1011,7 +975,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "log1p(forward)" );
         output = xt::log( inputs[0]->output + 1.0 );
         return true;
@@ -1021,7 +984,6 @@ public:
         print_message( "log1p(backward)" );
         if( inputs[0]->is_grad() ) 
             inputs[0]->grad += this->grad / ( inputs[0]->output + 1.0 );
-        _backward_inputs();
         return true;
     }
 };
@@ -1032,7 +994,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "pow(forward)" );
         output = xt::pow( inputs[0]->output, inputs[1]->output );
         return true;
@@ -1044,7 +1005,6 @@ public:
         fprec   c = (fprec)inputs[1]->output[0];
         if( inputs[0]->is_grad() ) 
             inputs[0]->grad += this->grad * c * xt::pow( x, c-1.0 );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -1195,7 +1155,6 @@ public:
             cout<<"Error:DotOp"<<endl;
             return false;
         }
-        _forward_inputs();
         print_message( "dot(forward)" );
         Tensor& a  = inputs[0]->output;
         Tensor& b  = inputs[1]->output;
@@ -1239,7 +1198,6 @@ public:
         }
         ga += gc * b;
         gb += gc * a;
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -1264,7 +1222,6 @@ public:
             cout<<"Error:MatMulOp"<<endl;
             return false;
         }
-        _forward_inputs();
         print_message( "matmul(forward)" );
         Tensor& a  = inputs[0]->output;
         Tensor& b  = inputs[1]->output;
@@ -1308,16 +1265,16 @@ public:
             if( az == 1 ) {
                 Tensor a1 = a;
                 a1.reshape( { 1, as[0] } );
-                bc = broadcast_check( a1, b, 1 );
+                bc = broadcast_check( a1, b, EB_MATMUL );
                 output = broadcast_dot( a1, b, bc );
             } else {
                 if( bz == 1 ) {
                     Tensor b1 = b;
                     b1.reshape( { bs[0], 1 } );
-                    bc = broadcast_check( a, b1, 1 );
+                    bc = broadcast_check( a, b1, EB_MATMUL );
                     output = broadcast_dot( a, b1, bc );
                 } else {
-                    bc = broadcast_check( a, b, 1 );
+                    bc = broadcast_check( a, b, EB_MATMUL );
                     output = broadcast_dot( a, b, bc );
                 }
             }
@@ -1398,7 +1355,6 @@ public:
             cout<<"Error:A:"<<az<<" B:"<< bz<<endl;
             return false;
         }
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -1423,7 +1379,6 @@ public:
             cout<<"Error:LinearOp"<<endl;
             return false;
         }
-        _forward_inputs();
         print_message( "linear(forward)" );
         Tensor& a  = inputs[0]->output;  // x
         Tensor& b  = inputs[1]->output;  // weight
@@ -1445,7 +1400,7 @@ public:
         } else if( az > 2 && bz == 2 ) {
         
             Tensor bt = xt::transpose(b);
-            bc = broadcast_check( a, bt, 1 );
+            bc = broadcast_check( a, bt, EB_MATMUL );
             output = broadcast_dot( a, bt, bc );
             
         } else {
@@ -1531,7 +1486,6 @@ public:
                 return false;
             }
         }
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -1558,7 +1512,6 @@ public:
             cout<<"Error:AddMmOp"<<endl;
             return false;
         }
-         _forward_inputs();  
         print_message( "addmm(forward)" );
         Tensor& a  = inputs[1]->output;  // mat1
         Tensor& b  = inputs[2]->output;  // mat2
@@ -1650,7 +1603,6 @@ public:
                 gd += gc * beta;
             }
         }
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -1671,7 +1623,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "transpose(forward)" );
         output = xt::transpose( inputs[0]->output );
         return true;
@@ -1680,7 +1631,6 @@ public:
     {
         print_message( "transpose(backward)" );
         inputs[0]->grad += xt::transpose( this->grad );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -1701,7 +1651,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "max(forward)" );
         axis = (int)inputs[1]->output[0];
         output = xt::amax( inputs[0]->output, {axis} );
@@ -1724,7 +1673,6 @@ public:
         cout<<"cond"<<cond<<endl;
         ga = gc * cond;
         //print_tensor( "max ga", ga );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -1745,7 +1693,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "min(forward)" );
         axis = (int)inputs[1]->output[0];
         output = xt::amin( inputs[0]->output, {axis} );
@@ -1767,7 +1714,6 @@ public:
         cond = xt::equal( a, o );
         ga = gc * cond;
         //print_tensor( "min ga", ga );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -1786,7 +1732,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "sigmoid(forward)" );
         output = 1.0 / ( 1.0+xt::exp( -inputs[0]->output ) );
         return true;
@@ -1795,7 +1740,6 @@ public:
     {
         print_message( "sigmoid(backward)" );
         inputs[0]->grad += this->grad * output * ( 1.0 - output );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -1814,7 +1758,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "relu(forward)" );
         output = xt::maximum( inputs[0]->output, 0 );
         return true;
@@ -1823,7 +1766,6 @@ public:
     {
         print_message( "relu(backward)" );
         inputs[0]->grad += this->grad * ( inputs[0]->output > 0 );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -1848,7 +1790,6 @@ public:
 
     bool forward()
     {
-        _forward_inputs();
         print_message( "hardtanh(forward)" );
         min_val = (fprec)inputs[1]->output[0];
         max_val = (fprec)inputs[2]->output[0];
@@ -1862,7 +1803,6 @@ public:
         Tensor& y  = inputs[0]->output;
         Tensor& gd = inputs[0]->grad;
         gd += this->grad * ( y > min_val && y < max_val );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -1883,7 +1823,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "elu(forward)" );
         Tensor& y = inputs[0]->output;
         alpha = (fprec)inputs[1]->output[0];
@@ -1902,7 +1841,6 @@ public:
         mask = ( y < 0.0 );
         auto m = xt::masked_view( gd, mask );
         m = alpha * xt::exp( y );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -1923,7 +1861,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "leakyrelu(forward)" );
         Tensor& y = inputs[0]->output;
         slope = (fprec)inputs[1]->output[0];
@@ -1942,7 +1879,6 @@ public:
         mask = ( y < 0.0 );
         auto m = xt::masked_view( gd, mask );
         m = gd * slope;
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -1968,7 +1904,6 @@ public:
             cout<<"Error:Beta is 0.0"<<endl;
             return false;
         }
-        _forward_inputs();
         print_message( "softplus(forward)" );
         fprec threshold = (fprec)inputs[2]->output[0];
         output = inputs[0]->output;
@@ -1988,7 +1923,6 @@ public:
         mask = ( a * beta < threshold );
         auto m = xt::masked_view( ga, mask );
         m = 1.0 / ( 1.0 + 1.0/xt::exp( beta * a ) );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -2007,7 +1941,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "tanh(forward)" );
         output = xt::tanh( inputs[0]->output );
         return true;
@@ -2016,7 +1949,6 @@ public:
     {
         print_message( "tanh(backward)" );
         inputs[0]->grad += this->grad * ( 1.0 - output * output );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -2087,7 +2019,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "softmax(forward)" );
         output = _softmax( inputs[0]->output, axis ); 
         return true;
@@ -2100,7 +2031,6 @@ public:
         Tensor sg = xt::sum( ga, {axis} );
         sg = _row2col( sg, as );
         inputs[0]->grad += ( ga - output * sg );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -2120,7 +2050,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "log_softmax(forward)" );
         output = _log_softmax( inputs[0]->output, axis );
         return true;
@@ -2134,7 +2063,6 @@ public:
         sg = _row2col( sg, gs );
         Tensor  se = xt::exp( output );
         inputs[0]->grad += ( ga - se * sg );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -2154,7 +2082,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "full_like(forward)" );
         if( inputs[0] )
         {
@@ -2171,7 +2098,6 @@ public:
     bool backward()
     {
         //print_message( "fulllike(backward)" );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -2186,7 +2112,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "zeros(forward)" );
         if( inputs[0] )
         {
@@ -2216,7 +2141,6 @@ public:
     }
     bool backward()
     {
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -2231,7 +2155,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "ones(forward)" );
         if( inputs[0] )
         {
@@ -2261,7 +2184,6 @@ public:
     }
     bool backward()
     {
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -2276,7 +2198,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "randn(forward)" );
         if( inputs[0] )
         {
@@ -2297,7 +2218,6 @@ public:
     }
     bool backward()
     {
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -2312,7 +2232,6 @@ public:
   
     bool forward()
     {
-        _forward_inputs();
         if( !inputs[0] )  return false;
         if( !inputs[1] )  return false;
         print_message( "normal(forward)" );
@@ -2354,7 +2273,6 @@ public:
     }
     bool backward()
     {
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -2369,7 +2287,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "batchnorm(forward)" );
         Tensor x  = inputs[0]->output;
         Tshape xs = x.shape();
@@ -2492,7 +2409,6 @@ public:
             gx = xt::transpose( gx, perm2 );
         }
     
-        _backward_inputs();
         return true;
     }
     
@@ -2516,7 +2432,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "dropout(forward)" );
         Tensor&   x = inputs[0]->output;
         fprec ratio = (fprec)inputs[1]->output[0];
@@ -2555,7 +2470,6 @@ public:
         } else {
             inputs[0]->grad = this->grad;
         }
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -2574,7 +2488,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "mseloss(forward)" );
         Tensor& a = inputs[0]->output;
         Tensor& b = inputs[1]->output;
@@ -2599,7 +2512,6 @@ public:
         if( type == 1 )  ga = ga / (fprec)a.size();
         gb = -ga;
         //print_tensor( "mseloss_grad", ga );
-        _backward_inputs();
         return true;
     }
     fprec get_loss() { return output[0]; }
@@ -2612,7 +2524,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "cross_entropy_loss(forward)" );
         Tensor& a  = inputs[0]->output;
         Tshape  as = a.shape();
@@ -2650,7 +2561,6 @@ public:
         
         inputs[0]->grad = ( y - one ) * ga * sc;
         //print_tensor( "crossloss_grad", inputs[0]->grad );
-        _backward_inputs();
       
         return true;
     }
@@ -2685,7 +2595,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "bceloss(forward)" );
         Tensor& y = inputs[0]->output;
         Tensor& t = inputs[1]->output;
@@ -2722,7 +2631,6 @@ public:
         gy += this->grad * ( -t/(y+eps) + (1-t)/(1-y+eps) ) / d;
         gt += this->grad * ( -xt::log(y+eps) + xt::log(1-y+eps) ) / d;
         //print_tensor( "bceloss grad", gy );
-        _backward_inputs();
         return true;
     }
 };
@@ -2733,7 +2641,6 @@ public:
     
     bool forward() 
     {
-        _forward_inputs();
         print_message( "nullload(forward)" );
         Tensor& a  = inputs[0]->output;
         Tshape  as = a.shape();
@@ -2782,7 +2689,6 @@ public:
         }
         inputs[0]->grad = one * sc;
         print_tensor( "nllloss grad", inputs[0]->grad );
-        _backward_inputs();
         return true;
     }
 };
@@ -2802,6 +2708,7 @@ public:
     Tshape broadcast_shape;
     enum Eshape result;
     
+private:
     // return value   0: no broadcast
     //               >0; broadcast by shape
     //               <0: broadcast error
@@ -2828,9 +2735,7 @@ public:
         
         unsigned int equal = 1;
         unsigned int err   = 0;
-        vector<unsigned int>  na(n_dim);
-        vector<unsigned int>  nb(n_dim);
-        eval_shape( as[0], na, n_dim );
+        vector<size_t>  na=extend_shape( as[0], n_dim);
 
 #ifdef _DEBUG
         cout<<"--------------------------"<<endl;
@@ -2840,22 +2745,22 @@ public:
         
         for(unsigned int k=1;k<num;k++)
         {
-            eval_shape( as[k], nb, n_dim );
+            vector<size_t>  nb=extend_shape( as[k], n_dim );
             
             // check broadcast
-            int ne = 0;
-            int n1 = 0;
-            int n2 = 0;
+            int n_equal = 0;
+            int n_broadcast = 0;
+            int n_miss = 0;
             for(int i=0;i<n_dim;i++){
                 if( na[i] == nb[i] ){
-                    ne += 1;
+                    n_equal += 1;
                 } else if( na[i] == 1 ){
-                    n1 += 1;
+                    n_broadcast += 1;
                 } else if( nb[i] == 1 ){
-                    n1 += 1;
+                    n_broadcast += 1;
                 } else {
                     //cout<<"broadcast mismatch dimension no."<<i<<endl;
-                    n2 += 1;
+                    n_miss += 1;
                 }
             }
 #ifdef _DEBUG
@@ -2864,21 +2769,21 @@ public:
             cout<<"broadcast ("<<k<<")  equal="<<ne<<" eq1="<<n1<<" other="<<n2<<endl;
 #endif
             
-            int status = 0;
-            if( ne == n_dim ) {  
-                status = 2;
+            Eshape status =SHAPE_ACCEPT;
+            if( n_equal == n_dim ) {  
+                status = SHAPE_ACCEPT;
                 equal++;
-            } else if( (ne+n1) == n_dim ) {
-                status = 1;
+            } else if( (n_equal+n_broadcast) == n_dim ) {
+                status = SHAPE_BROADCAST;
             } else {
                 cout<<"broadcast error. ("<<k<<")"<<endl; 
                 err += 1;
             }
-            if( status == 1 )
+            if( status == SHAPE_BROADCAST )
             {
                 for(int i=0;i<n_dim;i++)
                 {
-                    na[i] = ( na[i] > nb[i] ) ? na[i] : nb[i];
+                    na[i] = std::max(na[i], nb[i]);
                 }
             }
         }
@@ -2908,6 +2813,8 @@ public:
         }
         return result;
     }
+
+
     enum Eshape restore_broadcast( Tensor &ga, Tshape as, Tshape os )
     {
         int  az = as.size();
@@ -2956,9 +2863,9 @@ public:
         return SHAPE_BROADCAST;
     }
     
+public:
     bool forward()
     {
-        _forward_inputs();
         print_message( "broadcast_tensors(forward)" );
         if( inputs[0] )
         {
@@ -3010,7 +2917,6 @@ public:
             glist.clear();
         }
         print_message( "broadcast_tensors(backward)" );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -3050,7 +2956,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "list_contruct(forward)" );
         if( inputs.size() < 1 )
         {
@@ -3087,7 +2992,6 @@ public:
                 }
             }
         }
-        _backward_inputs();
         return true;
     }
 };
@@ -3104,7 +3008,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "list_unpack(forward)" );
         
         if( inputs[0] )
@@ -3136,7 +3039,6 @@ public:
                 glist1->at(output_id)= this->grad;
             }
         }
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -3171,7 +3073,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "tuplecontruct(forward)" );
         
         ndlist.clear();  
@@ -3187,7 +3088,6 @@ public:
     }
     bool backward()
     {
-        _backward_inputs();
         return true;
     }
 };
@@ -3204,7 +3104,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "tupleunpack(forward)" );
         
         if( inputs[0] )
@@ -3228,7 +3127,6 @@ public:
             MCTNode* node = ndlist1->at( output_id );
             if( node )  node->grad += this->grad;
         }
-        _backward_inputs();
         return true;
     }
 };
@@ -3239,7 +3137,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "size(forward)" );
         Tensor& a  = inputs[0]->output;
         Tshape  as = a.shape();
@@ -3249,7 +3146,6 @@ public:
     }
     bool backward()
     {
-        _backward_inputs();
         return true;
     }
 };
@@ -3260,7 +3156,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "expand(forward)" );
         
         if( inputs[1] )  // shape
@@ -3284,7 +3179,6 @@ public:
     }
     bool backward()
     {
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -3299,7 +3193,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "numtotensor(forward)" );
         output = inputs[0]->output;
         return true;
@@ -3308,7 +3201,6 @@ public:
     {
         print_message( "numtotensor(backward)" );
         inputs[0]->grad += this->grad;
-        _backward_inputs();
         return true;
     }
 };
@@ -3319,7 +3211,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "int(forward)" );
         output = inputs[0]->output;
         return true;
@@ -3328,7 +3219,6 @@ public:
     {
         print_message( "int(backward)" );
         inputs[0]->grad += this->grad;
-        _backward_inputs();
         return true;
     }
 };
@@ -3340,7 +3230,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "view(forward)" );
         Tensor& a = inputs[0]->output;
         org_shape = a.shape();
@@ -3370,7 +3259,6 @@ public:
         Tensor &ga = inputs[0]->grad;
         ga = this->grad;
         ga.reshape( org_shape );
-        _backward_inputs();
         return true;
     }
     void check_shape()
@@ -3389,7 +3277,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "to(forward)" );
         if( inputs.size() < 2 )
         {
@@ -3405,7 +3292,6 @@ public:
     }
     bool backward()
     {
-        _backward_inputs();
         return true;
     }
 };
@@ -3417,7 +3303,6 @@ public:
     
     bool forward()
     {
-        _forward_inputs();
         print_message( "detach(forward)" );
         
         if( inputs[0] )
@@ -3433,7 +3318,6 @@ public:
     }
     bool backward()
     {
-        _backward_inputs();
         return true;
     }
 };
