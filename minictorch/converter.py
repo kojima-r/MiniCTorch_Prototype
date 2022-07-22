@@ -619,7 +619,7 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
         text+="""
                 forward_result[k]->set_id( k );
                 forward_result[k]->forward();
-                forward_result[k]->check_shape();
+                forward_result[k]->display_shape();
                 forward_result[k]->zerograd();"""
     else:
         text+="""
@@ -640,7 +640,7 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
             if( forward_result[k] )  
             {
                forward_result[k]->backward();
-               forward_result[k]->check_grad_shape();
+               forward_result[k]->display_grad_shape();
             }"""
     else:
         text +="""

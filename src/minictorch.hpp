@@ -42,10 +42,7 @@ enum Evariable  // VariableTensor type
 enum Eshape  // Broadcast type
 {
     SHAPE_ACCEPT     =  0,  // そのまま継続実行
-    SHAPE_BROADCAST  =  1,  // Broadcastして実行 (1:A,2:B,3:A and B)
-    //SHAPE_BROADCAST_A  =  2,  // Broadcastして実行 (1:A,2:B,3:A and B)
-    //SHAPE_BROADCAST_B  =  3,  // Broadcastして実行 (1:A,2:B,3:A and B)
-    //SHAPE_BROADCAST_AB  = 4,  // Broadcastして実行 (1:A,2:B,3:A and B)
+    SHAPE_BROADCAST  =  1,  // Broadcastして実行 deprecated (1:A,2:B,3:A and B)
 
     SHAPE_REJECT     = -1,  // Broadcastできないの中断
     SHAPE_ERROR      = -2   // Errorなので中断
@@ -107,9 +104,10 @@ public:
         return true;
     };
     
+    // extend shape for the first step of broadcasting
     // as: (2,3,4,5)
-    // na: (1,1,1,1,1,1,1)
-    // na: (1,1,1,2,3,4,5)
+    // n_dim: 7
+    // out: (1,1,1,2,3,4,5)
     vector<size_t> extend_shape(const Tshape as, int n_dim )
     {
         unsigned int  az = as.size();
@@ -128,7 +126,7 @@ public:
     Tshape out_shape;
     void set_shape( Tshape s ) { out_shape = s; };
     
-    enum Eshape check_shape_size( string ss, int id, Tshape sh1, Tshape sh2, int size2 )
+    enum Eshape display_shape_size( string ss, int id, Tshape sh1, Tshape sh2, int size2 )
     {
         int sz1 = sh1.size();
         if( sz1 < 1 )  return SHAPE_ACCEPT;
@@ -168,24 +166,24 @@ public:
         }
         return SHAPE_BROADCAST;
     }
-    enum Eshape check_grad_shape_size( string s, int id, Tensor& ga, Tensor& gb )
+    enum Eshape display_grad_shape_size( string s, int id, Tensor& ga, Tensor& gb )
     {
-        return check_shape_size( s, id, ga.shape(), gb.shape(), gb.size() );
+        return display_shape_size( s, id, ga.shape(), gb.shape(), gb.size() );
     }
-    enum Eshape check_shape1( string s )
+    enum Eshape display_shape1( string s )
     {
-        return check_shape_size( s, id, out_shape, output.shape(), output.size() );
+        return display_shape_size( s, id, out_shape, output.shape(), output.size() );
     }
-    enum Eshape check_grad_shape1( string s, int k=0 )
+    enum Eshape display_grad_shape1( string s, int k=0 )
     {
         if( inputs[k] )
         {
-            return check_grad_shape_size( s, id, inputs[k]->output, inputs[k]->grad );
+            return display_grad_shape_size( s, id, inputs[k]->output, inputs[k]->grad );
         }
         return SHAPE_ERROR;
     }
-    virtual void check_shape()      {}
-    virtual void check_grad_shape() {}
+    virtual void display_shape()      {}
+    virtual void display_grad_shape() {}
     
     // for debug
     void print_message( const char* msg ) 
@@ -471,11 +469,11 @@ public:
         }
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "stack" );
+        display_shape1( "stack" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
         if( inputs[0] )
         {
@@ -488,7 +486,7 @@ public:
                     Tensor& a1 = tlist1->at(i);
                     Tensor& g1 = glist1->at(i);
                     string  s  = "stack_" + std::to_string(i) + " grad";
-                    check_grad_shape_size( s, id, a1, g1 );
+                    display_grad_shape_size( s, id, a1, g1 );
                 }
             }
         }
@@ -739,14 +737,14 @@ public:
         }
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "add" );
+        display_shape1( "add" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "add grad a", 0 );
-        check_grad_shape1( "add grad b", 1 );
+        display_grad_shape1( "add grad a", 0 );
+        display_grad_shape1( "add grad b", 1 );
     }
 };
 
@@ -791,14 +789,14 @@ public:
         }
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "sub" );
+        display_shape1( "sub" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "sub grad a", 0 );
-        check_grad_shape1( "sub grad b", 1 );
+        display_grad_shape1( "sub grad a", 0 );
+        display_grad_shape1( "sub grad b", 1 );
     }
 };
 
@@ -844,14 +842,14 @@ public:
         }
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "mul" );
+        display_shape1( "mul" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "mul grad a", 0 );
-        check_grad_shape1( "mul grad b", 1 );
+        display_grad_shape1( "mul grad a", 0 );
+        display_grad_shape1( "mul grad b", 1 );
     }
 };
 
@@ -899,14 +897,14 @@ public:
         }
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "div" );
+        display_shape1( "div" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "div grad a", 0 );
-        check_grad_shape1( "div grad b", 1 );
+        display_grad_shape1( "div grad a", 0 );
+        display_grad_shape1( "div grad b", 1 );
     }
 };
 
@@ -1007,13 +1005,13 @@ public:
             inputs[0]->grad += this->grad * c * xt::pow( x, c-1.0 );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "pow" );
+        display_shape1( "pow" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "pow grad", 0 );
+        display_grad_shape1( "pow grad", 0 );
     }
 };
 
@@ -1140,8 +1138,8 @@ public:
     bool forward()  { return true; }
     bool backward() { return true; }
     
-    void check_shape() {}
-    void check_grad_shape() {}
+    void display_shape() {}
+    void display_grad_shape() {}
 };
 
 class DotOp:public MCTNode{
@@ -1200,14 +1198,14 @@ public:
         gb += gc * a;
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "dot" );
+        display_shape1( "dot" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "dot grad a", 0 );
-        check_grad_shape1( "dot grad b", 1 );
+        display_grad_shape1( "dot grad a", 0 );
+        display_grad_shape1( "dot grad b", 1 );
     }
 };
 
@@ -1357,14 +1355,14 @@ public:
         }
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "matmul" );
+        display_shape1( "matmul" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "matmul grad a", 0 );
-        check_grad_shape1( "matmul grad b", 1 );
+        display_grad_shape1( "matmul grad a", 0 );
+        display_grad_shape1( "matmul grad b", 1 );
     }
 };
 
@@ -1488,15 +1486,15 @@ public:
         }
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "linear" );
+        display_shape1( "linear" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "linear grad x", 0 );
-        check_grad_shape1( "linear grad w", 1 );
-        check_grad_shape1( "linear grad b", 2 );
+        display_grad_shape1( "linear grad x", 0 );
+        display_grad_shape1( "linear grad w", 1 );
+        display_grad_shape1( "linear grad b", 2 );
     }
 };
 
@@ -1605,15 +1603,15 @@ public:
         }
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "addmm" );
+        display_shape1( "addmm" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "addmm grad b", 0 );
-        check_grad_shape1( "addmm grad x", 1 );
-        check_grad_shape1( "addmm grad w", 2 );
+        display_grad_shape1( "addmm grad b", 0 );
+        display_grad_shape1( "addmm grad x", 1 );
+        display_grad_shape1( "addmm grad w", 2 );
     }
 };
 
@@ -1633,13 +1631,13 @@ public:
         inputs[0]->grad += xt::transpose( this->grad );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "transpose" );
+        display_shape1( "transpose" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "transpose grad", 0 );
+        display_grad_shape1( "transpose grad", 0 );
     }
 };
 
@@ -1675,13 +1673,13 @@ public:
         //print_tensor( "max ga", ga );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "max" );
+        display_shape1( "max" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "max grad", 0 );
+        display_grad_shape1( "max grad", 0 );
     }
 };
 
@@ -1716,13 +1714,13 @@ public:
         //print_tensor( "min ga", ga );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "min" );
+        display_shape1( "min" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "min grad", 0 );
+        display_grad_shape1( "min grad", 0 );
     }
 };
 
@@ -1742,13 +1740,13 @@ public:
         inputs[0]->grad += this->grad * output * ( 1.0 - output );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "sigmoid" );
+        display_shape1( "sigmoid" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "sigmoid grad", 0 );
+        display_grad_shape1( "sigmoid grad", 0 );
     }
 };
 
@@ -1768,13 +1766,13 @@ public:
         inputs[0]->grad += this->grad * ( inputs[0]->output > 0 );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "relu" );
+        display_shape1( "relu" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "relu grad", 0 );
+        display_grad_shape1( "relu grad", 0 );
     }
 };
 
@@ -1805,13 +1803,13 @@ public:
         gd += this->grad * ( y > min_val && y < max_val );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "hardtanh" );
+        display_shape1( "hardtanh" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "hardtanh grad", 0 );
+        display_grad_shape1( "hardtanh grad", 0 );
     }
 };
 
@@ -1843,13 +1841,13 @@ public:
         m = alpha * xt::exp( y );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "elu" );
+        display_shape1( "elu" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "elu grad", 0 );
+        display_grad_shape1( "elu grad", 0 );
     }
 };
 
@@ -1881,13 +1879,13 @@ public:
         m = gd * slope;
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "leakyrelu" );
+        display_shape1( "leakyrelu" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "leakyrelu grad", 0 );
+        display_grad_shape1( "leakyrelu grad", 0 );
     }
 };
 
@@ -1925,13 +1923,13 @@ public:
         m = 1.0 / ( 1.0 + 1.0/xt::exp( beta * a ) );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "softplus" );
+        display_shape1( "softplus" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "softplus grad", 0 );
+        display_grad_shape1( "softplus grad", 0 );
     }
 };
 
@@ -1951,13 +1949,13 @@ public:
         inputs[0]->grad += this->grad * ( 1.0 - output * output );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "tanh" );
+        display_shape1( "tanh" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "tanh grad", 0 );
+        display_grad_shape1( "tanh grad", 0 );
     }
 };
 
@@ -2033,13 +2031,13 @@ public:
         inputs[0]->grad += ( ga - output * sg );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "softmax" );
+        display_shape1( "softmax" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "softmax grad", 0 );
+        display_grad_shape1( "softmax grad", 0 );
     }
 };
 
@@ -2065,13 +2063,13 @@ public:
         inputs[0]->grad += ( ga - se * sg );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "logsoftmax" );
+        display_shape1( "logsoftmax" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "logsoftmax grad", 0 );
+        display_grad_shape1( "logsoftmax grad", 0 );
     }
 };
 
@@ -2100,9 +2098,9 @@ public:
         //print_message( "fulllike(backward)" );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "fulllike" );
+        display_shape1( "fulllike" );
     }
 };
 
@@ -2143,9 +2141,9 @@ public:
     {
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "zeros" );
+        display_shape1( "zeros" );
     }
 };
 
@@ -2186,9 +2184,9 @@ public:
     {
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "ones" );
+        display_shape1( "ones" );
     }
 };
 
@@ -2220,9 +2218,9 @@ public:
     {
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "randn" );
+        display_shape1( "randn" );
     }
 };
 
@@ -2275,9 +2273,9 @@ public:
     {
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "normal" );
+        display_shape1( "normal" );
     }
 };
 
@@ -2412,15 +2410,15 @@ public:
         return true;
     }
     
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "batchnorm" );
+        display_shape1( "batchnorm" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "batchnorm grad x", 0 );
-        check_grad_shape1( "batchnorm grad gamma", 1 );
-        check_grad_shape1( "batchnorm grad beta", 2 );
+        display_grad_shape1( "batchnorm grad x", 0 );
+        display_grad_shape1( "batchnorm grad gamma", 1 );
+        display_grad_shape1( "batchnorm grad beta", 2 );
     }
 };
 
@@ -2472,13 +2470,13 @@ public:
         }
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "dropout" );
+        display_shape1( "dropout" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "dropout grad", 0 );
+        display_grad_shape1( "dropout grad", 0 );
     }
 };
 
@@ -2919,11 +2917,11 @@ public:
         print_message( "broadcast_tensors(backward)" );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "broadcast_tensors" );
+        display_shape1( "broadcast_tensors" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
         if( inputs[0] )
         {
@@ -2936,7 +2934,7 @@ public:
                     Tensor& a1 = tlist1->at(i);
                     Tensor& g1 = glist1->at(i);
                     string s = "broadcast_tensors_" + std::to_string(i) + " grad";
-                    check_grad_shape_size( s, id, a1, g1 );
+                    display_grad_shape_size( s, id, a1, g1 );
                 }
             }
         }
@@ -3041,11 +3039,11 @@ public:
         }
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "ListUnpack" );
+        display_shape1( "ListUnpack" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
         vector<Tensor>* tlist1 = inputs[0]->get_tlist();
         vector<Tensor>* glist1 = inputs[0]->get_glist();
@@ -3057,7 +3055,7 @@ public:
                 Tensor& a1 = tlist1->at( output_id );
                 Tensor& g1 = glist1->at( output_id );
                 string s = "ListUnpack_" + std::to_string( output_id ) + " grad";
-                check_grad_shape_size( s, id, a1, g1 );
+                display_grad_shape_size( s, id, a1, g1 );
             }
         }
     }
@@ -3181,9 +3179,9 @@ public:
     {
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "expand" );
+        display_shape1( "expand" );
     }
 };
 
@@ -3261,13 +3259,13 @@ public:
         ga.reshape( org_shape );
         return true;
     }
-    void check_shape()
+    void display_shape()
     {
-        check_shape1( "view" );
+        display_shape1( "view" );
     }
-    void check_grad_shape()
+    void display_grad_shape()
     {
-        check_grad_shape1( "view grad", 0 );
+        display_grad_shape1( "view grad", 0 );
     }
 };
 
