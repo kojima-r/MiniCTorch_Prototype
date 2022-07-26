@@ -2106,12 +2106,13 @@ public:
 
 class ZerosLikeOp : public FullLikeOp {
 public:
-    ZerosLikeOp():FullLikeOp( fprec v=0.0 ){}
+    ZerosLikeOp():FullLikeOp(0.0){}
+};
 
 class OnesLikeOp : public FullLikeOp {
 public:
-    ZerosLikeOp():FullLikeOp( fprec v=1.0 ){}
-
+    OnesLikeOp():FullLikeOp(1.0){}
+};
 
 
 class ZerosOp : public MCTNode {

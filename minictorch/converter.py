@@ -69,16 +69,16 @@ OUTPUT_ID_ENABLED_NODE={
     "TupleUnpackOp",
     }
  
-def makefile_generator( project, code="all", xtensor_include_base="../", minictorch_include="../src" ):
+def makefile_generator( project, code="all", xtensor_include_base="../", minictorch_include="../src",optimize="-O3" ):
     make_text="""
 CXX = g++
-CXXFLAGS += -g -Wall  -std=c++14 -I./ -I{minictorch_inc} -I{xtensor_base}xtensor-blas/include -I{xtensor_base}xtensor/include -I{xtensor_base}xtl/include
+CXXFLAGS += {optimize} -Wall  -std=c++14 -I./ -I{minictorch_inc} -I{xtensor_base}xtensor-blas/include -I{xtensor_base}xtensor/include -I{xtensor_base}xtl/include
 LDFLAGS = -lcblas
 TARGET  = {proj}
 SRCS    = {proj}.cpp {proj}_param.cpp
 OBJS    = $(SRCS:.cpp=.o)
 
-""".format(proj=project,xtensor_base=xtensor_include_base,minictorch_inc=minictorch_include)
+""".format(proj=project,xtensor_base=xtensor_include_base,minictorch_inc=minictorch_include,optimize=optimize)
 
     if code == "all":
         make_text+="""
@@ -346,7 +346,6 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
     n_constant = 0  # Constant no.
     output_id = None
     for i,el in enumerate(obj):
-        print(el)
         text="""
         // {el}
         {{""".format(el=str(el))
@@ -387,23 +386,23 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
                 val = el["constant_value"]
                 text+="""
             Tensor c = (fprec){val};
-            forward_result[{i}] = new VariableTensor( c, 1 );""".format(i=i,val=str(val))
+            forward_result[{i}] = new VariableTensor( c, VAR_CONST );""".format(i=i,val=str(val))
             else:
                 if len(el["shape"]) > 0: # Constant no. ## from extern variable
                     n_constant += 1
                     key = "Constant" + str(n_constant)
                     text+="""
             {key}.reshape( shape );
-            forward_result[{i}] = new VariableTensor( {key}, 1 );""".format(i=i,key=key)
+            forward_result[{i}] = new VariableTensor( {key}, VAR_CONST );""".format(i=i,key=key)
                 else:
                     val=el["constant_value"]
                     text+="""
             Tensor t= {{{val}}};
             t = t.reshape(shape);
-            forward_result[{i}] = new VariableTensor( t, 1 );""".format(i=i,shape=",".join(map(str,shape)), val=",".join(map(str,val)))
+            forward_result[{i}] = new VariableTensor( t, VAR_CONST );""".format(i=i,shape=",".join(map(str,shape)), val=",".join(map(str,val)))
         
         ###
-        ### constant
+        ### attr
         ###
         elif el["op"]=="prim::GetAttr":
         
@@ -421,7 +420,7 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
                     text+="""
             Tensor::shape_type shape = {{{shape}}};
             {key}.reshape( shape );
-            forward_result[{i}] = new VariableTensor( {key}, 2 );""".format(i=i,key=key,shape=shape)
+            forward_result[{i}] = new VariableTensor( {key}, VAR_ATTR );""".format(i=i,key=key,shape=shape)
             
             else:
                 skey = name.split("/")
@@ -433,7 +432,7 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
             Tensor::shape_type shape = {{{shape}}};
             fprec y = sqrt(1.0/(fprec){shy});
             Tensor t = xt::random::rand(shape,-y,y);
-            forward_result[{i}] = new VariableTensor( t, 2 );""".format(i=i,shape=shape,shy=shy)
+            forward_result[{i}] = new VariableTensor( t, VAR_ATTR );""".format(i=i,shape=shape,shy=shy)
                 
         else:
             ###
@@ -544,7 +543,7 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
         // input data
         Tensor::shape_type shape = {{{shape}}};
         xin.reshape( shape );
-        VariableTensor input_var( xin, 3 );
+        VariableTensor input_var( xin, VAR_INPUT );
     """.format(i=i,shape=",".join(map(str,shape)))
     all_text += text
     
@@ -604,113 +603,19 @@ def get_unpack_origin( obj, no1, inout ):
 def get_tensor_shape( x ):
     num = len( x.shape )
     text = ""
-    if num > 1:
+    if num > 0:# tensor
         text = "{"
-        for i in range(num-1):
-            text += str(x.shape[i])
-            text += ','
-        text += str(x.shape[num-1]) + "}"
-        return 1,text
-    elif num == 1:
-        text = "{" + str(x.shape[0]) + "}"
-        return 1,text
-    return 0,text
+        text += ",".join(map(str,x.shape))
+        text +="}"
+        return True, text
+    return False, text
 
-
-def c_train_code_generator( project, folder, obj, **kwargs ):
-    
-    # arguments
-    nwargs = len(kwargs)
-    if nwargs < 1: return ""
-    
-    epochs = 200
-    if 'epochs' in kwargs:
-        epochs = kwargs['epochs']
-    print("epoch_num : ", epochs )
-        
-    batchs = 32
-    if 'batch' in kwargs:
-        batchs = kwargs['batch']
-    print("batch_size : ", batchs )
-        
-    lr = 0.01;
-    if 'lr' in kwargs:
-        lr = kwargs['lr']
-    print("lr : ", lr )
-        
-    net_key = "Net"
-    if 'net_key' in kwargs:
-        net_key = kwargs['net_key']
-        print("net_key :", net_key )
-    
-    loss_key = "Loss"
-    if 'loss_key' in kwargs:
-        loss_key = kwargs['loss_key']
-        print("loss_key :", loss_key )
-        
-    pred_key = ""
-    if 'pred_key' in kwargs:
-        pred_key = kwargs['pred_key']
-        print("pred_key :", pred_key )
-        
-    pred_index = -1
-    if 'pred_index' in kwargs:
-        pred_index_no = kwargs['pred_index']
-        print("pred_index :", pred_index )
-        
-    input_opt = 0;
-    input_s = ""
-    if 'input_data' in kwargs:
-        input_data = kwargs[ 'input_data']
-        input_opt, input_s = get_tensor_shape( input_data )
-        
-    target_opt = 0
-    target_s = ""
-    if 'target_data' in kwargs:
-        target_data = kwargs[ 'target_data']
-        target_opt, target_s = get_tensor_shape( target_data )
-        
-    print("input  shape : ", input_opt, input_s)
-    print("target shape : ", target_opt, target_s)
-    
-    shuffle = 0
-    if "shuffle" in kwargs:
-        shuffle = kwargs["shuffle"]
-    print("shuffle : ", shuffle )
-    
-    pred_output = 0;
-    if input_opt > 0:
-        pred_output = input_data.shape[0]
-        
-    if 'pred_output' in kwargs:
-        pred_output = kwargs['pred_output']
-    print("pred_output : ", pred_output)
-    
-        
-    # ---------- 
-    
-    # output id
-    output_id = -1
-    for i,el in enumerate(obj):
-        if "output" in el['name']:
-            assert len(el["in"])>0, "output error"
-            output_id = el["in"][0]
-            
-    ## e.g. Loss = loss1 + loss2
-    output_sum_loss_id=[]
-    if output_id >=0:
-        el = obj[output_id];
-        if el["op"] == "aten::add":  # for vae
-            nadd1 = el['in'][0]
-            nadd2 = el['in'][1]
-            output_sum_loss_id=[nadd1,nadd2]
-            print("index list for Loss components : ", output_sum_loss_id)
-    
+def find_output_node(obj,net_key,loss_key,pred_key,output_id,target_enabled,pred_index, task_type):
     # evaluated no
     pred_no   = -1
     target_no = -1
     pred_pos  = -1
-    class_no  =  0
+    class_no  = -1
     
     pos1 = 0
     pos2 = 0
@@ -777,6 +682,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
                             pred_id  = i
     ## pred_idはここまでで決定
     print("pred_id",pred_id,pred_key)
+
     if pred_id > 0:
         el = obj[pred_id]
         type = 0
@@ -790,14 +696,14 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             pred_no = get_unpack_origin( obj, el['in'][0], inout )
             if len(el['in']) > 1: 
                 no2 = get_unpack_origin( obj, el['in'][1], inout )
-                if target_opt > 0: target_no = no2
+                if target_enabled > 0: target_no = no2
                 if type == 2:      class_no  = no2
                 if type == 3:      class_no  = no2
         if pred_no > 0:  
             print("eval1 no :",i," (type=",type,") : ", pred_no,target_no)
             
     if pred_pos < 0:
-        if len(pred_key) > 0:
+        if pred_key is not None:
             for i,el in enumerate(obj):
                 if pred_key in el['op']:
                     if i > pred_no:  pred_no = i
@@ -812,7 +718,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
                     pred_no = get_unpack_origin( obj, el['in'][0], inout )
                     if len(el['in']) > 1:
                         no2 = get_unpack_origin( obj, el['in'][1], inout )
-                        if target_opt > 0: target_no = no2
+                        if target_enabled > 0: target_no = no2
                         if type == 2:      class_no  = no2
                         if type == 3:      class_no  = no2
                 if pred_no > 0:  
@@ -823,23 +729,112 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         
     print("last cmd:", last) #未使用
     print("------")
-        
-    ###
-    sol_kind = "";
-    if "sol" in kwargs:
-        sol_kind = kwargs["sol"]
-    print("solution :", sol_kind)
-    if not "clas" in sol_kind:
-        class_no = 0
-    
+    if not "classification" in task_type:
+        class_no = -1
+
     if ( pred_index >= 0 ) and ( pred_index < output_id ):
         if inout[pred_index] > 0:
             pred_no = pred_index
-   
-    print("pred_no   :", pred_no)
-    print("target_no :", target_no)
-    print("class_no  :", class_no)
+
+    return pred_no,target_no,class_no
+
+def c_train_code_generator( project, folder, obj, **kwargs ):
     
+    # arguments
+    nwargs = len(kwargs)
+    if nwargs < 1: return ""
+    
+    epochs = 200
+    if 'epochs' in kwargs:
+        epochs = kwargs['epochs']
+    print("epoch_num : ", epochs )
+        
+    batch_size = 32
+    if 'batch' in kwargs:
+        batch_size = kwargs['batch']
+    print("batch_size : ", batch_size )
+        
+    lr = 0.01;
+    if 'lr' in kwargs:
+        lr = kwargs['lr']
+    print("lr : ", lr )
+        
+    net_key = "Net"
+    if 'net_key' in kwargs:
+        net_key = kwargs['net_key']
+        print("net_key :", net_key )
+    
+    loss_key = "Loss"
+    if 'loss_key' in kwargs:
+        loss_key = kwargs['loss_key']
+        print("loss_key :", loss_key )
+        
+    pred_key = None
+    if 'pred_key' in kwargs:
+        pred_key = kwargs['pred_key']
+        print("pred_key :", pred_key )
+        
+    pred_index = -1
+    if 'pred_index' in kwargs:
+        pred_index_no = kwargs['pred_index']
+        print("pred_index :", pred_index )
+        
+    input_enabled = False;
+    input_s = ""
+    if 'input_data' in kwargs:
+        input_data = kwargs['input_data']
+        input_enabled, input_s = get_tensor_shape( input_data )
+        
+    target_enabled = False
+    target_s = ""
+    if 'target_data' in kwargs:
+        target_data = kwargs['target_data']
+        target_enabled, target_s = get_tensor_shape( target_data )
+        
+    print("input  shape : ", input_enabled, input_s)
+    print("target shape : ", target_enabled, target_s)
+    
+    shuffle = False
+    if "shuffle" in kwargs:
+        shuffle = kwargs["shuffle"]
+    print("shuffle : ", shuffle )
+    
+    pred_output = 0
+    if input_enabled:
+        pred_output = input_data.shape[0]
+        
+    if 'pred_output' in kwargs:
+        pred_output = kwargs['pred_output']
+    print("pred_output : ", pred_output)
+
+    task_type = ""
+    if "task_type" in kwargs:
+        task_type = kwargs["task_type"]
+    print("task_type :", task_type)
+
+    # ---------- 
+    # output id
+    output_id = -1
+    for i,el in enumerate(obj):
+        if "output" in el['name']:
+            assert len(el["in"])>0, "output error"
+            output_id = el["in"][0]
+
+    ## e.g. Loss = loss1 + loss2
+    output_sum_loss_id=[]
+    if output_id >=0:
+        el = obj[output_id];
+        if el["op"] == "aten::add":  # for vae
+            nadd1 = el['in'][0]
+            nadd2 = el['in'][1]
+            output_sum_loss_id=[nadd1,nadd2]
+            print("index list for Loss components : ", output_sum_loss_id)
+    ###
+    pred_no,target_no,class_no = find_output_node(obj,net_key,loss_key,pred_key,output_id,target_enabled,pred_index, task_type)
+    print("pred_no   :", pred_no, obj[pred_no])
+    print("target_no :", target_no, obj[target_no])
+    print("class_no  :", class_no, obj[class_no])
+    ###
     
     # header section
     all_text="""
@@ -857,10 +852,10 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     """.format(proj=project)
     
     text = ""
-    if input_opt > 0:
+    if input_enabled:
         text +="""
     extern Tensor input_data;"""
-    if target_opt > 0:
+    if target_enabled:
         text +="""
     extern Tensor target_data;"""
     all_text += text
@@ -896,7 +891,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             }
         };"""
     
-    if class_no > 0:
+    if class_no >= 0:
         all_text +="""
         auto eval_labels=[]( Tensor& y, Tensor &t )
         {
@@ -917,15 +912,15 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     """.format(ne=epochs,lr=lr)
     
     text = ""
-    if batchs > 0:
+    if batch_size > 0:
         
-        if input_opt > 0:
+        if input_enabled:
             text +="""
         input_data.reshape( {shape} );
         auto input_shape = input_data.shape();
         """.format(shape=input_s)
         
-        if target_opt > 0:
+        if target_enabled:
             text +="""
         target_data.reshape( {shape} );
         auto target_shape = target_data.shape();
@@ -937,12 +932,12 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         cout<<"batch  number  : "<<n_batch<<","<<batch_size<<endl;
         cout<<"learning ratio : "<<lr<<endl;
     
-        """.format(bz=batchs)
+        """.format(bz=batch_size)
         
     else:
         
-        batchs = 0
-        if input_opt > 0:
+        batch_size = 0
+        if input_enabled:
             text +="""
         input_data.reshape( {shape} );
         auto input_shape = input_data.shape();
@@ -953,8 +948,8 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     all_text += text
     
     text = ""
-    if batchs > 0:
-        if input_opt > 0:
+    if batch_size > 0:
+        if input_enabled:
             ds = input_data.shape
             sz = input_data.ndim
             stri = ""
@@ -962,7 +957,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             text +="""
         Tensor x_tmp = xt::zeros<fprec>( {{ batch_size{ss} }} );""".format(ss=stri)
         
-        if target_opt > 0:
+        if target_enabled:
             ds = target_data.shape
             sz = target_data.ndim
             if sz == 1:
@@ -976,7 +971,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         Tensor y_tmp = xt::zeros<fprec>( {{ batch_size{ss} }} );""".format(shape=target_s,ss=stri)
     
     else:
-        if class_no > 0:
+        if class_no >= 0:
             text +="""
         auto labels = forward_result[{nt}]->output;
         auto labels_shape = labels.shape();""".format(nt=class_no)
@@ -999,16 +994,16 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             train_mode = true;""".format(fn=fpath)
             
     text = ""
-    if batchs > 0:
-        if shuffle > 0:
+    if batch_size > 0:
+        if shuffle:
             text += """
             
             xt::xarray<int> index = xt::arange( (int)input_shape[0] );
             xt::random::shuffle( index );"""
             
-    if batchs < 1:  # batchsize == 0
+    if batch_size < 1:  # batch_sizeize == 0
         
-        if class_no > 0:  # classification only
+        if class_no >= 0:  # classification only
         
             text +="""
             do_forward( forward_result, NL );
@@ -1036,8 +1031,8 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             do_zerograd( forward_result, NL );
         """
         
-    else:  # minibatch ( batchsize > 0 )
-        if class_no > 0:  # classification only
+    else:  # minibatch ( batch_sizeize > 0 )
+        if class_no >= 0:  # classification only
             text +="""
             
             fprec total_loss = 0.0;
@@ -1053,13 +1048,13 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
                 for(int k=0;k<batch_size;k++)
                 {"""
             
-        if input_opt > 0:
+        if input_enabled:
             ds = input_data.shape
             sz = input_data.ndim
             strx = ""
             for k in range(2,sz): strx += ", xt::all()"
             
-            if shuffle >0:
+            if shuffle:
                 #   xt::row( x_tmp, k ) = xt::row( input_data, index(jb+k) );"""
                 if sz == 1:
                     text +="""
@@ -1078,13 +1073,13 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
                     auto xw = xt::view( input_data, jb+k{ss} );
                     xt::view( x_tmp, k{ss} ) = xw;""".format(ss=strx)
                     
-        if target_opt > 0:
+        if target_enabled > 0:
             ds = target_data.shape
             sz = target_data.ndim
             strx = ""
             for k in range(2,sz): strx += ", xt::all()"
             
-            if shuffle > 0:
+            if shuffle:
                     #xt::row( y_tmp, k ) = xt::row( target_data, index(jb+k) );"""
                 if sz == 1:
                     text +="""
@@ -1111,7 +1106,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             text +="""
                 forward_result[{nt}]->output = y_tmp;""".format(nt=target_no)
         
-        if class_no > 0:  # classification only
+        if class_no >= 0:  # classification only
             text +="""
                 do_forward( forward_result, NL );
                 
@@ -1126,7 +1121,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
                 do_zerograd( forward_result, NL );
             }}
             fprec total_acc = (fprec)total_corrects / (fprec)input_shape[0];
-            cout<<"total_loss (batch): epoch "<<epoch<<" : loss "<<total_loss<<" : Acc "<<total_acc<<" "<<total_corrects<<endl;
+            cout<<"total_loss (batch): epoch "<<epoch<<" : loss "<<total_loss<<" : Acc "<<total_acc<<" ("<<total_corrects<<"/"<<input_shape[0]<<")"<<endl;
             """.format(ns=pred_no)
         
         else: # others
@@ -1165,7 +1160,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             outputfile<<to_string(o[0])<<endl;
             """.format(na1=output_sum_loss_id[0],na2=output_sum_loss_id[1])
         else:
-            if class_no > 0:  # classification only
+            if class_no >= 0:  # classification only
                 text +="""
             do_forward( forward_result, NL );
             
@@ -1201,11 +1196,8 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     
     text=""
     if pred_no > 0:
-        print("pred_no : ",pred_no)
-        if batchs < 1:  # batchsize == 0
-        
-            if input_opt > 0:
-                
+        if batch_size < 1:  # batch_sizeize == 0
+            if input_enabled > 0:
                 el = obj[pred_no]
                 text +="""
         input_data.reshape( {shape} );
@@ -1229,13 +1221,13 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             outputfile.close();
         }}""".format(fn=path,ns=pred_no)
             
-        else:  # minibatch ( batchsize > 0)
+        else:  # minibatch ( batch_sizeize > 0)
         
-            if class_no < 1: # not classification only
+            if class_no < 0: # not classification only
                 el = obj[pred_no]
             
                 pred_type = 1  ###
-                if input_opt > 0:
+                if input_enabled > 0:
                     pred_type = len(input_data.shape)
                 print("pred_type : ",pred_type)
                 
@@ -1244,7 +1236,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         {{
             // {ns} : {el1}""".format(ns=pred_no,el1=el['op'])
             
-                    if input_opt > 0:
+                    if input_enabled > 0:
                         text +="""
             input_var.output = input_data;"""
                  
@@ -1269,7 +1261,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         {{
             // {ns} : {el1}""".format(ns=pred_no,el1=el['op'])
             
-                    if input_opt > 0:
+                    if input_enabled > 0:
                         text +="""
             input_var.output = input_data;"""
                 
@@ -1279,7 +1271,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             """.format(ns=pred_no)
             
                     nx_set = 0;
-                    if input_opt > 0:
+                    if input_enabled > 0:
                         if pred_output == input_data.shape[0]:
                             nx_set = 1
                             text +="""
