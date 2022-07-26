@@ -154,7 +154,7 @@ def get_param_name( s1 ):
       if( k >= 0 ):  n = i
     s3 = re.findall("(?<=\[).+?(?=\])", s2[n])
     s4 = s3[0] + '_' + s2[n+1]
-    return s4
+    return "param_"+s4
     
 # 
 # fc3_bias
@@ -1185,7 +1185,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         }
         end = std::chrono::system_clock::now();
         double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
-        cout<<"Time:"<<elapsed<<endl;
+        cout<<"MiniCTorch Time: "<<elapsed<<endl;
 
         outputfile.close();
         
