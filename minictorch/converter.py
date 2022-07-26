@@ -3,7 +3,72 @@ import argparse
 import numpy as np
 import os
 import torch
+import re
 
+OP_MAPPING={
+    "aten::mul":"MulOp",
+    "aten::add":"AddOp",
+    "aten::sub":"SubOp",
+    "aten::rsub":"RsubOp",
+    "aten::div":"DivOp",
+    "aten::neg":"NegOp",
+    "aten::pow":"PowOp",
+    "aten::exp":"ExpOp",
+    "aten::log":"LogOp",
+    "aten::log1p":"Log1pOp",
+    "aten::dot":"DotOp",
+    "aten::matmul":"MatMulOp",
+    "aten::addmm":"AddMmOp",
+    "aten::linear":"LinearOp",
+    "aten::sum":"SumOp",
+    "aten::mean":"MeanOp",
+    "aten::stack":"StackOp",
+    "aten::select":"SelectOp",
+    "aten::copy_":"Copy_Op",
+    "aten::t":"TransposeOp",
+    "aten::max":"MaxOp",
+    "aten::min":"MinOp",
+    "aten::sigmoid":"SigmoidOp",
+    "aten::relu":"ReluOp",
+    "aten::elu":"EluOp",
+    "aten::leaky_relu":"LeakyReluOp",
+    "aten::hardtanh":"HardTanhOp",
+    "aten::softplus":"SoftplusOp",
+    "aten::softmax":"SoftmaxOp",
+    "aten::log_softmax":"LogSoftmaxOp",
+    "aten::tanh":"TanhOp",
+    "aten::randn":"RandnOp",
+    "aten::normal":"NormalOp",
+    "aten::batch_norm":"BatchNormOp",
+    "aten::dropout":"DropoutOp",
+    "aten::mse_loss":"MseLossOp",
+    "aten::cross_entropy_loss":"CrossEntropyLossOp",
+    "aten::binary_cross_entropy":"BCELossOp",
+    "aten::nll_loss_nd":"NLLLossOp",
+    "aten::size":"SizeOp",
+    "aten::zeros":"ZerosOp",
+    "aten::zeros_like":"ZerosLikeOp",
+    "aten::ones":"OnesOp",
+    "aten::ones_like":"OnesLikeOp",
+    "aten::expand":"ExpandOp",
+    "prim::NumToTensor":"NumToTensorOp",
+    "aten::Int":"IntOp",
+    "aten::view":"ViewOp",
+    "aten::broadcast_tensors":"BroadcastTensorsOp",
+    "aten::to":"ToOp",
+    "aten::detach":"DetachOp",
+    "prim::ListConstruct":"ListConstructOp",
+    "prim::ListUnpack":"ListUnpackOp",
+    "prim::TupleConstruct":"TupleConstructOp",
+    "prim::TupleUnpack":"TupleUnpackOp",
+    }
+
+OUTPUT_ID_ENABLED_NODE={
+    "DetachOp",
+    "ListUnpackOp",
+    "TupleUnpackOp",
+    }
+ 
 def makefile_generator( project, code="all", xtensor_include_base="../", minictorch_include="../src" ):
     make_text="""
 CXX = g++
@@ -50,12 +115,14 @@ clean:
     return make_text
 
 
-import re
 
-pat = re.compile(r'([^\[\]]*)\[(.*)\]')
 
+# s:     attribute name in computational graph e.g. Net/Linear[fc3]/bias/bias 
+# model: pytorch model
+# Return:  pytorch parameters  <class 'torch.nn.parameter.Parameter'>
+#
 def get_attr_from_model( s, model ):
-    
+    pat = re.compile(r'([^\[\]]*)\[(.*)\]')
     arr = s.split("/")
     if len(arr)>1:
         class_name = arr[0]
@@ -89,8 +156,14 @@ def get_param_name( s1 ):
     s4 = s3[0] + '_' + s2[n+1]
     return s4
     
+# 
+# fc3_bias
+# pytorch tensor: tensor([0.0402, 0.0524, 0.0345], requires_grad=True)
 #
-def string_tensor( key, out ):
+#=> Tensor fc3_bias ={ 0.040239427,0.052421827,0.034500692, }
+# fc3_bias.reshape({3})
+# 
+def generate_inline_tensor_c_code( key, out ):
     
     if torch.is_tensor(out):
         tmp = out.to('cpu').detach().numpy().copy()
@@ -118,11 +191,6 @@ def string_tensor( key, out ):
             +str(p1[l+4])+','+str(p1[l+5])+','+str(p1[l+6])+','+str(p1[l+7])+','
         s1 = s1 + s3 + '\n' + ' '*24
         l = l+num
-        #for i in range(num):
-        #    #print("for k,i ",k,i)
-        #    s1 = s1 + str(p1[l]) + ','
-        #    l = l + 1
-        #s1 = s1 + '\n' + ' '*24
     if nw2 > 0:
         for i in range(nw2):
             s1 = s1 + str(p1[l])+ ','
@@ -140,16 +208,12 @@ def string_tensor( key, out ):
             s2 = s2 + str( tmp.shape[i] ) + ','
         s2 = s2 + str( tmp.shape[n2-1] ) + '})'
     #print("shape :",s2)
-    
     return s1, s2
     
 
 # export all input data
-def c_data_generator( **datas ):
-    
-    key_list = list( datas.keys() )
-    if len(key_list) < 1:  return ""
-    
+def c_data_generator( **pair_data ):
+    if len(pair_data) < 1:  return ""
     # type declaration
     all_text="""
     #include <xtensor/xarray.hpp>
@@ -159,11 +223,9 @@ def c_data_generator( **datas ):
     """
     
     # Data section
-    val_list = list( datas.values() )
-    
-    for i in range(len(key_list)):
-        print("datafile key : ", key_list[i])
-        s1,s2 = string_tensor( key_list[i], val_list[i])
+    for key,val in pair_data.items():
+        print("datafile key : ", key)
+        s1,s2 = generate_inline_tensor_c_code( key, val)
         text="""
         // data
         
@@ -174,6 +236,9 @@ def c_data_generator( **datas ):
     
     return all_text
     
+
+def get_one_line(indent,s):
+    return "\n"+"    "*indent+s+"\n"
 
 def c_param_generator( project, obj, model, input_data ):
     
@@ -191,7 +256,7 @@ def c_param_generator( project, obj, model, input_data ):
     """
     
     # Data section
-    s1,s2 = string_tensor( "xin", input_data )
+    s1,s2 = generate_inline_tensor_c_code( "xin", input_data )
     text="""
     // input data
         
@@ -199,56 +264,45 @@ def c_param_generator( project, obj, model, input_data ):
     """.format(ivar1=s1)
     all_text += text
     
-    key_list = [];
-    cno = 0
+    key_list=[];
+    n_constant = 0
+    print("... parameters")
     for i,el in enumerate(obj):
         name = el["name"]
         #print("name",name,el["op"])
         if el["op"]=="prim::GetAttr":
-            print(el)
-            text="""
-    // {el}
-    """.format(el=str(el))
-    
+            print(i,el)
+            text = get_one_line(1,"// {el}").format(el=str(el))
             name = el["name"]
             key = get_param_name( name )
             if( key not in key_list ):
                 key_list.append( key )
                 attr = get_attr_from_model( name, model )
-                s1, s2 = string_tensor( key, attr )
-                if attr.ndim == 1:
-                    text+="""
-    {ivar1};
-    """.format(i=i,ivar1=s1)
-                else:
-                    text+="""
-    {ivar1};
-    """.format(i=i,ivar1=s1,ivar2=s2)
+                s1, s2 = generate_inline_tensor_c_code( key, attr )
+                text+=get_one_line(1,"{ivar1};").format(i=i,ivar1=s1)
                 all_text+=text
         
         elif el["op"]=="prim::Constant":
-            
             if len(el["shape"])>0:
-                text="""
-    // {el}
-    """.format(el=str(el))
-        
-                cno += 1
-                key ="Constant" + str(cno)
+                print(i,el)
+                text = get_one_line(1,"// {el}").format(el=str(el))
+                n_constant += 1
+                key ="Constant" + str(n_constant)
                 shape=el["shape"]
                 val=el["constant_value"]
-                print(el)
                 v = np.array( val )
-                s1, s2 = string_tensor( key, v )
-                text+="""
-    {ivar1};
-    """.format(i=i,key=key,shape=",".join(map(str,shape)), ivar1=s1)
+                s1, s2 = generate_inline_tensor_c_code( key, v )
+                text+=get_one_line(1,"{ivar1};").format(i=i,ivar1=s1)
                 all_text+=text
-
+    print("...")
     return all_text
 
     
 def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 ):
+    print("... computational graph")
+    for i,el in enumerate(obj):
+        print(i,el)
+    print("...")
     
     all_text="""
     //
@@ -268,7 +322,7 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
     extern Tensor  xin;"""
     
     key_list = []
-    cno = 0  # Constant no.
+    n_constant = 0  # Constant no.
     for i,el in enumerate(obj):
         if el["op"]=="prim::GetAttr":
             text=""
@@ -276,27 +330,20 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
             key = get_param_name( name )
             if( key not in key_list ):
                 key_list.append( key )
-                text="""
-    extern Tensor  {key};""".format(key=key)
-                all_text+=text
-                
+                all_text += get_one_line(1,"extern Tensor {key};").format(key=str(key))
         elif el["op"]=="prim::Constant":
             if len(el["shape"])>0:
-                cno += 1
-                key = "Constant" + str(cno)
-                text="""
-    extern Tensor  {key};""".format(key=key)
-                all_text+=text
-                
-                
+                n_constant += 1
+                key = "Constant" + str(n_constant)
+                all_text += get_one_line(1,"extern Tensor {key};").format(key=str(key))
     all_text +="""
     
     bool train_mode = true;
     
-    void defineOp( vector<MCTNode*>& forward_result, VariableTensor &input_var )
+    void build_computational_graph( vector<MCTNode*>& forward_result, VariableTensor &input_var )
     {"""
     
-    cno = 0  # Constant no.
+    n_constant = 0  # Constant no.
     output_id = None
     for i,el in enumerate(obj):
         print(el)
@@ -328,42 +375,23 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
                 assert len(el["in"])>0, "output error"
                 output_id = el["in"][0]
             else:
-                #assert False, "unknown IO:"+el["name"]
-                print("unknown IO:"+el["name"])
-            
-            #if el["name"]=="input/x":
-            #    text+="""
-            #forward_result[{i}] = &input_var;""".format(i=i)
-            #elif el["name"]=="output/output.1":
-            #    assert len(el["in"])>0, "output error"
-            #    output_id=el["in"][0]
-            #else:
-            #    if "input" in el["name"]:
-            #        text+="""
-            #forward_result[{i}] = &input_var;""".format(i=i)
-            #    elif "output" in el["name"]: 
-            #        assert len(el["in"])>0, "output error"
-            #        output_id = el["in"][0]
-            #    else:
-            #        #assert False, "unknown IO:"+el["name"]
-            #        print("unknown IO:"+el["name"])
-        
+                print("[WARNING] unknown IO:"+el["name"])
+        ###
+        ### constant
+        ###
         elif el["op"]=="prim::Constant":
-            
             if "constant_value" not in el:
                 text+="""
             forward_result[{i}] = NULL;""".format(i=i)
-            
             elif len(el["shape"]) == 0:
                 val = el["constant_value"]
                 text+="""
             Tensor c = (fprec){val};
             forward_result[{i}] = new VariableTensor( c, 1 );""".format(i=i,val=str(val))
-            
             else:
-                if len(el["shape"]) > 0: # Constant no.
-                    cno += 1
-                    key = "Constant" + str(cno)
+                if len(el["shape"]) > 0: # Constant no. ## from extern variable
+                    n_constant += 1
+                    key = "Constant" + str(n_constant)
                     text+="""
             {key}.reshape( shape );
             forward_result[{i}] = new VariableTensor( {key}, 1 );""".format(i=i,key=key)
@@ -374,6 +402,9 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
             t = t.reshape(shape);
             forward_result[{i}] = new VariableTensor( t, 1 );""".format(i=i,shape=",".join(map(str,shape)), val=",".join(map(str,val)))
         
+        ###
+        ### constant
+        ###
         elif el["op"]=="prim::GetAttr":
         
             name = el["name"]
@@ -409,177 +440,18 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
             ### standard operators
             ###
             out_id = el["output_id"]
-            
-            if el["op"]=="aten::mul":
-                text+="""
-            MulOp* op = new MulOp();"""
-            elif el["op"]=="aten::add":
-                text+="""
-            AddOp* op = new AddOp();"""
-            elif el["op"]=="aten::sub":
-                text+="""
-            SubOp* op = new SubOp();"""
-            elif el["op"]=="aten::rsub":
-                text+="""
-            RsubOp* op = new RsubOp();"""
-            elif el["op"]=="aten::div":     
-                text+="""
-            DivOp* op = new DivOp();"""
-            elif el["op"]=="aten::neg":     
-                text+="""
-            NegOp* op = new NegOp();"""
-            elif el["op"]=="aten::pow":
-                text+="""
-            PowOp* op = new PowOp();"""
-            elif el["op"]=="aten::exp":
-                text+="""
-            ExpOp* op = new ExpOp();"""
-            elif el["op"]=="aten::log":
-                text+="""
-            LogOp* op = new LogOp();"""
-            elif el["op"]=="aten::log1p":
-                text+="""
-            Log1pOp* op = new Log1pOp();"""
-            elif el["op"]=="aten::dot":
-                text+="""
-            DotOp* op = new DotOp();"""
-            elif el["op"]=="aten::matmul":
-                text+="""
-            MatMulOp* op = new MatMulOp();"""
-            elif el["op"]=="aten::addmm":
-                text+="""
-            AddMmOp*  op = new AddMmOp();"""
-            elif el["op"]=="aten::linear":
-                text+="""
-            LinearOp* op = new LinearOp();"""
-            elif el["op"]=="aten::sum":
-                text+="""
-            SumOp* op = new SumOp();"""
-            elif el["op"]=="aten::mean":
-                text+="""
-            MeanOp* op = new MeanOp();"""  
-            elif el["op"]=="aten::stack":
-                text+="""
-            StackOp* op = new StackOp();"""  
-            elif el["op"]=="aten::select":
-                text+="""
-            SelectOp* op = new SelectOp();"""
-            elif el["op"]=="aten::copy_":
-                text+="""
-            Copy_Op* op = new Copy_Op();"""
-            elif el["op"]=="aten::t":
-                text+="""
-            TransposeOp* op = new TransposeOp();"""
-            elif el["op"]=="aten::max":
-                text+="""
-            MaxOp* op = new MaxOp();"""
-            elif el["op"]=="aten::min":
-                text+="""
-            MinOp* op = new MinOp();""" 
-            elif el["op"]=="aten::sigmoid":
-                text+="""
-            SigmoidOp* op = new SigmoidOp();"""
-            elif el["op"]=="aten::relu":
-                text+="""
-            ReluOp* op = new ReluOp();"""
-            elif el["op"]=="aten::elu":
-                text+="""
-            EluOp* op = new EluOp();"""
-            elif el["op"]=="aten::leaky_relu":
-                text+="""
-            LeakyReluOp* op = new LeakyReluOp();"""
-            elif el["op"]=="aten::hardtanh":
-                text+="""
-            HardTanhOp* op = new HardTanhOp();"""
-            elif el["op"]=="aten::softplus":
-                text+="""
-            SoftplusOp* op = new SoftplusOp();"""
-            elif el["op"]=="aten::softmax":
-                text+="""
-            SoftmaxOp* op = new SoftmaxOp();"""
-            elif el["op"]=="aten::log_softmax":
-                text+="""
-            LogSoftmaxOp* op = new LogSoftmaxOp();"""
-            elif el["op"]=="aten::tanh":
-                text+="""
-            TanhOp* op = new TanhOp();"""
-            elif el["op"]=="aten::randn":
-                text+="""
-            RandnOp* op = new RandnOp();"""
-            elif el["op"]=="aten::normal":
-                text+="""
-            NormalOp* op = new NormalOp();"""
-            elif el["op"]=="aten::batch_norm":
-                text+="""
-            BatchNormOp* op = new BatchNormOp();"""
-            elif el["op"]=="aten::dropout":
-                text+="""
-            DropoutOp* op = new DropoutOp();"""
-            elif el["op"]=="aten::mse_loss":
-                text+="""
-            MseLossOp* op = new MseLossOp();"""
-            elif el["op"]=="aten::cross_entropy_loss":
-                text+="""
-            CrossEntropyLossOp* op = new CrossEntropyLossOp();"""
-            elif el["op"]=="aten::binary_cross_entropy":
-                text+="""
-            BCELossOp* op = new BCELossOp();"""
-            elif el["op"]=="aten::nll_loss_nd":
-                text+="""
-            NLLLossOp* op = new NLLLossOp();"""
-            elif el["op"]=="aten::size":
-                text+="""
-            SizeOp* op = new SizeOp();"""
-            elif el["op"]=="aten::zeros":
-                text+="""
-            ZerosOp* op = new ZerosOp();"""
-            elif el["op"]=="aten::zeros_like":
-                text+="""
-            FullLikeOp* op = new FullLikeOp( 0.0 );"""
-            elif el["op"]=="aten::ones":
-                text+="""
-            OnesOp* op = new OnesOp();"""
-            elif el["op"]=="aten::ones_like":
-                text+="""
-            FullLikeOp* op = new FullLikeOp( 1.0 );"""
-            elif el["op"]=="aten::expand":
-                text+="""
-            ExpandOp* op = new ExpandOp();"""
-            elif el["op"]=="prim::NumToTensor":
-                text+="""
-            NumToTensorOp* op = new NumToTensorOp();"""
-            elif el["op"]=="aten::Int":
-                text+="""
-            IntOp* op = new IntOp();"""
-            elif el["op"]=="aten::view":
-                text+="""
-            ViewOp* op = new ViewOp();"""
-            elif el["op"]=="aten::broadcast_tensors":
-                text+="""
-            BroadcastTensorsOp* op = new BroadcastTensorsOp();"""
-            elif el["op"]=="aten::to":
-                text+="""
-            ToOp* op = new ToOp();"""
-            elif el["op"]=="aten::detach":
-                text+="""
-            DetachOp* op = new DetachOp( {k} );""".format(k=out_id)
-            elif el["op"]=="prim::ListConstruct":
-                text+="""
-            ListConstructOp* op = new ListConstructOp();"""
-            elif el["op"]=="prim::ListUnpack":
-                text+="""
-            ListUnpackOp* op = new ListUnpackOp( {k} );""".format(k=out_id)
-            elif el["op"]=="prim::TupleConstruct":
-                text+="""
-            TupleConstructOp* op = new TupleConstructOp();"""
-            elif el["op"]=="prim::TupleUnpack":
-                text+="""
-            TupleUnpackOp* op = new TupleUnpackOp( {k} );""".format(k=out_id)
+            op=el["op"]
+            if op in OP_MAPPING:
+                if OP_MAPPING[op] in OUTPUT_ID_ENABLED_NODE:
+                    s="{cls}* op = new {cls}({out_id});".format(cls=OP_MAPPING[op],out_id=out_id)
+                else:
+                    s="{cls}* op = new {cls}();".format(cls=OP_MAPPING[op],out_id=out_id)
+                text+=get_one_line(3,s)
             else:
                 #assert False, "unknown op:"+el["op"]
-                text+="""
-            AddOp* op = NULL;"""
+                text+=get_one_line(3,"AddOp* op = NULL;")
                 print("unknown op:"+el["op"])
+            
             ### setting operator
             text+="""
             forward_result[{i}] = op;
@@ -683,7 +555,7 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
         all_text += text
     
     all_text +="""
-        defineOp( forward_result, input_var );
+        build_computational_graph( forward_result, input_var );
     #ifdef _TRAIN
         do_train_loop( forward_result, input_var, {output_id} );
     #else
@@ -695,35 +567,35 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
     """.format(output_id=output_id)
     
     return all_text
-    
-def unpack_origin_no( obj, no1 ):
-    no  = no1
-    el1 = obj[no]
-    no2 = el1["in"][0]
-    out_id = el1['output_id']
-    el2 = obj[no2]
+
+
+def unpack_origin_no( obj, target_index ):
+    target_node = obj[target_index]
+    in_index = target_node["in"][0]
+    in_node = obj[in_index]
+    out_id = target_node['output_id']
     #print( "unpack",el2["op"], out_id)
-    if el2["op"] == 'prim::ListConstruct':
-        no = el2['in'][out_id]
-    elif el2["op"] == 'prim::TupleConstruct':
-        no = el2['in'][out_id]
-    elif el2["op"] == 'aten::broadcast_tensors':
-        el3 = obj[el2['in'][0]]
+    result_index  = target_index
+    if in_node["op"] in ['prim::ListConstruct','prim::TupleConstruct']:
+        result_index = in_node['in'][out_id]
+    elif in_node["op"] == 'aten::broadcast_tensors':
+        el3 = obj[in_node['in'][0]]
         if el3["op"] == 'prim::ListConstruct':
-            no = el3['in'][out_id]
+            result_index = el3['in'][out_id]
     #print("unpack original no: ",no,no1)
-    return no
+    return result_index
     
 def get_unpack_origin( obj, no1, inout ):
     no = no1
     while True:
         el = obj[no]
-        if el["op"] == 'prim::ListUnpack' or el["op"] == 'prim::TupleUnpack':
-            no = unpack_origin_no( obj, no )
+        if el["op"] in ['prim::ListUnpack','prim::TupleUnpack']:
+            no = unpack_origin_no( obj, no ) ## unpackに対応したConstructを見つけようとする
         elif el["op"] == 'prim::ListConstruct':
             for j in range(len(el['in'])):
                 k = get_unpack_origin( obj, el['in'][j], inout )
-                if inout[k] == 1: return k
+                if inout[k] == 1:
+                    return k
             return no1
         else:
             break
@@ -814,10 +686,6 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         pred_output = kwargs['pred_output']
     print("pred_output : ", pred_output)
     
-    div_flag = False;
-    if 'div' in kwargs:
-        div_flag = kwargs['div']
-    #print("div : ", div_flag)
         
     # ---------- 
     
@@ -828,31 +696,15 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             assert len(el["in"])>0, "output error"
             output_id = el["in"][0]
             
-    nadd1 = 0;
-    nadd2 = 0;
+    ## e.g. Loss = loss1 + loss2
+    output_sum_loss_id=[]
     if output_id >=0:
         el = obj[output_id];
         if el["op"] == "aten::add":  # for vae
             nadd1 = el['in'][0]
             nadd2 = el['in'][1]
-            print("nadd : ", nadd1,nadd2)
-    
-    # division number (X)           
-    ndiv = []
-    if div_flag:
-        k = 0
-        for i,el in enumerate(obj):
-            if el["op"]=="aten::div":
-                el2 = obj[ el['in'][1] ]
-                if el2["op"] == "prim::Constant":
-                    div = el2["constant_value"]
-                    print("div value:",div)
-                    if abs(div-batchs) < 0.01:
-                        ndiv.append( el['in'][1] )
-                        print("div_el",el2)
-                        k = k+1
-        if len(nd) != 2:  div_flag = False
-        print("div no :",ndiv)
+            output_sum_loss_id=[nadd1,nadd2]
+            print("index list for Loss components : ", output_sum_loss_id)
     
     # evaluated no
     pred_no   = -1
@@ -863,18 +715,25 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     pos1 = 0
     pos2 = 0
     for i,el in enumerate(obj):
-        if net_key in el["name"]:
+        if net_key in el["name"]: # last Net
             pos1 = i+1
-        if loss_key in el["name"]:
+        if loss_key in el["name"]: # first Loss
             pos2 = i
             break
-    if pos1 > output_id:  pos1 = 0
+    if pos1 > output_id:
+        pos1 = 0
+
     if ( pos1 > 0 ) and ( pos1 < pos2 ):
         pred_pos = pos1
     elif pos2 > 0:
         pred_pos = pos2
-    if pos1 > pos2:  pred_pos = -1
-    print("pred_pos : ",pred_pos,pos1,pos2,output_id)
+    if pos1 > pos2:
+        pred_pos = -1
+
+    print("prediction output node index: ",pred_pos)
+    print("Net class output node index: ",pos1)
+    print("Loss class input node index: ",pos2)
+    print("output node index: ",output_id)
     
     # inout option ( 0:input only, 1:input and output both )
     inout = np.zeros( output_id+1, dtype=np.int )
@@ -892,10 +751,11 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             nin = 0;
             for j in range(len(el['in'])):
                 k = get_unpack_origin( obj, el['in'][j], inout ) # 220203 inout add
-                if inout[k] == 1: nin=nin+1
-            if nin > 0: inout[i] = 1
+                if inout[k] == 1:
+                    nin=nin+1
+            if nin > 0:
+                inout[i] = 1
             
-    #set_no = set()
     last = -1
     pred_max = -1
     pred_id  = -1
@@ -903,25 +763,19 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         el = obj[i]
         #print("el ",i,inout[i], " : ", el['name'],el['op'],el['in'],el['output_id'])
         if inout[i] > 0:
-            print("el ",i,inout[i], " : ", el['name'],el['op'],el['in'],el['output_id'],pred_no)
+            print("el ",i,"inout=",inout[i], " : ", el['name'],el['op'],"in=",el['in'],"output_id=",el['output_id'])
             if last < i: last = i
             if pred_pos < 0:  
                 pass
-                #for j in range(len(el['in'])):
-                #    k = get_unpack_origin( obj, el['in'][j], inout )
-                #    if inout[k] > 0:
-                #        print(" --- pred el (",j,") :",el['in'][j]," -> ",k)
-                #        set_no.add( k )
             elif i >= pred_pos:
                 for j in range(len(el['in'])):
                     k = get_unpack_origin( obj, el['in'][j], inout )
                     if ( k < pred_pos ) and ( inout[k] > 0 ):
                         print(" --- pred el (",j,") :",el['in'][j]," -> ",k)
-                        #set_no.add( k )
                         if pred_max < k: 
                             pred_max = k
                             pred_id  = i
-    
+    ## pred_idはここまでで決定
     print("pred_id",pred_id,pred_key)
     if pred_id > 0:
         el = obj[pred_id]
@@ -967,7 +821,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
                     break
             
         
-    print("last cmd:", last)
+    print("last cmd:", last) #未使用
     print("------")
         
     ###
@@ -975,10 +829,12 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     if "sol" in kwargs:
         sol_kind = kwargs["sol"]
     print("solution :", sol_kind)
-    if not "clas" in sol_kind:  class_no = 0
+    if not "clas" in sol_kind:
+        class_no = 0
     
     if ( pred_index >= 0 ) and ( pred_index < output_id ):
-        if inout[pred_index] > 0:  pred_no = pred_index
+        if inout[pred_index] > 0:
+            pred_no = pred_index
    
     print("pred_no   :", pred_no)
     print("target_no :", target_no)
@@ -1181,12 +1037,6 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
         """
         
     else:  # minibatch ( batchsize > 0 )
-            
-        if div_flag:
-            for i in range(len(nd)):
-                text +="""
-            forward_result[{nd1}]->set_output1( (fprec)batch_size );  // div size""".format(nd1=nd[i])
-            
         if class_no > 0:  # classification only
             text +="""
             
@@ -1304,14 +1154,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             text +="""
             forward_result[{nt}]->output = target_data;""".format(nt=target_no)
             
-        if div_flag:
-            for i in range(len(nd)):
-                text +="""
-            forward_result[{nd1}]->set_output1( (fprec)input_shape[0] );  // div size""".format(nd1=nd[i])
-            text +="""
-            """
-            
-        if( nadd1 > 0 and nadd2 > 0 and class_no < 1 ):  # 220203 mod
+        if( len(output_sum_loss_id) > 0 and class_no < 1 ):# Loss=Loss1+Loss2
             text +="""
             do_forward( forward_result, NL );
             
@@ -1320,7 +1163,7 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
             auto o2 = forward_result[{na2}]->output; 
             cout<<"epoch "<<epoch<<" - loss "<<o[0]<<" ( "<<o1[0]<<" , "<<o2[0]<<" ) "<<endl;
             outputfile<<to_string(o[0])<<endl;
-            """.format(na1=nadd1,na2=nadd2)
+            """.format(na1=output_sum_loss_id[0],na2=output_sum_loss_id[1])
         else:
             if class_no > 0:  # classification only
                 text +="""

@@ -2072,7 +2072,7 @@ public:
         display_grad_shape1( "logsoftmax grad", 0 );
     }
 };
-
+ 
 class FullLikeOp : public MCTNode {
 public:
     FullLikeOp( fprec v=0.0 ) { value = v; }
@@ -2103,6 +2103,16 @@ public:
         display_shape1( "fulllike" );
     }
 };
+
+class ZerosLikeOp : public FullLikeOp {
+public:
+    ZerosLikeOp():FullLikeOp( fprec v=0.0 ){}
+
+class OnesLikeOp : public FullLikeOp {
+public:
+    ZerosLikeOp():FullLikeOp( fprec v=1.0 ){}
+
+
 
 class ZerosOp : public MCTNode {
 public:
