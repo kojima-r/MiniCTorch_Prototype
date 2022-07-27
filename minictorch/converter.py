@@ -69,16 +69,16 @@ OUTPUT_ID_ENABLED_NODE={
     "TupleUnpackOp",
     }
  
-def makefile_generator( project, code="all", xtensor_include_base="../", minictorch_include="../src",optimize="-O3" ):
+def makefile_generator( project, code="all", xtensor_include_base="../", minictorch_include="../src",optimize="-O3",libs="-lmkl_rt"): #libs="-lcblas"):
     make_text="""
 CXX = g++
 CXXFLAGS += {optimize} -Wall  -std=c++14 -I./ -I{minictorch_inc} -I{xtensor_base}xtensor-blas/include -I{xtensor_base}xtensor/include -I{xtensor_base}xtl/include
-LDFLAGS = -lcblas
+LDFLAGS = {libs}
 TARGET  = {proj}
 SRCS    = {proj}.cpp {proj}_param.cpp
 OBJS    = $(SRCS:.cpp=.o)
 
-""".format(proj=project,xtensor_base=xtensor_include_base,minictorch_inc=minictorch_include,optimize=optimize)
+""".format(proj=project, xtensor_base=xtensor_include_base, minictorch_inc=minictorch_include, optimize=optimize, libs=libs)
 
     if code == "all":
         make_text+="""
