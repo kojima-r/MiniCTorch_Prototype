@@ -144,14 +144,14 @@ def get_attr_from_model( s, model ):
     return None
     
 
-# ex. Net/Linear[fc1]/weight/43 -> fc1_weight
-#     VAE/Net[net]/Linear[fc1]/weight/158 -> fc1_weight
+# ex. Net/Linear[fc1]/weight/43 -> param_fc1_weight
+#     VAE/Net[net]/Linear[fc1]/weight/158 -> param_fc1_weight
 def get_param_name( s1 ):
     s2 = s1.split('/')
     n = 1
     for i in range(len(s2)):
-      k = s2[i].find("[")
-      if( k >= 0 ):  n = i
+        if s2[i].find("[")>=0:
+            n = i
     s3 = re.findall("(?<=\[).+?(?=\])", s2[n])
     s4 = s3[0] + '_' + s2[n+1]
     return "param_"+s4
@@ -160,60 +160,60 @@ def get_param_name( s1 ):
 # fc3_bias
 # pytorch tensor: tensor([0.0402, 0.0524, 0.0345], requires_grad=True)
 #
-#=> Tensor fc3_bias ={ 0.040239427,0.052421827,0.034500692, }
-# fc3_bias.reshape({3})
+#=> result: Tensor fc3_bias ={ 0.040239427,0.052421827,0.034500692, }
+#   result_reshape: fc3_bias.reshape({3})
 # 
 def generate_inline_tensor_c_code( key, out ):
+    num_per_line = 8
+    n_indent = 24
     
     if torch.is_tensor(out):
         tmp = out.to('cpu').detach().numpy().copy()
     else:
         tmp = out
-    p1 = np.reshape( tmp,(-1,) )
-    n1 = len(p1)
-    key2 = key
-    if len(key) < 12:
-        key2 = key + ' '*(12-len(key))
-    s1 = 'Tensor ' + key + ' ={ '
+    flatten_tmp = np.reshape( tmp,(-1,) ) # flatten
     
-    num = 8
-    nw1 = n1//num
-    nw2 = n1% num
-    if nw2 == 0:
-        nw1 = nw1 - 1
-        nw2 = num
+    ## generating result line
+    n1 = len(flatten_tmp)
+    result = 'Tensor ' + key + ' ={ '
+    
+    n_line = n1//num_per_line
+    n_remain = n1% num_per_line
+    if n_remain == 0:
+        n_line -= 1
+        n_remain = num_per_line
         
     l = 0
-    for k in range(nw1):
-        if ( (nw1>1000) & (k>0) & (k % 10000 == 0)):
-            print("param:",key," - str loop ",k," / ", nw1)
-        s3 = str(p1[l])  +','+str(p1[l+1])+','+str(p1[l+2])+','+str(p1[l+3])+',' \
-            +str(p1[l+4])+','+str(p1[l+5])+','+str(p1[l+6])+','+str(p1[l+7])+','
-        s1 = s1 + s3 + '\n' + ' '*24
-        l = l+num
-    if nw2 > 0:
-        for i in range(nw2):
-            s1 = s1 + str(p1[l])+ ','
-            l = l + 1
-        print("param:",key," - str loop ",nw1," / ", nw1)  # 220203 add
-    s1 = s1 + ' }'
-    #print("tensor :",s1)
+    for k in range(n_line):
+        ## progress message
+        if ( (n_line>1000) & (k>0) & (k % 10000 == 0)):
+            print("param:",key," - str loop ",k," / ", n_line)
+
+        result += ",".join(map(str,flatten_tmp[l:l+num_per_line]))+',\n'
+        result += ' '*n_indent ## indent
+        l = l+num_per_line
+    if n_remain > 0:
+        result += ",".join(map(str,flatten_tmp[l:]))+ ','
+        print("param:",key," - str loop ",n_line," / ", n_line)
+    result += ' }'
+    #print("tensor :",result)
     
+    ## generating result_reshape line
     n2 = len( tmp.shape )
     if n2 == 0:
-        s2 = ""
+        result_reshape = ""
     else:
-        s2 = key + '.reshape({'
-        for i in range(n2-1):
-            s2 = s2 + str( tmp.shape[i] ) + ','
-        s2 = s2 + str( tmp.shape[n2-1] ) + '})'
-    #print("shape :",s2)
-    return s1, s2
+        result_reshape = key + '.reshape({'
+        s=",".join(map(str,list(tmp.shape)))
+        result_reshape += s + '})'
+    #print("shape :",result_shape)
+    return result, result_reshape
     
 
 # export all input data
-def c_data_generator( **pair_data ):
-    if len(pair_data) < 1:  return ""
+def generate_data_c_code( **pair_data ):
+    if len(pair_data) < 1:
+        return ""
     # type declaration
     all_text="""
     #include <xtensor/xarray.hpp>
@@ -224,7 +224,7 @@ def c_data_generator( **pair_data ):
     
     # Data section
     for key,val in pair_data.items():
-        print("datafile key : ", key)
+        print("generating data: ", key)
         s1,s2 = generate_inline_tensor_c_code( key, val)
         text="""
         // data
@@ -240,15 +240,11 @@ def c_data_generator( **pair_data ):
 def get_one_line(indent,s):
     return "\n"+"    "*indent+s+"\n"
 
-def c_param_generator( project, obj, model, input_data ):
-    
-    all_text="""
-    //
-    //  {title}_param
-    //""".format(title=project)
+
+def generate_input_and_param_c_code( obj, model, input_data ):
     
     # type declaration
-    all_text +="""
+    all_text ="""
     #include <xtensor/xarray.hpp>
     
     #define fprec float
@@ -256,7 +252,7 @@ def c_param_generator( project, obj, model, input_data ):
     """
     
     # Data section
-    s1,s2 = generate_inline_tensor_c_code( "xin", input_data )
+    s1,_ = generate_inline_tensor_c_code( "xin", input_data )
     text="""
     // input data
         
@@ -278,7 +274,7 @@ def c_param_generator( project, obj, model, input_data ):
             if( key not in key_list ):
                 key_list.append( key )
                 attr = get_attr_from_model( name, model )
-                s1, s2 = generate_inline_tensor_c_code( key, attr )
+                s1, _ = generate_inline_tensor_c_code( key, attr )
                 text+=get_one_line(1,"{ivar1};").format(i=i,ivar1=s1)
                 all_text+=text
         
@@ -291,25 +287,22 @@ def c_param_generator( project, obj, model, input_data ):
                 shape=el["shape"]
                 val=el["constant_value"]
                 v = np.array( val )
-                s1, s2 = generate_inline_tensor_c_code( key, v )
+                s1, _ = generate_inline_tensor_c_code( key, v )
                 text+=get_one_line(1,"{ivar1};").format(i=i,ivar1=s1)
                 all_text+=text
     print("...")
     return all_text
 
     
-def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 ):
+def generate_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
+    """
     print("... computational graph")
     for i,el in enumerate(obj):
         print(i,el)
     print("...")
-    
-    all_text="""
-    //
-    //  {title}
-    //""".format(title=project)
-    
-    all_text +="""
+    """
+
+    all_text ="""
     #include<stdio.h>
     #include<iostream>
     #include<fstream>
@@ -477,27 +470,39 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
     all_text +="""
     }
     """
+    return all_text
+
+def generate_main_c_code(obj, seed_no=-1, chk_shape=0):
+        
+    for i,el in enumerate(obj):
+        if el["op"]=="IO Node":
+            if "input" in el["name"]:
+                input_i=i
+                input_shape=el["shape"]
+            elif "output" in el["name"]: 
+                assert len(el["in"])>0, "output error"
+                output_id = el["in"][0]
 
     # 1 forward / backward
-    text ="""
-    void do_train1( vector<MCTNode*>& forward_result, VariableTensor &input_var, int N )
+    all_text ="""
+    void do_forward_backward_test( vector<MCTNode*>& forward_result, VariableTensor &input_var, int N )
     {
         cout<<"### forward computation ..."<<endl;
         for(int k=0;k<=N;k++) {
             if( forward_result[k] )  
             {"""
     if chk_shape > 0:
-        text+="""
+        all_text+="""
                 forward_result[k]->set_id( k );
                 forward_result[k]->forward();
                 forward_result[k]->display_shape();
                 forward_result[k]->zerograd();"""
     else:
-        text+="""
+        all_text+="""
                 //forward_result[k]->set_id( k );
                 forward_result[k]->forward();
                 forward_result[k]->zerograd();"""
-    text +="""
+    all_text +="""
             }
         }
         auto o = forward_result[N]->output;
@@ -507,22 +512,21 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
         forward_result[N]->grad = xt::ones_like( forward_result[N]->output );
         for(int k=N;k>=0;k--) {"""
     if chk_shape > 0:
-        text +="""
+        all_text +="""
             if( forward_result[k] )  
             {
                forward_result[k]->backward();
                forward_result[k]->display_grad_shape();
             }"""
     else:
-        text +="""
+        all_text +="""
             if( forward_result[k] )  forward_result[k]->backward();"""
-    text +="""
+    all_text +="""
         }
         cout<<"input_grad"<<input_var.grad<<endl;
     }
     
     """
-    all_text += text
     
     # main program
     all_text +="""
@@ -534,17 +538,12 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
     {{
         vector<MCTNode*> forward_result({graph_size});
     """.format(graph_size=len(obj))
-        
-    for i,el in enumerate(obj):
-        if el["op"]=="IO Node":
-            if "input" in el["name"]:
-                shape=el["shape"]
-                text="""
-        // input data
+    text="""
+        // input data:  forward_result[{i}]
         Tensor::shape_type shape = {{{shape}}};
         xin.reshape( shape );
         VariableTensor input_var( xin, VAR_INPUT );
-    """.format(i=i,shape=",".join(map(str,shape)))
+    """.format(i=input_i,shape=",".join(map(str,input_shape)))
     all_text += text
     
     if seed_no >= 0:
@@ -558,7 +557,7 @@ def c_code_generator( project, obj, model, seed_no=-1, chk_shape=0, rand_flag=0 
     #ifdef _TRAIN
         do_train_loop( forward_result, input_var, {output_id} );
     #else
-        do_train1( forward_result, input_var, {output_id} );
+        do_forward_backward_test( forward_result, input_var, {output_id} );
     #endif
         
         return 0;
@@ -1350,16 +1349,26 @@ def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, s
     obj = json.load(fp)
 
     # save parameter file
-    code1 = c_param_generator( project, obj, model, input_x )
+    code1 = generate_input_and_param_c_code( obj, model, input_x )
     if len(code1) > 0:
-       print( "[PARAM]", param_path )
-       ofparam = open( param_path, "w" )
-       ofparam.write( code1 )
+        code1 = """
+    //
+    //  {}_param
+    //""".format(project)+code1
+        print( "[PARAM]", param_path )
+        ofparam = open( param_path, "w" )
+        ofparam.write( code1 )
     else:
-       param_fname=""
+        param_fname=""
 
     # save cpp file
-    code2 = c_code_generator( project, obj, model, seed_no, chk_shape, rand_flag )  # 220120 add seed_no
+    code2 = generate_graph_c_code(obj, model, chk_shape, rand_flag )
+    code2="""
+    //
+    //  {title}
+    //""".format(title=project)+code2
+    code3 = generate_main_c_code(obj, seed_no, chk_shape)
+    code2+=code3
 
     print("[CPP] ", cpp_path )
     ofp = open( cpp_path, "w" )
@@ -1379,7 +1388,7 @@ def convert_data_file( project, folder, **datas ):
     data_path  = folder + "/" + data_fname
 
     # save data file
-    code = c_data_generator( **datas )
+    code = generate_data_c_code( **datas )
     if len( code ) > 0:
        print( "[DATA]", data_path )
        ofparam = open( data_path, "w" )
@@ -1416,14 +1425,14 @@ def convert_all( project, folder, model, json_path, input_x, data_dict={}, **kwa
     seed_no = -1
     if "seed" in kwargs:
         seed_no = kwargs["seed"]
-    chk_shp = 0
+    chk_shape = 0
     if "shape" in kwargs:
-        chk_shp = kwargs["shape"]
+        chk_shape = kwargs["shape"]
         
     kwargs2 = kwargs.copy()
     kwargs2.update( data_dict )
         
-    convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=rand_flag, seed_no=seed_no, chk_shape=chk_shp, code=code )
+    convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=rand_flag, seed_no=seed_no, chk_shape=chk_shape, code=code )
     if code == "all":
         convert_data_file( project, folder, **data_dict )
         convert_train_code( project, folder, json_path, **kwargs2 )
@@ -1444,16 +1453,7 @@ def main():
     args = parser.parse_args()
 
     filename = args.graph
-    code = c_code_generator(obj)
     convert_cpp_code( args.project, args.output_path, args.model, input_x, json_path, rand_flag=0)
-
-    make_code = makefile_generator(args.output)
-
-    print("[SAVE]",args.path+"/"+args.output)
-    ofp = open( args.path+"/"+args.output, "w" )
-    ofp.write( code )
-    makefp=open( args.path+"/"+"Makefile", "w" )
-    makefp.write( make_code )
 
 if __name__ == "__main__":
     main()
