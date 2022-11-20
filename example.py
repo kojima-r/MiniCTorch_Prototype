@@ -29,7 +29,7 @@ def main():
         print("[SAVE]",filename)
         minictorch.trace(model, input_to_model, filename)
     #convert_all( project, folder, json_path, input_dict, data_dict={}, **kwargs):
-    minictorch.convert_all("example", "output", model, filename,input_to_model, {"inp_data":input_to_model}, code="test")
+    minictorch.convert_all("example", "output", model, filename,input_to_model, {"inp_data":input_to_model}, code="all")
 
 
 if __name__ == "__main__":

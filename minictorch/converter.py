@@ -737,79 +737,54 @@ def find_output_node(obj,net_key,loss_key,pred_key,output_id,target_enabled,pred
 
     return pred_no,target_no,class_no
 
-def c_train_code_generator( project, folder, obj, **kwargs ):
+def c_train_code_generator( project, folder, obj,
+        epochs = 200,
+        batch_size = 32,
+        lr = 0.01,
+        net_key = "Net",
+        loss_key = "Loss",
+        pred_key = None,
+        pred_index = -1,
+        input_data=None,
+        target_data=None,
+        shuffle = False,
+        pred_output = None,
+        task_type = "",
+        latent_z=None,
+        **kwargs 
+        ):
     
     # arguments
-    nwargs = len(kwargs)
-    if nwargs < 1: return ""
-    
-    epochs = 200
-    if 'epochs' in kwargs:
-        epochs = kwargs['epochs']
+    print("task_type :", task_type)
     print("epoch_num : ", epochs )
-        
-    batch_size = 32
-    if 'batch' in kwargs:
-        batch_size = kwargs['batch']
     print("batch_size : ", batch_size )
-        
-    lr = 0.01;
-    if 'lr' in kwargs:
-        lr = kwargs['lr']
     print("lr : ", lr )
-        
-    net_key = "Net"
-    if 'net_key' in kwargs:
-        net_key = kwargs['net_key']
-        print("net_key :", net_key )
-    
-    loss_key = "Loss"
-    if 'loss_key' in kwargs:
-        loss_key = kwargs['loss_key']
-        print("loss_key :", loss_key )
-        
-    pred_key = None
-    if 'pred_key' in kwargs:
-        pred_key = kwargs['pred_key']
-        print("pred_key :", pred_key )
-        
-    pred_index = -1
-    if 'pred_index' in kwargs:
-        pred_index_no = kwargs['pred_index']
-        print("pred_index :", pred_index )
+    print("net_key :", net_key )
+    print("loss_key :", loss_key )    
+    print("pred_key :", pred_key )
+    print("pred_index :", pred_index )
+    print("shuffle : ", shuffle )
         
     input_enabled = False;
     input_s = ""
-    if 'input_data' in kwargs:
-        input_data = kwargs['input_data']
+    if input_data:
         input_enabled, input_s = get_tensor_shape( input_data )
         
     target_enabled = False
     target_s = ""
-    if 'target_data' in kwargs:
-        target_data = kwargs['target_data']
+    if target_data:
         target_enabled, target_s = get_tensor_shape( target_data )
         
     print("input  shape : ", input_enabled, input_s)
     print("target shape : ", target_enabled, target_s)
     
-    shuffle = False
-    if "shuffle" in kwargs:
-        shuffle = kwargs["shuffle"]
-    print("shuffle : ", shuffle )
-    
-    pred_output = 0
-    if input_enabled:
-        pred_output = input_data.shape[0]
-        
-    if 'pred_output' in kwargs:
-        pred_output = kwargs['pred_output']
+    #pred_output
+    if pred_output is None:
+        if input_enabled:
+            pred_output = input_data.shape[0]
+        else:
+            pred_output=0
     print("pred_output : ", pred_output)
-
-    task_type = ""
-    if "task_type" in kwargs:
-        task_type = kwargs["task_type"]
-    print("task_type :", task_type)
 
     # ---------- 
     # output id
@@ -1299,13 +1274,12 @@ def c_train_code_generator( project, folder, obj, **kwargs ):
     
     # latent variable
     z_no  = -1
-    if "z" in kwargs:   
-        keyw = kwargs["z"]
+    if latent_z is not None:
         for i,el in enumerate(obj):
             if el["op"] == "aten::linear":
-                if keyw in el['name']:
+                if latent_z in el['name']:
                     z_no = el['in'][0]
-                    print("vae z: ", z_no," keyw :", keyw )
+                    print("vae z: ", z_no," keyword :",  latent_z)
                     
     if z_no >= 0:
         pathz = folder + '/' + project + ".z"
