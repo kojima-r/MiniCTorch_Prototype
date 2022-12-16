@@ -10,6 +10,7 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/clinfo/ConDeNS",
     packages=setuptools.find_packages(),
+    include_package_data=True,
     install_requires=["lark-parser"],
     #extras_require={
     #    "develop": []

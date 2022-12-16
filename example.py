@@ -21,7 +21,7 @@ class Net(nn.Module):
 
 def main():
     model = Net()
-    input_to_model = torch.randn((1,2))
+    input_to_model = torch.randn((8,2))
     print(input_to_model.shape)
     model.eval()
     with torch.no_grad():
@@ -29,7 +29,10 @@ def main():
         print("[SAVE]",filename)
         minictorch.trace(model, input_to_model, filename)
     #convert_all( project, folder, json_path, input_dict, data_dict={}, **kwargs):
-    minictorch.convert_all("example", "output", model, filename,input_to_model, {"inp_data":input_to_model}, code="all")
+    minictorch.convert_all("example", "output", model, filename,input_to_model,
+            {"input_data":input_to_model}, batch_size=1,code="all",
+            train_tmpl='train_no_batch.tmpl.cpp',
+            )
 
 
 if __name__ == "__main__":

@@ -737,9 +737,12 @@ def find_output_node(obj,net_key,loss_key,pred_key,output_id,target_enabled,pred
 
     return pred_no,target_no,class_no
 
+from jinja2 import Template, Environment, FileSystemLoader
+
 def c_train_code_generator( project, folder, obj,
+        train_tmpl='train.tmpl.cpp',
         epochs = 200,
-        batch_size = 32,
+        batch_size = 0,
         lr = 0.01,
         net_key = "Net",
         loss_key = "Loss",
@@ -767,12 +770,12 @@ def c_train_code_generator( project, folder, obj,
         
     input_enabled = False;
     input_s = ""
-    if input_data:
+    if input_data is not None:
         input_enabled, input_s = get_tensor_shape( input_data )
         
     target_enabled = False
     target_s = ""
-    if target_data:
+    if target_data is not None:
         target_enabled, target_s = get_tensor_shape( target_data )
         
     print("input  shape : ", input_enabled, input_s)
@@ -809,469 +812,48 @@ def c_train_code_generator( project, folder, obj,
     print("target_no :", target_no, obj[target_no])
     print("class_no  :", class_no, obj[class_no])
     ###
-    
-    # header section
-    all_text="""
-    //
-    //  {proj}_train
-    //
-    #ifdef _NOTEBOOK
-    #include "../../src/minictorch.hpp"
-    #else
-    #include "minictorch.hpp"
-    #endif
-    #include <chrono>
-    
-    extern bool train_mode;
-    """.format(proj=project)
-    
-    text = ""
+    x_shape=""
+    y_shape=""
+    x_shape_rest=""
+    y_shape_rest = ""
+    x_shape_rest_enabled = False
+    y_shape_rest_enabled = False
+    if batch_size > 0:
+        if input_enabled:
+            ds = input_data.shape
+            x_shape = ",".join([str(batch_size)]+[str(ds[k]) for k in range(1,input_data.ndim)])
+        
+        if target_enabled:
+            ds = target_data.shape
+            y_shape = ",".join([str(batch_size)]+[str(ds[k]) for k in range(1,target_data.ndim)])
+
+        if input_enabled:
+            ds = input_data.shape
+            sz = input_data.ndim
+            if sz>=2:
+                x_shape_rest_enabled = True
+                for k in range(2,sz):
+                    x_shape_rest += ", xt::all()"
+        if target_enabled:
+            ds = target_data.shape
+            sz = target_data.ndim
+            if sz>=2:
+                y_shape_rest_enabled = True
+                for k in range(2,sz):
+                    y_shape_rest += ", xt::all()"
+         
+    double_loss_enabled= len(output_sum_loss_id) > 0 and class_no < 1  # Loss=Loss1+Loss2
+ 
+    pred_type = 1  ###
     if input_enabled:
-        text +="""
-    extern Tensor input_data;"""
-    if target_enabled:
-        text +="""
-    extern Tensor target_data;"""
-    all_text += text
-    
-    # train loop program
-    all_text +="""
-    
-    void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var, int NL )
-    {
-        auto do_forward=[]( vector<MCTNode*> &op, int n ) 
-        {
-            for(int k=0;k<=n;k++) {
-              if( op[k] )  op[k]->forward();
-            }
-        };
-        auto do_backward=[]( vector<MCTNode*> &op, int n ) 
-        {
-            op[n]->grad = xt::ones_like( op[n]->output );
-            for(int k=n;k>=0;k--) {
-              if( op[k] )  op[k]->backward();
-            }
-        };
-        auto do_zerograd=[]( vector<MCTNode*> &op, int n ) 
-        {
-            for(int k=0;k<=n;k++) {
-              if( op[k] )  op[k]->zerograd();
-            }
-        };
-        auto update_params=[]( vector<MCTNode*> &op, int n, fprec lr=0.01 ) 
-        {
-            for(int k=0;k<=n;k++) {
-              if( op[k] )  op[k]->update( lr );
-            }
-        };"""
-    
-    if class_no >= 0:
-        all_text +="""
-        auto eval_labels=[]( Tensor& y, Tensor &t )
-        {
-            auto lb = xt::argmax( y, 1 );
-            auto eq = xt::equal( t, lb );
-            auto sm = xt::sum( eq );
-            return (int)sm[0];
-        };"""
-    
-    # common parameter
-    all_text +="""
-    
-        //xt::random::seed(1);  
-        
-        fprec lr = {lr};
-        int epoch_num = {ne};
-        cout<<"epoch_num : "<<epoch_num<<endl;
-    """.format(ne=epochs,lr=lr)
-    
-    text = ""
-    if batch_size > 0:
-        
-        if input_enabled:
-            text +="""
-        input_data.reshape( {shape} );
-        auto input_shape = input_data.shape();
-        """.format(shape=input_s)
-        
-        if target_enabled:
-            text +="""
-        target_data.reshape( {shape} );
-        auto target_shape = target_data.shape();
-        """.format(shape=target_s)
-    
-        text +="""
-        int batch_size = {bz};
-        int n_batch = (int)input_shape[0] / batch_size;
-        cout<<"batch  number  : "<<n_batch<<","<<batch_size<<endl;
-        cout<<"learning ratio : "<<lr<<endl;
-    
-        """.format(bz=batch_size)
-        
-    else:
-        
-        batch_size = 0
-        if input_enabled:
-            text +="""
-        input_data.reshape( {shape} );
-        auto input_shape = input_data.shape();
-        input_var.output = input_data;
-        
-        """.format(shape=input_s)
-        
-    all_text += text
-    
-    text = ""
-    if batch_size > 0:
-        if input_enabled:
-            ds = input_data.shape
-            sz = input_data.ndim
-            stri = ""
-            for k in range(1,sz):  stri += ", " + str(ds[k])
-            text +="""
-        Tensor x_tmp = xt::zeros<fprec>( {{ batch_size{ss} }} );""".format(ss=stri)
-        
-        if target_enabled:
-            ds = target_data.shape
-            sz = target_data.ndim
-            if sz == 1:
-                text +="""
-        Tensor y_tmp = xt::zeros<fprec>( { batch_size } );"""
-            elif sz > 1:
-                stri = ""
-                for k in range(1,sz):  stri += ", " + str(ds[k])
-                text +="""
-        target_data.reshape( {shape} );
-        Tensor y_tmp = xt::zeros<fprec>( {{ batch_size{ss} }} );""".format(shape=target_s,ss=stri)
-    
-    else:
-        if class_no >= 0:
-            text +="""
-        auto labels = forward_result[{nt}]->output;
-        auto labels_shape = labels.shape();""".format(nt=class_no)
-    
-    all_text += text
-    
-        
-    # learning section
-    fpath = folder + '/' + project + ".out"
-        
-    all_text += """
-    
-        ofstream outputfile("{fn}");
-        std::chrono::system_clock::time_point  start, end; 
-        start = std::chrono::system_clock::now();
+        pred_type = len(input_data.shape)
+    print("pred_type : ",pred_type)
 
-        do_zerograd( forward_result, NL );
-        for(int epoch=0;epoch<epoch_num;epoch++)
-        {{
-            train_mode = true;""".format(fn=fpath)
-            
-    text = ""
-    if batch_size > 0:
-        if shuffle:
-            text += """
-            
-            xt::xarray<int> index = xt::arange( (int)input_shape[0] );
-            xt::random::shuffle( index );"""
-            
-    if batch_size < 1:  # batch_sizeize == 0
-        
-        if class_no >= 0:  # classification only
-        
-            text +="""
-            do_forward( forward_result, NL );
-            
-            fprec o = forward_result[NL]->output[0];
-            int corrects = eval_labels( forward_result[{ns}]->output, y );
-            fprec acc = (fprec)corrects / (fprec)labels_shape[0];
-            cout<<"epoch "<<epoch<<" - loss "<<o<<" - accuracy "<<acc<<endl;
-            outputfile<<to_string(o)<<","<<to_string(acc)<<endl;
-        """.format(ns=pred_no)
-        
-        else:  # others
-            
-            text +="""
-            do_forward( forward_result, NL );
-            
-            auto o = forward_result[NL]->output;
-            cout<<"epoch "<<epoch<<" - loss "<<o[0]<<endl;
-            outputfile<<to_string(o[0])<<endl;
-        """
-        
-        text += """
-            do_backward( forward_result, NL );
-            update_params( forward_result, NL, lr );
-            do_zerograd( forward_result, NL );
-        """
-        
-    else:  # minibatch ( batch_sizeize > 0 )
-        if class_no >= 0:  # classification only
-            text +="""
-            
-            fprec total_loss = 0.0;
-            int   total_corrects = 0;"""
-        else:
-            text +="""
-            
-            fprec total_loss = 0.0;"""
-        text +="""
-            for(int j=0;j<n_batch;j++)
-            {
-                int jb = j * batch_size;
-                for(int k=0;k<batch_size;k++)
-                {"""
-            
-        if input_enabled:
-            ds = input_data.shape
-            sz = input_data.ndim
-            strx = ""
-            for k in range(2,sz): strx += ", xt::all()"
-            
-            if shuffle:
-                #   xt::row( x_tmp, k ) = xt::row( input_data, index(jb+k) );"""
-                if sz == 1:
-                    text +="""
-                    x_tmp( k ) = input_data( index(jb+k) );"""
-                else:
-                    text +="""
-                    auto xw = xt::view( input_data, index(jb+k){ss} );
-                    xt::view( x_tmp, k{ss} ) = xw;""".format(ss=strx)
-            else:
-                #    xt::row( x_tmp, k ) = xt::row( input_data, jb+k );"""
-                if sz == 1:
-                    text +="""
-                    x_tmp( k ) = input_data( jb+k );"""
-                else:
-                    text +="""
-                    auto xw = xt::view( input_data, jb+k{ss} );
-                    xt::view( x_tmp, k{ss} ) = xw;""".format(ss=strx)
-                    
-        if target_enabled > 0:
-            ds = target_data.shape
-            sz = target_data.ndim
-            strx = ""
-            for k in range(2,sz): strx += ", xt::all()"
-            
-            if shuffle:
-                    #xt::row( y_tmp, k ) = xt::row( target_data, index(jb+k) );"""
-                if sz == 1:
-                    text +="""
-                    y_tmp( k ) = target_data( index(jb+k) );"""
-                else:
-                    text +="""
-                    auto yw = xt::view( target_data, index(jb+k){ss} );
-                    xt::view( y_tmp, k{ss} ) = yw;""".format(ss=strx)
-            else:
-                    #xt::row( y_tmp, k ) = xt::row( target_data, jb+k );"""
-                if sz == 1:
-                    text +="""
-                    y_tmp( k ) = target_data( jb+k );"""
-                else:
-                    text +="""
-                    auto yw = xt::view( target_data, jb+k{ss} );
-                    xt::view( y_tmp, k{ss} ) = yw;""".format(ss=strx)
-                    
-        text +="""
-                }
-                
-                input_var.output = x_tmp;"""
-        if target_no > 0:
-            text +="""
-                forward_result[{nt}]->output = y_tmp;""".format(nt=target_no)
-        
-        if class_no >= 0:  # classification only
-            text +="""
-                do_forward( forward_result, NL );
-                
-                auto o = forward_result[NL]->output;
-                total_loss += o[0];
-                
-                int corrects = eval_labels( forward_result[{ns}]->output, y_tmp );
-                total_corrects += corrects;
-            
-                do_backward( forward_result, NL );
-                update_params( forward_result, NL, lr );
-                do_zerograd( forward_result, NL );
-            }}
-            fprec total_acc = (fprec)total_corrects / (fprec)input_shape[0];
-            cout<<"total_loss (batch): epoch "<<epoch<<" : loss "<<total_loss<<" : Acc "<<total_acc<<" ("<<total_corrects<<"/"<<input_shape[0]<<")"<<endl;
-            """.format(ns=pred_no)
-        
-        else: # others
-        
-            text +="""
-                do_forward( forward_result, NL );
-                
-                auto o = forward_result[NL]->output;
-                total_loss += o[0];
-                
-                do_backward( forward_result, NL );
-                update_params( forward_result, NL, lr );
-                do_zerograd( forward_result, NL );
-            }
-            cout<<"total_loss : epoch "<<epoch<<" - loss "<<total_loss<<endl;
-            """
-            
-        # print loss value per epoch
-        text +="""
-            train_mode = false;
-            
-            input_var.output = input_data;"""
-            
-        if target_no > 0:
-            text +="""
-            forward_result[{nt}]->output = target_data;""".format(nt=target_no)
-            
-        if( len(output_sum_loss_id) > 0 and class_no < 1 ):# Loss=Loss1+Loss2
-            text +="""
-            do_forward( forward_result, NL );
-            
-            auto o  = forward_result[NL]->output;
-            auto o1 = forward_result[{na1}]->output;
-            auto o2 = forward_result[{na2}]->output; 
-            cout<<"epoch "<<epoch<<" - loss "<<o[0]<<" ( "<<o1[0]<<" , "<<o2[0]<<" ) "<<endl;
-            outputfile<<to_string(o[0])<<endl;
-            """.format(na1=output_sum_loss_id[0],na2=output_sum_loss_id[1])
-        else:
-            if class_no >= 0:  # classification only
-                text +="""
-            do_forward( forward_result, NL );
-            
-            auto o = forward_result[NL]->output;
-            int corrects = eval_labels( forward_result[{ns}]->output, target_data );
-            fprec acc = (fprec)corrects / (fprec)input_shape[0];
-            cout<<"total_loss (all)  : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<corrects<<endl;
-            outputfile<<to_string(o[0])<<","<<to_string(acc)<<","<<total_loss<<endl;""".format(ns=pred_no)
-            
-            else: # others
-                text+="""
-            do_forward( forward_result, NL );
-            
-            auto o  = forward_result[NL]->output;
-            cout<<"epoch "<<epoch<<" - loss "<<o[0]<<endl;
-            outputfile<<to_string(o[0])<<endl;
-            """
-            
-    all_text += text
-        
-    all_text +="""
-        }
-        end = std::chrono::system_clock::now();
-        double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
-        cout<<"MiniCTorch Time: "<<elapsed<<endl;
+    pred_op = ""  
+    if pred_no>=0:
+        el = obj[pred_no]
+        pred_op=el['op']
 
-        outputfile.close();
-        
-        train_mode = false;"""
-    
-    # prediction section
-    path = folder + '/' + project + ".pred"
-    
-    text=""
-    if pred_no > 0:
-        if batch_size < 1:  # batch_sizeize == 0
-            if input_enabled > 0:
-                el = obj[pred_no]
-                text +="""
-        input_data.reshape( {shape} );
-        {{
-            // {ns} : {el1}
-            input_var.output = input_data;
-            auto inp_shape = input_data.shape();
-            int  nx = inp_shape[0];
-            """.format(shape=inp_s,ns=pred_no,el1=el['op'])
-            
-                text += """
-            do_forward( forward_result, {ns} );
-            auto y_pred = forward_result[{ns}]->get_output();
-            
-            ofstream outputfile( "{fn}" );
-            outputfile<<to_string(nx)<<",1"<<endl;
-            for(int i=0;i<nx;i++)
-            {{
-                outputfile<<to_string(y_pred(i,0))<<endl;
-            }}
-            outputfile.close();
-        }}""".format(fn=path,ns=pred_no)
-            
-        else:  # minibatch ( batch_sizeize > 0)
-        
-            if class_no < 0: # not classification only
-                el = obj[pred_no]
-            
-                pred_type = 1  ###
-                if input_enabled > 0:
-                    pred_type = len(input_data.shape)
-                print("pred_type : ",pred_type)
-                
-                if pred_type == 1: ###
-                    text +="""
-        {{
-            // {ns} : {el1}""".format(ns=pred_no,el1=el['op'])
-            
-                    if input_enabled > 0:
-                        text +="""
-            input_var.output = input_data;"""
-                 
-                    text +="""
-            do_forward( forward_result, {ns} );
-            auto y_pred = forward_result[{ns}]->output;
-            
-            ofstream outputfile( "{fn}" );
-            outputfile<<to_string(input_shape[0])<<",1"<<endl;
-            
-            for(int i=0;i<input_shape[0];i++)
-            {{
-                outputfile<<to_string(y_pred(i,0))<<endl;
-            }}
-            outputfile.close();
-        }}""".format(fn=path,ns=pred_no)
-            
-                elif pred_type > 1:
-                    el = obj[pred_no]
-                    text +="""
-            
-        {{
-            // {ns} : {el1}""".format(ns=pred_no,el1=el['op'])
-            
-                    if input_enabled > 0:
-                        text +="""
-            input_var.output = input_data;"""
-                
-                    text +="""
-            do_forward( forward_result, {ns} );
-            auto y_pred = forward_result[{ns}]->output;
-            """.format(ns=pred_no)
-            
-                    nx_set = 0;
-                    if input_enabled > 0:
-                        if pred_output == input_data.shape[0]:
-                            nx_set = 1
-                            text +="""
-            int nx = input_shape[0];
-            """
-                    if nx_set == 0:
-                        text +="""
-            int nx = {nx};
-            """.format(nx=pred_output)
-            
-                    text +="""
-            ofstream outputfile( "{fn}" );
-            outputfile<<to_string(nx)<<","<<to_string(input_shape[1])<<endl;
-            
-            for(int i=0;i<nx;i++)
-            {{
-                for(int j=0;j<input_shape[1]-1;j++)
-                {{
-                    outputfile<<to_string(y_pred(i,j))<<",";
-                }}
-                outputfile<<to_string(y_pred(i,input_shape[1]-1))<<endl;
-            }}
-            outputfile.close();
-        }}""".format(fn=path,nx=pred_output)
-        
-    
     # latent variable
     z_no  = -1
     if latent_z is not None:
@@ -1280,32 +862,49 @@ def c_train_code_generator( project, folder, obj,
                 if latent_z in el['name']:
                     z_no = el['in'][0]
                     print("vae z: ", z_no," keyword :",  latent_z)
-                    
-    if z_no >= 0:
-        pathz = folder + '/' + project + ".z"
             
-        text +="""
-        {{
-            // {nz} : z output
-            auto z_pred = forward_result[{nz}]->get_output();
-        
-            ofstream outputfile( "{fn}" );
-            outputfile<<to_string(input_shape[0])<<","<<to_string(2)<<endl;
-        
-            for(int k=0;k<input_shape[0];k++)
-            {{
-                outputfile<<to_string(z_pred(k,0))<<","<<to_string(z_pred(k,1))<<endl;
-            }}
-            outputfile.close();
-        }}
-        """.format(fn=pathz,nz=z_no)
-    
-    all_text += text
-    all_text +="""
-    
-    }
-    """
-    return all_text
+    ###
+    path=os.path.dirname(__file__)
+    env = Environment(loader=FileSystemLoader(path+'/', encoding='utf8'))
+    #train_tmpl = env.get_template('train.tmpl.cpp')
+    train_tmpl = env.get_template(train_tmpl)
+    params={
+        "proj":project,
+        "input_enabled":input_enabled,
+        "target_enabled":target_enabled,
+        "eval_enabled":class_no >= 0,
+        "classification_task":class_no >= 0,
+        "target_no":target_no,
+        "pred_no":pred_no,
+        "epochs":epochs,
+        "lr":lr,
+        "input_shape":input_s,
+        "target_shape":target_s,
+        "batch_enabled":batch_size>0,
+        "batch_size":batch_size,
+        "x_shape":x_shape,
+        "y_shape":y_shape,
+        "x_shape_rest":x_shape_rest,
+        "x_shape_rest_enabled": x_shape_rest_enabled,
+        "y_shape_rest":y_shape_rest,
+        "y_shape_rest_enabled": y_shape_rest_enabled,
+        "double_loss_enabled":double_loss_enabled,
+        "output_filename":folder + '/' + project + ".out",
+        "pred_type":pred_type,
+        "pred_op":pred_op,
+        "pred_output":pred_output,
+        "pred_filename":folder + '/' + project + ".pred",
+        "z_filename": folder + '/' + project + ".z",
+        "z_no":z_no,
+        }
+    if len(output_sum_loss_id)>=2:
+        params["loss1_no"]=output_sum_loss_id[0]
+        params["loss2_no"]=output_sum_loss_id[1]
+    print(params)
+    rendered_s = train_tmpl.render(params)
+    print(rendered_s)
+       
+    return rendered_s
 
 
 # convert json file to parameter, cpp, and make file
