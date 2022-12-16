@@ -157,9 +157,19 @@ void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var,
         }
         {%- if classification_task %}
         fprec total_acc = (fprec)total_corrects / (fprec)input_shape[0];
-        cout<<"total_loss (batch): epoch "<<epoch<<" : loss "<<total_loss<<" : Acc "<<total_acc<<" ("<<total_corrects<<"/"<<input_shape[0]<<")"<<endl;
+        cout<<"total_loss : epoch "<<epoch 
+            <<" : total_loss "<<total_loss 
+            <<" : batch_average_loss "<<total_loss/n_batch 
+            <<" : average_loss "<<total_loss/(n_batch*batch_size) 
+            <<" : Acc "<<total_acc 
+            <<" ("<<total_corrects<<"/"<<input_shape[0]<<")" 
+            <<endl;
         {%- else %}
-        cout<<"total_loss : epoch "<<epoch<<" - loss "<<total_loss<<endl;
+        cout<<"total_loss : epoch "<<epoch
+            <<" : total_loss "<<total_loss
+            <<" : batch_average_loss "<<total_loss/n_batch 
+            <<" : average_loss "<<total_loss/(n_batch*batch_size) 
+            <<endl;
         {%- endif %}
 
         train_mode = false;
@@ -182,10 +192,10 @@ void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var,
         {%- if classification_task %}
         int corrects = eval_labels( forward_result[{{pred_no}}]->output, target_data );
         fprec acc = (fprec)corrects / (fprec)input_shape[0];
-        cout<<"total_loss (all)  : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<corrects<<endl;
+        cout<<"full_data : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<corrects<<endl;
         outputfile<<to_string(o[0])<<","<<to_string(acc)<<","<<total_loss<<endl;
         {%- else %}
-        cout<<"epoch "<<epoch<<" - loss "<<o[0]<<endl;
+        cout<<"full_data : epoch "<<epoch<<" : loss "<<o[0]<<endl;
         outputfile<<to_string(o[0])<<endl;
         {%- endif %}
     }

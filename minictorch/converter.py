@@ -4,6 +4,7 @@ import numpy as np
 import os
 import torch
 import re
+from jinja2 import Template, Environment, FileSystemLoader
 
 OP_MAPPING={
     "aten::mul":"MulOp",
@@ -70,60 +71,27 @@ OUTPUT_ID_ENABLED_NODE={
     }
  
 def makefile_generator( project, code="all", xtensor_include_base="../", minictorch_include="../src",optimize="-O3",libs="-lmkl_rt"): #libs="-lcblas"):
-    make_text="""
-CXX = g++
-CXXFLAGS += {optimize} -Wall  -std=c++14 -I./ -I{minictorch_inc} -I{xtensor_base}xtensor-blas/include -I{xtensor_base}xtensor/include -I{xtensor_base}xtl/include
-LDFLAGS = {libs}
-TARGET  = {proj}
-SRCS    = {proj}.cpp {proj}_param.cpp
-OBJS    = $(SRCS:.cpp=.o)
+    make_tmpl="make.tmpl.cpp"
+    params={
+        "proj":project,
+        "xtensor_base":xtensor_include_base,
+        "minictorch_inc":minictorch_include,
+        "optimize":optimize,
+        "libs":libs,
+        }
+    path=os.path.dirname(__file__)
+    env = Environment(loader=FileSystemLoader(path+'/', encoding='utf8'))
+    make_tmpl = env.get_template(make_tmpl)
+    rendered_s = make_tmpl.render(params)
+    return rendered_s
 
-""".format(proj=project, xtensor_base=xtensor_include_base, minictorch_inc=minictorch_include, optimize=optimize, libs=libs)
-
-    if code == "all":
-        make_text+="""
-TRAIN_SRCS    = {proj}.cpp {proj}_param.cpp {proj}_train.cpp {proj}_data.cpp
-TRAIN_TARGET  = {proj}_train
-TRAIN_OBJS    = $(TRAIN_SRCS:.cpp=.train.o)
-
-all: $(TARGET) $(TRAIN_TARGET)
-
-$(TRAIN_TARGET): $(TRAIN_OBJS)
-	$(CXX) -o $@ $^ -D_TRAIN $(CXXFLAGS) $(LDFLAGS)
-""".format(proj=project)
-    else:
-        make_text+="""
-all: $(TARGET)
-"""
-
-    make_text+="""
-$(TARGET): $(OBJS)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
-
-%.train.o: %.cpp
-	$(CXX) -c -D_TRAIN $(CXXFLAGS) $< -o $@
-
-%.o: %.cpp
-	$(CXX) -c $(CXXFLAGS) $<
-
-.PHONY: clean
-clean:
-	rm -f $(TARGET) $(OBJS) *.gcno *.gcov *~
-	find . -name "*.gcda" | xargs -r rm
-
-"""  #.format(proj=project,xtensor_base=xtensor_include_base,minictorch_inc=minictorch_include)
-    return make_text
-
-
-
-
-# s:     attribute name in computational graph e.g. Net/Linear[fc3]/bias/bias 
+# attr_name: attribute name in computational graph e.g. Net/Linear[fc3]/bias/bias 
 # model: pytorch model
 # Return:  pytorch parameters  <class 'torch.nn.parameter.Parameter'>
 #
-def get_attr_from_model( s, model ):
+def get_attr_from_model( attr_name, model ):
     pat = re.compile(r'([^\[\]]*)\[(.*)\]')
-    arr = s.split("/")
+    arr = attr_name.split("/")
     if len(arr)>1:
         class_name = arr[0]
         xx = arr[1:-1]
@@ -146,15 +114,15 @@ def get_attr_from_model( s, model ):
 
 # ex. Net/Linear[fc1]/weight/43 -> param_fc1_weight
 #     VAE/Net[net]/Linear[fc1]/weight/158 -> param_fc1_weight
-def get_param_name( s1 ):
-    s2 = s1.split('/')
+def get_param_name( attr_name ):
+    sep_list = attr_name.split('/')
     n = 1
-    for i in range(len(s2)):
-        if s2[i].find("[")>=0:
+    for i in range(len(sep_list)):
+        if sep_list[i].find("[")>=0:
             n = i
-    s3 = re.findall("(?<=\[).+?(?=\])", s2[n])
-    s4 = s3[0] + '_' + s2[n+1]
-    return "param_"+s4
+    keys = re.findall("(?<=\[).+?(?=\])", sep_list[n])
+    out_name = keys[0] + '_' + sep_list[n+1]
+    return "param_"+out_name
     
 # 
 # fc3_bias
@@ -301,19 +269,8 @@ def generate_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
         print(i,el)
     print("...")
     """
-
-    all_text ="""
-    #include<stdio.h>
-    #include<iostream>
-    #include<fstream>
-    #include<string>
-    #include<vector>
-    #include "minictorch.hpp"
-    
-    using namespace std;
-    
-    extern Tensor  xin;"""
-    
+    extern_vars=[]
+    graph_codes=[]
     key_list = []
     n_constant = 0  # Constant no.
     for i,el in enumerate(obj):
@@ -323,18 +280,12 @@ def generate_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
             key = get_param_name( name )
             if( key not in key_list ):
                 key_list.append( key )
-                all_text += get_one_line(1,"extern Tensor {key};").format(key=str(key))
+                extern_vars.append(str(key))
         elif el["op"]=="prim::Constant":
             if len(el["shape"])>0:
                 n_constant += 1
                 key = "Constant" + str(n_constant)
-                all_text += get_one_line(1,"extern Tensor {key};").format(key=str(key))
-    all_text +="""
-    
-    bool train_mode = true;
-    
-    void build_computational_graph( vector<MCTNode*>& forward_result, VariableTensor &input_var )
-    {"""
+                extern_vars.append(str(key))
     
     n_constant = 0  # Constant no.
     output_id = None
@@ -349,23 +300,17 @@ def generate_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
             pass
         elif "shape" in el and len(el["shape"])>0:
             shape = el["shape"]
-            shape_flat=1
-            for s in el["shape"]:
-                shape_flat *= s
             text+="""
             Tensor::shape_type shape = {{{shape}}};""".format(i=i,shape=",".join(map(str,shape)) )
         ###
         ### operator
         ###
         if el["op"]=="IO Node":
-            
             if "input" in el["name"]:
                 text+="""
             forward_result[{i}] = &input_var;""".format(i=i)
-            
-            elif "output" in el["name"]: 
+            elif "output" in el["name"]:  # output_id = el["in"][0]
                 assert len(el["in"])>0, "output error"
-                output_id = el["in"][0]
             else:
                 print("[WARNING] unknown IO:"+el["name"])
         ###
@@ -465,113 +410,45 @@ def generate_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
         text+="""
         }
         """
-        all_text+=text
+        graph_codes.append(text)
         
-    all_text +="""
-    }
-    """
-    return all_text
+    return extern_vars, graph_codes
 
-def generate_main_c_code(obj, seed_no=-1, chk_shape=0):
-        
+def generate_main_c_code(obj, extern_vars, graph_codes, seed_no=-1, chk_shape=0, title=""):
     for i,el in enumerate(obj):
         if el["op"]=="IO Node":
             if "input" in el["name"]:
-                input_i=i
+                input_id=i
                 input_shape=el["shape"]
             elif "output" in el["name"]: 
                 assert len(el["in"])>0, "output error"
                 output_id = el["in"][0]
 
     # 1 forward / backward
-    all_text ="""
-    void do_forward_backward_test( vector<MCTNode*>& forward_result, VariableTensor &input_var, int N )
-    {
-        cout<<"### forward computation ..."<<endl;
-        for(int k=0;k<=N;k++) {
-            if( forward_result[k] )  
-            {"""
-    if chk_shape > 0:
-        all_text+="""
-                forward_result[k]->set_id( k );
-                forward_result[k]->forward();
-                forward_result[k]->display_shape();
-                forward_result[k]->zerograd();"""
-    else:
-        all_text+="""
-                //forward_result[k]->set_id( k );
-                forward_result[k]->forward();
-                forward_result[k]->zerograd();"""
-    all_text +="""
-            }
+    path=os.path.dirname(__file__)
+    env = Environment(loader=FileSystemLoader(path+'/', encoding='utf8'))
+    #train_tmpl = env.get_template('train.tmpl.cpp')
+    main_tmpl="main.tmpl.cpp"
+    train_tmpl = env.get_template(main_tmpl)
+    params={
+        "title":title,
+        "extern_vars":extern_vars,
+        "graph_codes":graph_codes,
+        "seed_no":seed_no,
+        "chk_shape":chk_shape,
+        "graph_size":len(obj),
+        "input_id":input_id,
+        "input_shape": ",".join(map(str,input_shape)),
+        "output_id":output_id,
         }
-        auto o = forward_result[N]->output;
-        cout<<o<<endl;
-    
-        cout<<"### backward computation ..."<<endl;
-        forward_result[N]->grad = xt::ones_like( forward_result[N]->output );
-        for(int k=N;k>=0;k--) {"""
-    if chk_shape > 0:
-        all_text +="""
-            if( forward_result[k] )  
-            {
-               forward_result[k]->backward();
-               forward_result[k]->display_grad_shape();
-            }"""
-    else:
-        all_text +="""
-            if( forward_result[k] )  forward_result[k]->backward();"""
-    all_text +="""
-        }
-        cout<<"input_grad"<<input_var.grad<<endl;
-    }
-    
-    """
-    
-    # main program
-    all_text +="""
-    #ifdef _TRAIN
-    extern void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var, int N );
-    #endif
-    
-    int main()
-    {{
-        vector<MCTNode*> forward_result({graph_size});
-    """.format(graph_size=len(obj))
-    text="""
-        // input data:  forward_result[{i}]
-        Tensor::shape_type shape = {{{shape}}};
-        xin.reshape( shape );
-        VariableTensor input_var( xin, VAR_INPUT );
-    """.format(i=input_i,shape=",".join(map(str,input_shape)))
-    all_text += text
-    
-    if seed_no >= 0:
-        text ="""
-        xt::random::seed( {ns} );
-    """.format(ns=seed_no)
-        all_text += text
-    
-    all_text +="""
-        build_computational_graph( forward_result, input_var );
-    #ifdef _TRAIN
-        do_train_loop( forward_result, input_var, {output_id} );
-    #else
-        do_forward_backward_test( forward_result, input_var, {output_id} );
-    #endif
-        
-        return 0;
-    }}
-    """.format(output_id=output_id)
-    
-    return all_text
-
+    rendered_s = train_tmpl.render(params)
+    return rendered_s
 
 def unpack_origin_no( obj, target_index ):
     target_node = obj[target_index]
     in_index = target_node["in"][0]
     in_node = obj[in_index]
-    out_id = target_node['output_id']
+    out_id = target_node['output_id'] # output_id は unpack系に付いてListの何番目のものを取り出すか
     #print( "unpack",el2["op"], out_id)
     result_index  = target_index
     if in_node["op"] in ['prim::ListConstruct','prim::TupleConstruct']:
@@ -583,12 +460,13 @@ def unpack_origin_no( obj, target_index ):
     #print("unpack original no: ",no,no1)
     return result_index
     
+# 入力をさかのぼっていって最初に見つかったList/Tuple系以外のノードを見つける
 def get_unpack_origin( obj, no1, inout ):
     no = no1
     while True:
         el = obj[no]
         if el["op"] in ['prim::ListUnpack','prim::TupleUnpack']:
-            no = unpack_origin_no( obj, no ) ## unpackに対応したConstructを見つけようとする
+            no = unpack_origin_no( obj, no ) ## unpackに対応したConstruct（の入力）を見つけようとする
         elif el["op"] == 'prim::ListConstruct':
             for j in range(len(el['in'])):
                 k = get_unpack_origin( obj, el['in'][j], inout )
@@ -618,28 +496,33 @@ def find_output_node(obj,net_key,loss_key,pred_key,output_id,target_enabled,pred
     
     pos1 = 0
     pos2 = 0
+    direct_pos=0
     for i,el in enumerate(obj):
         if net_key in el["name"]: # last Net
-            pos1 = i+1
+            direct_pos=i
+            pos1 = i+1   # 一つ先をとっている
         if loss_key in el["name"]: # first Loss
             pos2 = i
             break
     if pos1 > output_id:
+        print("[WARN] net_key {} (id={}) is found after output node {}".format(net_key,pos1,output_id))
         pos1 = 0
 
-    if ( pos1 > 0 ) and ( pos1 < pos2 ):
+    if ( 0 < pos1 ) and ( pos1 < pos2 ):
         pred_pos = pos1
     elif pos2 > 0:
+        print("[WARN] loss_key {} (id={}) is set as prediction output node".format(loss_key,pos2))
         pred_pos = pos2
     if pos1 > pos2:
         pred_pos = -1
 
-    print("prediction output node index: ",pred_pos)
+    print("Prediction output node index: ",pred_pos)
     print("Net class output node index: ",pos1)
     print("Loss class input node index: ",pos2)
-    print("output node index: ",output_id)
+    print("Output node index: ",output_id)
     
     # inout option ( 0:input only, 1:input and output both )
+    # 反転させたときにinputに到達可能なノードを探している？
     inout = np.zeros( output_id+1, dtype=np.int )
     inout[0] = 1
     for i in range(1,output_id+1):
@@ -660,27 +543,25 @@ def find_output_node(obj,net_key,loss_key,pred_key,output_id,target_enabled,pred
             if nin > 0:
                 inout[i] = 1
             
-    last = -1
     pred_max = -1
     pred_id  = -1
+    # pred_pos（net_keyで指定したものの一つ先）より手前で条件を満たす最大IDのノードをとってくる
     for i in range(output_id+1):
         el = obj[i]
-        #print("el ",i,inout[i], " : ", el['name'],el['op'],el['in'],el['output_id'])
+        print("el ",i,"inout=",inout[i], " : ", el['name'],el['op'],"in=",el['in'],"output_id=",el['output_id'])
         if inout[i] > 0:
-            print("el ",i,"inout=",inout[i], " : ", el['name'],el['op'],"in=",el['in'],"output_id=",el['output_id'])
-            if last < i: last = i
-            if pred_pos < 0:  
-                pass
-            elif i >= pred_pos:
+            #print("el ",i,"inout=",inout[i], " : ", el['name'],el['op'],"in=",el['in'],"output_id=",el['output_id'])
+            if pred_pos >= 0 and i >= pred_pos:
                 for j in range(len(el['in'])):
                     k = get_unpack_origin( obj, el['in'][j], inout )
                     if ( k < pred_pos ) and ( inout[k] > 0 ):
-                        print(" --- pred el (",j,") :",el['in'][j]," -> ",k)
+                        #print(" --- pred el (",j,") :",el['in'][j]," -> ",k)
                         if pred_max < k: 
                             pred_max = k
                             pred_id  = i
     ## pred_idはここまでで決定
-    print("pred_id",pred_id,pred_key)
+    print("direct pred_id:",direct_pos,pred_key)
+    print("refine pred_id:",pred_id)
 
     if pred_id > 0:
         el = obj[pred_id]
@@ -726,7 +607,6 @@ def find_output_node(obj,net_key,loss_key,pred_key,output_id,target_enabled,pred
                     break
             
         
-    print("last cmd:", last) #未使用
     print("------")
     if not "classification" in task_type:
         class_no = -1
@@ -737,9 +617,8 @@ def find_output_node(obj,net_key,loss_key,pred_key,output_id,target_enabled,pred
 
     return pred_no,target_no,class_no
 
-from jinja2 import Template, Environment, FileSystemLoader
 
-def c_train_code_generator( project, folder, obj,
+def generate_train_c_code( project, folder, obj,
         train_tmpl='train.tmpl.cpp',
         epochs = 200,
         batch_size = 0,
@@ -900,16 +779,13 @@ def c_train_code_generator( project, folder, obj,
     if len(output_sum_loss_id)>=2:
         params["loss1_no"]=output_sum_loss_id[0]
         params["loss2_no"]=output_sum_loss_id[1]
-    print(params)
+    print("train code parameters:",params)
     rendered_s = train_tmpl.render(params)
-    print(rendered_s)
-       
     return rendered_s
 
 
 # convert json file to parameter, cpp, and make file
 def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, seed_no=-1, chk_shape=0, code="all" ):
-
     cpp_fname   = project + ".cpp"
     param_fname = project + "_param.cpp"
     cpp_path    = folder + "/" + cpp_fname
@@ -935,13 +811,8 @@ def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, s
         param_fname=""
 
     # save cpp file
-    code2 = generate_graph_c_code(obj, model, chk_shape, rand_flag )
-    code2="""
-    //
-    //  {title}
-    //""".format(title=project)+code2
-    code3 = generate_main_c_code(obj, seed_no, chk_shape)
-    code2+=code3
+    extern_vars, graph_codes = generate_graph_c_code(obj, model, chk_shape, rand_flag )
+    code2 = generate_main_c_code(obj,extern_vars, graph_codes, seed_no, chk_shape,title=project)
 
     print("[CPP] ", cpp_path )
     ofp = open( cpp_path, "w" )
@@ -956,7 +827,6 @@ def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, s
 
 
 def convert_data_file( project, folder, **datas ):
-
     data_fname = project + "_data.cpp"
     data_path  = folder + "/" + data_fname
 
@@ -969,7 +839,6 @@ def convert_data_file( project, folder, **datas ):
 
 
 def convert_train_code( project, folder, json_path, **kwargs ):
-
     train_fname = project + "_train.cpp"
     train_path  = folder + "/" + train_fname
 
@@ -979,7 +848,7 @@ def convert_train_code( project, folder, json_path, **kwargs ):
     obj = json.load(fp)
 
     # save train_cpp file
-    train_code = c_train_code_generator( project, folder, obj, **kwargs )
+    train_code = generate_train_c_code( project, folder, obj, **kwargs )
 
     print("[TRAIN] ", train_path )
     ofp_train = open( train_path, "w" )
@@ -999,6 +868,8 @@ def convert_all( project, folder, model, json_path, input_x, data_dict={}, **kwa
     if "seed" in kwargs:
         seed_no = kwargs["seed"]
     chk_shape = 0
+    if "chk_shape" in kwargs:
+        chk_shape = kwargs["chk_shape"]
     if "shape" in kwargs:
         chk_shape = kwargs["shape"]
         
