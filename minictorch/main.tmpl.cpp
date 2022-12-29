@@ -11,11 +11,13 @@
 using namespace std;
 
 extern Tensor xin;
-{% for var_name in extern_vars %}
+{%- for var_name in extern_vars %}
 extern Tensor {{var_name}};
-{% endfor %}
+{%- endfor %}
 
 bool train_mode = true;
+
+std::vector<Tensor> load_data_all();
 
 void build_computational_graph( vector<MCTNode*>& forward_result, VariableTensor &input_var )
 {
@@ -76,6 +78,7 @@ int main(){
     {% endif %}
     build_computational_graph( forward_result, input_var );
 #ifdef _TRAIN
+    auto vars = load_data_all();
     do_train_loop( forward_result, input_var, {{output_id}} );
 #else
     do_forward_backward_test( forward_result, input_var, {{output_id}} );

@@ -185,7 +185,7 @@ def generate_inline_tensor_c_code( key, out ):
     if n_remain > 0:
         result += ",".join(map(str,flatten_tmp[l:]))+ ','
         print("param:",key," - str loop ",n_line," / ", n_line)
-    result += ' }'
+    result += ' };'
     #print("tensor :",result)
     
     ## generating result_reshape line
@@ -201,31 +201,33 @@ def generate_inline_tensor_c_code( key, out ):
     
 
 # export all input data
-def generate_data_c_code( **pair_data ):
-    if len(pair_data) < 1:
-        return ""
-    # type declaration
-    all_text="""
-    #include <xtensor/xarray.hpp>
-    
-    #define fprec float
-    typedef xt::xarray<fprec> Tensor;
-    """
-    
-    # Data section
+def generate_data_c_code( pair_data, input_from_file, folder):
+    tensor_list=[]
     for key,val in pair_data.items():
         print("generating data: ", key)
-        s1,s2 = generate_inline_tensor_c_code( key, val)
-        text="""
-        // data
-        
-        {ivar1};
-    
-        """.format(ivar1=s1)
-        all_text += text
-    
-    return all_text
-    
+        tensor_info={}
+        if not input_from_file:
+            tensor_code, reshape_code = generate_inline_tensor_c_code( key, val)
+            tensor_info["tensor_code"]=tensor_code;
+            tensor_info["reshape_code"]=reshape_code;
+        tensor_info["shape"]=",".join(map(str,val.shape))
+        tensor_info["name"]=key
+        if input_from_file:
+            filename = "data_"+key+".npy"
+            tensor_info["filename"]=filename
+            print("[SAVE]", folder+"/"+filename)
+            np.save(folder+"/"+filename,val)
+        tensor_list.append(tensor_info)
+    params={"tensor_list":tensor_list,"input_from_file":input_from_file}
+    # 1 forward / backward
+    path=os.path.dirname(__file__)
+    env = Environment(loader=FileSystemLoader(path+'/', encoding='utf8'))
+    #train_tmpl = env.get_template('train.tmpl.cpp')
+    data_tmpl="data.tmpl.cpp"
+    data_tmpl = env.get_template(data_tmpl)
+    rendered_s = data_tmpl.render(params)
+    return rendered_s
+
 
 def get_one_line(indent,s):
     return "\n"+"    "*indent+s+"\n"
@@ -246,7 +248,7 @@ def generate_input_and_param_c_code( obj, model, input_data ):
     text="""
     // input data
         
-    {ivar1};
+    {ivar1}
     """.format(ivar1=s1)
     all_text += text
     
@@ -265,7 +267,7 @@ def generate_input_and_param_c_code( obj, model, input_data ):
                 key_list.append( key )
                 attr = get_attr_from_model( name, model )
                 s1, _ = generate_inline_tensor_c_code( key, attr )
-                text+=get_one_line(1,"{ivar1};").format(i=i,ivar1=s1)
+                text+=get_one_line(1,"{ivar1}").format(i=i,ivar1=s1)
                 all_text+=text
         
         elif el["op"]=="prim::Constant":
@@ -278,7 +280,7 @@ def generate_input_and_param_c_code( obj, model, input_data ):
                 val=el["constant_value"]
                 v = np.array( val )
                 s1, _ = generate_inline_tensor_c_code( key, v )
-                text+=get_one_line(1,"{ivar1};").format(i=i,ivar1=s1)
+                text+=get_one_line(1,"{ivar1}").format(i=i,ivar1=s1)
                 all_text+=text
     print("...")
     return all_text
@@ -660,6 +662,7 @@ def generate_train_c_code( project, folder, obj,
         pred_output = None,
         task_type = "",
         latent_z=None,
+        update_vars=None,
         **kwargs 
         ):
     
@@ -802,6 +805,7 @@ def generate_train_c_code( project, folder, obj,
         "pred_filename":folder + '/' + project + ".pred",
         "z_filename": folder + '/' + project + ".z",
         "z_no":z_no,
+        "update_vars":{k:",".join(map(str,v)) for k,v in update_vars.items()},
         }
     if len(output_sum_loss_id)>=2:
         params["loss1_no"]=output_sum_loss_id[0]
@@ -853,16 +857,15 @@ def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, s
     ofpmake.write( code3 )
     
     stats={"update_vars":update_vars}
-    print(stats)
     return stats
 
 
-def convert_data_file( project, folder, **datas ):
+def convert_data_file( project, folder, pair_data, input_from_file):
     data_fname = project + "_data.cpp"
     data_path  = folder + "/" + data_fname
 
     # save data file
-    code = generate_data_c_code( **datas )
+    code = generate_data_c_code( pair_data, input_from_file, folder)
     if len( code ) > 0:
        print( "[DATA]", data_path )
        ofparam = open( data_path, "w" )
@@ -906,14 +909,19 @@ def convert_all( project, folder, model, json_path, input_x, data_dict={}, **kwa
         chk_shape = kwargs["chk_shape"]
     if "shape" in kwargs:
         chk_shape = kwargs["shape"]
+    
+    input_from_file=False
+    if "input_from_file" in kwargs:
+        input_from_file = kwargs["input_from_file"]
         
-    kwargs2 = kwargs.copy()
-    kwargs2.update( data_dict )
-        
-    convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=rand_flag, seed_no=seed_no, chk_shape=chk_shape, code=code, makefile_name=makefile_name)
+    stats = convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=rand_flag, seed_no=seed_no, chk_shape=chk_shape, code=code, makefile_name=makefile_name)
+    print(stats)
+    kwargs_train = kwargs.copy()
+    kwargs_train.update( data_dict )
+    kwargs_train.update(stats)
     if code == "all":
-        convert_data_file( project, folder, **data_dict )
-        convert_train_code( project, folder, json_path, **kwargs2 )
+        convert_data_file( project, folder, data_dict, input_from_file)
+        convert_train_code( project, folder, json_path, **kwargs_train )
 
 def main():
     parser = argparse.ArgumentParser()

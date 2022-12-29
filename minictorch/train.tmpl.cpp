@@ -37,12 +37,27 @@ void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var,
           if( op[k] )  op[k]->zerograd();
         }
     };
-    auto update_params=[]( vector<MCTNode*> &op, int n, fprec lr=0.01 ) 
+    /*
+    auto update_all_params=[]( vector<MCTNode*> &op, int n, fprec lr=0.01 ) 
     {
         for(int k=0;k<=n;k++) {
           if( op[k] )  op[k]->update( lr );
         }
     };
+    */
+    auto update_params=[]( vector<MCTNode*> &op, int n, fprec lr=0.01 ) 
+    {
+        vector<int> var_list={
+            {%- for k, v in update_vars.items() %}
+            {{v}}, //{{k}}
+            {%- endfor %}
+        };
+        for(int i=0;i<var_list.size();i++) {
+            int j=var_list[i];
+            if( op[j] )  op[j]->update( lr );
+        }
+    };
+    
     {%- if eval_enabled %}
     auto eval_labels=[]( Tensor& y, Tensor &t )
     {
