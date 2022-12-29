@@ -48,7 +48,6 @@ enum Eshape  // Broadcast type
     SHAPE_ERROR      = -2   // Errorなので中断
 };
 
-
 class MCTNode {
 public:
     MCTNode()
@@ -197,6 +196,13 @@ public:
 #ifdef _DEBUG
         cout<<title<<a<<endl;
 #endif
+    }
+    std::string shape2str(const Tshape &strings)
+    {
+        std::stringstream ss;
+        std::copy(strings.begin(), strings.end(),
+            std::ostream_iterator<unsigned int>(ss, ","));
+        return ss.str();
     }
     void print_shape( string s, Tensor x )
     {
@@ -1231,6 +1237,7 @@ public:
         if( az < 1 || bz < 1 )
         {
             cout<<"Error:MatMulOp"<<endl;
+            cout<<"Error:A:"<<this->shape2str(as)<<" B:"<< this->shape2str(bs)<<endl;
             cout<<"Error:A:"<<az<<" B:"<< bz<<endl;
             return false;
         }
@@ -1278,6 +1285,7 @@ public:
             }
         } else {
             cout<<"Error:MatMulOp"<<endl;
+            cout<<"Error:A:"<<this->shape2str(as)<<" B:"<< this->shape2str(bs)<<endl;
             cout<<"Error:A:"<<az<<" B:"<< bz<<endl;
             return false;
         }
@@ -1304,6 +1312,7 @@ public:
         if( az < 1 || bz < 1 )
         {
             cout<<"Error:MatMulOp"<<endl;
+            cout<<"Error:A:"<<this->shape2str(as)<<" B:"<< this->shape2str(bs)<<endl;
             cout<<"Error:A:"<<az<<" B:"<< bz<<endl;
             return false;
         }
@@ -1350,6 +1359,7 @@ public:
             
         } else {
             cout<<"Error:MatMulOp"<<endl;
+            cout<<"Error:A:"<<this->shape2str(as)<<" B:"<< this->shape2str(bs)<<endl;
             cout<<"Error:A:"<<az<<" B:"<< bz<<endl;
             return false;
         }
@@ -1402,8 +1412,10 @@ public:
             output = broadcast_dot( a, bt, bc );
             
         } else {
-            cout<<"Error:MatMulOp"<<endl;
+            cout<<"Error:LinearOp"<<endl;
+            cout<<"Error:A:"<<this->shape2str(as)<<" B:"<< this->shape2str(bs)<<endl;
             cout<<"Error:A:"<<az<<" B:"<< bz<<endl;
+            throw "Exception : LinearOp\n";
             return false;
         }
         if( inputs[2] )
@@ -1415,7 +1427,7 @@ public:
             if( dz == 1 && ( ds[0] == bs[0] ) ) {
                 output += inputs[2]->output;
             } else {
-                cout<<"Error:MatMulOp"<<endl;
+                cout<<"Error:LinearOp"<<endl;
                 cout<<"Error:D:"<<ds[0]<<" B:"<< bs[0]<<endl;
                 return false;
             }
@@ -1464,7 +1476,7 @@ public:
             gb += gb2;
             
         } else {
-            cout<<"Error:MatMulOp"<<endl;
+            cout<<"Error:LinearOp"<<endl;
             cout<<"Error:A:"<<az<<" B:"<< bz<<endl;
             return false;
         }
@@ -1479,7 +1491,7 @@ public:
                 Tensor& gd = inputs[2]->grad;
                 gd += xt::sum( gc,{0} );
             } else {
-                cout<<"Error:MatMulOp"<<endl;
+                cout<<"Error:LinearOp"<<endl;
                 cout<<"Error:D:"<<ds[0]<<" B:"<< bs[0]<<endl;
                 return false;
             }
@@ -3321,12 +3333,16 @@ public:
             {
                 output = tlist1->at( out_id );
                 return true;
+            }else{
+                output = inputs[0]->output;
+                return true;
             }
         }
         return false;
     }
     bool backward()
     {
+        //inputs[0]->grad += this->grad;
         return true;
     }
 };

@@ -30,9 +30,13 @@ OP_MAPPING={
     "aten::max":"MaxOp",
     "aten::min":"MinOp",
     "aten::sigmoid":"SigmoidOp",
+    "aten::sigmoid_":"SigmoidOp",
     "aten::relu":"ReluOp",
+    "aten::relu_":"ReluOp",
     "aten::elu":"EluOp",
+    "aten::elu_":"EluOp",
     "aten::leaky_relu":"LeakyReluOp",
+    "aten::leaky_relu_":"LeakyReluOp",
     "aten::hardtanh":"HardTanhOp",
     "aten::softplus":"SoftplusOp",
     "aten::softmax":"SoftmaxOp",
@@ -74,6 +78,7 @@ def makefile_generator( project, code="all", xtensor_include_base="../", minicto
     make_tmpl="make.tmpl.cpp"
     params={
         "proj":project,
+        "code":code,
         "xtensor_base":xtensor_include_base,
         "minictorch_inc":minictorch_include,
         "optimize":optimize,
@@ -114,6 +119,9 @@ def get_attr_from_model( attr_name, model ):
 
 # ex. Net/Linear[fc1]/weight/43 -> param_fc1_weight
 #     VAE/Net[net]/Linear[fc1]/weight/158 -> param_fc1_weight
+
+"""
+### v1
 def get_param_name( attr_name ):
     sep_list = attr_name.split('/')
     n = 1
@@ -123,7 +131,20 @@ def get_param_name( attr_name ):
     keys = re.findall("(?<=\[).+?(?=\])", sep_list[n])
     out_name = keys[0] + '_' + sep_list[n+1]
     return "param_"+out_name
-    
+"""
+### v2
+def get_param_name( attr_name ):
+    sep_list = attr_name.split('/')
+    out=[]
+    for e in sep_list:
+        keys = re.findall("(?<=\[).+?(?=\])", e)
+        if len(keys)>0:
+            out.append(keys[0])
+    last=sep_list[-1]
+    name=last.split(".")[0]
+    attr_name="_".join(out)+"_"+name
+    return "param_"+attr_name
+# 
 # 
 # fc3_bias
 # pytorch tensor: tensor([0.0402, 0.0524, 0.0345], requires_grad=True)
@@ -143,7 +164,8 @@ def generate_inline_tensor_c_code( key, out ):
     
     ## generating result line
     n1 = len(flatten_tmp)
-    result = 'Tensor ' + key + ' ={ '
+    result = '// size:{} ({})\n'.format(n1, tmp.shape)
+    result += 'Tensor ' + key + ' ={ '
     
     n_line = n1//num_per_line
     n_remain = n1% num_per_line
@@ -270,6 +292,7 @@ def generate_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
     print("...")
     """
     extern_vars=[]
+    update_vars={}
     graph_codes=[]
     key_list = []
     n_constant = 0  # Constant no.
@@ -351,7 +374,6 @@ def generate_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
             #print(attr)
             
             if rand_flag == 0:
-                skey = name.split("/")
                 w_len = len(attr.shape) 
                 if w_len > 0:
                     shape = ",".join(map(str,attr.shape))
@@ -359,9 +381,11 @@ def generate_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
             Tensor::shape_type shape = {{{shape}}};
             {key}.reshape( shape );
             forward_result[{i}] = new VariableTensor( {key}, VAR_ATTR );""".format(i=i,key=key,shape=shape)
+                    if key not in update_vars:
+                        update_vars[key]=[]
+                    update_vars[key].append(i)
             
-            else:
-                skey = name.split("/")
+            else: # rand_flag is deprecated
                 w_len = len(attr.shape) 
                 if w_len > 0:
                     shape = ",".join(map(str,attr.shape))
@@ -371,6 +395,9 @@ def generate_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
             fprec y = sqrt(1.0/(fprec){shy});
             Tensor t = xt::random::rand(shape,-y,y);
             forward_result[{i}] = new VariableTensor( t, VAR_ATTR );""".format(i=i,shape=shape,shy=shy)
+                    if key not in update_vars:
+                        update_vars[key]=[]
+                    update_vars[key].append(i)
                 
         else:
             ###
@@ -412,7 +439,7 @@ def generate_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
         """
         graph_codes.append(text)
         
-    return extern_vars, graph_codes
+    return extern_vars, update_vars, graph_codes
 
 def generate_main_c_code(obj, extern_vars, graph_codes, seed_no=-1, chk_shape=0, title=""):
     for i,el in enumerate(obj):
@@ -785,12 +812,12 @@ def generate_train_c_code( project, folder, obj,
 
 
 # convert json file to parameter, cpp, and make file
-def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, seed_no=-1, chk_shape=0, code="all" ):
+def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, seed_no=-1, chk_shape=0, code="all", makefile_name="Makefile"):
     cpp_fname   = project + ".cpp"
     param_fname = project + "_param.cpp"
     cpp_path    = folder + "/" + cpp_fname
     param_path  = folder + "/" + param_fname
-    make_path   = folder + "/" + "Makefile"
+    make_path   = folder + "/" + makefile_name
   
     # save json file
     print( "[JSON]", json_path )
@@ -811,7 +838,7 @@ def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, s
         param_fname=""
 
     # save cpp file
-    extern_vars, graph_codes = generate_graph_c_code(obj, model, chk_shape, rand_flag )
+    extern_vars, update_vars, graph_codes = generate_graph_c_code(obj, model, chk_shape, rand_flag )
     code2 = generate_main_c_code(obj,extern_vars, graph_codes, seed_no, chk_shape,title=project)
 
     print("[CPP] ", cpp_path )
@@ -824,6 +851,10 @@ def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, s
     print( "[MAKE]", make_path )
     ofpmake = open( make_path, "w" )
     ofpmake.write( code3 )
+    
+    stats={"update_vars":update_vars}
+    print(stats)
+    return stats
 
 
 def convert_data_file( project, folder, **datas ):
@@ -864,6 +895,9 @@ def convert_all( project, folder, model, json_path, input_x, data_dict={}, **kwa
     code="all"
     if "code" in kwargs:
         code=kwargs["code"]
+    makefile_name="Makefile"
+    if "makefile_name" in kwargs:
+        makefile_name=kwargs["makefile_name"]
     seed_no = -1
     if "seed" in kwargs:
         seed_no = kwargs["seed"]
@@ -876,7 +910,7 @@ def convert_all( project, folder, model, json_path, input_x, data_dict={}, **kwa
     kwargs2 = kwargs.copy()
     kwargs2.update( data_dict )
         
-    convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=rand_flag, seed_no=seed_no, chk_shape=chk_shape, code=code )
+    convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=rand_flag, seed_no=seed_no, chk_shape=chk_shape, code=code, makefile_name=makefile_name)
     if code == "all":
         convert_data_file( project, folder, **data_dict )
         convert_train_code( project, folder, json_path, **kwargs2 )
