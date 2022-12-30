@@ -12,10 +12,10 @@ typedef xt::xarray<fprec> Tensor;
 //Tensor input_data;
 {%- for tensor_info in tensor_list %}
 {%- if input_from_file %}
-// {{tensor_info.name}} ({{tensor_info.shape}})
+// {{tensor_info.name}} ({{tensor_info.length}}) (shape: {{tensor_info.shape}})
 Tensor {{tensor_info.name}};
 {%- else %}
-{{tensor_info.tensor_code}}
+Tendor {{tensor_info.name}} = {{tensor_info.tensor_code}};
 {%- endif %}
 {%- endfor %}
 

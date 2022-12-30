@@ -74,7 +74,7 @@ OUTPUT_ID_ENABLED_NODE={
     "TupleUnpackOp",
     }
  
-def makefile_generator( project, code="all", xtensor_include_base="../", minictorch_include="../src",optimize="-O3",libs="-lmkl_rt"): #libs="-lcblas"):
+def generate_makefile( project, code="all", xtensor_include_base="../", minictorch_include="../src",optimize="-O3",libs="-lmkl_rt"): #libs="-lcblas"):
     make_tmpl="make.tmpl.cpp"
     params={
         "proj":project,
@@ -88,7 +88,7 @@ def makefile_generator( project, code="all", xtensor_include_base="../", minicto
     env = Environment(loader=FileSystemLoader(path+'/', encoding='utf8'))
     make_tmpl = env.get_template(make_tmpl)
     rendered_s = make_tmpl.render(params)
-    return rendered_s
+    return rendered_s, params
 
 # attr_name: attribute name in computational graph e.g. Net/Linear[fc3]/bias/bias 
 # model: pytorch model
@@ -152,7 +152,7 @@ def get_param_name( attr_name ):
 #=> result: Tensor fc3_bias ={ 0.040239427,0.052421827,0.034500692, }
 #   result_reshape: fc3_bias.reshape({3})
 # 
-def generate_inline_tensor_c_code( key, out ):
+def build_inline_tensor_c_code( key, out ):
     num_per_line = 8
     n_indent = 24
     
@@ -164,9 +164,9 @@ def generate_inline_tensor_c_code( key, out ):
     
     ## generating result line
     n1 = len(flatten_tmp)
-    result = '// size:{} ({})\n'.format(n1, tmp.shape)
-    result += 'Tensor ' + key + ' ={ '
-    
+    #result = '// size:{} ({})\n'.format(n1, tmp.shape)
+    #result += 'Tensor ' + key + ' ={ '
+    result = '{'
     n_line = n1//num_per_line
     n_remain = n1% num_per_line
     if n_remain == 0:
@@ -185,7 +185,7 @@ def generate_inline_tensor_c_code( key, out ):
     if n_remain > 0:
         result += ",".join(map(str,flatten_tmp[l:]))+ ','
         print("param:",key," - str loop ",n_line," / ", n_line)
-    result += ' };'
+    result += ' }'
     #print("tensor :",result)
     
     ## generating result_reshape line
@@ -197,8 +197,7 @@ def generate_inline_tensor_c_code( key, out ):
         s=",".join(map(str,list(tmp.shape)))
         result_reshape += s + '})'
     #print("shape :",result_shape)
-    return result, result_reshape
-    
+    return n1, result, result_reshape
 
 # export all input data
 def generate_data_c_code( pair_data, input_from_file, folder):
@@ -207,9 +206,10 @@ def generate_data_c_code( pair_data, input_from_file, folder):
         print("generating data: ", key)
         tensor_info={}
         if not input_from_file:
-            tensor_code, reshape_code = generate_inline_tensor_c_code( key, val)
-            tensor_info["tensor_code"]=tensor_code;
-            tensor_info["reshape_code"]=reshape_code;
+            length, tensor_code, reshape_code = build_inline_tensor_c_code( key, val)
+            tensor_info["tensor_code"]=tensor_code
+            tensor_info["reshape_code"]=reshape_code
+            tensor_info["length"]=length
         tensor_info["shape"]=",".join(map(str,val.shape))
         tensor_info["name"]=key
         if input_from_file:
@@ -226,7 +226,7 @@ def generate_data_c_code( pair_data, input_from_file, folder):
     data_tmpl="data.tmpl.cpp"
     data_tmpl = env.get_template(data_tmpl)
     rendered_s = data_tmpl.render(params)
-    return rendered_s
+    return rendered_s, params
 
 
 def get_one_line(indent,s):
@@ -234,59 +234,64 @@ def get_one_line(indent,s):
 
 
 def generate_input_and_param_c_code( obj, model, input_data ):
-    
     # type declaration
-    all_text ="""
-    #include <xtensor/xarray.hpp>
+    input_tensor_info={}
+    if input_data is not None:
+        key, val = "xin", input_data
+        length, tensor_code, reshape_code = build_inline_tensor_c_code( key, val)
+        input_tensor_info["tensor_code"]=tensor_code
+        input_tensor_info["reshape_code"]=reshape_code
+        input_tensor_info["length"]=length
+        input_tensor_info["shape"]=",".join(map(str,val.shape))
+        input_tensor_info["name"]=key
     
-    #define fprec float
-    typedef xt::xarray<fprec> Tensor;
-    """
-    
-    # Data section
-    s1,_ = generate_inline_tensor_c_code( "xin", input_data )
-    text="""
-    // input data
-        
-    {ivar1}
-    """.format(ivar1=s1)
-    all_text += text
-    
-    key_list=[];
+    pair_data={}
+    comment_data={}
     n_constant = 0
-    print("... parameters")
     for i,el in enumerate(obj):
         name = el["name"]
-        #print("name",name,el["op"])
         if el["op"]=="prim::GetAttr":
-            print(i,el)
-            text = get_one_line(1,"// {el}").format(el=str(el))
-            name = el["name"]
             key = get_param_name( name )
-            if( key not in key_list ):
-                key_list.append( key )
+            if( key not in pair_data ):
                 attr = get_attr_from_model( name, model )
-                s1, _ = generate_inline_tensor_c_code( key, attr )
-                text+=get_one_line(1,"{ivar1}").format(i=i,ivar1=s1)
-                all_text+=text
-        
+                pair_data[key]=attr
+                pair_data[key]=(attr,",".join(map(str,attr.shape)))
+                comment_data[key]=[(i,str(el))]
+            else:
+                comment_data[key].append((i,str(el)))
         elif el["op"]=="prim::Constant":
             if len(el["shape"])>0:
-                print(i,el)
-                text = get_one_line(1,"// {el}").format(el=str(el))
                 n_constant += 1
                 key ="Constant" + str(n_constant)
                 shape=el["shape"]
-                val=el["constant_value"]
-                v = np.array( val )
-                s1, _ = generate_inline_tensor_c_code( key, v )
-                text+=get_one_line(1,"{ivar1}").format(i=i,ivar1=s1)
-                all_text+=text
-    print("...")
-    return all_text
-
+                val = np.array(el["constant_value"])
+                pair_data[key]=(val,shape)
+                comment_data[key]=[(i,str(el))]
+    tensor_list=[]
+    for key,pair in pair_data.items():
+        val,shape=pair
+        length, tensor_code, reshape_code = build_inline_tensor_c_code( key, val)
+        tensor_info={}
+        tensor_info["tensor_code"]=tensor_code
+        tensor_info["reshape_code"]=reshape_code
+        tensor_info["length"]=length
+        tensor_info["shape"]=shape
+        tensor_info["name"]=key
+        tensor_info["node_list"]=[{"id":i, "text":text} for i, text in comment_data[key]]
+        tensor_list.append(tensor_info)
+    ######
+    make_tmpl="param.tmpl.cpp"
+    params={
+        "tensor_list":tensor_list,
+        "input_tensor_info":input_tensor_info,
+        }
+    path=os.path.dirname(__file__)
+    env = Environment(loader=FileSystemLoader(path+'/', encoding='utf8'))
+    make_tmpl = env.get_template(make_tmpl)
+    rendered_s = make_tmpl.render(params)
+    return rendered_s, params
     
-def generate_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
+def build_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
     """
     print("... computational graph")
     for i,el in enumerate(obj):
@@ -368,13 +373,10 @@ def generate_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
         ### attr
         ###
         elif el["op"]=="prim::GetAttr":
-        
             name = el["name"]
             key = get_param_name( name )
             print(name," -> ",key)
             attr = get_attr_from_model( name, model )
-            #print(attr)
-            
             if rand_flag == 0:
                 w_len = len(attr.shape) 
                 if w_len > 0:
@@ -471,7 +473,7 @@ def generate_main_c_code(obj, extern_vars, graph_codes, seed_no=-1, chk_shape=0,
         "output_id":output_id,
         }
     rendered_s = train_tmpl.render(params)
-    return rendered_s
+    return rendered_s, params
 
 def unpack_origin_no( obj, target_index ):
     target_node = obj[target_index]
@@ -577,7 +579,7 @@ def find_output_node(obj,net_key,loss_key,pred_key,output_id,target_enabled,pred
     # pred_pos（net_keyで指定したものの一つ先）より手前で条件を満たす最大IDのノードをとってくる
     for i in range(output_id+1):
         el = obj[i]
-        print("el ",i,"inout=",inout[i], " : ", el['name'],el['op'],"in=",el['in'],"output_id=",el['output_id'])
+        #print("el ",i,"inout=",inout[i], " : ", el['name'],el['op'],"in=",el['in'],"output_id=",el['output_id'])
         if inout[i] > 0:
             #print("el ",i,"inout=",inout[i], " : ", el['name'],el['op'],"in=",el['in'],"output_id=",el['output_id'])
             if pred_pos >= 0 and i >= pred_pos:
@@ -810,51 +812,56 @@ def generate_train_c_code( project, folder, obj,
     if len(output_sum_loss_id)>=2:
         params["loss1_no"]=output_sum_loss_id[0]
         params["loss2_no"]=output_sum_loss_id[1]
-    print("train code parameters:",params)
+    #print("train code parameters:",params)
     rendered_s = train_tmpl.render(params)
-    return rendered_s
+    return rendered_s, params
 
 
 # convert json file to parameter, cpp, and make file
 def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, seed_no=-1, chk_shape=0, code="all", makefile_name="Makefile"):
-    cpp_fname   = project + ".cpp"
-    param_fname = project + "_param.cpp"
-    cpp_path    = folder + "/" + cpp_fname
-    param_path  = folder + "/" + param_fname
-    make_path   = folder + "/" + makefile_name
+    cpp_fname        = project + "_main.cpp"
+    cpp_json_fname   = project + "_main.json"
+    param_fname      = project + "_param.cpp"
+    param_json_fname = project + "_param.json"
+    cpp_path        = folder + "/" + cpp_fname
+    cpp_json_path   = folder + "/" + cpp_json_fname
+    param_path      = folder + "/" + param_fname
+    param_json_path = folder + "/" + param_json_fname
+    make_path       = folder + "/" + makefile_name
+    make_json_path  = folder + "/" + makefile_name+".json"
   
-    # save json file
-    print( "[JSON]", json_path )
+    # load json file
+    print( "[LOAD JSON]", json_path )
     fp = open( json_path )
     obj = json.load(fp)
 
     # save parameter file
-    code1 = generate_input_and_param_c_code( obj, model, input_x )
-    if len(code1) > 0:
-        code1 = """
-    //
-    //  {}_param
-    //""".format(project)+code1
-        print( "[PARAM]", param_path )
-        ofparam = open( param_path, "w" )
-        ofparam.write( code1 )
-    else:
-        param_fname=""
+    code, param = generate_input_and_param_c_code( obj, model, input_x )
+    print( "[PARAM]", param_path )
+    with open( param_path, "w" ) as ofp:
+        ofp.write( code )
+    print( "[PARAM]", param_json_path )
+    with open(param_json_path, 'w') as ofp:
+        json.dump(param, ofp)
 
     # save cpp file
-    extern_vars, update_vars, graph_codes = generate_graph_c_code(obj, model, chk_shape, rand_flag )
-    code2 = generate_main_c_code(obj,extern_vars, graph_codes, seed_no, chk_shape,title=project)
-
+    extern_vars, update_vars, graph_codes = build_graph_c_code(obj, model, chk_shape, rand_flag )
+    code,param = generate_main_c_code(obj,extern_vars, graph_codes, seed_no, chk_shape,title=project)
     print("[CPP] ", cpp_path )
-    ofp = open( cpp_path, "w" )
-    ofp.write( code2 )
+    with open( cpp_path, "w" ) as ofp:
+        ofp.write( code )
+    print("[CPP] ", cpp_json_path )
+    with open(cpp_json_path, 'w') as ofp:
+        json.dump(param, ofp)
 
     # save make file
-    code3 = makefile_generator( project, code )
-
+    code,param = generate_makefile( project, code )
     print( "[MAKE]", make_path )
-    ofpmake = open( make_path, "w" )
-    ofpmake.write( code3 )
+    with open( make_path, "w" ) as ofp:
+        ofp.write( code )
+    print( "[MAKE]", make_json_path )
+    with open(make_json_path, 'w') as ofp:
+        json.dump(param, ofp)
     
     stats={"update_vars":update_vars}
     return stats
@@ -862,31 +869,38 @@ def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, s
 
 def convert_data_file( project, folder, pair_data, input_from_file):
     data_fname = project + "_data.cpp"
+    data_json_fname = project + "_data.json"
     data_path  = folder + "/" + data_fname
+    data_json_path  = folder + "/" + data_json_fname
 
     # save data file
-    code = generate_data_c_code( pair_data, input_from_file, folder)
-    if len( code ) > 0:
-       print( "[DATA]", data_path )
-       ofparam = open( data_path, "w" )
-       ofparam.write( code )
-
+    code,param = generate_data_c_code( pair_data, input_from_file, folder)
+    print( "[DATA]", data_path )
+    with open( data_path, "w" ) as ofp:
+        ofp.write( code )
+    print( "[DATA]", data_json_path )
+    with open(data_json_path, 'w') as ofp:
+        json.dump(param, ofp)
 
 def convert_train_code( project, folder, json_path, **kwargs ):
     train_fname = project + "_train.cpp"
+    train_json_fname = project + "_train.json"
     train_path  = folder + "/" + train_fname
+    train_json_path  = folder + "/" + train_json_fname
 
     # open json file
-    print( "[JSON]", json_path )
+    print( "[LOAD JSON]", json_path )
     fp = open( json_path )
     obj = json.load(fp)
 
     # save train_cpp file
-    train_code = generate_train_c_code( project, folder, obj, **kwargs )
-
-    print("[TRAIN] ", train_path )
-    ofp_train = open( train_path, "w" )
-    ofp_train.write( train_code )
+    code_train, param_train = generate_train_c_code( project, folder, obj, **kwargs )
+    print("[TRAIN]", train_path )
+    with open(train_path, "w" ) as ofp:
+        ofp.write( code_train )
+    print("[TRAIN]", train_json_path )
+    with open(train_json_path, 'w') as ofp:
+        json.dump(param_train, ofp)
 
 
 def convert_all( project, folder, model, json_path, input_x, data_dict={}, **kwargs ):
@@ -915,7 +929,6 @@ def convert_all( project, folder, model, json_path, input_x, data_dict={}, **kwa
         input_from_file = kwargs["input_from_file"]
         
     stats = convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=rand_flag, seed_no=seed_no, chk_shape=chk_shape, code=code, makefile_name=makefile_name)
-    print(stats)
     kwargs_train = kwargs.copy()
     kwargs_train.update( data_dict )
     kwargs_train.update(stats)

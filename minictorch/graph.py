@@ -2,6 +2,7 @@ import re
 import json
 import argparse
 import pydotplus
+import pathlib
 
 """
 # ex. Net/Linear[fc1]/weight/43 -> param_fc1_weight
@@ -111,7 +112,6 @@ def dot_graph( project, obj ):
 
    return  'digraph g{\n' + 'graph[label=' + project + ', labelloc="t"];\n' + txt+"\n}\n"
 
-import pathlib
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("graph", type=str, help="computational graph json")

@@ -18,7 +18,8 @@ setup(
     entry_points={
         "console_scripts": [
             "minictorch_translator = minictorch.converter:main",
-            "minictorch_dot = minictorch.graph:main"
+            "minictorch_dot = minictorch.graph:main",
+            "minictorch_render = minictorch.render:main",
         ]
     }
 )
