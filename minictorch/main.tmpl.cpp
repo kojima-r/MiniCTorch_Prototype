@@ -67,8 +67,8 @@ extern void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &inp
 #endif
   
 int main(){
-    vector<MCTNode*> forward_result({{graph_size}});
-    // input data:  forward_result[ {{input_id}} ]
+    vector<MCTNode*> c_graph({{graph_size}});
+    // input data:  c_graph[ {{input_id}} ]
     Tensor::shape_type shape = { {{input_shape}} };
     xin.reshape( shape );
     VariableTensor input_var( xin, VAR_INPUT );
@@ -76,12 +76,12 @@ int main(){
     {% if seed_no >= 0 %}
     xt::random::seed( {{seed_no}} );
     {% endif %}
-    build_computational_graph( forward_result, input_var );
+    build_computational_graph( c_graph, input_var );
 #ifdef _TRAIN
     auto vars = load_data_all();
-    do_train_loop( forward_result, input_var, {{output_id}} );
+    do_train_loop( c_graph, input_var, {{output_id}} );
 #else
-    do_forward_backward_test( forward_result, input_var, {{output_id}} );
+    do_forward_backward_test( c_graph, input_var, {{output_id}} );
 #endif
     return 0;
 }

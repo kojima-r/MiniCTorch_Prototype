@@ -16,59 +16,56 @@ extern Tensor input_data;
 extern Tensor target_data;
 {%- endif %}
 
-void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var, int NL )
-{
-    auto do_forward=[]( vector<MCTNode*> &op, int n ) 
-    {
-        for(int k=0;k<=n;k++) {
-          if( op[k] )  op[k]->forward();
-        }
-    };
-    auto do_backward=[]( vector<MCTNode*> &op, int n ) 
-    {
-        op[n]->grad = xt::ones_like( op[n]->output );
-        for(int k=n;k>=0;k--) {
-          if( op[k] )  op[k]->backward();
-        }
-    };
-    auto do_zerograd=[]( vector<MCTNode*> &op, int n ) 
-    {
-        for(int k=0;k<=n;k++) {
-          if( op[k] )  op[k]->zerograd();
-        }
-    };
-    /*
-    auto update_all_params=[]( vector<MCTNode*> &op, int n, fprec lr=0.01 ) 
-    {
-        for(int k=0;k<=n;k++) {
-          if( op[k] )  op[k]->update( lr );
-        }
-    };
-    */
-    auto update_params=[]( vector<MCTNode*> &op, int n, fprec lr=0.01 ) 
-    {
-        vector<int> var_list={
-            {%- for k, v in update_vars.items() %}
-            {{v}}, //{{k}}
-            {%- endfor %}
-        };
-        for(int i=0;i<var_list.size();i++) {
-            int j=var_list[i];
-            if( op[j] )  op[j]->update( lr );
-        }
-    };
-    
-    {%- if eval_enabled %}
-    auto eval_labels=[]( Tensor& y, Tensor &t )
-    {
-        auto lb = xt::argmax( y, 1 );
-        auto eq = xt::equal( t, lb );
-        auto sm = xt::sum( eq );
-        return (int)sm[0];
-    };
-    {%- endif %}
+void do_forward( vector<MCTNode*> &target_c_graph, int n ) {
+    for(int k=0;k<=n;k++) {
+        if( target_c_graph[k] )  target_c_graph[k]->forward();
+    }
+};
 
-    xt::random::seed(1);  
+void do_backward( vector<MCTNode*> &target_c_graph, int n ) {
+    target_c_graph[n]->grad = xt::ones_like( target_c_graph[n]->output );
+    for(int k=n;k>=0;k--) {
+        if( target_c_graph[k] ) target_c_graph[k]->backward();
+    }
+};
+
+void do_zerograd( vector<MCTNode*> &target_c_graph, int n ) {
+    for(int k=0;k<=n;k++) {
+        if( target_c_graph[k] )  target_c_graph[k]->zerograd();
+    }
+};
+/*
+void update_all_param( vector<MCTNode*> &target_c_graph, int n, fprec lr=0.01 ){
+    for(int k=0;k<=n;k++) {
+        if( target_c_graph[k] )  target_c_graph[k]->update( lr );
+    }
+};
+*/
+void update_params( vector<MCTNode*> &target_c_graph, int n, fprec lr=0.01 ) {
+    vector<int> var_list={
+        {%- for k, v in update_vars.items() %}
+        {{v}}, //{{k}}
+        {%- endfor %}
+    };
+    for(int i=0;i<var_list.size();i++) {
+        int j=var_list[i];
+        if( target_c_graph[j] )  target_c_graph[j]->update( lr );
+    }
+};
+    
+{%- if eval_enabled %}
+void eval_labels( Tensor& y, Tensor &t ){
+    auto lb = xt::argmax( y, 1 );
+    auto eq = xt::equal( t, lb );
+    auto sm = xt::sum( eq );
+    return (int)sm[0];
+};
+{%- endif %}
+
+
+
+void do_train_loop( vector<MCTNode*>& c_graph, VariableTensor &input_var, int output_id ){
+    xt::random::seed(1);
     
     fprec lr = {{lr}};
     int epoch_num = {{epochs}};
@@ -101,7 +98,7 @@ void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var,
     std::chrono::system_clock::time_point  start, end; 
     start = std::chrono::system_clock::now();
 
-    do_zerograd( forward_result, NL );
+    do_zerograd( c_graph, output_id );
     for(int epoch=0;epoch<epoch_num;epoch++){
         train_mode = true;
         {%- if batch_enabled and shuffle %}
@@ -154,21 +151,21 @@ void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var,
             }
             input_var.output = x_tmp;
             {%- if target_no > 0: %}
-            forward_result[{{target_no}}]->output = y_tmp;
+            c_graph[{{target_no}}]->output = y_tmp;
             {%- endif %}
-            do_forward( forward_result, NL );
+            do_forward( c_graph, output_id );
             
-            auto o = forward_result[NL]->output;
+            auto o = c_graph[output_id]->output;
             total_loss += o[0];
             
             {%- if classification_task %}
-            int corrects = eval_labels( forward_result[{{pred_no}}]->output, y_tmp );
+            int corrects = eval_labels( c_graph[{{pred_no}}]->output, y_tmp );
             total_corrects += corrects;
             {%- endif %}
         
-            do_backward( forward_result, NL );
-            update_params( forward_result, NL, lr );
-            do_zerograd( forward_result, NL );
+            do_backward( c_graph, output_id );
+            update_params( c_graph, output_id, lr );
+            do_zerograd( c_graph, output_id );
         }
         {%- if classification_task %}
         fprec total_acc = (fprec)total_corrects / (fprec)input_shape[0];
@@ -191,21 +188,21 @@ void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var,
         input_var.output = input_data;
 
         {%- if target_no > 0 %}
-        forward_result[{{target_no}}]->output = target_data;
+        c_graph[{{target_no}}]->output = target_data;
         {%- endif%}
         
-        do_forward( forward_result, NL );
-        auto o = forward_result[NL]->output;
+        do_forward( c_graph, output_id );
+        auto o = c_graph[output_id]->output;
         
         {%- if double_loss_enabled %}
-        auto o1 = forward_result[{{loss1_no}}]->output;
-        auto o2 = forward_result[{{loss2_no}}]->output; 
+        auto o1 = c_graph[{{loss1_no}}]->output;
+        auto o2 = c_graph[{{loss2_no}}]->output; 
         cout<<"epoch "<<epoch<<" - loss "<<o[0]<<" ( "<<o1[0]<<" , "<<o2[0]<<" ) "<<endl;
         outputfile<<to_string(o[0])<<endl;
         {%- endif %}
 
         {%- if classification_task %}
-        int corrects = eval_labels( forward_result[{{pred_no}}]->output, target_data );
+        int corrects = eval_labels( c_graph[{{pred_no}}]->output, target_data );
         fprec acc = (fprec)corrects / (fprec)input_shape[0];
         cout<<"full_data : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<corrects<<endl;
         outputfile<<to_string(o[0])<<","<<to_string(acc)<<","<<total_loss<<endl;
@@ -227,8 +224,8 @@ void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var,
         input_var.output = input_data;
         {%- endif %}
 
-        do_forward( forward_result, {{pred_no}} );
-        auto y_pred = forward_result[ {{pred_no}} ]->output;
+        do_forward( c_graph, {{pred_no}} );
+        auto y_pred = c_graph[ {{pred_no}} ]->output;
         
         ofstream outputfile( "{{pred_filename}}" );
         {%- if pred_type == 1 %}
@@ -257,7 +254,7 @@ void do_train_loop( vector<MCTNode*>& forward_result, VariableTensor &input_var,
     {%- if z_no >= 0 %}
     {
         // {{z_no}} : z output
-        auto z_pred = forward_result[{{z_no}}]->get_output();
+        auto z_pred = c_graph[{{z_no}}]->get_output();
     
         ofstream outputfile( "{{z_filename}}" );
         outputfile<<to_string(input_shape[0])<<","<<to_string(2)<<endl;
