@@ -6,7 +6,7 @@ SRCS    = {{proj}}_main.cpp {{proj}}_param.cpp
 OBJS    = $(SRCS:.cpp=.o)
 
 
-{% if code == "all" %}
+{% if make_target == "all" %}
 TRAIN_SRCS    = {{proj}}_main.cpp {{proj}}_param.cpp {{proj}}_train.cpp {{proj}}_data.cpp
 TRAIN_TARGET  = {{proj}}_train
 TRAIN_OBJS    = $(TRAIN_SRCS:.cpp=.train.o)

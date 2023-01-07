@@ -15,7 +15,7 @@ typedef xt::xarray<fprec> Tensor;
 // {{tensor_info.name}} ({{tensor_info.length}}) (shape: {{tensor_info.shape}})
 Tensor {{tensor_info.name}};
 {%- else %}
-Tendor {{tensor_info.name}} = {{tensor_info.tensor_code}};
+Tensor {{tensor_info.name}} = {{tensor_info.tensor_code}};
 {%- endif %}
 {%- endfor %}
 

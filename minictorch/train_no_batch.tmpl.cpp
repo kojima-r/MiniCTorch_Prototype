@@ -11,7 +11,9 @@
 extern bool train_mode;
 
 {%- if input_enabled %}
-extern Tensor input_data;
+{%- for input_name, var in input_vars.items() %}
+extern Tensor {{input_name}};
+{%- endfor %}
 {%- endif %}
 {%- if target_enabled %}
 extern Tensor target_data;
@@ -47,24 +49,35 @@ void eval_labels( Tensor& y, Tensor &t ){
 {% endif %}
 
 
-void do_train_loop( vector<MCTNode*>& c_graph, VariableTensor &input_var, int output_id )
+void do_train_loop( vector<MCTNode*>& c_graph, vector<VariableTensor*> &input_vars, int output_id )
 {
     //xt::random::seed(1);  
     fprec lr = {{lr}};
     int epoch_num = {{epochs}};
     cout<<"epoch_num : "<<epoch_num<<endl;
-{% if input_enabled %}
-    input_data.reshape( {{input_shape}} );
-    auto input_shape = input_data.shape();
-{% endif %}
-{% if target_enabled %}
-    target_data.reshape( {{target_shape}} );
+    int data_num=0;
+    {%- if input_enabled %}
+    ////
+    {%- for input_name, var in input_vars.items() %}
+    {
+        {{input_name}}.reshape({ {{var.shape_str}} });
+        input_vars[{{var.input_index}}]->output= {{input_name}};
+        auto input_shape = {{input_name}}.shape();
+        if(input_shape.size()>0 && input_shape[0]>data_num){
+            data_num=input_shape[0];
+        }
+    }
+    {%- endfor %}
+    {%- endif %}
+    
+    {%- if target_enabled %}
+    target_data.reshape({ {{target_shape}} });
     auto target_shape = target_data.shape();
-{% endif %}
+    {%- endif %}
     cout<<"learning ratio : "<<lr<<endl;
 
 
-    input_var.output = input_data;
+    //input_var.output = input_data;
     
     //Tensor x_tmp = xt::zeros<fprec>( {{ x_shape }} );
     //Tensor y_tmp = xt::zeros<fprec>( {{ y_shape }} );
@@ -77,53 +90,52 @@ void do_train_loop( vector<MCTNode*>& c_graph, VariableTensor &input_var, int ou
     for(int epoch=0;epoch<epoch_num;epoch++){
         train_mode = true;
         fprec total_loss = 0.0;
-        {% if classification_task %}
+        {%- if classification_task %}
         int   total_corrects = 0;
-        {% endif %}
+        {%- endif %}
         
         do_forward( c_graph, output_id );
         
         auto o = c_graph[output_id]->output;
 
-        {% if classification_task %}
+        {%- if classification_task %}
         int corrects = eval_labels( c_graph[{{pred_no}}]->output, y );
         fprec acc = (fprec)corrects / (fprec)labels_shape[0];
         cout<<"epoch "<<epoch<<" - loss "<<o<<" - accuracy "<<acc<<endl;
         outputfile<<to_string(o)<<","<<to_string(acc)<<endl;
-        {% else %}
+        {%- else %}
         cout<<"epoch "<<epoch<<" - loss "<<o[0]<<endl;
         outputfile<<to_string(o[0])<<endl;
-        {% endif %}
+        {%- endif %}
         do_backward( c_graph, output_id );
         update_params( c_graph, output_id, lr );
 
         do_zerograd( c_graph, output_id );
         {
             train_mode = false;
-            input_var.output = input_data;
 
-            {% if target_no > 0 %}
+            {%- if target_no > 0 %}
             c_graph[{{target_no}}]->output = target_data;
-            {% endif%}
+            {%- endif%}
             
             do_forward( c_graph, output_id );
             auto o = c_graph[output_id]->output;
             
-            {% if double_loss_enabled %}
+            {%- if double_loss_enabled %}
             auto o1 = c_graph[{{loss1_no}}]->output;
             auto o2 = c_graph[{{loss2_no}}]->output; 
             cout<<"epoch "<<epoch<<" - loss "<<o[0]<<" ( "<<o1[0]<<" , "<<o2[0]<<" ) "<<endl;
             outputfile<<to_string(o[0])<<endl;
-            {% endif %}
-            {% if classification_task %}
+            {%- endif %}
+            {%- if classification_task %}
             int corrects = eval_labels( c_graph[{{pred_no}}]->output, target_data );
             fprec acc = (fprec)corrects / (fprec)input_shape[0];
             cout<<"total_loss (all)  : epoch "<<epoch<<" : loss "<<o[0]<<" : Acc "<<acc<<" "<<corrects<<endl;
             outputfile<<to_string(o[0])<<","<<to_string(acc)<<","<<total_loss<<endl;
-            {% else %}
+            {%- else %}
             cout<<"epoch "<<epoch<<" - loss "<<o[0]<<endl;
             outputfile<<to_string(o[0])<<endl;
-            {% endif %}
+            {%- endif %}
         }
     }
     end = std::chrono::system_clock::now();
@@ -136,10 +148,6 @@ void do_train_loop( vector<MCTNode*>& c_graph, VariableTensor &input_var, int ou
     train_mode = false;
     {
         // {{pred_no}} : {pred_op}
-        {% if input_enabled %}
-        input_var.output = input_data;
-        {% endif %}
-
         do_forward( c_graph, {{pred_no}} );
         auto y_pred = c_graph[ {{pred_no}} ]->output;
         

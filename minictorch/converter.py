@@ -74,16 +74,17 @@ OUTPUT_ID_ENABLED_NODE={
     "TupleUnpackOp",
     }
  
-def generate_makefile( project, code="all", xtensor_include_base="../", minictorch_include="../src",optimize="-O3",libs="-lmkl_rt"): #libs="-lcblas"):
+def generate_makefile( project, make_target="all", xtensor_include_base="../", minictorch_include="../src",optimize="-O3",libs="-lmkl_rt"): #libs="-lcblas"):
     make_tmpl="make.tmpl.cpp"
     params={
         "proj":project,
-        "code":code,
+        "make_target":make_target,
         "xtensor_base":xtensor_include_base,
         "minictorch_inc":minictorch_include,
         "optimize":optimize,
         "libs":libs,
         }
+    print(params)
     path=os.path.dirname(__file__)
     env = Environment(loader=FileSystemLoader(path+'/', encoding='utf8'))
     make_tmpl = env.get_template(make_tmpl)
@@ -232,18 +233,27 @@ def generate_data_c_code( pair_data, input_from_file, folder):
 def get_one_line(indent,s):
     return "\n"+"    "*indent+s+"\n"
 
+def get_input_index(name):
+    bname=name.split("/")[-1]
+    res = re.match(r'.*([0-9]+)', bname)
+    if res:
+        return int(res[1])-1
+    return 0 # single input
 
-def generate_input_and_param_c_code( obj, model, input_data ):
+
+def generate_input_and_param_c_code( obj, model, input_list, input_name_list):
     # type declaration
-    input_tensor_info={}
-    if input_data is not None:
-        key, val = "xin", input_data
-        length, tensor_code, reshape_code = build_inline_tensor_c_code( key, val)
-        input_tensor_info["tensor_code"]=tensor_code
-        input_tensor_info["reshape_code"]=reshape_code
-        input_tensor_info["length"]=length
-        input_tensor_info["shape"]=",".join(map(str,val.shape))
-        input_tensor_info["name"]=key
+    input_tensor_list=[]
+    for input_var, input_name in zip(input_list,input_name_list):
+        input_tensor_info={}
+        if input_var is not None:
+            length, tensor_code, reshape_code = build_inline_tensor_c_code( input_name, input_var)
+            input_tensor_info["tensor_code"]=tensor_code
+            input_tensor_info["reshape_code"]=reshape_code
+            input_tensor_info["length"]=length
+            input_tensor_info["shape"]=",".join(map(str,input_var.shape))
+            input_tensor_info["name"]=input_name
+        input_tensor_list.append(input_tensor_info)
     
     pair_data={}
     comment_data={}
@@ -283,7 +293,7 @@ def generate_input_and_param_c_code( obj, model, input_data ):
     make_tmpl="param.tmpl.cpp"
     params={
         "tensor_list":tensor_list,
-        "input_tensor_info":input_tensor_info,
+        "input_tensor_list":input_tensor_list,
         }
     path=os.path.dirname(__file__)
     env = Environment(loader=FileSystemLoader(path+'/', encoding='utf8'))
@@ -291,13 +301,14 @@ def generate_input_and_param_c_code( obj, model, input_data ):
     rendered_s = make_tmpl.render(params)
     return rendered_s, params
     
-def build_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
+def build_graph_c_code(obj, model, input_names, chk_shape=0, rand_flag=0 ):
     """
     print("... computational graph")
     for i,el in enumerate(obj):
         print(i,el)
     print("...")
     """
+    input_vars={}
     extern_vars=[]
     update_vars={}
     graph_codes=[]
@@ -337,8 +348,21 @@ def build_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
         ###
         if el["op"]=="IO Node":
             if "input" in el["name"]:
+                index = get_input_index(el["name"])
+                assert index>=0, "wrong input index"
+                name = input_names[index]
+                print(el["name"],"->",name)
+                if name not in input_vars:
+                    input_vars[name]={}
+                    input_vars[name]["input_id"]=[]
+                    input_vars[name]["shape_str"]=",".join(map(str,el["shape"]))
+                    input_vars[name]["shape"]=el["shape"]
+                    input_vars[name]["batch_size"]=el["shape"][0]
+                    input_vars[name]["shape_rest"]=", xt::all()"*(len(el["shape"])-1)
+                    input_vars[name]["index"]=index
+                input_vars[name]["input_id"].append(i)
                 text+="""
-            forward_result[{i}] = &input_var;""".format(i=i)
+            forward_result[{i}] = input_vars[{index}];""".format(i=i,index=index)
             elif "output" in el["name"]:  # output_id = el["in"][0]
                 assert len(el["in"])>0, "output error"
             else:
@@ -443,15 +467,16 @@ def build_graph_c_code(obj, model, chk_shape=0, rand_flag=0 ):
         """
         graph_codes.append(text)
         
-    return extern_vars, update_vars, graph_codes
+    return extern_vars, update_vars, input_vars, graph_codes
 
-def generate_main_c_code(obj, extern_vars, graph_codes, seed_no=-1, chk_shape=0, title=""):
+def generate_main_c_code(obj, extern_vars, input_vars, graph_codes, seed_no=-1, chk_shape=0, title=""):
+    input_vars_info={}
     for i,el in enumerate(obj):
         if el["op"]=="IO Node":
-            if "input" in el["name"]:
-                input_id=i
-                input_shape=el["shape"]
-            elif "output" in el["name"]: 
+            #if "input" in el["name"]:
+            #    input_id=i
+            #   input_shape=el["shape"]
+            if "output" in el["name"]: 
                 assert len(el["in"])>0, "output error"
                 output_id = el["in"][0]
 
@@ -468,8 +493,7 @@ def generate_main_c_code(obj, extern_vars, graph_codes, seed_no=-1, chk_shape=0,
         "seed_no":seed_no,
         "chk_shape":chk_shape,
         "graph_size":len(obj),
-        "input_id":input_id,
-        "input_shape": ",".join(map(str,input_shape)),
+        "input_vars":input_vars,
         "output_id":output_id,
         }
     rendered_s = train_tmpl.render(params)
@@ -658,13 +682,14 @@ def generate_train_c_code( project, folder, obj,
         loss_key = "Loss",
         pred_key = None,
         pred_index = -1,
-        input_data=None,
         target_data=None,
         shuffle = False,
         pred_output = None,
         task_type = "",
         latent_z=None,
         update_vars=None,
+        input_vars=None,
+        input_pair_list=None,
         **kwargs 
         ):
     
@@ -679,23 +704,29 @@ def generate_train_c_code( project, folder, obj,
     print("pred_index :", pred_index )
     print("shuffle : ", shuffle )
         
-    input_enabled = False;
-    input_s = ""
-    if input_data is not None:
-        input_enabled, input_s = get_tensor_shape( input_data )
+    input_enabled = False
+    if input_vars is not None:
+        input_enabled = True
+        for k,v in input_pair_list:
+            input_vars[k]["data_name"]=v
+    #input_s = ""
+    #print(input_data)
+    #if input_data is not None:
+    #    input_enabled, input_s = get_tensor_shape( input_data )
+    #print("input  shape : ", input_enabled, input_s)
         
     target_enabled = False
     target_s = ""
     if target_data is not None:
         target_enabled, target_s = get_tensor_shape( target_data )
         
-    print("input  shape : ", input_enabled, input_s)
     print("target shape : ", target_enabled, target_s)
     
     #pred_output
     if pred_output is None:
         if input_enabled:
-            pred_output = input_data.shape[0]
+            k=next(iter(input_vars))
+            pred_output = input_vars[k]["shape"][0]
         else:
             pred_output=0
     print("pred_output : ", pred_output)
@@ -730,21 +761,21 @@ def generate_train_c_code( project, folder, obj,
     x_shape_rest_enabled = False
     y_shape_rest_enabled = False
     if batch_size > 0:
-        if input_enabled:
-            ds = input_data.shape
-            x_shape = ",".join([str(batch_size)]+[str(ds[k]) for k in range(1,input_data.ndim)])
+        #if input_enabled:
+        #    ds = input_data.shape
+        #    x_shape = ",".join([str(batch_size)]+[str(ds[k]) for k in range(1,input_data.ndim)])
         
         if target_enabled:
             ds = target_data.shape
             y_shape = ",".join([str(batch_size)]+[str(ds[k]) for k in range(1,target_data.ndim)])
 
-        if input_enabled:
-            ds = input_data.shape
-            sz = input_data.ndim
-            if sz>=2:
-                x_shape_rest_enabled = True
-                for k in range(2,sz):
-                    x_shape_rest += ", xt::all()"
+        #if input_enabled:
+        #    ds = input_data.shape
+        #    sz = input_data.ndim
+        #    if sz>=2:
+        #        x_shape_rest_enabled = True
+        #        for _ in range(2,sz):
+        #            x_shape_rest += ", xt::all()"
         if target_enabled:
             ds = target_data.shape
             sz = target_data.ndim
@@ -756,8 +787,8 @@ def generate_train_c_code( project, folder, obj,
     double_loss_enabled= len(output_sum_loss_id) > 0 and class_no < 1  # Loss=Loss1+Loss2
  
     pred_type = 1  ###
-    if input_enabled:
-        pred_type = len(input_data.shape)
+    if target_enabled:
+        pred_type = len(target_data.shape)
     print("pred_type : ",pred_type)
 
     pred_op = ""  
@@ -789,14 +820,16 @@ def generate_train_c_code( project, folder, obj,
         "pred_no":pred_no,
         "epochs":epochs,
         "lr":lr,
-        "input_shape":input_s,
+        "shuffle":shuffle,
+        #"input_shape":input_s,
+        "input_vars":input_vars,
         "target_shape":target_s,
         "batch_enabled":batch_size>0,
         "batch_size":batch_size,
-        "x_shape":x_shape,
+        #"x_shape":x_shape,
         "y_shape":y_shape,
-        "x_shape_rest":x_shape_rest,
-        "x_shape_rest_enabled": x_shape_rest_enabled,
+        #"x_shape_rest":x_shape_rest,
+        #"x_shape_rest_enabled": x_shape_rest_enabled,
         "y_shape_rest":y_shape_rest,
         "y_shape_rest_enabled": y_shape_rest_enabled,
         "double_loss_enabled":double_loss_enabled,
@@ -818,7 +851,7 @@ def generate_train_c_code( project, folder, obj,
 
 
 # convert json file to parameter, cpp, and make file
-def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, seed_no=-1, chk_shape=0, code="all", makefile_name="Makefile"):
+def convert_cpp_code( project, folder, model, input_vars, input_names, json_path, rand_flag=0, seed_no=-1, chk_shape=0, make_target="all", makefile_name="Makefile"):
     cpp_fname        = project + "_main.cpp"
     cpp_json_fname   = project + "_main.json"
     param_fname      = project + "_param.cpp"
@@ -836,7 +869,24 @@ def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, s
     obj = json.load(fp)
 
     # save parameter file
-    code, param = generate_input_and_param_c_code( obj, model, input_x )
+    if type(input_vars) is list:
+        input_list=input_vars
+    else:
+        input_list=[input_vars]
+    if type(input_names) is list:
+        temp_input_name_list=input_names
+    else:
+        temp_input_name_list=[input_names]
+    input_name_list=[]
+    input_pair_list=[]
+    for x in temp_input_name_list:
+        if type(x) is str:
+            input_name_list.append(x)
+        else:
+            input_pair_list.append(x)
+            input_name_list.append(x[0])
+    
+    code, param = generate_input_and_param_c_code( obj, model, input_list, input_name_list)
     print( "[PARAM]", param_path )
     with open( param_path, "w" ) as ofp:
         ofp.write( code )
@@ -845,8 +895,8 @@ def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, s
         json.dump(param, ofp)
 
     # save cpp file
-    extern_vars, update_vars, graph_codes = build_graph_c_code(obj, model, chk_shape, rand_flag )
-    code,param = generate_main_c_code(obj,extern_vars, graph_codes, seed_no, chk_shape,title=project)
+    extern_vars, update_vars, input_vars, graph_codes = build_graph_c_code(obj, model, input_name_list, chk_shape, rand_flag )
+    code,param = generate_main_c_code(obj,extern_vars,input_vars, graph_codes, seed_no, chk_shape,title=project)
     print("[CPP] ", cpp_path )
     with open( cpp_path, "w" ) as ofp:
         ofp.write( code )
@@ -855,7 +905,7 @@ def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, s
         json.dump(param, ofp)
 
     # save make file
-    code,param = generate_makefile( project, code )
+    code,param = generate_makefile( project, make_target )
     print( "[MAKE]", make_path )
     with open( make_path, "w" ) as ofp:
         ofp.write( code )
@@ -863,7 +913,7 @@ def convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=0, s
     with open(make_json_path, 'w') as ofp:
         json.dump(param, ofp)
     
-    stats={"update_vars":update_vars}
+    stats={"update_vars":update_vars, "input_vars":input_vars, "input_pair_list":input_pair_list}
     return stats
 
 
@@ -887,6 +937,7 @@ def convert_train_code( project, folder, json_path, **kwargs ):
     train_json_fname = project + "_train.json"
     train_path  = folder + "/" + train_fname
     train_json_path  = folder + "/" + train_json_fname
+    #print(kwargs)
 
     # open json file
     print( "[LOAD JSON]", json_path )
@@ -903,15 +954,15 @@ def convert_train_code( project, folder, json_path, **kwargs ):
         json.dump(param_train, ofp)
 
 
-def convert_all( project, folder, model, json_path, input_x, data_dict={}, **kwargs ):
+def convert_all( project, folder, model, json_path, input_vars, input_names,  data_dict={}, **kwargs ):
     
     os.makedirs(folder,exist_ok=True)
     rand_flag=0
     if "rand_flag" in kwargs:
         rand_flag=kwargs["rand_flag"]
-    code="all"
-    if "code" in kwargs:
-        code=kwargs["code"]
+    make_target="all"
+    if "make_target" in kwargs:
+        make_target=kwargs["make_target"]
     makefile_name="Makefile"
     if "makefile_name" in kwargs:
         makefile_name=kwargs["makefile_name"]
@@ -928,11 +979,11 @@ def convert_all( project, folder, model, json_path, input_x, data_dict={}, **kwa
     if "input_from_file" in kwargs:
         input_from_file = kwargs["input_from_file"]
         
-    stats = convert_cpp_code( project, folder, model, input_x, json_path, rand_flag=rand_flag, seed_no=seed_no, chk_shape=chk_shape, code=code, makefile_name=makefile_name)
+    stats = convert_cpp_code( project, folder, model, input_vars, input_names, json_path, rand_flag=rand_flag, seed_no=seed_no, chk_shape=chk_shape, make_target=make_target, makefile_name=makefile_name)
     kwargs_train = kwargs.copy()
     kwargs_train.update( data_dict )
     kwargs_train.update(stats)
-    if code == "all":
+    if make_target == "all":
         convert_data_file( project, folder, data_dict, input_from_file)
         convert_train_code( project, folder, json_path, **kwargs_train )
 
