@@ -1347,7 +1347,7 @@ public:
                 std::tie(ga2,gb2) = broadcast_dotgrad( gc, a1, b, bc );
             } else {
                 if( bz == 1 ) {
-                    Tensor b1 = b;
+                   Tensor b1 = b;
                     b1.reshape( { bs[0], 1 } );
                     std::tie(ga2,gb2) = broadcast_dotgrad( gc, a, b1, bc );
                 } else {
@@ -1394,7 +1394,8 @@ public:
         Tshape  bs = b.shape();
         int     az = as.size();
         int     bz = bs.size();
-        
+        print_shape( "A:", a);
+        print_shape( "B:", b);
         if( az == 1 && bz == 2 ) 
         {
             Tensor a1 = a;
@@ -2787,7 +2788,7 @@ private:
 #ifdef _DEBUG
             string ss = "broadcast tensor-" + std::to_string(k+1) + " ";
             print_ints( ss, nb, n_dim );
-            cout<<"broadcast ("<<k<<")  equal="<<ne<<" eq1="<<n1<<" other="<<n2<<endl;
+            //cout<<"broadcast ("<<k<<")  equal="<<ne<<" eq1="<<n1<<" other="<<n2<<endl;
 #endif
             
             Eshape status =SHAPE_ACCEPT;

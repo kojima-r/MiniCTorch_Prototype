@@ -53,6 +53,20 @@ std::vector<Tensor> load_data_all(){
     }
     {%- endfor %}
     {%- endif %}
+
+    {%- for tensor_info in discriminator_data.tensor_list %}
+    {%- if not discriminator_data.input_from_file %}
+    // {{tensor_info.name}} ({{tensor_info.length}}) (shape: {{tensor_info.shape}})
+    {{tensor_info.name}}_d.reshape({ {{tensor_info.shape_str}}  });
+    {%- endif %}
+    {%- endfor %}
+
+    {%- for tensor_info in generator_data.tensor_list %}
+    {%- if not generator_data.input_from_file %}
+    // {{tensor_info.name}} ({{tensor_info.length}}) (shape: {{tensor_info.shape}})
+    {{tensor_info.name}}_g.reshape({ {{tensor_info.shape}}  });
+    {%- endif %}
+    {%- endfor %}
     return out;
 };
 

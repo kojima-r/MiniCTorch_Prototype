@@ -3,11 +3,14 @@
 #define fprec float
 typedef xt::xarray<fprec> Tensor;
 
-// Dummy input data ({{discriminator_param.input_tensor_info.shape}})
-Tensor {{discriminator_param.input_tensor_info.name}}_d = {{discriminator_param.input_tensor_info.tensor_code}};
-
-// Dummy input data ({{generator_param.input_tensor_info.shape}})
-Tensor {{generator_param.input_tensor_info.name}}_g = {{generator_param.input_tensor_info.tensor_code}};
+{%- for tensor_info in discriminator_param.input_tensor_list %}
+// Dummy input data ({{tensor_info.shape}})
+Tensor {{tensor_info.name}}_d = {{tensor_info.tensor_code}};
+{%- endfor %}
+{%- for tensor_info in generator_param.input_tensor_list %}
+// Dummy input data ({{tensor_info.shape}})
+Tensor {{tensor_info.name}}_g = {{tensor_info.tensor_code}};
+{%- endfor %}
 
 // Tensor data
 {%- for tensor_info in discriminator_param.tensor_list %}
