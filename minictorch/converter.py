@@ -233,12 +233,16 @@ def generate_data_c_code( pair_data, input_from_file, folder):
 def get_one_line(indent,s):
     return "\n"+"    "*indent+s+"\n"
 
-def get_input_index(name):
+def get_input_index(name,name_list):
     bname=name.split("/")[-1]
-    res = re.match(r'.*([0-9]+)', bname)
-    if res:
-        return int(res[1])-1
-    return 0 # single input
+    if bname in name_list:
+        index=name_list.index(bname)
+        return index
+    else:
+        res = re.match(r'.*([0-9]+)', bname)
+        if res:
+            return int(res[1])-1
+        return 0 # single input
 
 
 def generate_input_and_param_c_code( obj, model, input_list, input_name_list):
@@ -348,10 +352,10 @@ def build_graph_c_code(obj, model, input_names, chk_shape=0, rand_flag=0 ):
         ###
         if el["op"]=="IO Node":
             if "input" in el["name"]:
-                index = get_input_index(el["name"])
+                index = get_input_index(el["name"],input_names)
                 assert index>=0, "wrong input index"
                 name = input_names[index]
-                print(el["name"],"->",name)
+                print("input: ",el["name"],"->",name)
                 if name not in input_vars:
                     input_vars[name]={}
                     input_vars[name]["input_id"]=[]
@@ -851,7 +855,7 @@ def generate_train_c_code( project, folder, obj,
 
 
 # convert json file to parameter, cpp, and make file
-def convert_cpp_code( project, folder, model, input_vars, input_names, json_path, rand_flag=0, seed_no=-1, chk_shape=0, make_target="all", makefile_name="Makefile"):
+def convert_cpp_code( project, folder, model, inputs, input_names, json_path, rand_flag=0, seed_no=-1, chk_shape=0, make_target="all", makefile_name="Makefile"):
     cpp_fname        = project + "_main.cpp"
     cpp_json_fname   = project + "_main.json"
     param_fname      = project + "_param.cpp"
@@ -869,10 +873,10 @@ def convert_cpp_code( project, folder, model, input_vars, input_names, json_path
     obj = json.load(fp)
 
     # save parameter file
-    if type(input_vars) is list:
-        input_list=input_vars
+    if type(inputs) is list:
+        input_list=inputs
     else:
-        input_list=[input_vars]
+        input_list=[inputs]
     if type(input_names) is list:
         temp_input_name_list=input_names
     else:
@@ -885,7 +889,6 @@ def convert_cpp_code( project, folder, model, input_vars, input_names, json_path
         else:
             input_pair_list.append(x)
             input_name_list.append(x[0])
-    
     code, param = generate_input_and_param_c_code( obj, model, input_list, input_name_list)
     print( "[PARAM]", param_path )
     with open( param_path, "w" ) as ofp:
@@ -954,7 +957,7 @@ def convert_train_code( project, folder, json_path, **kwargs ):
         json.dump(param_train, ofp)
 
 
-def convert_all( project, folder, model, json_path, input_vars, input_names,  data_dict={}, **kwargs ):
+def convert_all( project, folder, model, json_path, inputs, input_names,  data_dict={}, **kwargs ):
     
     os.makedirs(folder,exist_ok=True)
     rand_flag=0
@@ -979,7 +982,10 @@ def convert_all( project, folder, model, json_path, input_vars, input_names,  da
     if "input_from_file" in kwargs:
         input_from_file = kwargs["input_from_file"]
         
-    stats = convert_cpp_code( project, folder, model, input_vars, input_names, json_path, rand_flag=rand_flag, seed_no=seed_no, chk_shape=chk_shape, make_target=make_target, makefile_name=makefile_name)
+    stats = convert_cpp_code(
+        project, folder, model, inputs, input_names, json_path,
+        rand_flag=rand_flag, seed_no=seed_no, chk_shape=chk_shape,
+        make_target=make_target, makefile_name=makefile_name)
     kwargs_train = kwargs.copy()
     kwargs_train.update( data_dict )
     kwargs_train.update(stats)
