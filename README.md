@@ -29,6 +29,9 @@ python example.py
 - `output/example_train.cpp`:学習プログラム
 - `output/Makefile`
 
+## More examples
+https://github.com/kojima-r/MiniCTorch_Benchmark
+
 ## 実装済み演算
 https://docs.google.com/spreadsheets/d/1xPFaXAceqH8FPTJTFEfQup7KIxAGWHLt/edit?usp=sharing&ouid=108859876331580908917&rtpof=true&sd=true
 
