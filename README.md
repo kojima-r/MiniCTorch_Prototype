@@ -29,6 +29,19 @@ python example.py
 - `output/example_train.cpp`:学習プログラム
 - `output/Makefile`
 
+## 
+
+> convert_cpp_code( project, folder, model, json_path, input_to_model, input_name_pair, input_data_dict)
+
+[引数]
+ - project  :  プロジェクト名 (各ファイルのヘッダーに相当）
+ - path     :  生成するc++コードを保存するフォルダ (相対パス)
+ - model    :  変換するニューラルネットのクラスオブジェクト（nn.Module）
+ - json_path : 計算グラフを保存するJSONファイル名  (相対パスとファイル名で指定)
+ - input_to_model   :　modelへの入力データ (forward関数の入力引数に相当, リストで複数指定可)
+ - input_name_pair  :　変換するニューラルネットへの入力データ (「入力変数の名前」と「入力データの名前」のペア, リストで指定する)
+ - input_data_dict  :　入力データのディクショナリ (キーが「入力データの名前」でバリューが実際のarrayデータとなるディクショナリで指定)
+ 
 ## More examples
 https://github.com/kojima-r/MiniCTorch_Benchmark
 
