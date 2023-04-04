@@ -30,8 +30,10 @@ def main():
         minictorch.trace(model, input_to_model, filename)
     #convert_all( project, folder, json_path, input_dict, data_dict={}, **kwargs):
     minictorch.convert_all("example", "output", model, filename,input_to_model,
+            [("x","input_data")],
             {"input_data":input_to_model}, batch_size=1,code="all",
             train_tmpl='train_no_batch.tmpl.cpp',
+            lr=0.0001
             )
 
 

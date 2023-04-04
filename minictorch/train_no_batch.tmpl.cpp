@@ -61,7 +61,7 @@ void do_train_loop( vector<MCTNode*>& c_graph, vector<VariableTensor*> &input_va
     {%- for input_name, var in input_vars.items() %}
     {
         {{input_name}}.reshape({ {{var.shape_str}} });
-        input_vars[{{var.input_index}}]->output= {{input_name}};
+        input_vars[{{var.index}}]->output= {{input_name}};
         auto input_shape = {{input_name}}.shape();
         if(input_shape.size()>0 && input_shape[0]>data_num){
             data_num=input_shape[0];
