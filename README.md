@@ -29,7 +29,7 @@ python example.py
 - `output/example_train.cpp`:学習プログラム
 - `output/Makefile`
 
-## 
+## 変換のためのメソッド（example.py）
 
 > convert_cpp_code( project, folder, model, json_path, input_to_model, input_name_pair, input_data_dict)
 
